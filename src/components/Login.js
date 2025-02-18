@@ -125,7 +125,7 @@ const Login = () => {
       localStorage.setItem('userId', userId); // Store userId
 
       setSuccess('Login successful!');
-      navigate('/settleMate', { replace: true });
+      navigate('/helper', { replace: true });
     } else {
         setError('Token is missing in response');
       }

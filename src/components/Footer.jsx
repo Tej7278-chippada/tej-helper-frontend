@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <Box sx={{ bgcolor: 'background.paper', p: 1, mt: 'auto', textAlign: 'center' }}>
       <Typography variant="body2" color="textSecondary">
-        &copy; TejSettleMate 2024
+        &copy; TejHelper 2025
       </Typography>
     </Box>
   );

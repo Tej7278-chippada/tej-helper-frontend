@@ -155,7 +155,7 @@ const Header = ({ username }) => {
         <Toolbar>
         <Typography variant={isMobile ? "h6" : "h5"} component="div" sx={{ flexGrow: 1 }}>
           <Link to="/settleMate" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block' }}>
-            SettleMate
+            Helper
           </Link>
         </Typography>
         {/* <Link to="/admin" style={{ color: 'white', textDecoration: 'none', marginRight: '15px' }}>Admin Page</Link> */}
