@@ -22,6 +22,13 @@ import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import API from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
+// import { Marker, TileLayer } from 'leaflet';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
 
 const UserProfile = () => {
   const { id } = useParams(); // Extract sellerId from URL
@@ -34,6 +41,8 @@ const UserProfile = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  const [mapMode, setMapMode] = useState('normal');
+  const [currentLocation, setCurrentLocation] = useState(null);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -77,6 +86,41 @@ const UserProfile = () => {
 
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false);
+  };
+
+  const locateUser = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+
+  const saveLocation = async () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      await API.put(`/api/auth/${id}/location`, {
+        location: {
+          latitude: currentLocation.lat,
+          longitude: currentLocation.lng,
+        },
+      }, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      setSuccessMessage('Location saved successfully.');
+    } catch (err) {
+      setError('Failed to save location. Please try again later.');
+    }
   };
   
   if (loading || !userData) {
@@ -198,51 +242,92 @@ const UserProfile = () => {
                   </Grid>
                 </Grid>
               </Box>
-              <Toolbar sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                bgcolor: 'white', borderRadius:'16px',
-                boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '1rem',
-              }}>
-                <Box >
-                  <IconButton
-                    onClick={handleOpenDeleteDialog}
-                    onMouseEnter={() => setHoveredId(userData._id)} // Set hoveredId to the current button's ID
-                    onMouseLeave={() => setHoveredId(null)} // Reset hoveredId when mouse leaves
-                    style={{
+              
+              <Box>
+                <Toolbar sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  bgcolor: 'white', borderRadius:'16px',
+                  boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: '1rem',
+                }}>
+                  <Box >
+                    <IconButton
+                      onClick={handleOpenDeleteDialog}
+                      onMouseEnter={() => setHoveredId(userData._id)} // Set hoveredId to the current button's ID
+                      onMouseLeave={() => setHoveredId(null)} // Reset hoveredId when mouse leaves
+                      style={{
 
-                      backgroundColor: hoveredId === userData._id ? '#ffe6e6' : 'rgba(255, 255, 255, 0.2)',
-                      borderRadius: hoveredId === userData._id ? '6px' : '50%',
-                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center', color: 'red'
-                      // transition: 'all 0.2s ease',
-                    }}
+                        backgroundColor: hoveredId === userData._id ? '#ffe6e6' : 'rgba(255, 255, 255, 0.2)',
+                        borderRadius: hoveredId === userData._id ? '6px' : '50%',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center', color: 'red'
+                        // transition: 'all 0.2s ease',
+                      }}
+                    >
+                      {hoveredId && (
+                        <span
+                          style={{
+                            fontSize: '14px',
+                            color: '#ff0000',
+                            marginRight: '8px',
+                            whiteSpace: 'nowrap',
+                            opacity: hoveredId === userData._id ? 1 : 0,
+                            transform: hoveredId === userData._id ? 'translateX(0)' : 'translateX(10px)',
+                            transition: 'opacity 0.3s, transform 0.3s',
+                          }}
+                        >
+                          Delete User Account
+                        </span>
+                      )}
+                      <DeleteForeverRoundedIcon />
+                    </IconButton>
+                  </Box>
+                </Toolbar>
+              </Box>
+            </Box>
+          </Box>
+          <Box sx={{paddingBottom:'4rem',marginBottom:'5rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+            <Box sx={{ height: '500px', marginTop: '1rem', padding:'1rem' }}>
+              <MapContainer
+                center={[userData.location.latitude, userData.location.longitude]}
+                zoom={13}
+                style={{ height: '100%', width: '100%', borderRadius:'8px', }}
+              >
+                <TileLayer
+                  url={mapMode === 'normal' ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                />
+                <Marker position={[userData.location.latitude, userData.location.longitude]} />
+              </MapContainer>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                <Button
+                  variant="contained"
+                  onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                  startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon/> : <MapRoundedIcon />}
+                >
+                  {mapMode === 'normal' ? 'Satellite View' : 'Normal View'}
+                </Button>
+                {currentLocation && (
+                  <Button
+                    variant="contained"
+                    onClick={saveLocation}
                   >
-                    {hoveredId && (
-                      <span
-                        style={{
-                          fontSize: '14px',
-                          color: '#ff0000',
-                          marginRight: '8px',
-                          whiteSpace: 'nowrap',
-                          opacity: hoveredId === userData._id ? 1 : 0,
-                          transform: hoveredId === userData._id ? 'translateX(0)' : 'translateX(10px)',
-                          transition: 'opacity 0.3s, transform 0.3s',
-                        }}
-                      >
-                        Delete User Account
-                      </span>
-                    )}
-                    <DeleteForeverRoundedIcon />
-                  </IconButton>
-                </Box>
-              </Toolbar>
+                    Save Location
+                  </Button>
+                )}
+                <Button
+                  variant="contained"
+                  onClick={locateUser}
+                  startIcon={<LocationOnIcon />}
+                >
+                  Locate Me
+                </Button>
+              </Box>
             </Box>
           </Box>
         </div>
