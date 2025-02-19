@@ -233,6 +233,14 @@ const UserProfile = () => {
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      User Code:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {userData.userCode}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
                       User Phone:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
@@ -245,6 +253,14 @@ const UserProfile = () => {
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {userData.email}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Address:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                    {`${userData.address.street}, ${userData.address.area}, ${userData.address.city}, ${userData.address.state} - ${userData.address.pincode}`}
                     </Typography>
                   </Grid>
                 </Grid>

@@ -1,6 +1,6 @@
 // /src/components/Register.js
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton } from '@mui/material';
+import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton, MenuItem } from '@mui/material';
 import axios from 'axios';
 import Layout from './Layout';
 import Cropper from 'react-easy-crop';
@@ -18,6 +18,16 @@ const theme = createTheme({
     },
   },
 });
+
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", 
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", 
+  "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", 
+  "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", 
+  "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", 
+  "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", 
+  "Delhi", "Lakshadweep", "Puducherry"
+];
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -37,6 +47,8 @@ const Register = () => {
   const [profilePicError, setProfilePicError] = useState('');
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State to toggle password visibility
+  const [pincodeValidation, setPincodeValidation] = useState('');
+  const [address, setAddress] = useState({ street: '', area: '', city: '', state: '', pincode: '' });
 
   const handleCropComplete = async (_, croppedAreaPixels) => {
     if (!profilePic) return; // Ensure profilePic is set before proceeding
@@ -79,7 +91,8 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    setCroppedImage(null);
+    // setCroppedImage(null);
+    setPincodeValidation(''); // Reset pincode validation message
 
     // Validate username and password
     const usernameRegex = /^[A-Z][A-Za-z0-9@_-]{5,}$/;
@@ -128,11 +141,18 @@ const Register = () => {
       return;
     }
 
+    if (Object.values(address).some((field) => field.trim() === '')) {
+      setError('All address fields (street, area, city, state, pincode) are required.');
+      setLoading(false);
+      return;
+    }
+
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
     formData.append('email', email);
     formData.append('phone', phone);
+    formData.append('address', JSON.stringify(address));
     if (croppedImage) {
       const blob = await fetch(croppedImage).then(r => r.blob());
       formData.append('profilePic', blob, 'profilePic.jpg');
@@ -146,10 +166,12 @@ const Register = () => {
       setSuccess(`Your new account has been created with username ${username} and linked to email ${email}`);
       setUsername('');
       setProfilePic(null);
+      setCroppedImage(null);
       setEmail('');
       setPhone('');
       setPassword('');
       setConfirmPassword('');
+      setAddress({ street: '', area: '', city: '', state: '', pincode: '' });
       if (response.status === 201) {
         // window.location.href = '/';
       }
@@ -177,6 +199,29 @@ const Register = () => {
   // Toggle password visibility
   const handleToggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleAddressChange = (field, value) => {
+    setAddress((prevAddress) => ({ ...prevAddress, [field]: value }));
+  };
+
+  const validatePincode = async (pincode) => {
+    try {
+      const response = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
+      if (response.data[0].Status === 'Success') {
+        const place = response.data[0].PostOffice[0].Name;
+        const state = response.data[0].PostOffice[0].State;
+        const district = response.data[0].PostOffice[0].District;
+        setPincodeValidation(`Matched: ${place}`);
+        handleAddressChange('state', state);
+        handleAddressChange('city', district);
+        handleAddressChange('area', place);
+      } else {
+        setPincodeValidation('Pincode doesn\'t match. Please verify it once.');
+      }
+    } catch {
+      setPincodeValidation('Error validating pincode.');
+    }
   };
 
   return (
@@ -310,6 +355,56 @@ const Register = () => {
                 ),
               }}
             />
+            <TextField
+              label="Pincode"
+              fullWidth
+              margin="normal"
+              value={address.pincode}
+              onChange={(e) => {
+                handleAddressChange('pincode', e.target.value);
+                validatePincode(e.target.value);
+              }}
+            />
+            {pincodeValidation && <Typography variant="body2">{pincodeValidation}</Typography>}
+            <TextField
+              label="Street"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={address.street}
+              onChange={(e) => handleAddressChange('street', e.target.value)}
+            />
+            <TextField
+              label="Area"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={address.area}
+              onChange={(e) => handleAddressChange('area', e.target.value)}
+            />
+            <TextField
+              label="City"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={address.city}
+              onChange={(e) => handleAddressChange('city', e.target.value)}
+            />
+            
+            <TextField
+              select
+              label="State"
+              fullWidth
+              margin="normal"
+              value={address.state}
+              onChange={(e) => handleAddressChange('state', e.target.value)}
+            >
+              {indianStates.map((state) => (
+                <MenuItem key={state} value={state}>
+                  {state}
+                </MenuItem>
+              ))}
+            </TextField>
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}
             <Button type="submit" style={{marginTop:'1rem'}} variant="contained" color="primary" fullWidth disabled={loading}>
