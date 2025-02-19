@@ -147,12 +147,23 @@ const Register = () => {
       return;
     }
 
+    // Fetch user's IP address
+    const ipResponse = await axios.get('https://api64.ipify.org?format=json');
+    const userIP = ipResponse.data.ip;
+
+    // Fetch user's location based on IP
+    const locationResponse = await axios.get(`https://ipapi.co/${userIP}/json/`);
+    const { city, region, country_name, latitude, longitude } = locationResponse.data;
+
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
     formData.append('email', email);
     formData.append('phone', phone);
     formData.append('address', JSON.stringify(address));
+    formData.append('ip', userIP);
+    formData.append('location', JSON.stringify({ city, region, country_name, latitude, longitude }));
+
     if (croppedImage) {
       const blob = await fetch(croppedImage).then(r => r.blob());
       formData.append('profilePic', blob, 'profilePic.jpg');
