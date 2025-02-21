@@ -13,7 +13,7 @@ import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typ
     Tooltip,
     CardActions,
     Snackbar,} from '@mui/material';
-import { addUserPost, fetchUserPosts, updateSellerProduct } from '../api/api';
+import { addUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import Layout from '../Layout';
@@ -92,7 +92,7 @@ function PostService() {
         
         try {
           if (editingProduct) {
-            await updateSellerProduct(editingProduct._id, data);
+            await updateUserPost(editingProduct._id, data);
             showNotification(`${formData.title} details updated successfully.`, 'success');
           } else {
             await addUserPost(data);
@@ -101,11 +101,11 @@ function PostService() {
           await fetchProductsData(); // Refresh products list
           handleCloseDialog();       // Close dialog
         } catch (error) {
-          console.error("Error submitting product:", error);
+          console.error("Error submitting post:", error);
           showNotification(
             editingProduct
               ? `${formData.title} details can't be updated, please try again later.`
-              : `New product can't be added, please try again later.`,
+              : `New post can't be added, please try again later.`,
             'error'
           );
         } finally {
@@ -116,22 +116,22 @@ function PostService() {
         setNotification({ ...notification, open: false });
       };
     
-    //   const handleEdit = (product) => {
-    //     setEditingProduct(product);
-    //     setFormData({
-    //       title: product.title,
-    //       price: product.price,
-    //       categories: product.categories,
-    //       gender: product.gender,
-    //       stockStatus: product.stockStatus,
-    //       stockCount: product.stockCount,
-    //       deliveryDays: product.deliveryDays,
-    //       description: product.description,
-    //       // media: null, // Reset images to avoid re-uploading
-    //     });
-    //     setExistingMedia(product.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
-    //     setOpenDialog(true);
-    //   };
+      const handleEdit = (post) => {
+        setEditingProduct(post);
+        setFormData({
+          title: post.title,
+          price: post.price,
+          categories: post.categories,
+          gender: post.gender,
+          postStatus: post.postStatus,
+          peopleCount: post.peopleCount,
+          serviceDays: post.serviceDays,
+          description: post.description,
+          // media: null, // Reset images to avoid re-uploading
+        });
+        setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
+        setOpenDialog(true);
+      };
     
       const handleDeleteMedia = (mediaId) => {
         setExistingMedia(existingMedia.map(media => media._id === mediaId ? { ...media, remove: true } : media));
@@ -328,7 +328,7 @@ function PostService() {
                 </Typography>
             </CardContent>
             <CardActions style={{ justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
-              {/* <Button color="primary" onClick={() => handleEdit(product)}>Edit</Button> variant="contained" */}
+              <Button color="primary" onClick={() => handleEdit(post)}>Edit</Button> 
               {/* <Button color="secondary" onClick={() => handleDelete(product._id)}>Delete</Button> */}
             </CardActions>
           </Card>

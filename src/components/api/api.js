@@ -72,13 +72,13 @@ export const addUserPost = (data) => {
     return API.post('/api/posts/add', data, { headers });
   };
   
-  export const updateSellerProduct = (id, data) => {
-    const authTokenSeller = localStorage.getItem('authTokenSeller');
+  export const updateUserPost = (id, data) => {
+    const authToken = localStorage.getItem('authToken');
     const headers = {
       'Content-Type': 'multipart/form-data',
-      Authorization: `Bearer ${authTokenSeller}`,
+      Authorization: `Bearer ${authToken}`,
     };
-    return API.put(`/api/productSeller/${id}`, data, { headers });
+    return API.put(`/api/posts/${id}`, data, { headers });
   };
   
   export const deleteSellerProduct = (id) => {
