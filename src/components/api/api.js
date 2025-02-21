@@ -63,6 +63,37 @@ const extendSession = () => {
     window.addEventListener(event, extendSession)
 );
 
+export const addUserPost = (data) => {
+    const authToken = localStorage.getItem('authToken');
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${authToken}`,
+    };
+    return API.post('/api/posts/add', data, { headers });
+  };
+  
+  export const updateSellerProduct = (id, data) => {
+    const authTokenSeller = localStorage.getItem('authTokenSeller');
+    const headers = {
+      'Content-Type': 'multipart/form-data',
+      Authorization: `Bearer ${authTokenSeller}`,
+    };
+    return API.put(`/api/productSeller/${id}`, data, { headers });
+  };
+  
+  export const deleteSellerProduct = (id) => {
+    const authTokenSeller = localStorage.getItem('authTokenSeller');
+    const headers = authTokenSeller ? { Authorization: `Bearer ${authTokenSeller}` } : {};
+    return API.delete(`/api/productSeller/${id}`, { headers });
+  };
+  
+  // Fetch seller's own products
+  export const fetchMySellerProducts = () => {
+    const authTokenSeller = localStorage.getItem('authTokenSeller');
+    const headers = authTokenSeller ? { Authorization: `Bearer ${authTokenSeller}` } : {};
+    return API.get('/api/productSeller/my-products', { headers });
+  };
+
 export default API;
 
 

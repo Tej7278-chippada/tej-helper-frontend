@@ -12,6 +12,7 @@ import UserProfile from './components/UserProfile';
 import GroupDetails from './components/settleMate/GroupDetails';
 import GroupTrans from './components/settleMate/GroupTrans';
 import Helper from './components/Helper/Helper';
+import PostService from './components/Helper/PostService';
 
 const theme = createTheme({
   breakpoints: {
@@ -40,6 +41,11 @@ function App() {
           <Route path="/helper" element={
             <PrivateRoute>
               <Helper />
+            </PrivateRoute>
+          } />
+          <Route path="/userPosts" element={
+            <PrivateRoute>
+              <PostService />
             </PrivateRoute>
           } />
           <Route path="/forgot-password" element={<ForgotPassword />} />
