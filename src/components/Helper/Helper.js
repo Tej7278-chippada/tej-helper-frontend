@@ -1,8 +1,8 @@
 // components/Helper/Helper.js
 import React from 'react';
-import {Box, Button, Toolbar, Typography, useMediaQuery } from '@mui/material';
+import {Box, Button, Toolbar, Typography} from '@mui/material';
 import Layout from '../Layout';
-import { useTheme } from '@emotion/react';
+// import { useTheme } from '@emotion/react';
 import LocalMallRoundedIcon from '@mui/icons-material/LocalMallRounded';
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -10,8 +10,8 @@ import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // const theme = useTheme();
+  // const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Layout username={tokenUsername}>
