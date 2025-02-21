@@ -94,6 +94,8 @@ export const addUserPost = (data) => {
     return API.get('/api/posts/my-posts', { headers });
   };
 
+  export const fetchPosts = () => API.get('/api/posts');
+
 export default API;
 
 

@@ -1,4 +1,4 @@
-// src/components/Admin.js
+// src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
 import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography,
     Dialog,
@@ -42,7 +42,7 @@ function PostService() {
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' }); // For notifications
   // const theme = useTheme();
-//   const navigate = useNavigate();
+  // const navigate = useNavigate();
 
 
     const fetchProductsData = useCallback(async () => {
@@ -56,7 +56,7 @@ function PostService() {
         } finally {
           setLoading(false);
         }
-      }, []);
+    }, []);
     
       useEffect(() => {
         // fetchProducts().then((response) => setProducts(response.data));
