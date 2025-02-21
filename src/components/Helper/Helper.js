@@ -3,10 +3,9 @@ import React, { useEffect, useState } from 'react';
 import {Box, Button, Card, CardContent, CardMedia, Grid, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
-import LocalMallRoundedIcon from '@mui/icons-material/LocalMallRounded';
 import FilterListIcon from "@mui/icons-material/FilterList";
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
+// import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
@@ -47,26 +46,6 @@ const Helper = ()=> {
           </Typography>
           <Button
             variant="contained"
-            // onClick={() => openUserProfile()}
-            sx={{
-              backgroundColor: '#1976d2', // Primary blue
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '24px',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              '&:hover': {
-                backgroundColor: '#1565c0', // Darker shade on hover
-              },
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px', marginRight: '10px'
-            }}
-          >
-            <PostAddRoundedIcon sx={{ fontSize: '20px' }} />
-            {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Product</span> */}
-          </Button>
-          <Button
-            variant="contained"
             // onClick={handleFilterToggle}
             sx={{
               backgroundColor: '#1976d2', // Primary blue
@@ -99,30 +78,10 @@ const Helper = ()=> {
               },
               display: 'flex',
               alignItems: 'center',
-              gap: '8px', marginRight: '10px'
+              gap: '8px',
             }}
           >
             <FavoriteIcon sx={{ fontSize: '20px' }} />
-            {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span> */}
-          </Button>
-          <Button
-            variant="contained"
-            // onClick={() => navigate("/my-orders")}
-            sx={{
-              backgroundColor: '#1976d2', // Primary blue
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '24px',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              '&:hover': {
-                backgroundColor: '#1565c0', // Darker shade on hover
-              },
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px', 
-            }}
-          >
-            <LocalMallRoundedIcon sx={{ fontSize: '20px' }} />
             {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span> */}
           </Button>
           

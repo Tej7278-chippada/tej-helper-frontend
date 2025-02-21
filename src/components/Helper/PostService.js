@@ -15,10 +15,11 @@ import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typ
     Snackbar,} from '@mui/material';
 import { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
-import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
+// import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
+import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 
 function PostService() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -237,7 +238,7 @@ function PostService() {
                 gap: '8px', marginRight: '10px'
               }}
             >
-              <AddShoppingCartRoundedIcon sx={{ fontSize: '20px' }} />
+              <PostAddRoundedIcon sx={{ fontSize: '20px' }} />
               {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Product</span> */}
             </Button>
             
