@@ -23,12 +23,44 @@ import API from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 // import { Marker, TileLayer } from 'leaflet';
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
+// Fix for Leaflet marker icon issue
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Set default icon manually
+const customIcon = new L.Icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41], // Default size
+  iconAnchor: [12, 41], // Position relative to the point
+  popupAnchor: [1, -34],
+});
+
+// Move map when user location is updated
+const ChangeView = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 13);
+    }
+  }, [center, map]);
+  return null;
+};
+
+// Fix for default marker icon in Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
+
 
 const UserProfile = () => {
   const { id } = useParams(); // Extract sellerId from URL
@@ -43,6 +75,7 @@ const UserProfile = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [mapMode, setMapMode] = useState('normal');
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [locationDetails, setLocationDetails] = useState(null);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -88,18 +121,57 @@ const UserProfile = () => {
     setDeleteDialogOpen(false);
   };
 
-  const locateUser = () => {
+  const locateUser = async () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setCurrentLocation({ lat: latitude, lng: longitude });
+
+          // Set location details manually using lat/lng
+          setLocationDetails({
+            latitude,
+            longitude,
+            accuracy: position.coords.accuracy, // GPS accuracy in meters
           });
+          console.log("User's current location:", latitude, longitude);
+          // Fetch location details using an IP geolocation API
+          // try {
+          //   const response = await fetch(`https://ipapi.co/${latitude},${longitude}/json/`);
+          //   const data = await response.json();
+          //   setLocationDetails({
+          //     ip: data.ip,
+          //     street: data.street || 'Not available',
+          //     area: data.area || 'Not available',
+          //     city: data.city,
+          //     state: data.region,
+          //     nation: data.country_name,
+          //     pincode: data.postal,
+          //     accuracy: position.coords.accuracy, // GPS accuracy in meters
+          //   });
+            // 🌍 Fetch location details using OpenStreetMap's Nominatim API
+          // try {
+          //   const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+          //   const data = await response.json();
+
+          //   setLocationDetails({
+          //     street: data.address.road || 'Not available',
+          //     area: data.address.neighbourhood || 'Not available',
+          //     city: data.address.city || data.address.town || 'Not available',
+          //     state: data.address.state || 'Not available',
+          //     nation: data.address.country || 'Not available',
+          //     pincode: data.address.postcode || 'Not available',
+          //   });
+          // } catch (err) {
+          //   console.error('Error fetching location details:', err);
+          //   setError('Failed to fetch location details. Please try again later.');
+          // }
         },
         (error) => {
           console.error('Error getting location:', error);
-        }
+          setError('Failed to fetch your current location. Please enable location access.');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
       );
     } else {
       console.error('Geolocation is not supported by this browser.');
@@ -293,16 +365,117 @@ const UserProfile = () => {
             </Box>
           </Box>
           <Box sx={{paddingBottom:'4rem',marginBottom:'5rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+          {locationDetails && (
+                <Box sx={{ marginBottom: '1rem' }}>
+                  <Typography variant="h6" gutterBottom>
+                    Current Location Details
+                  </Typography>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        IP Address:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.ip}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Street:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.street}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Area:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.area}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        City:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.city}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        State:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.state}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Nation:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.nation}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Pincode:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.pincode}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Latitude:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.latitude}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Longitude:
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.longitude}
+                      </Typography>
+                    </Grid>
+                    <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Accuracy (meters):
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {locationDetails.accuracy}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              )}
             <Box sx={{ height: '500px', marginTop: '1rem', padding:'1rem' }}>
               <MapContainer
-                center={[userData.location.latitude, userData.location.longitude]}
+                center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]}
                 zoom={13}
                 style={{ height: '100%', width: '100%', borderRadius:'8px', }}
+                attributionControl={false}  // Disables the watermark
               >
+                <ChangeView center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]} />
                 <TileLayer
-                  url={mapMode === 'normal' ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                  url={mapMode === 'normal'
+                    ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                    : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
                 />
-                <Marker position={[userData.location.latitude, userData.location.longitude]} />
+                <Marker position={[userData.location.latitude, userData.location.longitude]} icon={customIcon}
+                >
+                  <Popup>User Location</Popup>
+                </Marker>
+                {currentLocation && (
+                  <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
+                    <Popup>Your Current Location</Popup>
+                  </Marker>
+                )}
               </MapContainer>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
                 <Button
