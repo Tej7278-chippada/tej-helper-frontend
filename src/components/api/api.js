@@ -87,11 +87,11 @@ export const addUserPost = (data) => {
     return API.delete(`/api/productSeller/${id}`, { headers });
   };
   
-  // Fetch seller's own products
-  export const fetchMySellerProducts = () => {
-    const authTokenSeller = localStorage.getItem('authTokenSeller');
-    const headers = authTokenSeller ? { Authorization: `Bearer ${authTokenSeller}` } : {};
-    return API.get('/api/productSeller/my-products', { headers });
+  // Fetch user's own posts
+  export const fetchUserPosts = () => {
+    const authToken = localStorage.getItem('authToken');
+    const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+    return API.get('/api/posts/my-posts', { headers });
   };
 
 export default API;

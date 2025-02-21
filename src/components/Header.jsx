@@ -148,6 +148,10 @@ const Header = ({ username }) => {
     const userId = localStorage.getItem('userId'); 
     navigate(`/user/${userId}`); //, { replace: true }
   };
+
+  const toUserPosts = () => {
+    navigate('/userposts'); //, { replace: true }
+  };
   
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -230,8 +234,8 @@ const Header = ({ username }) => {
                 onClose={handleClose}
               >
                 <MenuItem onClick={() => openUserProfile()}>My Profile</MenuItem>
+                <MenuItem onClick={toUserPosts}>My Posts</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                {/* <MenuItem onClick={handleSwitchProfile}>Switch Profile</MenuItem> */}
               </Menu>
               <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <List style={{ cursor: 'pointer' }}>
