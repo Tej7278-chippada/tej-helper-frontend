@@ -13,7 +13,7 @@ import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typ
     Tooltip,
     CardActions,
     Snackbar,} from '@mui/material';
-import { addUserPost, fetchUserPosts, updateUserPost } from '../api/api';
+import { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import Layout from '../Layout';
@@ -45,7 +45,7 @@ function PostService() {
   // const navigate = useNavigate();
 
 
-    const fetchProductsData = useCallback(async () => {
+    const fetchPostsData = useCallback(async () => {
         setLoading(true);
         try {
           const response = await fetchUserPosts();
@@ -61,7 +61,7 @@ function PostService() {
       useEffect(() => {
         // fetchProducts().then((response) => setProducts(response.data));
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
-        fetchProductsData();
+        fetchPostsData();
     
         // window.addEventListener('scroll', handleScroll);
         return () => {
@@ -70,7 +70,7 @@ function PostService() {
         //     clearTimeout(scrollTimeoutRef.current);
         //   }
         };
-      }, [fetchProductsData]);
+      }, [fetchPostsData]);
     
       const handleSubmit = async (e) => {
         e.preventDefault();
@@ -98,7 +98,7 @@ function PostService() {
             await addUserPost(data);
             showNotification(`New Post "${formData.title}" is added successfully.`, 'success');
           }
-          await fetchProductsData(); // Refresh products list
+          await fetchPostsData(); // Refresh products list
           handleCloseDialog();       // Close dialog
         } catch (error) {
           console.error("Error submitting post:", error);
@@ -158,23 +158,24 @@ function PostService() {
           setNewMedia(prevMedia => [...prevMedia, ...selectedFiles]);
         }
       };
-    //   const handleDelete = async (productId) => {
-    //     const product = products.find((p) => p._id === productId); // Find the product to get its title
+
+      const handleDelete = async (postId) => {
+        const post = posts.find((p) => p._id === postId); // Find the product to get its title
       
-    //     if (!product) {
-    //       showNotification("Product not found for deletion.", "error");
-    //       return;
-    //     }
+        if (!post) {
+          showNotification("Post not found for deletion.", "error");
+          return;
+        }
       
-    //     try {
-    //       await deleteSellerProduct(productId);
-    //       showNotification(`Product "${product.title}" deleted successfully.`, "success");
-    //       await fetchProductsData(); // Refresh products list
-    //     } catch (error) {
-    //       console.error("Error deleting product:", error);
-    //       showNotification(`Failed to delete "${product.title}". Please try again later.`, "error");
-    //     }
-    //   };
+        try {
+          await deleteUserPost(postId);
+          showNotification(`Post "${post.title}" deleted successfully.`, "success");
+          await fetchPostsData(); // Refresh posts list
+        } catch (error) {
+          console.error("Error deleting post:", error);
+          showNotification(`Failed to delete "${post.title}". Please try again later.`, "error");
+        }
+      };
     
       const showNotification = (message, severity) => {
         setNotification({ open: true, message, severity });
@@ -329,7 +330,7 @@ function PostService() {
             </CardContent>
             <CardActions style={{ justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
               <Button color="primary" onClick={() => handleEdit(post)}>Edit</Button> 
-              {/* <Button color="secondary" onClick={() => handleDelete(product._id)}>Delete</Button> */}
+              <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
             </CardActions>
           </Card>
         </Grid>
