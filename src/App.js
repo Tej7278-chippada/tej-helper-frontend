@@ -10,6 +10,7 @@ import ForgotPassword from './components/ForgotPassword';
 import UserProfile from './components/UserProfile';
 import Helper from './components/Helper/Helper';
 import PostService from './components/Helper/PostService';
+import PostDetailsById from './components/Helper/PostDetailsById';
 
 const theme = createTheme({
   breakpoints: {
@@ -46,6 +47,7 @@ function App() {
               <UserProfile />
             </PrivateRoute>}
           />
+          <Route path="/post/:id" element={<PostDetailsById />} />
         </Routes>
       </Router>
     </ThemeProvider>

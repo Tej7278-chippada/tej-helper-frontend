@@ -10,6 +10,7 @@ import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
 import { fetchPosts } from '../api/api';
+import { useNavigate } from 'react-router-dom';
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -17,6 +18,7 @@ const Helper = ()=> {
   const [posts, setPosts] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
 
   // Fetch posts data
   useEffect(() => {
@@ -36,6 +38,11 @@ const Helper = ()=> {
     };
     fetchData();
   }, []);
+
+  const openPostDetail = (post) => {
+    // setSelectedProduct(product);
+    navigate(`/post/${post._id}`);
+  };
 
   return (
     <Layout username={tokenUsername}>
@@ -107,7 +114,7 @@ const Helper = ()=> {
                       boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow
                       transition: 'transform 0.1s ease, box-shadow 0.1s ease', // Smooth transition for hover
                     }}
-                      // onClick={() => openProductDetail(product)}
+                      onClick={() => openPostDetail(post)}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
                         e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow

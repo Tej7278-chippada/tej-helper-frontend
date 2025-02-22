@@ -20,6 +20,7 @@ import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
+import { useNavigate } from 'react-router-dom';
 
 function PostService() {
   const [openDialog, setOpenDialog] = useState(false);
@@ -44,6 +45,7 @@ function PostService() {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' }); // For notifications
   // const theme = useTheme();
   // const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
     const fetchPostsData = useCallback(async () => {
@@ -211,6 +213,11 @@ function PostService() {
         setFormData({ title: '', price: '', categories: '', gender: '', postStatus: '', peopleCount: '', serviceDays: '', description: '', media: null });
     };
 
+    const openPostDetail = (post) => {
+      // setSelectedProduct(product);
+      navigate(`/post/${post._id}`);
+    };
+
 
 
     return (
@@ -275,7 +282,7 @@ function PostService() {
                 gap: '0.1rem',
                 // marginBottom: '1rem'
                 height:'210px'}} 
-                // onClick={() => openProductDetail(product)}
+                onClick={() => openPostDetail(post)}
                 >
                 {post.media && post.media.slice(0, 5).map((base64Image, index) => (
                   <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
