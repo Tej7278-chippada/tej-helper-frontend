@@ -1,19 +1,19 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Button, Snackbar, Alert, Toolbar } from '@mui/material';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress } from '@mui/material';
 // import { ThumbUp, Comment } from '@mui/icons-material';
 // import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
 // import CommentPopup from './CommentPopup';
-// import FavoriteIcon from '@mui/icons-material/Favorite';
-// import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { useParams } from 'react-router-dom';
 // import Layout from '../Layout';
 import { useTheme } from '@emotion/react';
 // import SkeletonProductDetail from './SkeletonProductDetail';
 // import ImageZoomDialog from './ImageZoomDialog';
 import ShareIcon from '@mui/icons-material/Share'; // Import the share icon
-import { fetchPostById } from '../api/api';
+import { addToWishlist, checkPostInWishlist, fetchPostById, removeFromWishlist } from '../api/api';
 import Layout from '../Layout';
 import SkeletonProductDetail from '../SkeletonProductDetail';
 import ImageZoomDialog from './ImageZoomDialog';
@@ -24,15 +24,15 @@ function PostDetailsById({ onClose, user }) {
   // const [products, setProducts] = useState([]);
   // const [selectedProduct, setSelectedProduct] = useState(null);
 //   const [commentPopupOpen, setCommentPopupOpen] = useState(false);
-//   const [wishlist, setWishlist] = useState(new Set());
+  const [wishlist, setWishlist] = useState(new Set());
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-//   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
 //   const [likeLoading, setLikeLoading] = useState(false); // For like progress
-//   const [wishLoading, setWishLoading] = useState(false); // For like progress
+  const [wishLoading, setWishLoading] = useState(false); // For like progress
 //   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
   // const { productId } = useParams();
@@ -43,8 +43,8 @@ function PostDetailsById({ onClose, user }) {
       setLoading(true);
       try {
         // const likesCount = await fetchLikesCount(id);
-        // const authToken = localStorage.getItem('authToken');
-        // setIsAuthenticated(!!authToken); // Check if user is authenticated
+        const authToken = localStorage.getItem('authToken');
+        setIsAuthenticated(!!authToken); // Check if user is authenticated
   
         // Fetch product details
         const response = await fetchPostById(id);
@@ -73,20 +73,20 @@ function PostDetailsById({ onClose, user }) {
   }, [id]);
   
 
-//   useEffect(() => {
-//     const checkWishlistStatus = async () => {
-//       if (isAuthenticated && product) {
-//         try {
-//           const isInWishlist = await checkProductInWishlist(product._id);
-//           setWishlist(new Set(isInWishlist ? [product._id] : []));
-//         } catch (error) {
-//           console.error('Error checking wishlist status:', error);
-//         }
-//       }
-//     };
+  useEffect(() => {
+    const checkWishlistStatus = async () => {
+      if (isAuthenticated && post) {
+        try {
+          const isInWishlist = await checkPostInWishlist(post._id);
+          setWishlist(new Set(isInWishlist ? [post._id] : []));
+        } catch (error) {
+          console.error('Error checking wishlist status:', error);
+        }
+      }
+    };
   
-//     checkWishlistStatus();
-//   }, [product, isAuthenticated]);
+    checkWishlistStatus();
+  }, [post, isAuthenticated]);
 
 //   useEffect(() => {
 //     // Periodically fetch stock count
@@ -155,28 +155,28 @@ function PostDetailsById({ onClose, user }) {
     setSelectedImage(null);
   };
 
-//   const handleWishlistToggle = async (productId) => {
-//     if (!isAuthenticated) return; // Prevent unauthenticated actions
-//     setWishLoading(true); // Start the progress indicator
-//     try {
-//       if (wishlist.has(productId)) {
-//         setWishlist((prevWishlist) => {
-//           const newWishlist = new Set(prevWishlist);
-//           newWishlist.delete(productId);
-//           return newWishlist;
-//         }); // Optimistically update the UI
-//         await removeFromWishlist(productId);
-//       } else {
-//         setWishlist((prevWishlist) => new Set([...prevWishlist, productId])); // Optimistically update the UI
-//         await addToWishlist(productId);
-//       }
-//     } catch (error) {
-//       console.error('Error toggling wishlist:', error);
-//       alert('Failed to update wishlist status!');
-//     } finally {
-//       setWishLoading(false); // End the progress indicator
-//     }
-//   };
+  const handleWishlistToggle = async (postId) => {
+    if (!isAuthenticated) return; // Prevent unauthenticated actions
+    setWishLoading(true); // Start the progress indicator
+    try {
+      if (wishlist.has(postId)) {
+        setWishlist((prevWishlist) => {
+          const newWishlist = new Set(prevWishlist);
+          newWishlist.delete(postId);
+          return newWishlist;
+        }); // Optimistically update the UI
+        await removeFromWishlist(postId);
+      } else {
+        setWishlist((prevWishlist) => new Set([...prevWishlist, postId])); // Optimistically update the UI
+        await addToWishlist(postId);
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      alert('Failed to update wishlist status!');
+    } finally {
+      setWishLoading(false); // End the progress indicator
+    }
+  };
   
 
 //   const handleShare = async (productId, productTitle) => {
@@ -346,12 +346,12 @@ function PostDetailsById({ onClose, user }) {
                     </IconButton>
                     <IconButton
                       style={{ display: 'inline-block', float: 'right', fontWeight: '500', backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
-                    //   onClick={() => handleWishlistToggle(product._id)}
-                    //   sx={{
-                        // color: wishlist.has(post._id) ? 'red' : 'gray',
-                    //   }} disabled={wishLoading} // Disable button while loading
+                      onClick={() => handleWishlistToggle(post._id)}
+                      sx={{
+                        color: wishlist.has(post._id) ? 'red' : 'gray',
+                      }} disabled={wishLoading} // Disable button while loading
                     >
-                      {/* <Tooltip
+                      <Tooltip
                         title={wishlist.has(post._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
                         arrow
                         placement="right"
@@ -374,7 +374,7 @@ function PostDetailsById({ onClose, user }) {
                           <FavoriteBorderIcon />
                         )}
                         </span>
-                      </Tooltip> */}
+                      </Tooltip>
                     </IconButton>
                     <Typography variant="h4" style={{
                       fontWeight: 'bold',

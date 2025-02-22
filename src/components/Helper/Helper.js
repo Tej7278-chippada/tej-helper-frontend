@@ -73,7 +73,7 @@ const Helper = ()=> {
           </Button>
           <Button
             variant="contained"
-            // onClick={() => navigate('/wishlist')}
+            onClick={() => navigate('/wishlist')}
             sx={{
               backgroundColor: '#1976d2', // Primary blue
               color: '#fff',

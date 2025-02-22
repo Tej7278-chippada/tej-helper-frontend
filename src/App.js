@@ -11,6 +11,7 @@ import UserProfile from './components/UserProfile';
 import Helper from './components/Helper/Helper';
 import PostService from './components/Helper/PostService';
 import PostDetailsById from './components/Helper/PostDetailsById';
+import WishList from './components/Helper/WishList';
 
 const theme = createTheme({
   breakpoints: {
@@ -48,6 +49,11 @@ function App() {
             </PrivateRoute>}
           />
           <Route path="/post/:id" element={<PostDetailsById />} />
+          <Route path="/wishlist" element={
+            <PrivateRoute>
+              <WishList />
+            </PrivateRoute>
+          } />
         </Routes>
       </Router>
     </ThemeProvider>

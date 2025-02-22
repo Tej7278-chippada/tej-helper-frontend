@@ -105,6 +105,44 @@ export const fetchPostById = async (id) => {
   return await API.get(`/api/posts/${id}`, { headers });
 };
 
+export const fetchWishlist = async () => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.get('/api/wishlist', {
+      headers: {
+          Authorization: `Bearer ${authToken}`,
+      },
+  });
+};
+
+export const checkPostInWishlist = async (postId) => {
+  const authToken = localStorage.getItem('authToken');
+  const response = await API.get(`/api/wishlist/is-in-wishlist/${postId}`, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return response.data.isInWishlist;
+};
+
+
+export const addToWishlist = async (postId) => {
+    const authToken = localStorage.getItem('authToken');
+    return await API.post('/api/wishlist/add', { postId }, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+    });
+};
+
+export const removeFromWishlist = async (postId) => {
+    const authToken = localStorage.getItem('authToken');
+    return await API.post('/api/wishlist/remove', { postId }, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        },
+    });
+};
+
 
 
 
