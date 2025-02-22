@@ -143,6 +143,23 @@ export const removeFromWishlist = async (postId) => {
     });
 };
 
-
+export const likePost = async (id) => {
+  const authToken = localStorage.getItem('authToken');
+  const response = await API.post(`/api/likes/${id}/like`, {}, {
+    headers: { Authorization: `Bearer ${authToken}` },
+  });
+  return response.data;
+};
+export const checkIfLiked = async (id) => {
+  const authToken = localStorage.getItem('authToken');
+  const response = await API.get(`/api/likes/${id}/isLiked`, {
+    headers: { Authorization: `Bearer ${authToken}` },
+  });
+  return response.data.isLiked;
+};
+export const fetchLikesCount = async (id) => {
+  const response = await API.get(`/api/likes/${id}/count`);
+  return response.data.likes;
+};
 
 

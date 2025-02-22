@@ -1,8 +1,8 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useState } from 'react';
 import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress } from '@mui/material';
-// import { ThumbUp, Comment } from '@mui/icons-material';
-// import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import { ThumbUp, Comment } from '@mui/icons-material';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
 // import CommentPopup from './CommentPopup';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -13,7 +13,7 @@ import { useTheme } from '@emotion/react';
 // import SkeletonProductDetail from './SkeletonProductDetail';
 // import ImageZoomDialog from './ImageZoomDialog';
 import ShareIcon from '@mui/icons-material/Share'; // Import the share icon
-import { addToWishlist, checkPostInWishlist, fetchPostById, removeFromWishlist } from '../api/api';
+import { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
 import Layout from '../Layout';
 import SkeletonProductDetail from '../SkeletonProductDetail';
 import ImageZoomDialog from './ImageZoomDialog';
@@ -31,7 +31,7 @@ function PostDetailsById({ onClose, user }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
-//   const [likeLoading, setLikeLoading] = useState(false); // For like progress
+  const [likeLoading, setLikeLoading] = useState(false); // For like progress
   const [wishLoading, setWishLoading] = useState(false); // For like progress
 //   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
@@ -42,23 +42,23 @@ function PostDetailsById({ onClose, user }) {
     const fetchProductDetails = async () => {
       setLoading(true);
       try {
-        // const likesCount = await fetchLikesCount(id);
+        const likesCount = await fetchLikesCount(id);
         const authToken = localStorage.getItem('authToken');
         setIsAuthenticated(!!authToken); // Check if user is authenticated
   
         // Fetch product details
         const response = await fetchPostById(id);
   
-        // let likedByUser = false; // Default to false for unauthenticated users
-        // if (authToken) {
+        let likedByUser = false; // Default to false for unauthenticated users
+        if (authToken) {
           // Only check if the product is liked by the user if the user is authenticated
-        //   likedByUser = await checkIfLiked(id);
-        // }
+          likedByUser = await checkIfLiked(id);
+        }
   
         setPost({
           ...response.data,
-        //   likedByUser, // Set the liked status
-        //   likes: likesCount,
+          likedByUser, // Set the liked status
+          likes: likesCount,
         });
         // setStockCountId(response.data.stockCount); // Set initial stock count
 
@@ -109,24 +109,24 @@ function PostDetailsById({ onClose, user }) {
 //     return deliveryDate.toLocaleDateString(undefined, options);
 //   };
   
-//   const handleLike = async () => {
-//     if (!isAuthenticated || likeLoading) return; // Prevent unauthenticated actions
-//     setLikeLoading(true); // Start the progress indicator
-//     try {
-//       const newLikedByUser = !product.likedByUser;
-//       setProduct((prevProduct) => ({
-//         ...prevProduct,
-//         likedByUser: newLikedByUser,
-//         likes: newLikedByUser ? prevProduct.likes + 1 : prevProduct.likes - 1,
-//       }));
-//       await likeProduct(id);
-//     } catch (error) {
-//       console.error('Error toggling like:', error);
-//       alert('Error toggling like.');
-//     } finally {
-//       setLikeLoading(false); // End the progress indicator
-//     }
-//   };
+  const handleLike = async () => {
+    if (!isAuthenticated || likeLoading) return; // Prevent unauthenticated actions
+    setLikeLoading(true); // Start the progress indicator
+    try {
+      const newLikedByUser = !post.likedByUser;
+      setPost((prevProduct) => ({
+        ...prevProduct,
+        likedByUser: newLikedByUser,
+        likes: newLikedByUser ? prevProduct.likes + 1 : prevProduct.likes - 1,
+      }));
+      await likePost(id);
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      alert('Error toggling like.');
+    } finally {
+      setLikeLoading(false); // End the progress indicator
+    }
+  };
 //   const openComments = (product) => {
 //     // setSelectedProduct(product);
 //     setCommentPopupOpen(true);
@@ -475,16 +475,16 @@ function PostDetailsById({ onClose, user }) {
               right: '1rem', position: 'relative', display: 'inline-block', float: 'right',
             }}>
               <IconButton
-                // onClick={handleLike}
-                // disabled={likeLoading} // Disable button while loading, sx={{ color: product.likedByUser ? 'blue' : 'gray' }} 
+                onClick={handleLike}
+                disabled={likeLoading} // Disable button while loading, sx={{ color: product.likedByUser ? 'blue' : 'gray' }} 
               >
-                {/* {likeLoading ? (
+                {likeLoading ? (
                   <CircularProgress size={24} color="inherit" /> // Show spinner while loading
                 ) : post.likedByUser ? (
                   <ThumbUp />
                 ) : (
                   <ThumbUpOffAltIcon />
-                )} */}
+                )}
                 {post.likes}
               </IconButton>
               <IconButton 
