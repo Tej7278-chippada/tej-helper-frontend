@@ -386,7 +386,7 @@ function PostDetailsById({ onClose, user }) {
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Product Category:
+                      Post Category:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {post.categories}
@@ -408,8 +408,27 @@ function PostDetailsById({ onClose, user }) {
                       ₹{post.price}
                     </Typography>
                   </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Post Status: 
+                    </Typography>
+                    {/* <Typography variant="body2" color="textSecondary">
+                      {post.gender}
+                    </Typography> */}
+                    <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                      {post.postStatus}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      People Count: 
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {post.peopleCount}
+                    </Typography>
+                  </Grid>
                   <Grid item xs={12} sm={12}>
-                    <Typography variant="body2">Delivery in {post.serviceDays} days</Typography>
+                    <Typography variant="body2">Service required for {post.serviceDays} days</Typography>
                     {post.serviceDays && (
                       <Typography color='grey' variant="body2">
                         {/* {`Product will be delivered by ${calculateDeliveryDate(product.deliveryDays)}`} */}
@@ -434,7 +453,7 @@ function PostDetailsById({ onClose, user }) {
                     {stockCountId > 0 ? `In Stock (${stockCountId} available)` : "Out of Stock"}
                   </Typography> */}
                 </Box>
-                <Box >
+                {/* <Box >
                   <Button
                     variant="contained"
                     color="primary"
@@ -444,7 +463,7 @@ function PostDetailsById({ onClose, user }) {
                   >
                     Buy Now
                   </Button>
-                </Box>
+                </Box> */}
               </Toolbar>
               
               </Box>
@@ -475,7 +494,7 @@ function PostDetailsById({ onClose, user }) {
               </IconButton>
             </Grid2>
             <Typography variant="h6" style={{ paddingLeft: '6px', fontWeight: 500 }}>
-              Product Description:
+              Post Description:
             </Typography>
             <Typography variant="body2" color="textSecondary" style={{
               marginTop: '0.5rem',
@@ -492,7 +511,7 @@ function PostDetailsById({ onClose, user }) {
           </Grid>
           <Grid item xs={6} sm={4}>
             <Typography variant="body1" style={{ fontWeight: 500 }}>
-              Seller Details:
+              User Details:
             </Typography>
             <Typography variant="body2" color="textSecondary">
               {/* {post.sellerTitle} */}
@@ -500,7 +519,7 @@ function PostDetailsById({ onClose, user }) {
           </Grid>
           <Grid item xs={6} sm={4}>
             <Typography variant="body1" style={{ fontWeight: 500 }}>
-              Seller Id:
+              User Code:
             </Typography>
             <Typography variant="body2" color="textSecondary">
               {post.userCode}
