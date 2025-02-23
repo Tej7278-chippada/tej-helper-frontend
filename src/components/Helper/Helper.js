@@ -11,6 +11,7 @@ import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
 import { fetchPosts } from '../api/api';
 import { useNavigate } from 'react-router-dom';
+import FilterPosts from './FilterPosts';
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -19,6 +20,14 @@ const Helper = ()=> {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
+  const [filteredPosts, setFilteredPosts] = useState([]);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [filterCriteria, setFilterCriteria] = useState({
+    category: '',
+    gender: '',
+    postStatus: '',
+    priceRange: [0, 10000],
+  });
 
   // Fetch posts data
   useEffect(() => {
@@ -44,6 +53,24 @@ const Helper = ()=> {
     navigate(`/post/${post._id}`);
   };
 
+  // Handle opening and closing the filter card
+  const handleFilterToggle = () => {
+    setFilterOpen((prev) => !prev);
+  };
+
+  // Apply filters to the posts
+  const applyFilters = (newFilters) => {
+    setFilterCriteria(newFilters);
+    const filtered = posts.filter((post) => {
+      const matchCategory = newFilters.category ? post.category === newFilters.category : true;
+      const matchGender = newFilters.gender ? post.gender === newFilters.gender : true;
+      const matchPostStatus = newFilters.postStatus ? post.postStatus === newFilters.postStatus : true;
+      const matchPrice = post.price >= newFilters.priceRange[0] && post.price <= newFilters.priceRange[1];
+      return matchCategory && matchGender && matchPostStatus && matchPrice;
+    });
+    setFilteredPosts(filtered);
+  };
+
   return (
     <Layout username={tokenUsername}>
       <Box>
@@ -53,7 +80,7 @@ const Helper = ()=> {
           </Typography>
           <Button
             variant="contained"
-            // onClick={handleFilterToggle}
+            onClick={handleFilterToggle}
             sx={{
               backgroundColor: '#1976d2', // Primary blue
               color: '#fff',
@@ -220,6 +247,16 @@ const Helper = ()=> {
 
 
       </Box>
+      {/* Filter Floating Card */}
+      {filterOpen && (
+          <FilterPosts
+            filterCriteria={filterCriteria}
+            applyFilters={applyFilters}
+            posts={posts}
+            filteredPosts={filteredPosts}
+            onClose={handleFilterToggle}
+          />
+        )}
     
     </Layout>
   );
