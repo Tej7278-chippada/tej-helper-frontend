@@ -137,6 +137,19 @@ function PostService() {
         if (mediaToKeep.length > 0) {
           data.append('existingMedia', JSON.stringify(mediaToKeep));
         }
+
+        // Append location data
+        data.append('location', JSON.stringify({
+          latitude: currentLocation.lat,
+          longitude: currentLocation.lng,
+          accuracy: locationDetails.accuracy,
+          street: locationDetails.street,
+          area: locationDetails.area,
+          city: locationDetails.city,
+          state: locationDetails.state,
+          nation: locationDetails.nation,
+          pincode: locationDetails.pincode,
+        }));
         
         try {
           if (editingProduct) {

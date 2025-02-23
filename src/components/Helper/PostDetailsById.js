@@ -436,6 +436,22 @@ function PostDetailsById({ onClose, user }) {
                       </Typography>
                     )}
                   </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      IP address: 
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {post.ip}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Latitude Longitude: 
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {post.location.latitude}, {post.location.longitude}
+                    </Typography>
+                  </Grid>
                 </Grid>
               </Box>
               <Toolbar sx={{
