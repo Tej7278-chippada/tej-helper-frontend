@@ -1,6 +1,6 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress } from '@mui/material';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button } from '@mui/material';
 import { ThumbUp, Comment } from '@mui/icons-material';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
@@ -13,11 +13,48 @@ import { useTheme } from '@emotion/react';
 // import SkeletonProductDetail from './SkeletonProductDetail';
 // import ImageZoomDialog from './ImageZoomDialog';
 import ShareIcon from '@mui/icons-material/Share'; // Import the share icon
-import { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
+import API, { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
 import Layout from '../Layout';
 import SkeletonProductDetail from '../SkeletonProductDetail';
 import ImageZoomDialog from './ImageZoomDialog';
 import CommentPopup from './CommentPopup';
+import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
+// Fix for Leaflet marker icon issue
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Set default icon manually
+const customIcon = new L.Icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41], // Default size
+  iconAnchor: [12, 41], // Position relative to the point
+  popupAnchor: [1, -34],
+});
+
+// Move map when user location is updated
+const ChangeView = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 13);
+    }
+  }, [center, map]);
+  return null;
+};
+
+// Fix for default marker icon in Leaflet
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
 
 
 function PostDetailsById({ onClose, user }) {
@@ -38,6 +75,11 @@ function PostDetailsById({ onClose, user }) {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
   // const { productId } = useParams();
 //   const [stockCountId, setStockCountId] = useState(null); // Track only stock count
+  const [mapMode, setMapMode] = useState('normal');
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [locationDetails, setLocationDetails] = useState(null);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -233,6 +275,51 @@ function PostDetailsById({ onClose, user }) {
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+
+  const locateUser = async () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setCurrentLocation({ lat: latitude, lng: longitude });
+
+          // Set location details manually using lat/lng
+          setLocationDetails({
+            latitude,
+            longitude,
+            accuracy: position.coords.accuracy, // GPS accuracy in meters
+          });
+          console.log("User's current location:", latitude, longitude);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setError('Failed to fetch your current location. Please enable location access.');
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+
+  const saveLocation = async () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      await API.put(`/api/auth/${id}/location`, {
+        location: {
+          latitude: currentLocation.lat,
+          longitude: currentLocation.lng,
+        },
+      }, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      setSuccessMessage('Location saved successfully.');
+    } catch (err) {
+      setError('Failed to save location. Please try again later.');
+    }
+  };
+
+  if (error) return <Alert severity="error">{error}</Alert>;
 
 
   if (loading || !post) {
@@ -526,6 +613,147 @@ function PostDetailsById({ onClose, user }) {
               {post.description}
             </Typography>
           </Grid>
+          <Grid>
+            <Box sx={{paddingBottom:'4rem',marginBottom:'1rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+              {locationDetails && (
+                    <Box sx={{ margin: '1rem' }}>
+                      <Typography variant="h6" gutterBottom>
+                        Current Location Details
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            IP Address:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.ip}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Street:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.street}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Area:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.area}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            City:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.city}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            State:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.state}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Nation:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.nation}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Pincode:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.pincode}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Latitude:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.latitude}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Longitude:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.longitude}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Accuracy (meters):
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.accuracy}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  )}
+              <Box sx={{ height: '500px', marginTop: '1rem', padding: '1rem' }}>
+                <MapContainer
+                  center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%', borderRadius: '8px', }}
+                  attributionControl={false}  // Disables the watermark
+                >
+                  <ChangeView center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]} />
+                  <TileLayer
+                    url={mapMode === 'normal'
+                      ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                      : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                  />
+                  <Marker position={[post.location.latitude, post.location.longitude]} icon={customIcon}
+                  >
+                    <Popup>User Location</Popup>
+                  </Marker>
+                  {currentLocation && (
+                    <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
+                      <Popup>Your Current Location</Popup>
+                    </Marker>
+                  )}
+                </MapContainer>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                    startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon />}
+                  >
+                    {mapMode === 'normal' ? 'Satellite View' : 'Normal View'}
+                  </Button>
+                  {currentLocation && (
+                    <Button
+                      variant="contained"
+                      onClick={saveLocation}
+                    >
+                      Save Location
+                    </Button>
+                  )}
+                  <Button
+                    variant="contained"
+                    onClick={locateUser}
+                    startIcon={<LocationOnIcon />}
+                  >
+                    Locate Me
+                  </Button>
+                </Box>
+              </Box>
+            </Box>
+          </Grid>
           <Grid item xs={6} sm={4}>
             <Typography variant="body1" style={{ fontWeight: 500 }}>
               User Details:
@@ -556,7 +784,7 @@ function PostDetailsById({ onClose, user }) {
           post={post} // Pass the current product
           onCommentAdded={onCommentAdded}  // Passing the comment added handler
         />
-        <Snackbar
+      <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleCloseSnackbar}
@@ -564,6 +792,16 @@ function PostDetailsById({ onClose, user }) {
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
           {snackbar.message}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={!!successMessage}
+        autoHideDuration={9000}
+        onClose={() => setSuccessMessage('')}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity="success" onClose={() => setSuccessMessage('')}>
+          {successMessage}
         </Alert>
       </Snackbar>
       </Box>
