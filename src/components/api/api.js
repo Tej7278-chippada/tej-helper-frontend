@@ -162,4 +162,15 @@ export const fetchLikesCount = async (id) => {
   return response.data.likes;
 };
 
+export const addComment = async (id, comment) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
 
+  try {
+      const response = await API.post(`/api/posts/${id}/comment`, comment, { headers });
+      return response.data;
+  } catch (error) {
+      console.error('Error adding comment:', error);
+      throw error;
+  }
+};

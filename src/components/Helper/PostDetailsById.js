@@ -17,13 +17,14 @@ import { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetc
 import Layout from '../Layout';
 import SkeletonProductDetail from '../SkeletonProductDetail';
 import ImageZoomDialog from './ImageZoomDialog';
+import CommentPopup from './CommentPopup';
 
 
 function PostDetailsById({ onClose, user }) {
   const [selectedImage, setSelectedImage] = useState(null);
   // const [products, setProducts] = useState([]);
   // const [selectedProduct, setSelectedProduct] = useState(null);
-//   const [commentPopupOpen, setCommentPopupOpen] = useState(false);
+  const [commentPopupOpen, setCommentPopupOpen] = useState(false);
   const [wishlist, setWishlist] = useState(new Set());
   const { id } = useParams();
   const [post, setPost] = useState(null);
@@ -127,23 +128,23 @@ function PostDetailsById({ onClose, user }) {
       setLikeLoading(false); // End the progress indicator
     }
   };
-//   const openComments = (product) => {
-//     // setSelectedProduct(product);
-//     setCommentPopupOpen(true);
-//     // setSelectedProduct(product); // Pass the product to ensure it gets updated in the popup
-//   };
+  const openComments = (post) => {
+    // setSelectedProduct(product);
+    setCommentPopupOpen(true);
+    // setSelectedProduct(product); // Pass the product to ensure it gets updated in the popup
+  };
 
-//   const onCommentAdded = async () => {
-//     try {
-//       // const updatedProducts = await fetchProducts(); // This fetches all products after a comment is added
-//       // setProducts(updatedProducts.data); // Update the product list in the state
-//       // setCommentPopupOpen(false); // Close the CommentPopup
-//     } catch (error) {
-//       console.error("Error fetching products after comment added:", error);
-//     } finally {
-//       // setCommentPopupOpen(false); // Close the comment popup
-//     }
-//   };
+  const onCommentAdded = async () => {
+    try {
+      // const updatedPosts = await fetchPosts(); // This fetches all products after a comment is added
+      // setPost(updatedPosts.data); // Update the product list in the state
+      // setCommentPopupOpen(false); // Close the CommentPopup
+    } catch (error) {
+      console.error("Error fetching posts after comment added:", error);
+    } finally {
+      // setCommentPopupOpen(false); // Close the comment popup
+    }
+  };
 
   // Function to open the zoomed image modal
   const handleImageClick = (image) => {
@@ -488,9 +489,9 @@ function PostDetailsById({ onClose, user }) {
                 {post.likes}
               </IconButton>
               <IconButton 
-            //   onClick={() => openComments(product)}
+                onClick={() => openComments(post)}
               >
-                {/* <Comment /> {post.comments?.length || 0} */}
+                <Comment /> {post.comments?.length || 0}
               </IconButton>
             </Grid2>
             <Typography variant="h6" style={{ paddingLeft: '6px', fontWeight: 500 }}>
@@ -533,12 +534,12 @@ function PostDetailsById({ onClose, user }) {
           handleCloseImageModal={handleCloseImageModal}
           images={post.media} // Pass the full media array
         />
-        {/* <CommentPopup
+        <CommentPopup
           open={commentPopupOpen}
           onClose={() => setCommentPopupOpen(false)}
-          product={product} // Pass the current product
-        //   onCommentAdded={onCommentAdded}  // Passing the comment added handler
-        /> */}
+          post={post} // Pass the current product
+          onCommentAdded={onCommentAdded}  // Passing the comment added handler
+        />
         <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
