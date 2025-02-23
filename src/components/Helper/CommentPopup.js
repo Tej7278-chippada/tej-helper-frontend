@@ -69,7 +69,9 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
   // };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md"  fullWidth fullScreen={ isMobile ? true : false} >
+    <Dialog open={open} onClose={onClose} maxWidth="md"  fullWidth fullScreen={ isMobile ? true : false} sx={{margin: isMobile ? '10px' : '0px', '& .MuiPaper-root': { // Target the dialog paper
+                  borderRadius: '14px', // Apply border radius
+                },}} >
       <DialogContent style={{ position: 'sticky', height: 'auto', scrollbarWidth: 'thin' }}>
         {/* Close button */}
         <IconButton
