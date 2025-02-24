@@ -1,5 +1,5 @@
 // src/components/Helper/PostDetailsById.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button } from '@mui/material';
 import { ThumbUp, Comment } from '@mui/icons-material';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
@@ -27,6 +27,12 @@ import MapRoundedIcon from '@mui/icons-material/MapRounded';
 // Fix for Leaflet marker icon issue
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+// import { Polyline } from 'react-leaflet';
+// import polyline from '@mapbox/polyline';
+// import { getDistance } from 'geolib'; // For calculating the distance
+import 'leaflet-routing-machine';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -34,6 +40,14 @@ const customIcon = new L.Icon({
   shadowUrl: markerShadow,
   iconSize: [25, 41], // Default size
   iconAnchor: [12, 41], // Position relative to the point
+  popupAnchor: [1, -34],
+});
+
+const userLocationIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
   popupAnchor: [1, -34],
 });
 
@@ -80,6 +94,11 @@ function PostDetailsById({ onClose, user }) {
   const [locationDetails, setLocationDetails] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [distance, setDistance] = useState(null);
+  const [route, setRoute] = useState(null);
+  const mapRef = useRef();
+  const routingControlRef = useRef();
+
   
   useEffect(() => {
     const fetchProductDetails = async () => {
@@ -130,6 +149,14 @@ function PostDetailsById({ onClose, user }) {
   
     checkWishlistStatus();
   }, [post, isAuthenticated]);
+
+  // Expose removeViaPoint to the window object
+  useEffect(() => {
+    window.removeViaPoint = removeViaPoint;
+    return () => {
+      delete window.removeViaPoint;
+    };
+  }, []);
 
 //   useEffect(() => {
 //     // Periodically fetch stock count
@@ -302,24 +329,139 @@ function PostDetailsById({ onClose, user }) {
     }
   };
 
-  const saveLocation = async () => {
-    try {
-      const authToken = localStorage.getItem('authToken');
-      await API.put(`/api/auth/${id}/location`, {
-        location: {
-          latitude: currentLocation.lat,
-          longitude: currentLocation.lng,
+  // const saveLocation = async () => {
+  //   try {
+  //     const authToken = localStorage.getItem('authToken');
+  //     await API.put(`/api/auth/${id}/location`, {
+  //       location: {
+  //         latitude: currentLocation.lat,
+  //         longitude: currentLocation.lng,
+  //       },
+  //     }, {
+  //       headers: { Authorization: `Bearer ${authToken}` },
+  //     });
+  //     setSuccessMessage('Location saved successfully.');
+  //   } catch (err) {
+  //     setError('Failed to save location. Please try again later.');
+  //   }
+  // };
+
+  if (error) return <Alert severity="error">{error}</Alert>;
+
+  // const calculateDistance = () => {
+  //   if (!currentLocation || !post?.location) {
+  //     setDistance("Location data missing");
+  //     return;
+  //   }
+  
+  //   const userCoords = { latitude: currentLocation.lat, longitude: currentLocation.lng };
+  //   const postCoords = { latitude: post.location.latitude, longitude: post.location.longitude };
+  
+  //   const dist = getDistance(userCoords, postCoords) / 1000; // Convert meters to km
+  //   setDistance(dist.toFixed(2)); // Display distance in km
+  // };
+  
+
+  // const fetchRoute = async () => {
+  //   if (!currentLocation || !post?.location) {
+  //     setRoute(null);
+  //     return;
+  //   }
+  
+  //   try {
+  //     const response = await fetch(
+  //       `https://router.project-osrm.org/route/v1/driving/${currentLocation.lng},${currentLocation.lat};${post.location.longitude},${post.location.latitude}?overview=full&geometries=polyline`
+  //     );
+  //     const data = await response.json();
+  
+  //     if (data.routes.length > 0) {
+  //       const decodedRoute = polyline.decode(data.routes[0].geometry);
+  //       setRoute(decodedRoute.map(([lat, lng]) => [lat, lng]));
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching route:", error);
+  //   }
+  // };
+
+  const showDistanceAndRoute = () => {
+    if (currentLocation && post) {
+      const map = mapRef.current;
+      if (routingControlRef.current) {
+        map.removeControl(routingControlRef.current);
+      }
+      const routingControl = L.Routing.control({
+        waypoints: [
+          L.latLng(currentLocation.lat, currentLocation.lng),
+          L.latLng(post.location.latitude, post.location.longitude)
+        ],
+        routeWhileDragging: true,
+        // lineOptions: {
+        //   styles: [{ color: 'rgba(46, 82, 201, 0.84)', weight: 5, opacity: 0.7 }], // Custom route color
+        // },
+        // createMarker: (i, waypoint, n) => {
+        //   const marker = L.marker(waypoint.latLng, {
+        //     icon: customIcon,
+        //   });
+        //   if (i === n - 1) {
+        //     marker.bindPopup(`<b>Destination</b><br><button onclick="deleteRoute()">Delete Route</button>`);
+        //   }
+        //   return marker;
+        // },
+        createMarker: function(i, waypoint, n) {
+          if (i === 0) {
+            return L.marker(waypoint.latLng, { icon: userLocationIcon });
+          } else if (i === n - 1) {
+            return L.marker(waypoint.latLng, { icon: customIcon });
+          } else {
+            const marker = L.marker(waypoint.latLng, { icon: customIcon });
+            marker.bindPopup(`<b>You pinned here...</b><br><button onclick="window.removeViaPoint(${i})">Delete</button>`);
+            return marker;
+          }
         },
-      }, {
-        headers: { Authorization: `Bearer ${authToken}` },
+      }).addTo(map);
+
+      routingControlRef.current = routingControl;
+
+      routingControl.on('routesfound', function (e) {
+        const routes = e.routes;
+        const distance = routes[0].summary.totalDistance / 1000; // Convert to kilometers
+        setDistance(distance.toFixed(2) + ' km');
+        setRoute(routes[0]);
       });
-      setSuccessMessage('Location saved successfully.');
-    } catch (err) {
-      setError('Failed to save location. Please try again later.');
+
+      // Add close button to the routing container
+      const routingContainer = document.querySelector('.leaflet-routing-container');
+      if (routingContainer) {
+        const closeButton = document.createElement('div');
+        closeButton.innerHTML = '<CloseIcon />';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.onclick = () => {
+          map.removeControl(routingControl);
+          routingControlRef.current = null;
+        };
+        routingContainer.appendChild(closeButton);
+      }
     }
   };
 
-  if (error) return <Alert severity="error">{error}</Alert>;
+  const removeViaPoint = (index) => {
+    if (routingControlRef.current) {
+      const waypoints = routingControlRef.current.getWaypoints();
+      waypoints.splice(index, 1);
+      routingControlRef.current.setWaypoints(waypoints);
+    }
+  };
+
+  const shareLocation = () => {
+    const url = `https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setSuccessMessage('Location link copied to clipboard.');
+    });
+  };
+  
 
 
   if (loading || !post) {
@@ -534,8 +676,22 @@ function PostDetailsById({ onClose, user }) {
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Latitude Longitude: 
+                      <IconButton
+                        style={{
+                          // display: 'inline-block',
+                          // float: 'right',
+                          fontWeight: '500',
+                          backgroundColor: 'rgba(255, 255, 255, 0)',
+                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0)', marginLeft: '10px'
+                        }}
+                        onClick={shareLocation}
+                      >
+                      <Tooltip title="Share Post location" arrow placement="right">
+                        <ShareIcon />
+                      </Tooltip>
+                    </IconButton>
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="body2" color="textSecondary" onClick={shareLocation} sx={{cursor:'pointer'}}>
                       {post.location.latitude}, {post.location.longitude}
                     </Typography>
                   </Grid>
@@ -710,6 +866,7 @@ function PostDetailsById({ onClose, user }) {
                   zoom={13}
                   style={{ height: '100%', width: '100%', borderRadius: '8px', }}
                   attributionControl={false}  // Disables the watermark
+                  ref={mapRef}
                 >
                   <ChangeView center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]} />
                   <TileLayer
@@ -722,10 +879,12 @@ function PostDetailsById({ onClose, user }) {
                     <Popup>User Location</Popup>
                   </Marker>
                   {currentLocation && (
-                    <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
+                    <Marker position={[currentLocation.lat, currentLocation.lng]} icon={userLocationIcon}>
                       <Popup>Your Current Location</Popup>
                     </Marker>
                   )}
+                  {/* {route && <Polyline positions={route} color="blue" />} */}
+
                 </MapContainer>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
                   <Button
@@ -735,12 +894,25 @@ function PostDetailsById({ onClose, user }) {
                   >
                     {mapMode === 'normal' ? 'Satellite View' : 'Normal View'}
                   </Button>
-                  {currentLocation && (
+                  {/* {currentLocation && (
                     <Button
                       variant="contained"
                       onClick={saveLocation}
                     >
                       Save Location
+                    </Button>
+                  )} */}
+                  {distance && (
+                    <Typography variant="body1" style={{ marginTop: '1rem', fontWeight: 500 }}>
+                      Distance: {distance}
+                    </Typography>
+                  )}
+                  {currentLocation && (
+                    <Button
+                      variant="contained"
+                      onClick={showDistanceAndRoute}
+                    >
+                      Show Distance
                     </Button>
                   )}
                   <Button
@@ -751,6 +923,20 @@ function PostDetailsById({ onClose, user }) {
                     Locate Me
                   </Button>
                 </Box>
+                
+                {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: '1rem' }}>
+                  <Button variant="contained" color="primary" onClick={calculateDistance}>
+                    Show Distance
+                  </Button>
+                  <Button variant="contained" color="secondary" onClick={fetchRoute}>
+                    Show Route
+                  </Button>
+                </Box>
+                {distance !== null && (
+                  <Typography variant="h6" sx={{ textAlign: 'center', marginTop: '1rem' }}>
+                    Distance: {distance} km
+                  </Typography>
+                )} */}
               </Box>
             </Box>
           </Grid>
