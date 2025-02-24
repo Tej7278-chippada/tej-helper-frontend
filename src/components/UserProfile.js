@@ -366,7 +366,7 @@ const UserProfile = () => {
           </Box>
           <Box sx={{paddingBottom:'4rem',marginBottom:'5rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
           {locationDetails && (
-                <Box sx={{ marginBottom: '1rem' }}>
+                <Box sx={{ margin: '1rem' }}>
                   <Typography variant="h6" gutterBottom>
                     Current Location Details
                   </Typography>

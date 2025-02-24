@@ -1,6 +1,6 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useRef, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button } from '@mui/material';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress } from '@mui/material';
 import { ThumbUp, Comment } from '@mui/icons-material';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
@@ -13,7 +13,7 @@ import { useTheme } from '@emotion/react';
 // import SkeletonProductDetail from './SkeletonProductDetail';
 // import ImageZoomDialog from './ImageZoomDialog';
 import ShareIcon from '@mui/icons-material/Share'; // Import the share icon
-import API, { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
+import { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
 import Layout from '../Layout';
 import SkeletonProductDetail from '../SkeletonProductDetail';
 import ImageZoomDialog from './ImageZoomDialog';
@@ -21,7 +21,6 @@ import CommentPopup from './CommentPopup';
 import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 // Fix for Leaflet marker icon issue
@@ -32,6 +31,8 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 // import { getDistance } from 'geolib'; // For calculating the distance
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
+import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 
 
 // Set default icon manually
@@ -95,9 +96,11 @@ function PostDetailsById({ onClose, user }) {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [distance, setDistance] = useState(null);
-  const [route, setRoute] = useState(null);
+  // const [route, setRoute] = useState(null);
   const mapRef = useRef();
   const routingControlRef = useRef();
+  const [routeCalculating, setRouteCalculating] = useState(false);
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   
   useEffect(() => {
@@ -305,6 +308,7 @@ function PostDetailsById({ onClose, user }) {
 
   const locateUser = async () => {
     if (navigator.geolocation) {
+      setLoadingLocation(true); // Show progress indicator
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
@@ -317,10 +321,12 @@ function PostDetailsById({ onClose, user }) {
             accuracy: position.coords.accuracy, // GPS accuracy in meters
           });
           console.log("User's current location:", latitude, longitude);
+          setLoadingLocation(false); // Hide progress indicator
         },
         (error) => {
           console.error('Error getting location:', error);
           setError('Failed to fetch your current location. Please enable location access.');
+          setLoadingLocation(false); // Hide progress indicator
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
       );
@@ -385,65 +391,58 @@ function PostDetailsById({ onClose, user }) {
 
   const showDistanceAndRoute = () => {
     if (currentLocation && post) {
+      setRouteCalculating(true); // Show progress indicator
       const map = mapRef.current;
       if (routingControlRef.current) {
         map.removeControl(routingControlRef.current);
       }
-      const routingControl = L.Routing.control({
-        waypoints: [
-          L.latLng(currentLocation.lat, currentLocation.lng),
-          L.latLng(post.location.latitude, post.location.longitude)
-        ],
-        routeWhileDragging: true,
-        // lineOptions: {
-        //   styles: [{ color: 'rgba(46, 82, 201, 0.84)', weight: 5, opacity: 0.7 }], // Custom route color
-        // },
-        // createMarker: (i, waypoint, n) => {
-        //   const marker = L.marker(waypoint.latLng, {
-        //     icon: customIcon,
-        //   });
-        //   if (i === n - 1) {
-        //     marker.bindPopup(`<b>Destination</b><br><button onclick="deleteRoute()">Delete Route</button>`);
-        //   }
-        //   return marker;
-        // },
-        createMarker: function(i, waypoint, n) {
-          if (i === 0) {
-            return L.marker(waypoint.latLng, { icon: userLocationIcon });
-          } else if (i === n - 1) {
-            return L.marker(waypoint.latLng, { icon: customIcon });
-          } else {
-            const marker = L.marker(waypoint.latLng, { icon: customIcon });
-            marker.bindPopup(`<b>You pinned here...</b><br><button onclick="window.removeViaPoint(${i})">Delete</button>`);
-            return marker;
-          }
-        },
-      }).addTo(map);
+        const routingControl = L.Routing.control({
+          waypoints: [
+            L.latLng(currentLocation.lat, currentLocation.lng),
+            L.latLng(post.location.latitude, post.location.longitude)
+          ],
+          routeWhileDragging: true,
+          createMarker: function(i, waypoint, n) {
+            if (i === 0) {
+              return L.marker(waypoint.latLng, { icon: userLocationIcon });
+            } else if (i === n - 1) {
+              return L.marker(waypoint.latLng, { icon: customIcon });
+            } else {
+              const marker = L.marker(waypoint.latLng, { icon: customIcon });
+              marker.bindPopup(`<b>You pinned here...</b><br><button onclick="window.removeViaPoint(${i})">Delete</button>`);
+              return marker;
+            }
+          },
+        }).addTo(map);
+      
 
-      routingControlRef.current = routingControl;
+        routingControlRef.current = routingControl;
 
-      routingControl.on('routesfound', function (e) {
-        const routes = e.routes;
-        const distance = routes[0].summary.totalDistance / 1000; // Convert to kilometers
-        setDistance(distance.toFixed(2) + ' km');
-        setRoute(routes[0]);
-      });
+        routingControl.on('routesfound', function (e) {
+          const routes = e.routes;
+          const distance = routes[0].summary.totalDistance / 1000; // Convert to kilometers
+          setDistance(distance.toFixed(2) + ' km');
+          // setRoute(routes[0]);
+          setRouteCalculating(false); // Hide progress indicator after route calculation
+        });
 
-      // Add close button to the routing container
-      const routingContainer = document.querySelector('.leaflet-routing-container');
-      if (routingContainer) {
-        const closeButton = document.createElement('div');
-        closeButton.innerHTML = '<CloseIcon />';
-        closeButton.style.position = 'absolute';
-        closeButton.style.top = '10px';
-        closeButton.style.right = '10px';
-        closeButton.style.cursor = 'pointer';
-        closeButton.onclick = () => {
-          map.removeControl(routingControl);
-          routingControlRef.current = null;
-        };
-        routingContainer.appendChild(closeButton);
-      }
+      
+
+        // Add close button to the routing container
+        const routingContainer = document.querySelector('.leaflet-routing-container');
+        if (routingContainer) {
+          const closeButton = document.createElement('div');
+          closeButton.innerHTML = '<CloseIcon />';
+          closeButton.style.position = 'absolute';
+          closeButton.style.top = '10px';
+          closeButton.style.right = '10px';
+          closeButton.style.cursor = 'pointer';
+          closeButton.onclick = () => {
+            map.removeControl(routingControl);
+            routingControlRef.current = null;
+          };
+          routingContainer.appendChild(closeButton);
+        }
     }
   };
 
@@ -770,7 +769,7 @@ function PostDetailsById({ onClose, user }) {
             </Typography>
           </Grid>
           <Grid>
-            <Box sx={{paddingBottom:'4rem',marginBottom:'1rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+            <Box sx={{paddingBottom:'6rem',marginBottom:'2rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
               {locationDetails && (
                     <Box sx={{ margin: '1rem' }}>
                       <Typography variant="h6" gutterBottom>
@@ -860,7 +859,7 @@ function PostDetailsById({ onClose, user }) {
                       </Grid>
                     </Box>
                   )}
-              <Box sx={{ height: '500px', marginTop: '1rem', padding: '1rem' }}>
+              <Box sx={{ height: isMobile ? '400px' : '500px', marginTop: '1rem', padding: '1rem' }}>
                 <MapContainer
                   center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]}
                   zoom={13}
@@ -886,14 +885,28 @@ function PostDetailsById({ onClose, user }) {
                   {/* {route && <Polyline positions={route} color="blue" />} */}
 
                 </MapContainer>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                  <Button
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', alignItems:'center' }}>
+                  {/* <Button
                     variant="contained"
                     onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
                     startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon />}
                   >
                     {mapMode === 'normal' ? 'Satellite View' : 'Normal View'}
-                  </Button>
+                  </Button> */}
+                  <IconButton
+                    style={{
+                      // display: 'inline-block',
+                      // float: 'right',
+                      fontWeight: '500', width:'60px', borderRadius:'10px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
+                    }}
+                    onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                  >
+                    <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
+                    {mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}
+                    </Tooltip>
+                  </IconButton>
                   {/* {currentLocation && (
                     <Button
                       variant="contained"
@@ -902,26 +915,68 @@ function PostDetailsById({ onClose, user }) {
                       Save Location
                     </Button>
                   )} */}
-                  {distance && (
-                    <Typography variant="body1" style={{ marginTop: '1rem', fontWeight: 500 }}>
-                      Distance: {distance}
-                    </Typography>
-                  )}
+                  <Box m={1}>
+                  
                   {currentLocation && (
+                    <IconButton
+                      style={{
+                        // display: 'inline-block',
+                        // float: 'right',
+                        fontWeight: '500', width:'60px', borderRadius:'10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                      }}
+                      onClick={showDistanceAndRoute}
+                      disabled={loadingLocation && routeCalculating} // Disable button while loading
+                    >
+                      <Tooltip title={routeCalculating ? 'Caliculating route...' : 'Show the route and distance'} arrow placement="right">
+                      {routeCalculating ? <CircularProgress size={24} /> : <RouteRoundedIcon />}
+                      </Tooltip>
+                    </IconButton>
+                  )}
+                  </Box>
+                  {/* {currentLocation && (
                     <Button
                       variant="contained"
                       onClick={showDistanceAndRoute}
+                      startIcon={<RouteRoundedIcon />}
                     >
                       Show Distance
                     </Button>
-                  )}
-                  <Button
+                  )} */}
+                  <Box >
+                  
+                  <IconButton
+                    style={{
+                      // display: 'inline-block',
+                      // float: 'right',
+                      fontWeight: '500', width:'60px', borderRadius:'10px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
+                    }}
+                    onClick={locateUser}
+                    disabled={loadingLocation} // Disable button while loading
+                  >
+                    <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'} arrow placement="right">
+                    {loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}
+                    </Tooltip>
+                  </IconButton>
+                  </Box>
+                  {/* <Button
                     variant="contained"
                     onClick={locateUser}
                     startIcon={<LocationOnIcon />}
                   >
                     Locate Me
-                  </Button>
+                  </Button> */}
+                  
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '0rem', alignItems:'center', alignContent:'center' }}>
+                {distance && (
+                  <Typography variant="body1" color='grey' style={{ fontWeight: 500 }}>
+                    Distance to post location: {distance}
+                  </Typography>
+                )}
                 </Box>
                 
                 {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: '1rem' }}>
