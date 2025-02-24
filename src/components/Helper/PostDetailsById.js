@@ -624,22 +624,23 @@ function PostDetailsById({ onClose, user }) {
               {post.description}
             </Typography>
           </Grid>
-          <Grid item xs={6} sm={4}>
+          <Grid item xs={6} sm={4} mt={1} ml={1}>
             <Typography variant="body1" style={{ fontWeight: 500 }}>
               User Details:
             </Typography>
             <Typography variant="body2" color="textSecondary">
               {/* {post.sellerTitle} */}
             </Typography>
+            <Grid item xs={6} sm={4}>
+              <Typography variant="body1" style={{ fontWeight: 500 }}>
+                User Code:
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                {post.userCode}
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item xs={6} sm={4}>
-            <Typography variant="body1" style={{ fontWeight: 500 }}>
-              User Code:
-            </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {post.userCode}
-            </Typography>
-          </Grid>
+          
 
         </div>
         {/* Large Image Dialog with Zoom */}
