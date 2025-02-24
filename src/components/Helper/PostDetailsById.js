@@ -1,6 +1,6 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useRef, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress } from '@mui/material';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button } from '@mui/material';
 import { ThumbUp, Comment } from '@mui/icons-material';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
@@ -33,6 +33,8 @@ import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
+import RouteMapDialog from './RouteMapDialog';
+import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
 
 
 // Set default icon manually
@@ -101,6 +103,7 @@ function PostDetailsById({ onClose, user }) {
   const routingControlRef = useRef();
   const [routeCalculating, setRouteCalculating] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [routeMapDialogOpen, setRouteMapDialogOpen] = useState(false);
 
   
   useEffect(() => {
@@ -218,6 +221,12 @@ function PostDetailsById({ onClose, user }) {
     }
   };
 
+  const openRouteMapDialog = (post) => {
+    // setSelectedProduct(product);
+    setRouteMapDialogOpen(true);
+    // setSelectedProduct(product); // Pass the product to ensure it gets updated in the popup
+  };
+
   // Function to open the zoomed image modal
   const handleImageClick = (image) => {
     setSelectedImage(image);
@@ -252,46 +261,46 @@ function PostDetailsById({ onClose, user }) {
   };
   
 
-//   const handleShare = async (productId, productTitle) => {
-//     const shareUrl = `${window.location.origin}/product/${productId}`;
-//     const shareData = {
-//       title: productTitle,
-//       text: `Check out this amazing product: ${productTitle}`,
-//       url: shareUrl,
-//     };
+  const handleShare = async (postId, postTitle) => {
+    const shareUrl = `${window.location.origin}/post/${postId}`;
+    const shareData = {
+      title: postTitle,
+      text: `Check out this amazing post: ${postTitle}`,
+      url: shareUrl,
+    };
 
-//     // Check if Web Share API is supported
-//     if (navigator.share) {
-//       try {
-//         await navigator.share(shareData);
-//       } catch (err) {
-//         console.error('Error using Web Share API:', err);
-//       }
-//     } else if (navigator.clipboard && navigator.clipboard.writeText) {
-//       // Fallback: Copy to clipboard if supported
-//       try {
-//         await navigator.clipboard.writeText(shareUrl);
-//         alert(`The link has been copied to your clipboard: ${shareUrl}`);
-//       } catch (err) {
-//         console.error('Error copying text to clipboard:', err);
-//         alert(`Unable to copy the link. Please manually share this URL: ${shareUrl}`);
-//       }
-//     } else {
-//       // Fallback for browsers without clipboard API
-//       const tempInput = document.createElement('textarea');
-//       tempInput.value = shareUrl;
-//       document.body.appendChild(tempInput);
-//       tempInput.select();
-//       try {
-//         document.execCommand('copy');
-//         alert(`The link has been copied to your clipboard: ${shareUrl}`);
-//       } catch (err) {
-//         console.error('Error using execCommand to copy:', err);
-//         alert(`Unable to copy the link. Please manually share this URL: ${shareUrl}`);
-//       }
-//       document.body.removeChild(tempInput);
-//     }
-//   };
+    // Check if Web Share API is supported
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Error using Web Share API:', err);
+      }
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Fallback: Copy to clipboard if supported
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert(`The link has been copied to your clipboard: ${shareUrl}`);
+      } catch (err) {
+        console.error('Error copying text to clipboard:', err);
+        alert(`Unable to copy the link. Please manually share this URL: ${shareUrl}`);
+      }
+    } else {
+      // Fallback for browsers without clipboard API
+      const tempInput = document.createElement('textarea');
+      tempInput.value = shareUrl;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand('copy');
+        alert(`The link has been copied to your clipboard: ${shareUrl}`);
+      } catch (err) {
+        console.error('Error using execCommand to copy:', err);
+        alert(`Unable to copy the link. Please manually share this URL: ${shareUrl}`);
+      }
+      document.body.removeChild(tempInput);
+    }
+  };
 
 //   const handleBuyNow = () => {
 //     if (!isAuthenticated || likeLoading) return; // Prevent unauthenticated actions
@@ -554,7 +563,7 @@ function PostDetailsById({ onClose, user }) {
               scrollbarWidth: 'thin', padding: '1rem',
               position: 'relative', // To enable absolute positioning of the button
             }}>
-              <Box flex={isMobile ? "1" : "0 0 70%"} mb={7}>
+              <Box flex={isMobile ? "1" : "0 0 70%"} mb={8}>
 
                 {/* Product Details */}
                 <Grid container spacing={2}>
@@ -567,7 +576,7 @@ function PostDetailsById({ onClose, user }) {
                         backgroundColor: 'rgba(255, 255, 255, 0.8)',
                         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '10px'
                       }}
-                    //   onClick={() => handleShare(product._id, product.title)}
+                      onClick={() => handleShare(post._id, post.title)}
                     >
                       <Tooltip title="Share this product" arrow placement="right">
                         <ShareIcon />
@@ -672,7 +681,7 @@ function PostDetailsById({ onClose, user }) {
                       {post.ip}
                     </Typography>
                   </Grid>
-                  <Grid item xs={6} sm={4}>
+                  <Grid item xs={12} sm={6}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Latitude Longitude: 
                       <IconButton
@@ -681,7 +690,7 @@ function PostDetailsById({ onClose, user }) {
                           // float: 'right',
                           fontWeight: '500',
                           backgroundColor: 'rgba(255, 255, 255, 0)',
-                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0)', marginLeft: '10px'
+                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0)', marginLeft: '10px', padding:'0px'
                         }}
                         onClick={shareLocation}
                       >
@@ -707,22 +716,35 @@ function PostDetailsById({ onClose, user }) {
                 justifyContent: 'space-between',
                 marginTop: '0rem',
               }}>
-                <Box style={{ display: 'flex', flexGrow: 1, }}>
+                {/* <Box style={{ display: 'flex', flexGrow: 1, }}> */}
                   {/* <Typography variant="body2" color={stockCountId > 0 ? "green" : "red"}>
                     {stockCountId > 0 ? `In Stock (${stockCountId} available)` : "Out of Stock"}
                   </Typography> */}
+                {/* </Box> */}
+                <Box >
+                  <Button
+                    variant="text"
+                    color="secondary"
+                    onClick={() => openRouteMapDialog(post)}
+                    // disabled={stockCountId === 0}
+                    style={{ margin: "0rem", borderRadius: '10px' }}
+                    startIcon={<RouteRoundedIcon />}
+                  >
+                    Route Map
+                  </Button>
                 </Box>
-                {/* <Box >
+                <Box >
                   <Button
                     variant="contained"
                     color="primary"
-                    // onClick={handleBuyNow}
+                    // onClick={() => openRouteMapDialog(post)}
                     // disabled={stockCountId === 0}
-                    style={{ margin: "1rem" }}
+                    style={{ margin: "0rem", borderRadius: '8px' }}
+                    startIcon={<ChatRoundedIcon />}
                   >
-                    Buy Now
+                    Chat
                   </Button>
-                </Box> */}
+                </Box>
               </Toolbar>
               
               </Box>
@@ -1024,6 +1046,12 @@ function PostDetailsById({ onClose, user }) {
           onClose={() => setCommentPopupOpen(false)}
           post={post} // Pass the current product
           onCommentAdded={onCommentAdded}  // Passing the comment added handler
+        />
+        <RouteMapDialog
+          open={routeMapDialogOpen}
+          onClose={() => setRouteMapDialogOpen(false)}
+          post={post} // Pass the current product
+          // onCommentAdded={onCommentAdded}  // Passing the comment added handler
         />
       <Snackbar
         open={snackbar.open}
