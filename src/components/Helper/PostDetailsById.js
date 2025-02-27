@@ -21,6 +21,7 @@ import CommentPopup from './CommentPopup';
 import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import RouteMapDialog from './RouteMapDialog';
 import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
+import ChatDialog from '../Chat/ChatDialog';
 
 
 function PostDetailsById({ onClose, user }) {
@@ -41,6 +42,8 @@ function PostDetailsById({ onClose, user }) {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
   const [successMessage, setSuccessMessage] = useState('');
   const [routeMapDialogOpen, setRouteMapDialogOpen] = useState(false);
+  const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const userId = localStorage.getItem('userId');
 
   
   useEffect(() => {
@@ -567,6 +570,7 @@ function PostDetailsById({ onClose, user }) {
                     Route Map
                   </Button>
                 </Box>
+                {!(post.userId === userId) && 
                 <Box >
                   <Button
                     variant="contained"
@@ -575,10 +579,12 @@ function PostDetailsById({ onClose, user }) {
                     // disabled={stockCountId === 0}
                     style={{ margin: "0rem", borderRadius: '8px' }}
                     startIcon={<ChatRoundedIcon />}
+                    onClick={() => setChatDialogOpen(true)}
                   >
                     Chat
                   </Button>
                 </Box>
+                }
               </Toolbar>
               
               </Box>
@@ -629,7 +635,7 @@ function PostDetailsById({ onClose, user }) {
               User Details:
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              {/* {post.sellerTitle} */}
+              {post.userId}
             </Typography>
             <Grid item xs={6} sm={4}>
               <Typography variant="body1" style={{ fontWeight: 500 }}>
@@ -661,6 +667,7 @@ function PostDetailsById({ onClose, user }) {
           post={post} // Pass the current product
           // onCommentAdded={onCommentAdded}  // Passing the comment added handler
         />
+        <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} />
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

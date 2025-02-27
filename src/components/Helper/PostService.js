@@ -352,6 +352,13 @@ function PostService() {
 
   if (error) return <Alert severity="error">{error}</Alert>;
 
+  const handleChatsOpen = (post) => {
+    // setGroupDetailsId(post._id);
+    // if (isMobile) {
+      navigate(`/chatsOfPost/${post._id}`);
+    // }
+  };
+
 
 
     return (
@@ -471,8 +478,11 @@ function PostService() {
                 </Typography>
             </CardContent>
             <CardActions style={{ justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
-              <Button color="primary" onClick={() => handleEdit(post)}>Edit</Button> 
-              <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
+              <Box>
+                <Button color="primary" sx={{marginRight:'10px'}} onClick={() => handleEdit(post)}>Edit</Button> 
+                <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
+              </Box>
+              <Button color="primary" onClick={() => handleChatsOpen(post)}>Chats</Button> 
             </CardActions>
           </Card>
         </Grid>
