@@ -8,7 +8,7 @@ const NotFound = () => {
   return (
     <Box 
       sx={{ 
-        height: '100vh', 
+        height: '80vh', 
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'center', 
@@ -18,10 +18,10 @@ const NotFound = () => {
       }}
     >
       <Typography variant="h5" gutterBottom>
-        This page is hosted on a static Netlify page. Page refreshing cannot be done.
+        Invalid url, please check the url...
       </Typography>
       <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
-        Please click the button below to navigate to the Home page.
+        Or click on the button below to navigate to the Home page.
       </Typography>
       <Button variant="contained" color="primary" onClick={() => navigate('/helper')}>
         Home
