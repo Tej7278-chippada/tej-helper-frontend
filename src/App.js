@@ -13,7 +13,8 @@ import PostService from './components/Helper/PostService';
 import PostDetailsById from './components/Helper/PostDetailsById';
 import WishList from './components/Helper/WishList';
 import ChatsOfPosts from './components/Chat/ChatsOfPosts';
-import ChatHistory from './components/Chat/ChatHistory';
+// import ChatHistory from './components/Chat/ChatHistory';
+import ChatHistoryPage from './components/Chat/ChatHistoryPage';
 
 const theme = createTheme({
   breakpoints: {
@@ -63,7 +64,7 @@ function App() {
           } />
           <Route path="/chat/:chatId" element={
             <PrivateRoute>
-              <ChatHistory />
+              <ChatHistoryPage />
             </PrivateRoute>
           } />
         </Routes>

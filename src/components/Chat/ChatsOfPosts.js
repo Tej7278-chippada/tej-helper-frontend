@@ -21,6 +21,7 @@ const ChatsOfPosts = () => {
   const [chatDetailsById, setChatDetailsById] = useState(null);
   const [loading, setLoading] = useState(true); // Track loading state
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
+  const [postTitle, setPostTitle] = useState(""); // Store post title
 
 
   const fetchChatsOfPost = useCallback(async () => {
@@ -30,7 +31,10 @@ const ChatsOfPosts = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
       });
       // setChats(response.data.chats.reverse() || []);
-      setBuyers(response.data.posts.find(post => post._id === postId)?.buyers || []);
+      // setBuyers(response.data.posts.find(post => post._id === postId)?.buyers || []);
+      const post = response.data.posts.find(post => post._id === postId);
+      setBuyers(post?.buyers || []);
+      setPostTitle(post?.title || ""); // Store post title
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.error('Unauthorized user, redirecting to login');
@@ -53,7 +57,7 @@ const ChatsOfPosts = () => {
   }, [fetchChatsOfPost, navigate]); // ✅ Add 'fetchChatsOfPost' and 'navigate' in dependencies
 
   const handleChatClick = (chat) => {
-    setChatDetailsById(chat.id);
+    setChatDetailsById(chat);
     if (isMobile) {
       navigate(`/chat/${chat.id}`);
     }
@@ -92,8 +96,14 @@ const ChatsOfPosts = () => {
                 }}
               >
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography position="relative" variant="h5">Chats of </Typography>
-                  <Typography position="relative" variant="h5">{postId}</Typography>
+                  <Typography position="relative" variant="h6" color='grey'
+                    style={{ marginBottom: '0.0rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis',
+                      maxHeight: '4.5rem',  // This keeps the text within three lines based on the line height.
+                      lineHeight: '1.5rem'  // Adjust to control exact line spacing.
+                    }}
+                    >Chats of <span style={{ fontWeight: "normal", color: "black" }}>{postTitle}</span>
+                  </Typography>
+                  {/* <Typography position="relative" variant="h5">{postId}</Typography> */}
                 </Box>
               </Box>
               <Box bgcolor="#f5f5f5"
@@ -198,7 +208,7 @@ const ChatsOfPosts = () => {
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatId={chatDetailsById} postId={postId} />  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} />  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
