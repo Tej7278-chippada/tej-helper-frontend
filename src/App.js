@@ -15,6 +15,7 @@ import WishList from './components/Helper/WishList';
 import ChatsOfPosts from './components/Chat/ChatsOfPosts';
 // import ChatHistory from './components/Chat/ChatHistory';
 import ChatHistoryPage from './components/Chat/ChatHistoryPage';
+import NotFound from './components/NotFound'; // Import 404 Page
 
 const theme = createTheme({
   breakpoints: {
@@ -67,6 +68,8 @@ function App() {
               <ChatHistoryPage />
             </PrivateRoute>
           } />
+          {/* 404 Not Found Page */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </ThemeProvider>
