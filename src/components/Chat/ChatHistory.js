@@ -19,12 +19,12 @@ const ChatHistory = ({ open, onClose, post, user, chatData, postId }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 const bottomRef = useRef(null); // Reference to the last transaction
 
-  useEffect(() => {
-    // if (open) {
-      // Fetch chat history when the dialog opens
-      fetchChatHistory();
-    // }
-  });
+  // useEffect(() => {
+  //   // if (open) {
+  //     // Fetch chat history when the dialog opens
+  //     fetchChatHistory();
+  //   // }
+  // });
 
   const fetchChatHistory = async () => {
     try {
