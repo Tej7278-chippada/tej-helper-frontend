@@ -6,6 +6,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfiedRounded';
 import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
+import io from 'socket.io-client';
+
+const socket = io(process.env.REACT_APP_API_URL);
 
 const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
@@ -46,8 +49,20 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   }, [post._id, userId, authToken]);
 
   useEffect(() => {
-    if (open) fetchChatHistory();
-  }, [open, fetchChatHistory]);
+    if (open) {
+      fetchChatHistory();
+      const room = `${post._id}_${userId}`;
+      socket.emit('joinRoom', room);
+
+      socket.on('receiveMessage', (newMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      });
+    }
+
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, [open, fetchChatHistory, post._id, userId]);
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -77,9 +92,13 @@ const ChatDialog = ({ open, onClose, post, user }) => {
     }});
 
       if (response) {
+        const newMessage = { senderId: userId, text: message, createdAt: new Date() };
+        const room = `${post._id}_${userId}`;
+        socket.emit('sendMessage', { room, message: newMessage });
+
         setMessage('');
         console.log("Message sent");
-        fetchChatHistory(); // Refresh chat history
+        // fetchChatHistory(); // Refresh chat history
         setTimeout(() => inputRef.current?.focus(), 50); // Keeps keyboard open
       }
     } catch (error) {
@@ -158,7 +177,7 @@ const ChatDialog = ({ open, onClose, post, user }) => {
               }}>
                 <Typography variant="body1">{msg.text}</Typography>
                 <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5 }}>
-                  {new Date(msg.createdAt).toLocaleTimeString()}
+                  {new Date(msg.createdAt).toLocaleString()}
                 </Typography>
               </Box>
             </Box>

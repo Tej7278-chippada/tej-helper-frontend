@@ -1,13 +1,16 @@
 // src/components/ChatHistory.js
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 import Picker from 'emoji-picker-react';
 import axios from 'axios';
 // import { useParams } from 'react-router-dom';
+import io from 'socket.io-client';
 
-const ChatHistory = ({ open, onClose, post, user, chatData, postId }) => {
+const socket = io(process.env.REACT_APP_API_URL);
+
+const ChatHistory = ({ chatData, postId }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
     const userId = localStorage.getItem('userId');
@@ -19,14 +22,10 @@ const ChatHistory = ({ open, onClose, post, user, chatData, postId }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 const bottomRef = useRef(null); // Reference to the last transaction
 
-  // useEffect(() => {
-  //   // if (open) {
-  //     // Fetch chat history when the dialog opens
-  //     fetchChatHistory();
-  //   // }
-  // });
+  
 
-  const fetchChatHistory = async () => {
+  const fetchChatHistory = useCallback(async () => {
+    if (!chatData.id || !postId) return;
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chats?postId=${postId}&buyerId=${chatData.id}`, {headers: {
         Authorization: `Bearer ${authToken}`,
@@ -36,7 +35,23 @@ const bottomRef = useRef(null); // Reference to the last transaction
     } catch (error) {
       console.error('Error fetching chat history:', error);
     }
-  };
+  }, [authToken, chatData.id, postId]);
+
+  useEffect(() => {
+    if (postId && chatData.id) {
+      fetchChatHistory();
+      const room = `${postId}_${chatData.id}`;
+      socket.emit('joinRoom', room);
+
+      socket.on('receiveMessage', (newMessage) => {
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+      });
+    }
+
+    return () => {
+      socket.off('receiveMessage');
+    };
+  }, [chatData.id, fetchChatHistory, postId]);
 
   const handleSendMessage = async () => {
     if (message.trim() === '') return;
@@ -55,9 +70,13 @@ const bottomRef = useRef(null); // Reference to the last transaction
     }});
 
       if (response) {
+        const newMessage = { senderId: userId, text: message, createdAt: new Date() };
+        const room = `${postId}_${chatData.id}`;
+        socket.emit('sendMessage', { room, message: newMessage });
+
         setMessage('');
         console.log("Message sent");
-        fetchChatHistory(); // Refresh chat history
+        // fetchChatHistory(); // Refresh chat history
       }
     } catch (error) {
       console.error('Error sending message:', error);
@@ -174,9 +193,9 @@ const bottomRef = useRef(null); // Reference to the last transaction
               <Typography variant="h5">
                 {chatData.username}
               </Typography>
-              <Typography>Chat History{postId}</Typography>
+              {/* <Typography>Chat History{postId}</Typography>
               <Typography>BuyerId {chatData.id}</Typography>
-              <Typography>SellerId {userId}</Typography> 
+              <Typography>SellerId {userId}</Typography>  */}
             </Box>
           </Box> 
         {/* ) : null} */}
@@ -209,7 +228,7 @@ const bottomRef = useRef(null); // Reference to the last transaction
               }}>
                 <Typography variant="body1">{msg.text}</Typography>
                 <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
-                  {new Date(msg.createdAt).toLocaleTimeString()}
+                  {new Date(msg.createdAt).toLocaleString()}
                 </Typography>
               </Box>
             </Box>
