@@ -92,9 +92,19 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
           label="Add a comment"
           fullWidth
           multiline
-          rows={3} style={{ marginTop: '1rem' }}
+          rows={3}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
+          sx={{ 
+            marginTop: '1rem',
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '10px',
+              bgcolor: theme.palette.background.paper,
+            },
+            '& .MuiInputBase-input': {
+              padding: '0px 0px', scrollbarWidth: 'thin'
+            },
+          }}
         />
         {/* Align Submit button to the right */}
         <Box
@@ -118,14 +128,37 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
           <Button
             onClick={handleAddComment}
             variant="contained"
-            color="primary" style={{ width: '150px' }}
+            color="primary" 
+            // style={{ width: '150px' }}
             disabled={loading}
           >
             {loading ? <CircularProgress size={24} /> : 'Submit'}
           </Button>
         </Box>
         {/* Display list of comments */}
-        <div style={{ height: isMobile ? 'auto' : '300px', overflowY: 'auto', margin: '1rem 0', scrollbarWidth: 'thin', marginInline: '-20px' }}>
+        <Box bgcolor="#f5f5f5" sx={{ height: isMobile ? '500px' : '300px', overflowY: 'auto', margin: '1rem 0', marginInline: '-10px', borderRadius:'8px',
+          // Custom scrollbar styles
+          scrollbarWidth: 'thin', // Firefox
+          scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
+          "&::-webkit-scrollbar": {
+            width: "8px", // Thin scrollbar
+            height: "8px", // If horizontal scroll exists
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent", // Track color
+          },
+          "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "#aaa", // Thumb color
+            borderRadius: "4px", background: "#aaa", // Scrollbar thumb color
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#888", // Darker on hover
+            background: "#888", // Darker on hover
+          },
+          "&::-webkit-scrollbar-button": {
+            display: 'none', // Remove scrollbar arrows
+          },
+        }}>
           {comments && comments.length ? (
             comments.map((comment, index) => (
               <Typography
@@ -152,9 +185,9 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
               </Typography>
             ))
           ) : (
-            <Typography>No comments available.</Typography>
+            <Typography color='grey' textAlign="center" sx={{ m: 2 }}>No comments available.</Typography>
           )}
-        </div>
+        </Box>
 
       </DialogContent>
     </Dialog>

@@ -238,7 +238,7 @@ function RouteMapDialog({ open, onClose, post }) {
               />
               <Marker position={[post.location.latitude, post.location.longitude]} icon={customIcon}
               >
-                <Popup>User Location</Popup>
+                <Popup>Post Location</Popup>
               </Marker>
               {currentLocation && (
                 <Marker position={[currentLocation.lat, currentLocation.lng]} icon={userLocationIcon}>

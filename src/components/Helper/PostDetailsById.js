@@ -355,7 +355,7 @@ function PostDetailsById({ onClose, user }) {
               // height: '73vh', // Fixed height relative to viewport
               overflowY: 'auto',
               // bgcolor: 'transparent', // Card background color (customizable)
-              borderRadius: 3, // Card border radius (customizable)
+              borderRadius: isMobile ? '10px' : '12px', // Card border radius (customizable)
               // boxShadow: 3, // Shadow for a modern look
               scrollbarWidth: 'thin'
             }}>
@@ -373,7 +373,7 @@ function PostDetailsById({ onClose, user }) {
                     scrollbarWidth: 'none',
                     scrollbarColor: '#888 transparent',
                     // borderRadius: '8px',
-                    gap: '0.2rem', height: '300px',
+                    gap: isMobile ? '3px' : '4px', height: isMobile ? '250px' : '300px',
                   }}>
                     {post.media && post.media.length > 0 ? (
                       post.media.map((base64Image, index) => (
@@ -383,7 +383,7 @@ function PostDetailsById({ onClose, user }) {
                           alt={`Post ${index}`}
                           style={{
                             // height: '200px',
-                            borderRadius: '8px',
+                            borderRadius: '6px',
                             objectFit: 'cover',
                             flexShrink: 0,
                             cursor: 'pointer' // Make the image look clickable
@@ -468,7 +468,7 @@ function PostDetailsById({ onClose, user }) {
                         </span>
                       </Tooltip>
                     </IconButton>
-                    <Typography variant="h4" style={{
+                    <Typography variant="h5" style={{
                       fontWeight: 'bold',
                       marginBottom: '0.5rem',
                       color: '#333'
