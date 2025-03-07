@@ -6,6 +6,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfiedRounded';
 import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
+import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import io from 'socket.io-client';
 
 const socket = io(process.env.REACT_APP_API_URL);
@@ -63,6 +64,12 @@ const ChatDialog = ({ open, onClose, post, user }) => {
       socket.off('receiveMessage');
     };
   }, [open, fetchChatHistory, post._id, userId]);
+
+  const scrollToBottom = () => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -160,8 +167,8 @@ const ChatDialog = ({ open, onClose, post, user }) => {
             <CloseIcon />
         </IconButton>
       </DialogTitle>
-    <DialogContent sx={{padding: 0, scrollbarWidth:'thin' }}>
-        <Box sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}}>
+    <DialogContent sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'f5f5f5' }}>
+        <Box bgcolor="#f5f5f5"  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}}>
           {messages.length > 0 ? (
           messages.map((msg, index) => (
             <Box key={index} sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1 }}
@@ -187,6 +194,27 @@ const ChatDialog = ({ open, onClose, post, user }) => {
           <Typography color='grey' textAlign="center" sx={{ mt: 2 }}>Start chat</Typography>
         )}
         </Box>
+        <IconButton
+          style={{
+            position: 'absolute',
+            bottom: isMobile ? '80px' : '95px',
+            right: isMobile ? '4px' : '12px',
+            // padding: '6px 4px',
+            borderRadius: '24px',
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4px', // Reduce padding to shrink button size
+            width:isMobile ? '30px' : '25px', // Set smaller width
+            height: isMobile ? '35px' : '30px', // Set smaller height
+            color: '#1a73e8', // Google Blue style
+          }}
+          // onClick={handleAddTransaction}
+          onClick={scrollToBottom}
+          onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus when selecting emoji
+        >
+          <KeyboardDoubleArrowDownRoundedIcon style={{ fontSize: '14px' }}/>
+        </IconButton>
 
         
         

@@ -1,26 +1,35 @@
 // src/components/ChatHistory.js
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
-import Picker from 'emoji-picker-react';
+import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
+import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, LinearProgress } from '@mui/material';
+// import SendIcon from '@mui/icons-material/Send';
+// import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
+// import Picker from 'emoji-picker-react';
 import axios from 'axios';
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
+import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfiedRounded';
+import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
 // import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
+const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
+
 const ChatHistory = ({ chatData, postId }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
-    const userId = localStorage.getItem('userId');
-    const authToken = localStorage.getItem('authToken');
+  const userId = localStorage.getItem('userId');
+  const authToken = localStorage.getItem('authToken');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-const bottomRef = useRef(null); // Reference to the last transaction
+  const bottomRef = useRef(null); // Reference to the last transaction
+  const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
+  const inputRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+
 
   
 
@@ -56,6 +65,8 @@ const bottomRef = useRef(null); // Reference to the last transaction
   const handleSendMessage = async () => {
     if (message.trim() === '') return;
 
+    setLoading(true);
+
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/sendMessage`, {
         // method: 'POST',
@@ -77,16 +88,19 @@ const bottomRef = useRef(null); // Reference to the last transaction
         setMessage('');
         console.log("Message sent");
         // fetchChatHistory(); // Refresh chat history
+        setTimeout(() => inputRef.current?.focus(), 50); // Keeps keyboard open
       }
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
+      setLoading(false); 
     }
   };
 
-  const onEmojiClick = (event, emojiObject) => {
-    setMessage(prevMessage => prevMessage + emojiObject.emoji);
-    setShowEmojiPicker(false);
-  };
+  // const onEmojiClick = (event, emojiObject) => {
+  //   setMessage(prevMessage => prevMessage + emojiObject.emoji);
+  //   setShowEmojiPicker(false);
+  // };
 
   useEffect(() => {
     // Instantly scroll to the latest transaction without animation
@@ -94,6 +108,34 @@ const bottomRef = useRef(null); // Reference to the last transaction
       bottomRef.current.scrollIntoView({ behavior: 'auto' });
     }
   }, [messages.length]); // Runs every time transactions update
+
+  // Insert emoji at cursor position
+  const onEmojiClick = (emojiObject) => {
+    if (!inputRef.current) return;
+  
+    // Ensure cursor position is updated before inserting the emoji
+    const cursorPosition = inputRef.current.selectionStart || message.length;
+    const textBeforeCursor = message.substring(0, cursorPosition);
+    const textAfterCursor = message.substring(cursorPosition);
+  
+    // Insert emoji at the correct position
+    // const newMessage = textBeforeCursor + emojiObject.emoji + textAfterCursor;
+    setMessage(textBeforeCursor + emojiObject.emoji + textAfterCursor);
+    // setShowEmojiPicker(false);
+  
+    // Move cursor to the correct position after the emoji
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.selectionStart = inputRef.current.selectionEnd = cursorPosition + emojiObject.emoji.length;
+        // inputRef.current.focus(); // ✅ Keep keyboard open
+      }
+    }, 50);
+  };
+
+  const handleEmojiToggle = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+    if (!isPickerLoaded) setIsPickerLoaded(true); // Mark as loaded once opened
+  };
 
   
 
@@ -240,6 +282,7 @@ const bottomRef = useRef(null); // Reference to the last transaction
         )}
         {/* </Box> */}
       </Box>
+      
     </Box>
     
     <Box position="sticky"
@@ -268,24 +311,68 @@ const bottomRef = useRef(null); // Reference to the last transaction
                   marginTop: '1rem',
                 }}> */}
                   <Box  sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
-                    <IconButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+                    {/* <IconButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                       <EmojiEmotionsIcon />
+                    </IconButton> */}
+                    <IconButton 
+                      onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
+                      onClick={handleEmojiToggle}>
+                      {showEmojiPicker ? <EmojiEmotionsRoundedIcon /> : <SentimentSatisfiedRoundedIcon />}
                     </IconButton>
-                    {showEmojiPicker && (
+                    {/* {showEmojiPicker && (
                       <Box sx={{ position: 'absolute', bottom: 60, left: 20 }}>
                         <Picker onEmojiClick={onEmojiClick} />
+                      </Box>
+                    )} */}
+                    {/* Lazy Loaded Emoji Picker */}
+                    {showEmojiPicker && (
+                      <Box sx={{ position: 'absolute', bottom: 70, left: 10, zIndex: 10, backgroundColor: '#fff',
+                        borderRadius: '12px',
+                        boxShadow: 3,
+                        overflow: 'hidden' }}
+                        onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus when selecting emoji
+                        >
+                        <Suspense fallback={<Box sx={{ p: 2, textAlign: "center" }}><CircularProgress size={24} /></Box>}>
+                            {isPickerLoaded && (
+                            <Picker onEmojiClick={(emoji) => onEmojiClick(emoji)} 
+                                width={isMobile ? 300 : 350} height={isMobile ? 350 : 400} 
+                                previewConfig={{ showPreview: false }} 
+                                searchDisabled={true} 
+                            />
+                            )}
+                        </Suspense>
                       </Box>
                     )}
                     <TextField
                       fullWidth
+                      inputRef={inputRef}
                       variant="outlined"
                       placeholder="Type a message..."
+                      multiline
                       value={message}
+                      minRows={1}
+                      maxRows={3} 
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '20px',
+                          bgcolor: theme.palette.background.paper,
+                        },
+                        '& .MuiInputBase-input': {
+                          padding: '0px 0px', scrollbarWidth: 'thin'
+                        },
+                      }}
                     />
-                    <IconButton color="primary" onClick={handleSendMessage}>
+                    {/* <IconButton color="primary" onClick={handleSendMessage}>
                       <SendIcon />
+                    </IconButton> */}
+                    <IconButton color="primary" 
+                      onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
+                      onClick={handleSendMessage}
+                      disabled={loading || message.trim() === ''}
+                      >
+                      {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon />} 
                     </IconButton>
                   </Box>
                 {/* </Toolbar> */}

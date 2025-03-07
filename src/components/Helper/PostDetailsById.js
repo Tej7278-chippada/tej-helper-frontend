@@ -1,6 +1,6 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button } from '@mui/material';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button, styled } from '@mui/material';
 import { ThumbUp, Comment } from '@mui/icons-material';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
@@ -22,6 +22,23 @@ import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import RouteMapDialog from './RouteMapDialog';
 import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
 import ChatDialog from '../Chat/ChatDialog';
+import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
+
+const CustomTooltip = styled(({ className, ...props }) => (
+  <Tooltip {...props} arrow classes={{ popper: className }} />
+  ))(({ theme }) => ({
+    [`& .MuiTooltip-tooltip`]: {
+      backgroundColor: "#2e3b55", // Custom background color
+      color: "#ffffff", // Custom text color
+      fontSize: "14px",
+      padding: "10px",
+      borderRadius: "12px",
+      boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
+    },
+    [`& .MuiTooltip-arrow`]: {
+      color: "#2e3b55", // Arrow color matching the tooltip background
+    },
+}));
 
 
 function PostDetailsById({ onClose, user }) {
@@ -303,7 +320,7 @@ function PostDetailsById({ onClose, user }) {
   const shareLocation = () => {
     const url = `https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`;
     navigator.clipboard.writeText(url).then(() => {
-      setSuccessMessage('Location link copied to clipboard.');
+      setSuccessMessage('Post location link copied.');
     });
   };
   
@@ -415,9 +432,9 @@ function PostDetailsById({ onClose, user }) {
                       }}
                       onClick={() => handleShare(post._id, post.title)}
                     >
-                      <Tooltip title="Share this product" arrow placement="right">
+                      <CustomTooltip  title="Share this post" arrow placement="right">
                         <ShareIcon />
-                      </Tooltip>
+                      </CustomTooltip >
                     </IconButton>
                     <IconButton
                       style={{ display: 'inline-block', float: 'right', fontWeight: '500', backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
@@ -510,17 +527,17 @@ function PostDetailsById({ onClose, user }) {
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={6} sm={4}>
+                  {/* <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       IP address: 
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {post.ip}
                     </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Latitude Longitude: 
+                  </Grid> */}
+                  <Grid item xs={12} sm={12}>
+                    <Typography variant="body2" color='grey' style={{ fontWeight: 500 }}>
+                      See post location on other maps by searching this post location link on google
                       <IconButton
                         style={{
                           // display: 'inline-block',
@@ -531,14 +548,14 @@ function PostDetailsById({ onClose, user }) {
                         }}
                         onClick={shareLocation}
                       >
-                      <Tooltip title="Share Post location" arrow placement="right">
-                        <ShareIcon />
-                      </Tooltip>
+                      <CustomTooltip  title="Copy Post location" arrow placement="top">
+                        <LinkRoundedIcon />
+                      </CustomTooltip >
                     </IconButton>
                     </Typography>
-                    <Typography variant="body2" color="textSecondary" onClick={shareLocation} sx={{cursor:'pointer'}}>
+                    {/* <Typography variant="body2" color="textSecondary" onClick={shareLocation} sx={{cursor:'pointer'}}>
                       {post.location.latitude}, {post.location.longitude}
-                    </Typography>
+                    </Typography> */}
                   </Grid>
                 </Grid>
               </Box>
@@ -684,7 +701,7 @@ function PostDetailsById({ onClose, user }) {
         onClose={() => setSuccessMessage('')}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity="success" onClose={() => setSuccessMessage('')}>
+        <Alert severity="success" onClose={() => setSuccessMessage('')} sx={{ width: '100%', borderRadius:'1rem' }}>
           {successMessage}
         </Alert>
       </Snackbar>
