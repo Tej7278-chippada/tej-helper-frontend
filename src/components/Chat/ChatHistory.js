@@ -10,6 +10,7 @@ import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfie
 import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
 // import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
+import ChatsSkeleton from './ChatsSkeleton';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -29,12 +30,14 @@ const ChatHistory = ({ chatData, postId }) => {
   const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
   const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
 
   
 
   const fetchChatHistory = useCallback(async () => {
     if (!chatData.id || !postId) return;
+    setIsFetching(true);
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chats?postId=${postId}&buyerId=${chatData.id}`, {headers: {
         Authorization: `Bearer ${authToken}`,
@@ -43,6 +46,8 @@ const ChatHistory = ({ chatData, postId }) => {
       setMessages(data.messages || []);
     } catch (error) {
       console.error('Error fetching chat history:', error);
+    } finally {
+      setIsFetching(false);
     }
   }, [authToken, chatData.id, postId]);
 
@@ -247,6 +252,7 @@ const ChatHistory = ({ chatData, postId }) => {
       sx={{
       overflowY: 'auto',
       padding: '0px', scrollbarWidth:'thin', 
+      scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
     }}>
       <Box mb={0} sx={{ scrollbarWidth: 'thin' }}>
       {/* <GroupTransHistory transactions={filteredTransactions  || []} loggedInUserId={loggedInUserId}
@@ -256,7 +262,12 @@ const ChatHistory = ({ chatData, postId }) => {
         isSearchOpen={isSearchOpen}
       /> */}
       {/* <Box sx={{ overflowY: 'auto', m: 1 , scrollbarWidth:'thin', marginBottom:'6rem'}}> */}
-          {messages.length > 0 ? (
+        {isFetching ? (
+            // <Typography textAlign="center">Loading...</Typography>
+          <Box sx={{ margin: '10px', textAlign: 'center' }}>
+            <ChatsSkeleton/>
+          </Box>
+          ) : messages.length > 0 ? (
           messages.map((msg, index) => (
             <Box key={index} sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1 }}
             ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last transaction
@@ -268,7 +279,13 @@ const ChatHistory = ({ chatData, postId }) => {
                 borderRadius: 2,
                 maxWidth: '70%',
               }}>
-                <Typography variant="body1">{msg.text}</Typography>
+                {/* <Typography variant="body1">{msg.text}</Typography> */}
+                <Typography variant="body1" noWrap sx={{ 
+                    whiteSpace: "pre-wrap", // Retain line breaks and tabs
+                    wordWrap: "break-word",
+                  }}>
+                    {msg.text}
+                  </Typography>
                 <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
                   {new Date(msg.createdAt).toLocaleString()}
                 </Typography>

@@ -186,8 +186,9 @@ const ChatsOfPosts = () => {
                           alt={chat.username}
                           sx={{ width: 50, height: 50, marginInline: 1 }}
                         />
-                        <Typography variant="h6" m="1rem">
-                          {chat.username}{chat.id}
+                        <Typography variant="h6" m="1rem" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis',}}>
+                          {chat.username}
+                          {/* {chat.id} */}
                         </Typography>
                       </Box>
                     ))

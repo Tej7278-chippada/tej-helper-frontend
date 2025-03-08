@@ -130,6 +130,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
             variant="contained"
             color="primary" 
             // style={{ width: '150px' }}
+            sx={{borderRadius:2}}
             disabled={loading}
           >
             {loading ? <CircularProgress size={24} /> : 'Submit'}

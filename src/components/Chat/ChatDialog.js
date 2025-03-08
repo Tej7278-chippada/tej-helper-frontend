@@ -8,6 +8,7 @@ import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfie
 import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
 import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import io from 'socket.io-client';
+import ChatsSkeleton from './ChatsSkeleton';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -24,9 +25,10 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const bottomRef = useRef(null); // Reference to the last transaction
   const inputRef = useRef(null);
-  const prevMessagesLength = useRef(0);
+  // const prevMessagesLength = useRef(0);
   const [loading, setLoading] = useState(false);
   const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
+  const [isFetching, setIsFetching] = useState(true);
 
 
 //   useEffect(() => {
@@ -38,14 +40,18 @@ const ChatDialog = ({ open, onClose, post, user }) => {
 
   const fetchChatHistory = useCallback(async () => {
     if (!post._id || !userId) return;
+    setIsFetching(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chats?postId=${post._id}&buyerId=${userId}`, {headers: {
-        Authorization: `Bearer ${authToken}`,
-    }});
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chats?postId=${post._id}&buyerId=${userId}`, {
+        // params: { postId: post._id, buyerId: userId },
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
       const data = await response.json();
       setMessages(data.messages || []);
     } catch (error) {
       console.error('Error fetching chat history:', error);
+    } finally {
+      setIsFetching(false);
     }
   }, [post._id, userId, authToken]);
 
@@ -73,10 +79,10 @@ const ChatDialog = ({ open, onClose, post, user }) => {
 
   // Scroll to bottom on new message
   useEffect(() => {
-    if (messages.length > prevMessagesLength.current) {
+    // if (messages.length > prevMessagesLength.current) {
       bottomRef.current?.scrollIntoView({ behavior:'auto' });
-    }
-    prevMessagesLength.current = messages.length;
+    // }
+    // prevMessagesLength.current = messages.length;
   }, [messages]);
 
   const handleSendMessage = async () => {
@@ -167,9 +173,16 @@ const ChatDialog = ({ open, onClose, post, user }) => {
             <CloseIcon />
         </IconButton>
       </DialogTitle>
-    <DialogContent sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'f5f5f5' }}>
-        <Box bgcolor="#f5f5f5"  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}}>
-          {messages.length > 0 ? (
+    <DialogContent sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'#f5f5f5',
+      scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
+     }}>
+        <Box  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}}>
+        {isFetching ? (
+            // <Typography textAlign="center">Loading...</Typography>
+            <Box sx={{ margin: '0rem', textAlign: 'center' }}>
+              <ChatsSkeleton/>
+            </Box>
+          ) : messages.length > 0 ? (
           messages.map((msg, index) => (
             <Box key={index} sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1 }}
               ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last transaction
@@ -191,7 +204,7 @@ const ChatDialog = ({ open, onClose, post, user }) => {
           ))
         ) : 
         (
-          <Typography color='grey' textAlign="center" sx={{ mt: 2 }}>Start chat</Typography>
+          <Typography color='grey' textAlign="center" sx={{ m: 2 }}>Start chat</Typography>
         )}
         </Box>
         <IconButton
