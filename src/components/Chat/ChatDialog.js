@@ -58,7 +58,7 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   useEffect(() => {
     if (open) {
       fetchChatHistory();
-      const room = `${post._id}_${userId}`;
+      const room = `${post._id}_${userId}`; // Ensure unique room name
       socket.emit('joinRoom', room);
 
       socket.on('receiveMessage', (newMessage) => {
@@ -68,6 +68,8 @@ const ChatDialog = ({ open, onClose, post, user }) => {
 
     return () => {
       socket.off('receiveMessage');
+      const room = `${post._id}_${userId}`; // Ensure unique room name
+      socket.emit('leaveRoom', room);
     };
   }, [open, fetchChatHistory, post._id, userId]);
 

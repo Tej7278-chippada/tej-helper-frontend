@@ -54,7 +54,7 @@ const ChatHistory = ({ chatData, postId }) => {
   useEffect(() => {
     if (postId && chatData.id) {
       fetchChatHistory();
-      const room = `${postId}_${chatData.id}`;
+      const room = `${postId}_${chatData.id}`; // Ensure unique room name
       socket.emit('joinRoom', room);
 
       socket.on('receiveMessage', (newMessage) => {
@@ -63,6 +63,8 @@ const ChatHistory = ({ chatData, postId }) => {
     }
 
     return () => {
+      const room = `${postId}_${chatData.id}`; // Ensure unique room name
+      socket.emit('leaveRoom', room);
       socket.off('receiveMessage');
     };
   }, [chatData.id, fetchChatHistory, postId]);
