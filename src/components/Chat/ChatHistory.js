@@ -218,21 +218,29 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
     {/* </Box>
     </Box> */}
     
-    <Box p={isMobile ? '0px' : 0} position="relative" sx={{scrollbarWidth:'none'}}>
+    <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
     <Box
-      position="sticky" //fixed
-      top={0}
-      left={0}
-      right={0}
-      zIndex={10}
       sx={{
-        bgcolor: 'white', // Background color to ensure visibility
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Optional shadow for separation
-        padding: '18px 16px', // Padding for a clean look
-        scrollbarWidth:'none'
+        position: 'sticky',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        bgcolor: 'white',
+        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+        padding: isMobile ? '10px' : '10px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
       }}
     >
-      <Box display="flex" justifyContent="space-between" alignItems="center" sx={{scrollbarWidth:'none', margin: -1}}>
+      {/* <Box display="flex" justifyContent="space-between" alignItems="center" sx={{scrollbarWidth:'none', margin: -1}}> */}
         {/* {!isMobile ? ( */}
           <Box display="flex" alignItems="center">
             <Avatar
@@ -266,7 +274,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
             </Box>
           )}
         {/* ) : null} */}
-      </Box>
+      {/* </Box> */}
     </Box>
     <Box height={isMobile ? 'calc(82vh - 64px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
       sx={{
@@ -274,7 +282,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
       padding: '0px', scrollbarWidth:'thin', 
       scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
     }}>
-      <Box mb={0} sx={{ scrollbarWidth: 'thin' }}>
+      {/* <Box mb={0} sx={{ scrollbarWidth: 'thin' }}> */}
       {/* <GroupTransHistory transactions={filteredTransactions  || []} loggedInUserId={loggedInUserId}
         socket={socket} // Pass the socket instance
         groupId={groupId} // Pass the groupId
@@ -319,12 +327,13 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
         )}
         {/* </Box> */}
         
-      </Box>
+      {/* </Box> */}
       <IconButton
           style={{
-            position: 'absolute',
-            bottom: isMobile ? '80px' : '135px',
-            right: isMobile ? '4px' : '12px',
+            position: 'sticky',
+            bottom: isMobile ? '30px' : '35px',
+            left : '100%',
+            // left: isMobile ? '4px' : '12px',
             // padding: '6px 4px',
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
@@ -344,18 +353,16 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
       
     </Box>
     
-    <Box position="sticky"
-      bottom={0}
-      left={0}
-      right={0}
-      zIndex={10}
-      sx={{
-        bgcolor: 'white', // Background color to ensure visibility
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Optional shadow for separation
-        // padding: '30px 16px', // Padding for a clean look
-        padding:'10px',
-        // scrollbarWidth:'thin'
-      }}
+    <Box sx={{
+          position: 'sticky',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          bgcolor: 'white',
+          boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
+          padding: '10px',  display: 'flex', alignItems: 'center', gap: 1
+        }}
       >
                 {/* <Toolbar sx={{
                   position: 'absolute',
@@ -369,7 +376,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                   justifyContent: 'space-between',
                   marginTop: '1rem',
                 }}> */}
-                  <Box  sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                  {/* <Box  sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}> */}
                     {/* <IconButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
                       <EmojiEmotionsIcon />
                     </IconButton> */}
@@ -410,7 +417,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                       multiline
                       value={message}
                       minRows={1}
-                      maxRows={2} 
+                      maxRows={isMobile ? 2 : 1} 
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       sx={{ 
@@ -435,7 +442,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                     </IconButton>
                   </Box>
                 {/* </Toolbar> */}
-              </Box>
+              {/* </Box> */}
   </Box>
   </>
   );
