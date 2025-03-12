@@ -268,7 +268,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
         {/* ) : null} */}
       </Box>
     </Box>
-    <Box height={isMobile ? 'calc(80vh - 64px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
+    <Box height={isMobile ? 'calc(82vh - 64px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
       sx={{
       overflowY: 'auto',
       padding: '0px', scrollbarWidth:'thin', 

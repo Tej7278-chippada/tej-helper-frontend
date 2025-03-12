@@ -89,7 +89,7 @@ const ChatsOfPosts = () => {
             scrollbarWidth: 'none'
           }}>
 
-            <Box height={isMobile ? "77vh" : "auto"} sx={{ padding: '0px' }}>
+            <Box height={isMobile ? "85vh" : "auto"} sx={{ padding: '0px' }}>
               <Box
                 position="sticky" //fixed
                 top={0}
@@ -115,10 +115,11 @@ const ChatsOfPosts = () => {
               </Box>
               <Box bgcolor="#f5f5f5"
                 // mt="64px" // Matches the approximate height of the fixed header
-                height="calc(80vh - 64px)" // Adjust the height of the scrollable area
+                // height="calc(80vh - 64px)" // Adjust the height of the scrollable area
                 sx={{
                   overflowY: 'auto',
-                  paddingInline: isMobile ? '4px' : '6px', scrollbarWidth: 'none'
+                  paddingInline: isMobile ? '4px' : '6px', scrollbarWidth: 'none',
+                  height: isMobile ? 'calc(88vh - 64px)' : 'calc(83vh - 64px)',
                 }}
               >
                 <Box style={{ paddingTop: '8px', paddingBottom: '1rem' }}>
