@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
-import React, { useEffect, useState } from 'react';
-import {Box, Button, Card, CardContent, CardMedia, Grid, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -12,6 +12,15 @@ import { useTheme } from '@emotion/react';
 import { fetchPosts } from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import FilterPosts from './FilterPosts';
+import CloseIcon from '@mui/icons-material/Close'
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+// import RefreshIcon from '@mui/icons-material/Refresh';
+import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
+import MapRoundedIcon from '@mui/icons-material/MapRounded';
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -27,6 +36,20 @@ const Helper = ()=> {
     gender: '',
     postStatus: '',
     priceRange: [0, 10000],
+  });
+  const [userLocation, setUserLocation] = useState(null);
+  const [currentAddress, setCurrentAddress] = useState('');
+  const [distanceRange, setDistanceRange] = useState(10); // Default distance range in km
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const mapRef = useRef(null);
+  const [mapMode, setMapMode] = useState('normal');
+
+  // Custom marker icon
+  const userLocationIcon = new L.Icon({
+    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+    iconSize: [30, 30],
   });
 
   // Fetch posts data
@@ -47,6 +70,125 @@ const Helper = ()=> {
     };
     fetchData();
   }, []);
+
+  // Get user's current location
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+          fetchAddress(latitude, longitude);
+        },
+        (error) => {
+          console.error("Error fetching location:", error);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by this browser.");
+    }
+  }, []);
+
+  // Fetch address from latitude and longitude
+  const fetchAddress = async (lat, lng) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await response.json();
+      setCurrentAddress(data.display_name);
+    } catch (error) {
+      console.error("Error fetching address:", error);
+    }
+  };
+
+  // Refresh user's current location
+  // const refreshLocation = () => {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         setUserLocation({ latitude, longitude });
+  //         fetchAddress(latitude, longitude);
+  //       },
+  //       (error) => {
+  //         console.error("Error fetching location:", error);
+  //       }
+  //     );
+  //   }
+  // };
+
+  // Handle opening and closing the distance range menu
+  const handleDistanceMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleDistanceMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  // Handle distance range change
+  const handleDistanceRangeChange = (range) => {
+    setDistanceRange(range);
+    handleDistanceMenuClose();
+  };
+
+  // Calculate distance between two coordinates using Haversine formula
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
+
+  // Filter posts based on distance range
+  useEffect(() => {
+    if (userLocation && posts.length > 0) {
+      const filtered = posts.filter((post) => {
+        if (post.location && post.location.latitude && post.location.longitude) {
+          const distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            post.location.latitude,
+            post.location.longitude
+          );
+          return distance <= distanceRange;
+        }
+        return false;
+      });
+      setFilteredPosts(filtered);
+    }
+  }, [userLocation, posts, distanceRange]);
+
+  // Fetch user's location and address
+  const fetchUserLocation = useCallback(() => {
+    setLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+          fetchAddress(latitude, longitude);
+          setLoadingLocation(false);
+        },
+        (error) => {
+          console.error('Error fetching location:', error);
+          setLoadingLocation(false);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+      setLoadingLocation(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUserLocation();
+  }, [fetchUserLocation]);
+
 
   const openPostDetail = (post) => {
     // setSelectedProduct(product);
@@ -74,10 +216,150 @@ const Helper = ()=> {
   return (
     <Layout username={tokenUsername}>
       <Box>
-      <Toolbar > 
-          <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
+      <Toolbar sx={{display:'flex', justifyContent:'space-between'}}> 
+          {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
-          </Typography>
+          </Typography> */}
+          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '1rem', marginLeft: '-1rem'}}>
+          <IconButton color="primary" onClick={() => setShowMap(true)} >
+            <LocationOnIcon />
+            <Typography variant="body1" sx={{marginLeft:'8px' }}>
+              {/* {currentAddress || "Fetching location..."} */}
+              {(currentAddress.split(" ").length > 2 ? `${currentAddress.split(" ").slice(0, 2).join(" ")}...` : currentAddress) || "Fetching location..."}
+            </Typography>
+          </IconButton>
+          </Box>
+          <Box>
+          {/* <IconButton color="primary" onClick={() => setShowMap(true)}>
+            <LocationOnIcon />
+            <Typography variant="body1" sx={{marginLeft:'8px' }}>
+              {currentAddress || "Fetching location..."}
+              {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."}
+            </Typography>
+          </IconButton> */}
+          {/* <IconButton color="primary">
+            <RefreshIcon onClick={refreshLocation} />
+          </IconButton> */}
+          {/* Floating Map Card */}
+          {showMap && (
+            <Card
+              sx={{
+                position: 'fixed',
+                top: '10%',
+                left: '5%',
+                width: '90%',
+                maxWidth: '400px',
+                zIndex: 1000,
+                borderRadius: '10px',
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                backgroundColor: '#fff',
+              }}
+            >
+              <CardContent>
+                {/* Close Button */}
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Typography variant="h6">Your Location</Typography>
+                  <IconButton onClick={() => setShowMap(false)}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+                <Box display="flex" justifyContent="start" mb={2} mt={1}>
+                <LocationOnIcon color='primary'/>
+                <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
+                  {currentAddress || "Fetching location..."}
+                  {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
+                </Typography>
+                </Box>
+
+                {/* Map */}
+                <Box sx={{ height: '300px', borderRadius: '8px', overflow: 'hidden' }}>
+                  <MapContainer
+                    center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
+                    zoom={13}
+                    style={{ height: '100%', width: '100%' }}
+                    attributionControl={false}
+                    ref={mapRef}
+                  >
+                    <TileLayer
+                      url={mapMode === 'normal'
+                        ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                        : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                    />
+                    {userLocation && (
+                      <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userLocationIcon}>
+                        <Popup>Your Current Location</Popup>
+                      </Marker>
+                    )}
+                  </MapContainer>
+                </Box>
+
+                {/* Locate Me Button */}
+                <Box display="flex" justifyContent="space-between" marginTop="1rem">
+                <IconButton
+                    style={{
+                      // display: 'inline-block',
+                      // float: 'right',
+                      fontWeight: '500', width: '60px', borderRadius: '10px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
+                    }}
+                    onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                  >
+                    <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
+                      <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
+                    </Tooltip>
+                  </IconButton>
+                  <IconButton
+                    onClick={fetchUserLocation}
+                    disabled={loadingLocation}
+                    sx={{
+                      width: '60px', borderRadius: '10px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px',
+                      height: '50px',
+                    }}
+                  >
+                    <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'}>
+                      {loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}
+                    </Tooltip>
+                  </IconButton>
+                </Box>
+              </CardContent>
+            </Card>
+          )}
+          </Box>
+          <Box sx={{display:'flex', justifyContent:'space-between'}}>
+          <Button
+            variant="contained"
+            onClick={handleDistanceMenuOpen}
+            sx={{
+              backgroundColor: '#1976d2',
+              color: '#fff',
+              padding: '8px 16px',
+              borderRadius: '24px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+              '&:hover': {
+                backgroundColor: '#1565c0',
+              },
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginRight: '10px'
+            }}
+          >
+            {distanceRange} km
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleDistanceMenuClose}
+          >
+            {[10, 20, 30, 50, 70, 100].map((range) => (
+              <MenuItem key={range} onClick={() => handleDistanceRangeChange(range)}>
+                {range} km
+              </MenuItem>
+            ))}
+          </Menu>
           <Button
             variant="contained"
             onClick={handleFilterToggle}
@@ -118,6 +400,7 @@ const Helper = ()=> {
             <FavoriteIcon sx={{ fontSize: '20px' }} />
             {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span> */}
           </Button>
+          </Box>
           
         </Toolbar>
 
@@ -128,9 +411,9 @@ const Helper = ()=> {
               // <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: "50vh" }}>
               //   <CircularProgress />
               // </Box>
-            ) : (
+            ) : ( filteredPosts.length > 0 ? (
               <Grid container spacing={isMobile ? 1 : 2}>
-                {posts.map((post) => (
+                {filteredPosts.map((post) => (
                   <Grid item xs={12} sm={6} md={4} key={post._id}>
                     <Card style={{
                       margin: '0rem 0',  // spacing between up and down cards
@@ -242,6 +525,9 @@ const Helper = ()=> {
                 ))}
 
               </Grid>
+            ) : ( 
+              <Typography color='error' textAlign="center" sx={{ m: 2 }}>No posts found within {distanceRange} km of your location...</Typography>
+            )
             )}
           </Box>
 
