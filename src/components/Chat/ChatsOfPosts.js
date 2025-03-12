@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfPosts.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery } from '@mui/material';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -8,6 +8,7 @@ import Layout from '../Layout';
 import apiClient from '../../utils/axiosConfig';
 // import ChatDialog from './ChatDialog';
 import ChatHistory from './ChatHistory';
+// import CloseIcon from '@mui/icons-material/Close';
 
 
 const ChatsOfPosts = () => {
@@ -22,6 +23,7 @@ const ChatsOfPosts = () => {
   const [loading, setLoading] = useState(true); // Track loading state
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [postTitle, setPostTitle] = useState(""); // Store post title
+  const [openDialog, setOpenDialog] = useState(false);
 
 
   const fetchChatsOfPost = useCallback(async () => {
@@ -59,8 +61,13 @@ const ChatsOfPosts = () => {
   const handleChatClick = (chat) => {
     setChatDetailsById(chat);
     if (isMobile) {
-      navigate(`/chat/${chat.id}`);
+      // navigate(`/chat/${chat.id}`);
+      setOpenDialog(true); // Open the dialog on mobile
     }
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false); // Close the dialog
   };
 
   return (
@@ -221,6 +228,29 @@ const ChatsOfPosts = () => {
         </Box>
       </Box>
       {/* <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={postId} user={user} /> */}
+      {/* Dialog for Mobile View */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        fullScreen={isMobile}
+        maxWidth="sm"
+        fullWidth
+        sx={{
+          margin: isMobile ? '10px' : '0px',
+          '& .MuiPaper-root': { borderRadius: '14px',  } //maxHeight: isMobile ? '300px' : 'auto'
+        }}
+      >
+        {/* <DialogContent> */}
+          {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <IconButton onClick={handleCloseDialog}>
+              <CloseIcon />
+            </IconButton>
+          </Box> */}
+          {chatDetailsById && (
+            <ChatHistory chatData={chatDetailsById} postId={postId} handleCloseDialog={handleCloseDialog} />
+          )}
+        {/* </DialogContent> */}
+      </Dialog>
     </Layout>
   );
 };

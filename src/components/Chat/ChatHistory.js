@@ -12,12 +12,13 @@ import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
 import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
 import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
+import CloseIcon from '@mui/icons-material/Close';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
 const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatHistory = ({ chatData, postId }) => {
+const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
   const userId = localStorage.getItem('userId');
@@ -253,7 +254,17 @@ const ChatHistory = ({ chatData, postId }) => {
               <Typography>BuyerId {chatData.id}</Typography>
               <Typography>SellerId {userId}</Typography>  */}
             </Box>
+            
           </Box> 
+          {isMobile && (
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <IconButton 
+              onClick={handleCloseDialog}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+          )}
         {/* ) : null} */}
       </Box>
     </Box>
