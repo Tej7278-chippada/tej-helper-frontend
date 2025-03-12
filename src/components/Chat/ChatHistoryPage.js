@@ -1,12 +1,13 @@
 // /components/chat/ChatHistoryPage.js
 import React, { useEffect, useState, useRef } from "react";
 import { Box, Avatar, Typography, TextField, IconButton, CircularProgress, LinearProgress } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
+import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import { useNavigate, useParams } from "react-router-dom";
 import apiClient from "../../utils/axiosConfig";
 import io from 'socket.io-client';
 import Layout from "../Layout";
 import { useTheme } from "@emotion/react";
+import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -21,7 +22,7 @@ const ChatHistoryPage = () => {
   const sellerId = localStorage.getItem("userId");
   const authToken = localStorage.getItem("authToken");
   const bottomRef = useRef(null);
-   const theme = useTheme();
+  const theme = useTheme();
 
   useEffect(() => {
     if (!authToken) {
@@ -101,12 +102,20 @@ const ChatHistoryPage = () => {
     }
   }, [chat?.messages.length]);
 
+  const scrollToBottom = () => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   if (!chat) {
     return (
     // <Typography>Loading chat...</Typography>
     <Box>
       <Layout>
-        <Typography>Loading chat...</Typography>
+        <Box sx={{ margin: '1rem', textAlign: 'center', marginTop: '1rem' }}>
+          <Typography>Loading chat...</Typography>
+        </Box>
       </Layout>
     </Box>
   );
@@ -114,7 +123,7 @@ const ChatHistoryPage = () => {
 
   return (
     <Layout>
-    <Box display="flex" flexDirection="column" height="90vh">
+    <Box display="flex" flexDirection="column" height="91vh">
       {/* Header with Profile */}
       <Box display="flex" alignItems="center" p={1} bgcolor="#f5f5f5" boxShadow={1}>
         <Avatar
@@ -130,7 +139,10 @@ const ChatHistoryPage = () => {
       </Box>
 
       {/* Chat Messages */}
-      <Box flex={1} p={2} overflow="auto" bgcolor="#fff">
+      <Box flex={1} p={2} sx={{
+        overflowY: 'auto', scrollbarWidth:'thin', 
+        scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
+      }} bgcolor="#fff">
         {isFetching ? (
           <Box sx={{ margin: '10px', textAlign: 'center' }}>
             <CircularProgress />
@@ -163,6 +175,27 @@ const ChatHistoryPage = () => {
         ) : (
           <Typography color='grey'>Start chat</Typography>
         )}
+        <IconButton
+          style={{
+            position: 'absolute',
+            bottom: '90px',
+            right: '6px',
+            // padding: '6px 4px',
+            borderRadius: '24px',
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4px', // Reduce padding to shrink button size
+            width:'30px', // Set smaller width
+            height:'35px', // Set smaller height
+            color: '#1a73e8', // Google Blue style
+          }}
+          // onClick={handleAddTransaction}
+          onClick={scrollToBottom}
+          onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus when selecting emoji
+        >
+          <KeyboardDoubleArrowDownRoundedIcon style={{ fontSize: '14px' }}/>
+        </IconButton>
       </Box>
 
       {/* Message Input */}
@@ -190,7 +223,7 @@ const ChatHistoryPage = () => {
         <IconButton onClick={sendMessage} color="primary"
         onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
         disabled={loading || message.trim() === ''}>
-          {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendIcon />}
+          {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon />}
         </IconButton>
       </Box>
     </Box>

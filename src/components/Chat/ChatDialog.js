@@ -1,18 +1,20 @@
 // src/components/ChatDialog.js
-import React, { useState, useEffect, useRef, useCallback, lazy, Suspense } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef, useCallback, 
+  // lazy, Suspense
+   } from 'react';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
-import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfiedRounded';
-import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
+// import SentimentSatisfiedRoundedIcon from '@mui/icons-material/SentimentSatisfiedRounded';
+// import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
 import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
-const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
+// const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
 const ChatDialog = ({ open, onClose, post, user }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
@@ -20,14 +22,14 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   const authToken = localStorage.getItem('authToken');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const bottomRef = useRef(null); // Reference to the last transaction
   const inputRef = useRef(null);
   // const prevMessagesLength = useRef(0);
   const [loading, setLoading] = useState(false);
-  const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
+  // const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
   const [isFetching, setIsFetching] = useState(true);
 
 
@@ -124,32 +126,32 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   };
 
   // Insert emoji at cursor position
-  const onEmojiClick = (emojiObject) => {
-    if (!inputRef.current) return;
+  // const onEmojiClick = (emojiObject) => {
+  //   if (!inputRef.current) return;
   
-    // Ensure cursor position is updated before inserting the emoji
-    const cursorPosition = inputRef.current.selectionStart || message.length;
-    const textBeforeCursor = message.substring(0, cursorPosition);
-    const textAfterCursor = message.substring(cursorPosition);
+  //   // Ensure cursor position is updated before inserting the emoji
+  //   const cursorPosition = inputRef.current.selectionStart || message.length;
+  //   const textBeforeCursor = message.substring(0, cursorPosition);
+  //   const textAfterCursor = message.substring(cursorPosition);
   
-    // Insert emoji at the correct position
-    // const newMessage = textBeforeCursor + emojiObject.emoji + textAfterCursor;
-    setMessage(textBeforeCursor + emojiObject.emoji + textAfterCursor);
-    // setShowEmojiPicker(false);
+  //   // Insert emoji at the correct position
+  //   // const newMessage = textBeforeCursor + emojiObject.emoji + textAfterCursor;
+  //   setMessage(textBeforeCursor + emojiObject.emoji + textAfterCursor);
+  //   // setShowEmojiPicker(false);
   
-    // Move cursor to the correct position after the emoji
-    setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.selectionStart = inputRef.current.selectionEnd = cursorPosition + emojiObject.emoji.length;
-        // inputRef.current.focus(); // ✅ Keep keyboard open
-      }
-    }, 50);
-  };
+  //   // Move cursor to the correct position after the emoji
+  //   setTimeout(() => {
+  //     if (inputRef.current) {
+  //       inputRef.current.selectionStart = inputRef.current.selectionEnd = cursorPosition + emojiObject.emoji.length;
+  //       // inputRef.current.focus(); // ✅ Keep keyboard open
+  //     }
+  //   }, 50);
+  // };
 
-  const handleEmojiToggle = () => {
-    setShowEmojiPicker(!showEmojiPicker);
-    if (!isPickerLoaded) setIsPickerLoaded(true); // Mark as loaded once opened
-  };
+  // const handleEmojiToggle = () => {
+  //   setShowEmojiPicker(!showEmojiPicker);
+  //   if (!isPickerLoaded) setIsPickerLoaded(true); // Mark as loaded once opened
+  // };
   
 
   
@@ -235,7 +237,7 @@ const ChatDialog = ({ open, onClose, post, user }) => {
         
       </DialogContent>
        {/* Lazy Loaded Emoji Picker */}
-        {showEmojiPicker && (
+        {/* {showEmojiPicker && (
           <Box sx={{ position: 'absolute', bottom: 70, left: 10, zIndex: 10, backgroundColor: '#fff',
             borderRadius: '12px',
             boxShadow: 3,
@@ -252,21 +254,21 @@ const ChatDialog = ({ open, onClose, post, user }) => {
                 )}
             </Suspense>
           </Box>
-        )}
+        )} */}
       <DialogActions >
         {/* <Button onClick={onClose}>Close</Button> */}
         
 
         {/* Input & Send Button */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 0.5 : 1, padding: isMobile ? 0 : 1, flex: 1 }}>
-          <IconButton 
+          {/* <IconButton 
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
             onClick={handleEmojiToggle}>
             {showEmojiPicker ? <EmojiEmotionsRoundedIcon /> : <SentimentSatisfiedRoundedIcon />}
-          </IconButton>
+          </IconButton> */}
           <TextField
             fullWidth
-            inputRef={inputRef}
+            // inputRef={inputRef}
             variant="outlined"
             placeholder="Type a message..."
             multiline

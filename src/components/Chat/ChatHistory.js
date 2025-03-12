@@ -11,6 +11,7 @@ import EmojiEmotionsRoundedIcon from '@mui/icons-material/EmojiEmotionsRounded';
 // import { useParams } from 'react-router-dom';
 import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
+import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -142,6 +143,12 @@ const ChatHistory = ({ chatData, postId }) => {
   const handleEmojiToggle = () => {
     setShowEmojiPicker(!showEmojiPicker);
     if (!isPickerLoaded) setIsPickerLoaded(true); // Mark as loaded once opened
+  };
+
+  const scrollToBottom = () => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   
@@ -300,7 +307,29 @@ const ChatHistory = ({ chatData, postId }) => {
           <Typography color='grey'>Start chat</Typography>
         )}
         {/* </Box> */}
+        
       </Box>
+      <IconButton
+          style={{
+            position: 'absolute',
+            bottom: isMobile ? '80px' : '135px',
+            right: isMobile ? '4px' : '12px',
+            // padding: '6px 4px',
+            borderRadius: '24px',
+            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '4px', // Reduce padding to shrink button size
+            width:isMobile ? '30px' : '25px', // Set smaller width
+            height: isMobile ? '35px' : '30px', // Set smaller height
+            color: '#1a73e8', // Google Blue style
+          }}
+          // onClick={handleAddTransaction}
+          onClick={scrollToBottom}
+          onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus when selecting emoji
+        >
+          <KeyboardDoubleArrowDownRoundedIcon style={{ fontSize: '14px' }}/>
+        </IconButton>
       
     </Box>
     
@@ -370,7 +399,7 @@ const ChatHistory = ({ chatData, postId }) => {
                       multiline
                       value={message}
                       minRows={1}
-                      maxRows={3} 
+                      maxRows={2} 
                       onChange={(e) => setMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       sx={{ 
