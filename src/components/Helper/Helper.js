@@ -4,7 +4,7 @@ import {Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconB
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
-import FavoriteIcon from '@mui/icons-material/Favorite';
+// import FavoriteIcon from '@mui/icons-material/Favorite';
 // import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
@@ -220,10 +220,10 @@ const Helper = ()=> {
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
-          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '1rem', marginLeft: '-1rem'}}>
+          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '10px', marginLeft: '-1rem'}}>
           <IconButton color="primary" onClick={() => setShowMap(true)} >
             <LocationOnIcon />
-            <Typography variant="body1" sx={{marginLeft:'8px' }}>
+            <Typography variant="body1" sx={{marginLeft:'0px' }}>
               {/* {currentAddress || "Fetching location..."} */}
               {(currentAddress.split(" ").length > 2 ? `${currentAddress.split(" ").slice(0, 2).join(" ")}...` : currentAddress) || "Fetching location..."}
             </Typography>
@@ -328,7 +328,7 @@ const Helper = ()=> {
             </Card>
           )}
           </Box>
-          <Box sx={{display:'flex', justifyContent:'space-between'}}>
+          <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-10px'}}>
           <Button
             variant="contained"
             onClick={handleDistanceMenuOpen}
@@ -343,7 +343,7 @@ const Helper = ()=> {
               },
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '0px',
               marginRight: '10px'
             }}
           >
@@ -374,13 +374,13 @@ const Helper = ()=> {
               },
               display: 'flex',
               alignItems: 'center',
-              gap: '8px', marginRight: '10px'
+              gap: '0px', marginRight: '0px'
             }}
           >
             <FilterListIcon sx={{ fontSize: '20px' }} />
             {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span> */}
           </Button>
-          <Button
+          {/* <Button
             variant="contained"
             onClick={() => navigate('/wishlist')}
             sx={{
@@ -398,8 +398,8 @@ const Helper = ()=> {
             }}
           >
             <FavoriteIcon sx={{ fontSize: '20px' }} />
-            {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span> */}
-          </Button>
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span>
+          </Button> */}
           </Box>
           
         </Toolbar>
