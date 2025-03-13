@@ -1,6 +1,6 @@
 // src/components/CommentPopup.js
-import React, { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Grid, Tooltip, Alert } from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Grid, Tooltip, Alert, Snackbar } from '@mui/material';
 // import { addComment } from '../../api/api';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -68,7 +68,7 @@ function RouteMapDialog({ open, onClose, post }) {
   const [mapMode, setMapMode] = useState('normal');
   const [currentLocation, setCurrentLocation] = useState(null);
   const [locationDetails, setLocationDetails] = useState(null);
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
   //   const [successMessage, setSuccessMessage] = useState('');
   const [distance, setDistance] = useState(null);
   // const [route, setRoute] = useState(null);
@@ -76,6 +76,7 @@ function RouteMapDialog({ open, onClose, post }) {
   const routingControlRef = useRef();
   const [routeCalculating, setRouteCalculating] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
 
 
   // Expose removeViaPoint to the window object
@@ -98,14 +99,15 @@ function RouteMapDialog({ open, onClose, post }) {
     };
   }, []);
 
-  const locateUser = async () => {
+  const locateUser = useCallback(async () => {
     if (navigator.geolocation) {
       setLoadingLocation(true); // Show progress indicator
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
+          const locationData = { latitude, longitude };
           setCurrentLocation({ lat: latitude, lng: longitude });
-
+          localStorage.setItem('userLocation', JSON.stringify(locationData)); // Store in localStorage
           // Set location details manually using lat/lng
           setLocationDetails({
             latitude,
@@ -117,7 +119,8 @@ function RouteMapDialog({ open, onClose, post }) {
         },
         (error) => {
           console.error('Error getting location:', error);
-          setError('Failed to fetch your current location. Please enable location access.');
+          // setError('Failed to fetch your current location. Please enable location access.');
+          setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
           setLoadingLocation(false); // Hide progress indicator
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
@@ -125,7 +128,20 @@ function RouteMapDialog({ open, onClose, post }) {
     } else {
       console.error('Geolocation is not supported by this browser.');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const storedLocation = localStorage.getItem("userLocation");
+
+    if (storedLocation) {
+      // Use the stored location
+      const { latitude, longitude } = JSON.parse(storedLocation);
+      setCurrentLocation({ lat: latitude, lng: longitude });
+    } else {
+      // Fetch location only if not stored
+      locateUser();
+    }
+  }, [locateUser]);
 
   const showDistanceAndRoute = () => {
     if (currentLocation && post && mapRef.current) {
@@ -193,8 +209,10 @@ function RouteMapDialog({ open, onClose, post }) {
     }
   };
 
-  if (error) return <Alert severity="error">{error}</Alert>;
+  // if (error) return <Alert severity="error">{error}</Alert>;
   if (!post || !post.location) return <Alert severity="error">Post location data is missing.</Alert>;
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
 
 
@@ -453,6 +471,16 @@ function RouteMapDialog({ open, onClose, post }) {
 
 
       </DialogContent>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
     </Dialog>
 
