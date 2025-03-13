@@ -24,7 +24,7 @@ import MapRoundedIcon from '@mui/icons-material/MapRounded';
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState([]);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -59,17 +59,17 @@ const Helper = ()=> {
   // Fetch posts data
   useEffect(() => {
     const fetchData = async () => {
-        setLoading(true);
+        // setLoading(true);
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
         try {
             const response = await fetchPosts();
             // const { posts } = response.data;
             setPosts(response.data);
             // setTotalPages(totalPages);
-            setLoading(false);
+            // setLoading(false);
         } catch (error) {
             console.error("Error fetching posts:", error);
-            setLoading(false);
+            // setLoading(false);
         }
     };
     fetchData();
@@ -129,18 +129,17 @@ const Helper = ()=> {
     setAnchorEl(null);
   };
 
-  // Handle distance range change
-  // const handleDistanceRangeChange = (range) => {
-  //   setDistanceRange(range);
-  //   handleDistanceMenuClose();
-  // };
-  const handleDistanceRangeChange = (event, newValue) => {
-    setDistanceRange(newValue);
-  };
+  const distanceValues = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
 
-  const distanceMarks = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200].map(
-    (value) => ({ value, label: `${value}` })
-  );
+  // Normalize distances into equal positions (0 to distanceValues.length - 1)
+  const marks = distanceValues.map((value, index) => ({
+    value: index,
+    label: `${value}`,
+  }));
+
+  const handleDistanceRangeChange = (event, newValue) => {
+    setDistanceRange(distanceValues[newValue]); // Convert index back to actual distance
+  };
 
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -383,7 +382,7 @@ const Helper = ()=> {
           >
             <Box
               style={{
-                padding: "10px",
+                padding: isMobile ? '15px' : '10px',
                 display: "flex",
                 flexDirection: isMobile ? "column" : "column",
                 alignItems: 'flex-start',
@@ -391,31 +390,43 @@ const Helper = ()=> {
               }}
             >
               {/* Selected Distance Label */}
+              <Box sx={{display: isMobile ? 'inline': 'flex', justifyContent: isMobile ? 'normal' : 'unset'}}>
               <Typography
                 sx={{
                   fontSize: "16px",
                   fontWeight: "bold",
-                  marginBottom: isMobile ? "20px" : "10px",
+                  // marginBottom: isMobile ? "20px" : "10px",
                   textAlign: "center",
                 }}
               >
-                Distance Range: {distanceRange} km
+                Distance Range: 
               </Typography>
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  marginBottom: isMobile ? "20px" : "10px", marginLeft:'10px',
+                  textAlign: "center",
+                }}
+              >
+                {distanceRange} km
+              </Typography>
+              </Box>
 
               {/* Distance Slider */}
               <Slider
                 orientation={isMobile ? "vertical" : "horizontal"}
-                value={distanceRange}
+                value={distanceValues.indexOf(distanceRange)} // Map actual distance to index
                 onChange={handleDistanceRangeChange}
                 aria-labelledby="distance-slider"
                 // valueLabelDisplay="auto"
-                step={null}
-                marks={distanceMarks}
-                min={2}
-                max={200}
+                step={1}
+                marks={marks}
+                min={0}
+                max={distanceValues.length - 1}
                 sx={{
                   ...(isMobile
-                    ? { height: "400px", margin: "0 auto" }
+                    ? { height: "300px", margin: "0 auto" }
                     : { width: "400px", marginInline: "10px" }),
                   color: "#1976d2",
                 }}
