@@ -1,24 +1,5 @@
 import React, { useState } from 'react';
-import {
-    Box,
-    Button,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    TextField,
-    MenuItem,
-    Select,
-    FormControl,
-    InputLabel,
-    Grid,
-    Typography,
-    Tooltip,
-    CardContent,
-    CardMedia,
-    Card,
-    useMediaQuery,
-} from '@mui/material';
-// import ProductDetail from './ProductDetail';
+import { Box, Button, Dialog, DialogTitle, DialogContent, TextField, MenuItem, Select, FormControl, InputLabel, Grid, Typography, Tooltip, CardContent, CardMedia, Card, useMediaQuery, } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import LazyImage from './LazyImage';
 import PostDetailsById from './PostDetailsById';
@@ -35,7 +16,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
   };
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-    const [localFilters, setLocalFilters] = useState(initialFilterState);
+    const [localFilters, setLocalFilters] = useState(filterCriteria || initialFilterState);
     const [selectedPost, setSelectedPost] = useState(null);
     const [showFilteredProducts, setShowFilteredProducts] = useState(false);
 
@@ -57,6 +38,13 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
     const handleApplyFilters = () => {
         applyFilters(localFilters);
         setShowFilteredProducts(true); // Show filtered products after "Apply"
+        // onClose(); // Close the filter dialog
+    };
+
+    const handleResetFilters = () => {
+      setLocalFilters(initialFilterState);
+      applyFilters(initialFilterState);
+      setShowFilteredProducts(false);
     };
 
     const openPostDetail = (post) => {
@@ -65,19 +53,19 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
     };
 
     const handleDialogClose = () => {
-        setLocalFilters(initialFilterState); // Reset filters to default
-        setShowFilteredProducts(false); // Hide filtered products
+        // setLocalFilters(initialFilterState); // Reset filters to default
+        // setShowFilteredProducts(false); // Hide filtered products
         onClose(); // Trigger parent close action
       };
 
     return (
-        <Dialog open={true} onClose={handleDialogClose} fullScreen={true}  sx={{margin:'10px', borderRadius:'3', '& .MuiPaper-root': { borderRadius: '16px', }, }}
+        <Dialog open={true} onClose={handleDialogClose} fullScreen={true}  sx={{margin:'10px', borderRadius:'3', '& .MuiPaper-root': { borderRadius: '16px', scrollbarColor: '#aaa transparent', scrollbarWidth:'thin' },  }}
         >
             {selectedPost && (
                 <PostDetailsById post={selectedPost} onClose={() => setSelectedPost(null)} />
             )}
             <DialogTitle sx={{ height: '0px', marginBottom:'1rem' }}>
-                Filter Products
+                Filter Posts
                 <Button style={{ float: 'right', marginTop: '-2px' }} variant="text" onClick={handleDialogClose}>Close</Button>
             </DialogTitle>
             <DialogContent sx={{padding: isMobile ? '2px' : '6px', marginTop: '10px',}}>
@@ -167,6 +155,15 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                         />
                                     </Box>
                                 </Box>
+
+                                {/* Reset Filters Button */}
+                                <Button
+                                  variant="outlined"
+                                  onClick={handleResetFilters}
+                                  style={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem' }} fullWidth
+                                >
+                                  Reset Filters
+                                </Button>
 
                                 {/* Apply Button */}
                                 <Button

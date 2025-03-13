@@ -30,6 +30,7 @@ const Helper = ()=> {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
   const [filteredPosts, setFilteredPosts] = useState([]);
+  const [locationFilteredPosts, setLocationFilteredPosts] = useState([]);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
     category: '',
@@ -159,7 +160,7 @@ const Helper = ()=> {
         }
         return false;
       });
-      setFilteredPosts(filtered);
+      setLocationFilteredPosts(filtered);
     }
   }, [userLocation, posts, distanceRange]);
 
@@ -203,8 +204,8 @@ const Helper = ()=> {
   // Apply filters to the posts
   const applyFilters = (newFilters) => {
     setFilterCriteria(newFilters);
-    const filtered = posts.filter((post) => {
-      const matchCategory = newFilters.category ? post.category === newFilters.category : true;
+    const filtered = locationFilteredPosts.filter((post) => {
+      const matchCategory = newFilters.categories ? post.categories === newFilters.categories : true;
       const matchGender = newFilters.gender ? post.gender === newFilters.gender : true;
       const matchPostStatus = newFilters.postStatus ? post.postStatus === newFilters.postStatus : true;
       const matchPrice = post.price >= newFilters.priceRange[0] && post.price <= newFilters.priceRange[1];
@@ -225,7 +226,7 @@ const Helper = ()=> {
             <LocationOnIcon />
             <Typography variant="body1" sx={{marginLeft:'0px' }}>
               {/* {currentAddress || "Fetching location..."} */}
-              {(currentAddress.split(" ").length > 2 ? `${currentAddress.split(" ").slice(0, 2).join(" ")}...` : currentAddress) || "Fetching location..."}
+              {(currentAddress.split(" ").length > (isMobile ? 1 : 2) ? `${currentAddress.split(" ").slice(0, (isMobile ? 1 : 2)).join(" ")}...` : currentAddress) || "Fetching location..."}
             </Typography>
           </IconButton>
           </Box>
@@ -354,7 +355,7 @@ const Helper = ()=> {
             open={Boolean(anchorEl)}
             onClose={handleDistanceMenuClose}
           >
-            {[10, 20, 30, 50, 70, 100].map((range) => (
+            {[2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200].map((range) => (
               <MenuItem key={range} onClick={() => handleDistanceRangeChange(range)}>
                 {range} km
               </MenuItem>
@@ -411,9 +412,9 @@ const Helper = ()=> {
               // <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: "50vh" }}>
               //   <CircularProgress />
               // </Box>
-            ) : ( filteredPosts.length > 0 ? (
+            ) : ( locationFilteredPosts.length > 0 ? (
               <Grid container spacing={isMobile ? 1 : 2}>
-                {filteredPosts.map((post) => (
+                {locationFilteredPosts.map((post) => (
                   <Grid item xs={12} sm={6} md={4} key={post._id}>
                     <Card style={{
                       margin: '0rem 0',  // spacing between up and down cards
