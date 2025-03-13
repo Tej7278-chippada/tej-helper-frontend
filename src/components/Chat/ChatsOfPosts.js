@@ -40,7 +40,7 @@ const ChatsOfPosts = () => {
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.error('Unauthorized user, redirecting to login');
-        navigate('/');
+        navigate('/login');
       } else {
         console.error('Error fetching chats:', error);
       }
@@ -52,7 +52,7 @@ const ChatsOfPosts = () => {
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
     if (!authToken) {
-      navigate('/');
+      navigate('/login');
     } else {
       fetchChatsOfPost(); // ✅ Fetch chats on component mount
     }

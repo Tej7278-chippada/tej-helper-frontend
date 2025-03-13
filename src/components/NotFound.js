@@ -23,7 +23,7 @@ const NotFound = () => {
       <Typography variant="body1" color="textSecondary" sx={{ mb: 3 }}>
         Or click on the button below to navigate to the Home page.
       </Typography>
-      <Button variant="contained" color="primary" onClick={() => navigate('/helper')}>
+      <Button variant="contained" color="primary" onClick={() => navigate('/')}>
         Home
       </Button>
     </Box>

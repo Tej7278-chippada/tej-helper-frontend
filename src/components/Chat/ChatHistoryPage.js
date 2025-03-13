@@ -26,7 +26,7 @@ const ChatHistoryPage = () => {
 
   useEffect(() => {
     if (!authToken) {
-      navigate("/");
+      navigate("/login");
       return;
     }
 

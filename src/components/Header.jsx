@@ -75,7 +75,7 @@ const Header = ({ username }) => {
     localStorage.removeItem('activeUser'); // Clear active user on logout
     localStorage.removeItem('tokenUsername'); 
     localStorage.removeItem('userId');
-    navigate('/');
+    navigate('/login');
   };
   
   // const handleSwitchProfile = () => {
@@ -85,7 +85,7 @@ const Header = ({ username }) => {
 
   const handleSelectUser = (user) => {
     if (user === 'Login with another account') {
-      navigate('/');
+      navigate('/login');
     } else {
       const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
       const authToken = tokens[user];
@@ -158,7 +158,7 @@ const Header = ({ username }) => {
       <AppBar position="static">
         <Toolbar>
         <Typography variant={isMobile ? "h6" : "h5"} component="div" sx={{ flexGrow: 1 }}>
-          <Link to="/helper" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block' }}>
+          <Link to="/" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block' }}>
             Helper
           </Link>
         </Typography>

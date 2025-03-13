@@ -184,7 +184,7 @@ const Register = () => {
       setConfirmPassword('');
       setAddress({ street: '', area: '', city: '', state: '', pincode: '' });
       if (response.status === 201) {
-        // window.location.href = '/';
+        // window.location.href = '/login';
       }
     } catch (error) {
       setError(error.response.data.message || 'An error occurred during registration.');
@@ -423,7 +423,7 @@ const Register = () => {
             </Button>
             <Typography variant="body2" align="center" style={{ marginTop: '10px' }}>
               Already have an account?{' '}
-              <Button href="/" variant="text">
+              <Button href="/login" variant="text">
                 Login
               </Button>
             </Typography>

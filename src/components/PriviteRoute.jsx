@@ -8,7 +8,7 @@ const PrivateRoute = ({ children }) => {
 
   if (!authToken || !userId) {
     // If no token, redirect to root with a state message
-    return <Navigate to="/" state={{ message: 'Please login first.' }} />;
+    return <Navigate to="/login" state={{ message: 'Please login first.' }} />;
   }
 
   return children; // If token exists, allow access to the children components

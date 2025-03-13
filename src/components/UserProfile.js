@@ -105,7 +105,7 @@ const UserProfile = () => {
 
       setSuccessMessage('Your account has been deleted successfully.');
       localStorage.clear();
-      navigate('/');
+      navigate('/login');
     } catch (err) {
       setError('Failed to delete account. Please try again later.');
     } finally {
