@@ -137,7 +137,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
           </Button>
         </Box>
         {/* Display list of comments */}
-        <Box bgcolor="#f5f5f5" sx={{ height: isMobile ? '500px' : '300px', overflowY: 'auto', margin: '1rem 0', marginInline: '-10px', borderRadius:'8px',
+        <Box bgcolor="#f5f5f5" sx={{ height: isMobile ? '500px' : '300px', overflowY: 'auto', margin: '1rem 0', mx: '-10px', borderRadius:'8px',
           // Custom scrollbar styles
           scrollbarWidth: 'thin', // Firefox
           scrollbarColor: '#aaa transparent', // Firefox (thumb & track)

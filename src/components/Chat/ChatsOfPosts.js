@@ -192,7 +192,7 @@ const ChatsOfPosts = () => {
                               : 'https://placehold.co/56x56?text=No+Image'
                           }
                           alt={chat.username}
-                          sx={{ width: 50, height: 50, marginInline: 1 }}
+                          sx={{ width: 50, height: 50, mx: 1 }}
                         />
                         <Typography variant="h6" m="1rem" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis',}}>
                           {chat.username}

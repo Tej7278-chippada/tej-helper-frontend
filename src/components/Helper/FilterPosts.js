@@ -190,7 +190,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                             {/* Display Filtered Products */}
                             {showFilteredProducts && (
                               filteredPosts.length > 0 ? (
-                                  <Box flex={isMobile ? "1" : "0 0 70%"} marginInline={isMobile ? "-12px" : "-2px"}>
+                                  <Box flex={isMobile ? "1" : "0 0 70%"} mx={isMobile ? "-12px" : "-2px"}>
                                       <Typography variant="h6" paddingLeft="10px" gutterBottom>
                                           Filtered Posts
                                       </Typography>

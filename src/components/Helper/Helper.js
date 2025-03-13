@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Menu, Slider, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Menu, Slider, Snackbar, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -31,6 +31,7 @@ const Helper = ()=> {
   const navigate = useNavigate();
   const [filteredPosts, setFilteredPosts] = useState([]);
   const [locationFilteredPosts, setLocationFilteredPosts] = useState([]);
+  const [fetchLocationFilteredPosts, setFetchLocationFilteredPosts] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [filterCriteria, setFilterCriteria] = useState({
     category: '',
@@ -48,6 +49,7 @@ const Helper = ()=> {
   const [mapMode, setMapMode] = useState('normal');
   const [locationDetails, setLocationDetails] = useState(null);
   // const distanceOptions = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
   
 
   // Custom marker icon
@@ -55,6 +57,71 @@ const Helper = ()=> {
     iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
     iconSize: [30, 30],
   });
+
+
+  // Fetch user's location and address
+  const fetchUserLocation = useCallback(() => {
+    setLoadingLocation(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const locationData = { latitude, longitude };
+          setUserLocation(locationData);
+          localStorage.setItem('userLocation', JSON.stringify(locationData)); // Store in localStorage
+          fetchAddress(latitude, longitude);
+          setLocationDetails({
+            accuracy: position.coords.accuracy, // GPS accuracy in meters
+          });
+          setLoadingLocation(false);
+        },
+        (error) => {
+          console.error('Error fetching location:', error);
+          setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
+          setLoadingLocation(false);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+      setLoadingLocation(false);
+    }
+  }, []);
+
+  // useEffect(() => {
+  //   fetchUserLocation();
+  // }, [fetchUserLocation]);
+
+  // When component mounts, check if location is stored in localStorage
+  // useEffect(() => {
+  //   const savedLocation = localStorage.getItem('userLocation');
+  //   const savedAddress = localStorage.getItem('currentAddress');
+
+  //   if (savedLocation && savedAddress) {
+  //     setUserLocation(JSON.parse(savedLocation));
+  //     setCurrentAddress(savedAddress);
+  //   } else {
+  //     fetchUserLocation(); // Fetch only if no saved location
+  //   }
+  // }, [fetchUserLocation]);
+
+  // Get user's current location
+  useEffect(() => {
+    const storedLocation = localStorage.getItem("userLocation");
+    const savedDistance = localStorage.getItem('distanceRange');
+
+    if (storedLocation) {
+      // Use the stored location
+      const { latitude, longitude } = JSON.parse(storedLocation);
+      setUserLocation({ latitude, longitude });
+      fetchAddress(latitude, longitude);
+      if (savedDistance) {
+        setDistanceRange(Number(savedDistance));
+      }
+    } else {
+      // Fetch location only if not stored
+      fetchUserLocation();
+    }
+  }, [fetchUserLocation]);
 
   // Fetch posts data
   useEffect(() => {
@@ -76,22 +143,23 @@ const Helper = ()=> {
   }, []);
 
   // Get user's current location
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ latitude, longitude });
-          fetchAddress(latitude, longitude);
-        },
-        (error) => {
-          console.error("Error fetching location:", error);
-        }
-      );
-    } else {
-      console.error("Geolocation is not supported by this browser.");
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         setUserLocation({ latitude, longitude });
+  //         fetchAddress(latitude, longitude);
+  //       },
+  //       (error) => {
+  //         console.error("Error fetching location:", error);
+  //       }
+  //     );
+  //   } else {
+  //     console.error("Geolocation is not supported by this browser.");
+  //   }
+  // }, []);
+  
 
   // Fetch address from latitude and longitude
   const fetchAddress = async (lat, lng) => {
@@ -138,7 +206,9 @@ const Helper = ()=> {
   }));
 
   const handleDistanceRangeChange = (event, newValue) => {
-    setDistanceRange(distanceValues[newValue]); // Convert index back to actual distance
+    const selectedDistance = distanceValues[newValue];
+    setDistanceRange(selectedDistance);  // Convert index back to actual distance
+    localStorage.setItem('distanceRange', selectedDistance); 
   };
 
   // Calculate distance between two coordinates using Haversine formula
@@ -156,6 +226,7 @@ const Helper = ()=> {
 
   // Filter posts based on distance range
   useEffect(() => {
+    setFetchLocationFilteredPosts(true);
     if (userLocation && posts.length > 0) {
       const filtered = posts.filter((post) => {
         if (post.location && post.location.latitude && post.location.longitude) {
@@ -168,39 +239,14 @@ const Helper = ()=> {
           return distance <= distanceRange;
         }
         return false;
+        // setFetchLocationFilteredPosts(false);
       });
       setLocationFilteredPosts(filtered);
+      setFetchLocationFilteredPosts(false);
     }
   }, [userLocation, posts, distanceRange]);
 
-  // Fetch user's location and address
-  const fetchUserLocation = useCallback(() => {
-    setLoadingLocation(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation({ latitude, longitude });
-          fetchAddress(latitude, longitude);
-          setLocationDetails({
-            accuracy: position.coords.accuracy, // GPS accuracy in meters
-          });
-          setLoadingLocation(false);
-        },
-        (error) => {
-          console.error('Error fetching location:', error);
-          setLoadingLocation(false);
-        }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-      setLoadingLocation(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUserLocation();
-  }, [fetchUserLocation]);
+  
 
 
   const openPostDetail = (post) => {
@@ -225,6 +271,8 @@ const Helper = ()=> {
     });
     setFilteredPosts(filtered);
   };
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
     <Layout username={tokenUsername}>
@@ -323,7 +371,7 @@ const Helper = ()=> {
                     </Tooltip>
                   </IconButton>
                   {locationDetails && (
-                  <Box sx={{marginInline:'10px'}}>
+                  <Box sx={{mx:'10px'}}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Accuracy (meters):
                     </Typography>
@@ -374,6 +422,7 @@ const Helper = ()=> {
           </Button>
 
           {/* Distance Range Menu */}
+          {anchorEl && (
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
@@ -427,12 +476,13 @@ const Helper = ()=> {
                 sx={{
                   ...(isMobile
                     ? { height: "300px", margin: "0 auto" }
-                    : { width: "400px", marginInline: "10px" }),
+                    : { width: "400px", mx: "10px" }),
                   color: "#1976d2",
                 }}
               />
             </Box>
           </Menu>
+          )}
           <Button
             variant="contained"
             onClick={handleFilterToggle}
@@ -484,7 +534,10 @@ const Helper = ()=> {
               // <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: "50vh" }}>
               //   <CircularProgress />
               // </Box>
-            ) : ( locationFilteredPosts.length > 0 ? (
+            ) : ( fetchLocationFilteredPosts ? (
+              <SkeletonCards/>
+            ) : 
+            ( locationFilteredPosts.length > 0 ? (
               <Grid container spacing={isMobile ? 1 : 2}>
                 {locationFilteredPosts.map((post) => (
                   <Grid item xs={12} sm={6} md={4} key={post._id}>
@@ -507,7 +560,7 @@ const Helper = ()=> {
                         e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
                       }} >
                       {/* CardMedia for Images with Scroll */}
-                      <CardMedia marginInline={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '200px', backgroundColor: '#f5f5f5' }}>
+                      <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '200px', backgroundColor: '#f5f5f5' }}>
                         <div style={{
                           display: 'flex',
                           overflowX: 'auto',
@@ -601,21 +654,32 @@ const Helper = ()=> {
             ) : ( 
               <Typography color='error' textAlign="center" sx={{ m: 2 }}>No posts found within {distanceRange} km of your location...</Typography>
             )
-            )}
+            ))}
           </Box>
 
 
       </Box>
       {/* Filter Floating Card */}
       {filterOpen && (
-          <FilterPosts
-            filterCriteria={filterCriteria}
-            applyFilters={applyFilters}
-            posts={posts}
-            filteredPosts={filteredPosts}
-            onClose={handleFilterToggle}
-          />
-        )}
+        <FilterPosts
+          filterCriteria={filterCriteria}
+          applyFilters={applyFilters}
+          posts={posts}
+          filteredPosts={filteredPosts}
+          onClose={handleFilterToggle}
+        />
+      )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     
     </Layout>
   );
