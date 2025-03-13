@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Menu, Slider, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -46,6 +46,9 @@ const Helper = ()=> {
   const [showMap, setShowMap] = useState(false);
   const mapRef = useRef(null);
   const [mapMode, setMapMode] = useState('normal');
+  const [locationDetails, setLocationDetails] = useState(null);
+  // const distanceOptions = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
+  
 
   // Custom marker icon
   const userLocationIcon = new L.Icon({
@@ -127,10 +130,17 @@ const Helper = ()=> {
   };
 
   // Handle distance range change
-  const handleDistanceRangeChange = (range) => {
-    setDistanceRange(range);
-    handleDistanceMenuClose();
+  // const handleDistanceRangeChange = (range) => {
+  //   setDistanceRange(range);
+  //   handleDistanceMenuClose();
+  // };
+  const handleDistanceRangeChange = (event, newValue) => {
+    setDistanceRange(newValue);
   };
+
+  const distanceMarks = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200].map(
+    (value) => ({ value, label: `${value}` })
+  );
 
   // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -173,6 +183,9 @@ const Helper = ()=> {
           const { latitude, longitude } = position.coords;
           setUserLocation({ latitude, longitude });
           fetchAddress(latitude, longitude);
+          setLocationDetails({
+            accuracy: position.coords.accuracy, // GPS accuracy in meters
+          });
           setLoadingLocation(false);
         },
         (error) => {
@@ -245,7 +258,7 @@ const Helper = ()=> {
           {showMap && (
             <Card
               sx={{
-                position: 'fixed',
+                position: 'absolute',
                 top: '10%',
                 left: '5%',
                 width: '90%',
@@ -253,7 +266,7 @@ const Helper = ()=> {
                 zIndex: 1000,
                 borderRadius: '10px',
                 boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-                backgroundColor: '#fff',
+                backgroundColor: '#fff', '& .MuiCardContent-root': {padding: '10px' },
               }}
             >
               <CardContent>
@@ -310,6 +323,16 @@ const Helper = ()=> {
                       <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
                     </Tooltip>
                   </IconButton>
+                  {locationDetails && (
+                  <Box sx={{marginInline:'10px'}}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Accuracy (meters):
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {locationDetails.accuracy}
+                    </Typography>
+                  </Box>
+                  )}
                   <IconButton
                     onClick={fetchUserLocation}
                     disabled={loadingLocation}
@@ -317,7 +340,7 @@ const Helper = ()=> {
                       width: '60px', borderRadius: '10px',
                       backgroundColor: 'rgba(255, 255, 255, 0.26)',
                       boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px',
-                      height: '50px',
+                      // height: '50px',
                     }}
                   >
                     <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'}>
@@ -330,36 +353,74 @@ const Helper = ()=> {
           )}
           </Box>
           <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-10px'}}>
+          {/* Button to Open Distance Menu */}
+          {/* Distance Button */}
           <Button
             variant="contained"
             onClick={handleDistanceMenuOpen}
             sx={{
-              backgroundColor: '#1976d2',
-              color: '#fff',
-              padding: '8px 16px',
-              borderRadius: '24px',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-              '&:hover': {
-                backgroundColor: '#1565c0',
-              },
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0px',
-              marginRight: '10px'
+              backgroundColor: "#1976d2",
+              color: "#fff",
+              padding: "8px 16px",
+              borderRadius: "24px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              "&:hover": { backgroundColor: "#1565c0" },
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              marginRight: "10px",
             }}
           >
             {distanceRange} km
           </Button>
+
+          {/* Distance Range Menu */}
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleDistanceMenuClose}
+            sx={{ padding: "10px", '& .MuiPaper-root': { borderRadius:'12px'},  }}
           >
-            {[2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200].map((range) => (
-              <MenuItem key={range} onClick={() => handleDistanceRangeChange(range)}>
-                {range} km
-              </MenuItem>
-            ))}
+            <Box
+              style={{
+                padding: "10px",
+                display: "flex",
+                flexDirection: isMobile ? "column" : "column",
+                alignItems: 'flex-start',
+                // minWidth: isMobile ? "60px" : "250px", borderRadius:'10px'
+              }}
+            >
+              {/* Selected Distance Label */}
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  marginBottom: isMobile ? "20px" : "10px",
+                  textAlign: "center",
+                }}
+              >
+                Distance Range: {distanceRange} km
+              </Typography>
+
+              {/* Distance Slider */}
+              <Slider
+                orientation={isMobile ? "vertical" : "horizontal"}
+                value={distanceRange}
+                onChange={handleDistanceRangeChange}
+                aria-labelledby="distance-slider"
+                // valueLabelDisplay="auto"
+                step={null}
+                marks={distanceMarks}
+                min={2}
+                max={200}
+                sx={{
+                  ...(isMobile
+                    ? { height: "400px", margin: "0 auto" }
+                    : { width: "400px", marginInline: "10px" }),
+                  color: "#1976d2",
+                }}
+              />
+            </Box>
           </Menu>
           <Button
             variant="contained"
@@ -406,7 +467,7 @@ const Helper = ()=> {
         </Toolbar>
 
         <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: isMobile ? '4px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
-            {loading ? (
+            {loadingLocation ? (
               // renderSkeletonCards()
               <SkeletonCards />
               // <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: "50vh" }}>
