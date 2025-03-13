@@ -75,6 +75,8 @@ const Header = ({ username }) => {
     localStorage.removeItem('activeUser'); // Clear active user on logout
     localStorage.removeItem('tokenUsername'); 
     localStorage.removeItem('userId');
+    localStorage.removeItem('userLocation'); 
+    localStorage.removeItem('distanceRange');
     navigate('/login');
   };
   
