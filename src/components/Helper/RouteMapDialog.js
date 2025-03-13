@@ -1,5 +1,5 @@
 // src/components/CommentPopup.js
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Grid, Tooltip, Alert, Snackbar } from '@mui/material';
 // import { addComment } from '../../api/api';
 import CloseIcon from '@mui/icons-material/Close';
@@ -99,7 +99,14 @@ function RouteMapDialog({ open, onClose, post }) {
     };
   }, []);
 
-  const locateUser = useCallback(async () => {
+  const locateUser = async () => {
+    const storedLocation = localStorage.getItem("userLocation");
+
+    if (storedLocation) {
+      // Use the stored location
+      const { latitude, longitude } = JSON.parse(storedLocation);
+      setCurrentLocation({ lat: latitude, lng: longitude });
+    } else {
     if (navigator.geolocation) {
       setLoadingLocation(true); // Show progress indicator
       navigator.geolocation.getCurrentPosition(
@@ -128,20 +135,21 @@ function RouteMapDialog({ open, onClose, post }) {
     } else {
       console.error('Geolocation is not supported by this browser.');
     }
-  }, []);
+  }
+  };
 
-  useEffect(() => {
-    const storedLocation = localStorage.getItem("userLocation");
+  // useEffect(() => {
+  //   const storedLocation = localStorage.getItem("userLocation");
 
-    if (storedLocation) {
-      // Use the stored location
-      const { latitude, longitude } = JSON.parse(storedLocation);
-      setCurrentLocation({ lat: latitude, lng: longitude });
-    } else {
-      // Fetch location only if not stored
-      locateUser();
-    }
-  }, [locateUser]);
+  //   if (storedLocation) {
+  //     // Use the stored location
+  //     const { latitude, longitude } = JSON.parse(storedLocation);
+  //     setCurrentLocation({ lat: latitude, lng: longitude });
+  //   } else {
+  //     // Fetch location only if not stored
+  //     locateUser();
+  //   }
+  // }, [locateUser]);
 
   const showDistanceAndRoute = () => {
     if (currentLocation && post && mapRef.current) {
