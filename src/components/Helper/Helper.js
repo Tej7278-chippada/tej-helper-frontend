@@ -537,7 +537,7 @@ const Helper = ()=> {
           
         </Toolbar>
 
-        <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: isMobile ? '4px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: isMobile ? '6px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
             {loadingLocation ? (
               // renderSkeletonCards()
               <SkeletonCards />
@@ -548,7 +548,7 @@ const Helper = ()=> {
               <SkeletonCards/>
             ) : 
             ( locationFilteredPosts.length > 0 ? (
-              <Grid container spacing={isMobile ? 1 : 2}>
+              <Grid container spacing={isMobile ? 2 : 2}>
                 {locationFilteredPosts.map((post) => (
                   <Grid item xs={12} sm={6} md={4} key={post._id}>
                     <Card style={{
@@ -570,7 +570,7 @@ const Helper = ()=> {
                         e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
                       }} >
                       {/* CardMedia for Images with Scroll */}
-                      <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '200px', backgroundColor: '#f5f5f5' }}>
+                      <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                         <div style={{
                           display: 'flex',
                           overflowX: 'auto',
@@ -579,13 +579,13 @@ const Helper = ()=> {
                           borderRadius: '8px',
                           gap: '0.1rem',
                           // marginBottom: '1rem'
-                          height: '210px'
+                          height: '170px'
                         }} 
                         // onClick={() => openProductDetail(product)}
                         >
                           {post.media && post.media.slice(0, 5).map((base64Image, index) => (
                             <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
-                              height: '200px',
+                              height: '160px',
                               borderRadius: '8px',
                               objectFit: 'cover',
                               flexShrink: 0,
@@ -601,7 +601,7 @@ const Helper = ()=> {
                       </CardMedia>
                       <CardContent style={{ padding: '1rem' }}>
                         <Tooltip title={post.title} placement="top" arrow>
-                          <Typography variant="h5" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                           </Typography>
                         </Tooltip>
@@ -619,12 +619,12 @@ const Helper = ()=> {
                             People Count: {post.peopleCount}
                           </Typography>
                         {/* )} */}
-                        <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                        {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                           Service Days: {post.serviceDays}
                         </Typography>
                         <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                           UserCode : {post.userCode}
-                        </Typography>
+                        </Typography> */}
                         {/* <Typography variant="body2" color={product.stockStatus === 'In Stock' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
                           Stock Status: {product.stockStatus}
                         </Typography> */}

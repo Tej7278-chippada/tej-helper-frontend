@@ -13,7 +13,7 @@ const LazyImage = React.memo(({ base64Image, alt }) => {
       alt={alt}
       loading="lazy" // Lazy loading enabled
       style={{
-        height: '200px',
+        height: '160px',
         borderRadius: '8px',
         objectFit: 'cover',
         flexShrink: 0,

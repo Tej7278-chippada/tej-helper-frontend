@@ -1,18 +1,6 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,Alert,
-    Box,
-    Toolbar,
-    Grid,
-    CardMedia,
-    CardContent,
-    Tooltip,
-    CardActions,
-    Snackbar,} from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
@@ -31,6 +19,7 @@ import MapRoundedIcon from '@mui/icons-material/MapRounded';
 // Fix for Leaflet marker icon issue
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useTheme } from '@emotion/react';
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -90,6 +79,8 @@ function PostService() {
   const { id } = useParams(); // Extract sellerId from URL
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
 
     const fetchPostsData = useCallback(async () => {
@@ -491,12 +482,14 @@ function PostService() {
       </Box>
 
 
-        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth fullScreen={true} sx={{
-            margin: '1rem',
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth fullScreen={isMobile ? true : false} sx={{
+            margin: '10px',
             '& .MuiPaper-root': { // Target the dialog paper
                 borderRadius: '16px', // Apply border radius
-                scrollbarWidth: 'thin',
-            },
+                scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent',
+            }, '& .MuiDialogContent-root': { margin: isMobile ? '0rem' : '1rem', padding: isMobile ? '1rem' : '0rem', 
+            }, '& .MuiDialogActions-root': { margin: isMobile ? '1rem' : '1rem',
+            }, 
         }}>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                 <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}</DialogTitle>
@@ -591,7 +584,7 @@ function PostService() {
                       </Grid>
                     </Box>
                   )}
-                  <Box sx={{ height: '300px', marginTop: '1rem', padding:'1rem' }}>
+                  <Box sx={{ height: '300px', marginTop: '1rem', paddingInline:'6px' }}>
                     <MapContainer
                       center={[currentLocation.lat, currentLocation.lng] }
                       zoom={13}
