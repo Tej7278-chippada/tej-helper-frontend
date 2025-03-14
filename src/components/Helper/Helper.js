@@ -21,6 +21,8 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -53,9 +55,17 @@ const Helper = ()=> {
   
 
   // Custom marker icon
-  const userLocationIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-    iconSize: [30, 30],
+  // const userLocationIcon = new L.Icon({
+  //   iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+  //   iconSize: [30, 30],
+  // });
+
+  const customIcon = new L.Icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41], // Default size
+    iconAnchor: [12, 41], // Position relative to the point
+    popupAnchor: [1, -34],
   });
 
 
@@ -347,7 +357,7 @@ const Helper = ()=> {
                         : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
                     />
                     {userLocation && (
-                      <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userLocationIcon}>
+                      <Marker position={[userLocation.latitude, userLocation.longitude]} icon={customIcon}>
                         <Popup>Your Current Location</Popup>
                       </Marker>
                     )}
@@ -391,7 +401,7 @@ const Helper = ()=> {
                     }}
                   >
                     <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'}>
-                      {loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}
+                      <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
                     </Tooltip>
                   </IconButton>
                 </Box>
