@@ -70,7 +70,7 @@ function PostService() {
   const [loading, setLoading] = useState(false); // to show loading state
   const [submitError, setSubmitError] = useState(''); // Error for failed product submission
   // const [selectedProduct, setSelectedProduct] = useState(null);
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' }); // For notifications
+  // const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' }); // For notifications
   // const theme = useTheme();
   // const navigate = useNavigate();
   const navigate = useNavigate();
@@ -78,10 +78,11 @@ function PostService() {
   const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
   const [locationDetails, setLocationDetails] = useState(null);
   const { id } = useParams(); // Extract sellerId from URL
-  const [error, setError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
+  // const [error, setError] = useState('');
+  // const [successMessage, setSuccessMessage] = useState('');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
 
 
     const fetchPostsData = useCallback(async () => {
@@ -90,8 +91,9 @@ function PostService() {
           const response = await fetchUserPosts();
           setPosts(response.data); // Set products returned by the API
         } catch (error) {
-          console.error('Error fetching seller products:', error);
-          setNotification({ open: true, message: 'Failed to fetch products.', type: 'error' });
+          console.error('Error fetching your posts:', error);
+          // setNotification({ open: true, message: 'Failed to fetch products.', type: 'error' });
+          setSnackbar({ open: true, message: 'Failed to fetch your posts.', severity: 'error' });
         } finally {
           setLoading(false);
         }
@@ -146,28 +148,33 @@ function PostService() {
         try {
           if (editingProduct) {
             await updateUserPost(editingProduct._id, data);
-            showNotification(`${formData.title} details updated successfully.`, 'success');
+            // showNotification(`${formData.title} details updated successfully.`, 'success');
+            setSnackbar({ open: true, message: `${formData.title} details updated successfully.`, severity: 'success' });
           } else {
             await addUserPost(data);
-            showNotification(`New Post "${formData.title}" is added successfully.`, 'success');
+            // showNotification(`New Post "${formData.title}" is added successfully.`, 'success');
+            setSnackbar({ open: true, message: `New Post "${formData.title}" is added successfully.`, severity: 'success' });
           }
           await fetchPostsData(); // Refresh products list
           handleCloseDialog();       // Close dialog
         } catch (error) {
           console.error("Error submitting post:", error);
-          showNotification(
-            editingProduct
-              ? `${formData.title} details can't be updated, please try again later.`
-              : `New post can't be added, please try again later.`,
-            'error'
-          );
+          // showNotification(
+          //   editingProduct
+          //     ? `${formData.title} details can't be updated, please try again later.`
+          //     : `New post can't be added, please try again later.`,
+          //   'error'
+          // );
+          setSnackbar({ open: true, message: editingProduct
+            ? `${formData.title} details can't be updated, please try again later.`
+            : `New post can't be added, please try again later.`, severity: 'error' });
         } finally {
           setLoading(false); // Stop loading state
         }
       };
-      const handleCloseNotification = () => {
-        setNotification({ ...notification, open: false });
-      };
+      // const handleCloseNotification = () => {
+      //   setNotification({ ...notification, open: false });
+      // };
     
       const handleEdit = (post) => {
         setEditingProduct(post);
@@ -216,23 +223,26 @@ function PostService() {
         const post = posts.find((p) => p._id === postId); // Find the product to get its title
       
         if (!post) {
-          showNotification("Post not found for deletion.", "error");
+          // showNotification("Post not found for deletion.", "error");
+          setSnackbar({ open: true, message: 'Post not found for deletion.', severity: 'error' });
           return;
         }
       
         try {
           await deleteUserPost(postId);
-          showNotification(`Post "${post.title}" deleted successfully.`, "success");
+          // showNotification(`Post "${post.title}" deleted successfully.`, "success");
+          setSnackbar({ open: true, message: `Post "${post.title}" deleted successfully.`, severity: 'success' });
           await fetchPostsData(); // Refresh posts list
         } catch (error) {
           console.error("Error deleting post:", error);
-          showNotification(`Failed to delete "${post.title}". Please try again later.`, "error");
+          // showNotification(`Failed to delete "${post.title}". Please try again later.`, "error");
+          setSnackbar({ open: true, message: `Failed to delete "${post.title}". Please try again later.`, severity: 'error' });
         }
       };
     
-      const showNotification = (message, severity) => {
-        setNotification({ open: true, message, severity });
-      };
+      // const showNotification = (message, severity) => {
+      //   setNotification({ open: true, message, severity });
+      // };
 
     const handleOpenDialog = () => {
         // Reset form data to empty
@@ -281,7 +291,7 @@ function PostService() {
             longitude,
             accuracy: position.coords.accuracy, // GPS accuracy in meters
           });
-          console.log("User's current location:", latitude, longitude);
+          // console.log("User's current location:", latitude, longitude);
           // Fetch location details using an IP geolocation API
           // try {
           //   const response = await fetch(`https://ipapi.co/${latitude},${longitude}/json/`);
@@ -316,12 +326,14 @@ function PostService() {
         },
         (error) => {
           console.error('Error getting location:', error);
-          setError('Failed to fetch your current location. Please enable location access.');
+          // setError('Failed to fetch your current location. Please enable location access.');
+          setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
       );
     } else {
       console.error('Geolocation is not supported by this browser.');
+      setSnackbar({ open: true, message: 'Geolocation is not supported by this browser.', severity: 'error' });
     }
   };
 
@@ -336,13 +348,15 @@ function PostService() {
       }, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      setSuccessMessage('Location saved successfully.');
+      // setSuccessMessage('Location saved successfully.');
+      setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
     } catch (err) {
-      setError('Failed to save location. Please try again later.');
+      // setError('Failed to save location. Please try again later.');
+      setSnackbar({ open: true, message: 'Failed to save your current location. Please try again later.', severity: 'error' });
     }
   };
 
-  if (error) return <Alert severity="error">{error}</Alert>;
+  // if (error) return <Alert severity="error">{error}</Alert>;
 
   const handleChatsOpen = (post) => {
     // setGroupDetailsId(post._id);
@@ -350,6 +364,8 @@ function PostService() {
       navigate(`/chatsOfPost/${post._id}`);
     // }
   };
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
 
 
@@ -799,17 +815,17 @@ function PostService() {
 
         </Dialog>
         {/* Snackbar for notifications */}
-        <Snackbar
+        {/* <Snackbar
           open={notification.open}
           autoHideDuration={9000}
           onClose={handleCloseNotification}
           anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         >
-          <Alert onClose={handleCloseNotification} severity={notification.severity} sx={{ width: '100%' }}>
+          <Alert onClose={handleCloseNotification} severity={notification.severity} sx={{ width: '100%', borderRadius:'1rem'  }}>
             {notification.message}
           </Alert>
-        </Snackbar>
-        <Snackbar
+        </Snackbar> */}
+        {/* <Snackbar
           open={!!successMessage}
           autoHideDuration={9000}
           onClose={() => setSuccessMessage('')}
@@ -817,6 +833,16 @@ function PostService() {
         >
           <Alert severity="success" onClose={() => setSuccessMessage('')}>
             {successMessage}
+          </Alert>
+        </Snackbar> */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+            {snackbar.message}
           </Alert>
         </Snackbar>
         </Box>
