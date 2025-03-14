@@ -89,7 +89,7 @@ const WishList = () => {
                           e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
                         }} >
                         {/* CardMedia for Images with Scroll */}
-                        <CardMedia sx={{ position: 'relative', margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '200px', backgroundColor: '#f5f5f5' }} >
+                        <CardMedia sx={{ position: 'relative', margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }} >
                           <div style={{
                             display: 'flex',
                             overflowX: 'auto',
@@ -98,7 +98,7 @@ const WishList = () => {
                             borderRadius: '8px',
                             gap: '0.1rem',
                             // marginBottom: '1rem'
-                            height: '210px'
+                            height: '170px'
                           }} >
                             {post.media && post.media.length > 0 ? (
                               post.media.slice(0, 5).map((base64Image, index) => (
@@ -107,7 +107,7 @@ const WishList = () => {
                                   base64Image={base64Image}
                                   alt={`Product ${index}`}
                                   style={{
-                                    height: '200px',
+                                    height: '160px',
                                     borderRadius: '8px',
                                     objectFit: 'cover',
                                     flexShrink: 0,
