@@ -16,13 +16,23 @@ import CloseIcon from '@mui/icons-material/Close'
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 // import RefreshIcon from '@mui/icons-material/Refresh';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+const ChangeView = ({ center }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 13);
+    }
+  }, [center, map]);
+  return null;
+};
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -351,6 +361,7 @@ const Helper = ()=> {
                     attributionControl={false}
                     ref={mapRef}
                   >
+                    <ChangeView center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]} />
                     <TileLayer
                       url={mapMode === 'normal'
                         ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
