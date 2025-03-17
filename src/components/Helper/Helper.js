@@ -689,7 +689,7 @@ const Helper = ()=> {
                           </Typography>
                         )}
                       </CardMedia>
-                      <CardContent style={{ padding: '1rem' }}>
+                      <CardContent style={{ padding: '10px' }}>
                         <Tooltip title={post.title} placement="top" arrow>
                           <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                             {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}

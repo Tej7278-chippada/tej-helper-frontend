@@ -55,8 +55,8 @@ const WishList = () => {
   return (
     <Layout>
       <Box p={'4px'} sx={{ margin: '0rem' }}>
-        <Typography variant="h6" align="left" marginLeft="1rem" marginTop="1rem" gutterBottom>
-          Your Wishlist
+        <Typography variant="h6" align="left" marginInline="6px" gutterBottom>
+          Wishlisted Posts
         </Typography>
 
         {/* <div style={{
@@ -166,7 +166,7 @@ const WishList = () => {
                             <HeartBrokenIcon />
                           </IconButton>
                         </CardMedia>
-                        <CardContent style={{ padding: '1rem' }}>
+                        <CardContent style={{ padding: '10px' }}>
                           <Tooltip title={post.title} placement="top" arrow>
                             <Typography variant="h5" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
