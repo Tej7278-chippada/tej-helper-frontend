@@ -121,10 +121,10 @@ const WishList = () => {
                             ) : (
                               // Show a placeholder image if no media is available
                               <img
-                                src="../assets/null-product-image.webp" // Replace with the path to your placeholder image
+                                src="https://placehold.co/56x56?text=No+Imag" // Replace with the path to your placeholder image
                                 alt="No media available"
                                 style={{
-                                  height: '200px',
+                                  height: '160px',
                                   borderRadius: '8px',
                                   objectFit: 'cover',
                                   flexShrink: 0,

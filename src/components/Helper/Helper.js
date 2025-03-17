@@ -673,15 +673,29 @@ const Helper = ()=> {
                         }} 
                         // onClick={() => openProductDetail(product)}
                         >
-                          {post.media && post.media.slice(0, 5).map((base64Image, index) => (
-                            <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
-                              height: '160px',
-                              borderRadius: '8px',
-                              objectFit: 'cover',
-                              flexShrink: 0,
-                              cursor: 'pointer' // Make the image look clickable
-                            }} />
-                          ))}
+                          {(post.media).length > 0 ? (
+                            post.media && post.media.slice(0, 5).map((base64Image, index) => (
+                              <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
+                                height: '160px',
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                                cursor: 'pointer' // Make the image look clickable
+                              }} />
+                            ))
+                          ) : (
+                            <img
+                              // src="../assets/null-product-image.webp" // Replace with the path to your placeholder image
+                              src='https://placehold.co/56x56?text=No+Imag'
+                              alt="No media available"
+                              style={{
+                                height: '160px',
+                                borderRadius: '8px',
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                              }}
+                            />
+                          )}
                         </div>
                         {post.media && post.media.length > 5 && (
                           <Typography variant="body2" color="error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>

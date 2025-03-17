@@ -412,6 +412,7 @@ function PostService() {
                 margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', background: 'rgba(255, 255, 255, 0.9)',
                 boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
+                cursor:'pointer'
               }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
@@ -436,7 +437,8 @@ function PostService() {
                   }}
                     onClick={() => openPostDetail(post)}
                   >
-                    {post.media && post.media.slice(0, 5).map((base64Image, index) => (
+                  {post.media && post.media.length > 0 ? (
+                    post.media && post.media.slice(0, 5).map((base64Image, index) => (
                       <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
                         height: '160px',
                         borderRadius: '8px',
@@ -444,7 +446,20 @@ function PostService() {
                         flexShrink: 0,
                         cursor: 'pointer' // Make the image look clickable
                       }} />
-                    ))}
+                    ))
+                  ) : (
+                    // Show a placeholder image if no media is available
+                    <img
+                      src="https://placehold.co/56x56?text=No+Imag" // Replace with the path to your placeholder image
+                      alt="No media available"
+                      style={{
+                        height: '160px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
                   </div>
                   {post.media && post.media.length > 5 && (
                     <Typography variant="body2" color="error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
@@ -452,7 +467,7 @@ function PostService() {
                     </Typography>
                   )}
                 </CardMedia>
-                <CardContent style={{ padding: '1rem' }}>
+                <CardContent style={{ padding: '10px' }}>
                   <Tooltip title={post.title} placement="top" arrow>
                     <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
@@ -464,11 +479,11 @@ function PostService() {
                   <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Gender: {post.gender}
                   </Typography>
-                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
                     Post Status: {post.postStatus}
                   </Typography>
                   {/* {post.stockStatus === 'In Stock' && ( */}
-                  <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
                     People Count: {post.peopleCount}
                   </Typography>
                   {/* )} */}
@@ -489,7 +504,7 @@ function PostService() {
                     Description: {post.description}
                   </Typography>
                 </CardContent>
-                <CardActions style={{ justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
+                <CardActions style={{ justifyContent: 'space-between', padding: '8px 1rem' }}>
                   <Box>
                     <Button color="primary" sx={{ marginRight: '10px' }} onClick={() => handleEdit(post)}>Edit</Button>
                     <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
@@ -815,9 +830,9 @@ function PostService() {
                         variant="contained"
                         color="primary"
                         disabled={loading}
-                        style={loading ? { cursor: 'wait' } : {}} sx={{ borderRadius: '8px' }}
+                        style={loading ? { cursor: 'wait' } : {}} sx={{ borderRadius: '14px' }}
                     >
-                        {loading ? 'Processing...' : (editingProduct ? 'Update Product' : 'Add Product')}
+                        {loading ? 'Processing...' : (editingProduct ? 'Update Post' : 'Add Post')}
                     </Button>
                 </DialogActions>
             </form>
