@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Menu, Slider, Snackbar, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Slider, Snackbar, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -46,7 +46,7 @@ const Helper = ()=> {
   const [userLocation, setUserLocation] = useState(null);
   const [currentAddress, setCurrentAddress] = useState('');
   const [distanceRange, setDistanceRange] = useState(10); // Default distance range in km
-  const [anchorEl, setAnchorEl] = useState(null);
+  // const [anchorEl, setAnchorEl] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const mapRef = useRef(null);
@@ -54,6 +54,7 @@ const Helper = ()=> {
   const [locationDetails, setLocationDetails] = useState(null);
   // const distanceOptions = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
+  const [showDistanceRanges, setShowDistanceRanges] = useState(false);
   
 
   // Custom marker icon
@@ -234,13 +235,13 @@ const Helper = ()=> {
   // };
 
   // Handle opening and closing the distance range menu
-  const handleDistanceMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  // const handleDistanceMenuOpen = (event) => {
+  //   setAnchorEl(event.currentTarget);
+  // };
 
-  const handleDistanceMenuClose = () => {
-    setAnchorEl(null);
-  };
+  // const handleDistanceMenuClose = () => {
+  //   setAnchorEl(null);
+  // };
 
   const distanceValues = [2, 5, 10, 20, 50, 70, 100, 150, 200];
 
@@ -479,7 +480,8 @@ const Helper = ()=> {
           {/* Distance Button */}
           <Button
             variant="contained"
-            onClick={handleDistanceMenuOpen}
+            // onClick={handleDistanceMenuOpen}
+            onClick={() => setShowDistanceRanges(true)}
             sx={{
               backgroundColor: "#1976d2",
               color: "#fff",
@@ -497,12 +499,19 @@ const Helper = ()=> {
           </Button>
 
           {/* Distance Range Menu */}
-          {anchorEl && (
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleDistanceMenuClose}
-            sx={{ padding: "10px", '& .MuiPaper-root': { borderRadius:'12px'},  }}
+          {showDistanceRanges && (
+          <Card
+            // anchorEl={anchorEl}
+            // open={Boolean(anchorEl)}
+            // onClose={handleDistanceMenuClose}
+            sx={{ position: 'absolute',
+              top: '10%',
+              right: '5%',
+              // width: '90%',
+              // maxWidth: '400px',
+              zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px',
+              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+              backgroundColor: '#fff', '& .MuiCardContent-root': {padding: '10px' },  }}
           >
             <Box
               style={{
@@ -535,8 +544,16 @@ const Helper = ()=> {
               >
                 {distanceRange} km
               </Typography>
+              {!isMobile && (
+                <IconButton 
+                  sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto' }}
+                  onClick={() => setShowDistanceRanges(false)}
+                  variant="text"
+                >
+                  <CloseIcon/>
+                </IconButton>
+              )}
               </Box>
-
               {/* Distance Slider */}
               <Slider
                 orientation={isMobile ? "vertical" : "horizontal"}
@@ -555,8 +572,16 @@ const Helper = ()=> {
                   color: "#1976d2",
                 }}
               />
+              
             </Box>
-          </Menu>
+            {isMobile && (
+            <Box sx={{ padding: '12px'}}>
+              <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
+                Close
+              </Button>
+            </Box>
+            )}
+          </Card>
           )}
           <Button
             variant="contained"

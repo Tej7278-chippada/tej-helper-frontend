@@ -200,7 +200,9 @@ const UserProfile = () => {
     return (
       <Layout>
         {/* <SkeletonCards /> */}
+        <Box sx={{margin: '8px' }}>
         <SkeletonProductDetail />
+        </Box>
       </Layout>
     );
   };

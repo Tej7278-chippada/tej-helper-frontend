@@ -330,7 +330,9 @@ function PostDetailsById({ onClose, user }) {
     return (
       <Layout>
         {/* <SkeletonCards /> */}
-        <SkeletonProductDetail />
+        <Box sx={{margin: '8px' }}>
+          <SkeletonProductDetail />
+        </Box>
       </Layout>
     );
   }
@@ -394,7 +396,8 @@ function PostDetailsById({ onClose, user }) {
                     ) : (
                       // Show a placeholder image if no media is available
                       <img
-                        src="../assets/null-product-image.webp" // Replace with the path to your placeholder image
+                        // src="../assets/null-product-image.webp" // Replace with the path to your placeholder image
+                        src='https://placehold.co/56x56?text=No+Imag'
                         alt="No media available"
                         style={{
                           // height: '200px',

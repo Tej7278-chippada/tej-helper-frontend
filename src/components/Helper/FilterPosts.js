@@ -216,7 +216,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                     e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
                                                   }} >
                                                 {/* CardMedia for Images with Scroll */}
-                                                <CardMedia style={{ margin: '0rem 0',borderRadius: '8px', overflow: 'hidden', height: '200px', backgroundColor: '#f5f5f5' }}>
+                                                <CardMedia style={{ margin: '0rem 0',borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                                                   <div style={{
                                                     display: 'flex',
                                                     overflowX: 'auto',
@@ -225,10 +225,10 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                     borderRadius: '8px',
                                                     gap: '0.1rem',
                                                     // marginBottom: '1rem'
-                                                    height:'210px'}} onClick={() => openPostDetail(post)}>
+                                                    height:'170px'}} onClick={() => openPostDetail(post)}>
                                                     {post.media && post.media.slice(0, 5).map((base64Image, index) => (
                                                       <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
-                                                        height: '200px',
+                                                        height: '160px',
                                                         borderRadius: '8px',
                                                         objectFit: 'cover',
                                                         flexShrink: 0,
@@ -242,9 +242,9 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                     </Typography>
                                                   )}
                                                 </CardMedia>
-                                                <CardContent style={{ padding: '1rem' }}>
+                                                <CardContent style={{ padding: '10px' }}>
                                                   <Tooltip title={post.title} placement="top" arrow>
-                                                    <Typography variant="h5" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                    <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                                       {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                                                     </Typography>
                                                   </Tooltip>
@@ -254,11 +254,11 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                   <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
                                                     Gender: {post.gender}
                                                   </Typography>
+                                                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block',float: 'right', marginBottom: '0.5rem' }}>
+                                                    Post Status: {post.postStatus}
+                                                  </Typography>
                                                   <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
                                                     Category: {post.categories}
-                                                  </Typography>
-                                                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                                                    Post Status: {post.postStatus}
                                                   </Typography>
                                                   {/* {post.postStatus === 'In Stock' && (
                                                     <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block',float: 'right',marginBottom: '0.5rem' }}>

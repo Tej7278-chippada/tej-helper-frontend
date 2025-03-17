@@ -55,13 +55,13 @@ const WishList = () => {
   return (
     <Layout>
       <Box p={'4px'} sx={{ margin: '0rem' }}>
-        <Typography variant="h5" align="left" marginLeft="1rem" marginTop="1rem" gutterBottom>
+        <Typography variant="h6" align="left" marginLeft="1rem" marginTop="1rem" gutterBottom>
           Your Wishlist
         </Typography>
 
-        <div style={{
+        {/* <div style={{
           backgroundSize: 'cover', backgroundPosition: 'center', backdropFilter: 'blur(10px)'
-        }}>
+        }}> */}
           <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
             {loading ? (
               <SkeletonCards />
@@ -193,13 +193,15 @@ const WishList = () => {
                     </Grid>
                   ))
                 ) : (
-                  <Typography align="center" padding="1rem" variant="body1">
-                    Your wishlist is empty.
-                  </Typography>
+                  <Box textAlign="center" sx={{ margin: 2 }}>
+                    <Typography textAlign="center" color="grey"  variant="body1" >
+                      Your wishlist is empty...
+                    </Typography>
+                  </Box>
                 )}</Grid>
             )}
           </Box>
-        </div>
+        {/* </div> */}
         {/* {selectedProduct && (
           <ProductDetail product={selectedProduct} onClose={() => setSelectedProduct(null)} />
         )} */}

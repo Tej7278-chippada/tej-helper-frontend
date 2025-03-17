@@ -404,97 +404,106 @@ function PostService() {
           <SkeletonCards/>
         ) : (
       <Grid container spacing={2}>
-      {posts.map((post) => (
-        <Grid item xs={12} sm={6} md={4} key={post._id}>
-          {/* <ProductCard product={product} /> */}
-          <Card style={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden',  background: 'rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-              transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
-               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
-                e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <Grid item xs={12} sm={6} md={4} key={post._id}>
+              {/* <ProductCard product={product} /> */}
+              <Card style={{
+                margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', background: 'rgba(255, 255, 255, 0.9)',
+                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
-                e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
-              }}
-          >
-            {/* CardMedia for Images with Scroll */}
-            <CardMedia style={{ margin: '0rem 0',borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
-              <div style={{
-                display: 'flex',
-                overflowX: 'auto',
-                scrollbarWidth: 'thin',
-                scrollbarColor: '#888 transparent',
-                borderRadius: '8px',
-                gap: '0.1rem',
-                // marginBottom: '1rem'
-                height:'170px'}} 
-                onClick={() => openPostDetail(post)}
-                >
-                {post.media && post.media.slice(0, 5).map((base64Image, index) => (
-                  <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
-                    height: '160px',
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
+                  e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
+                }}
+              >
+                {/* CardMedia for Images with Scroll */}
+                <CardMedia style={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
+                  <div style={{
+                    display: 'flex',
+                    overflowX: 'auto',
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: '#888 transparent',
                     borderRadius: '8px',
-                    objectFit: 'cover',
-                    flexShrink: 0,
-                    cursor: 'pointer' // Make the image look clickable
-                  }}/>
-                ))}
-              </div>
-              {post.media && post.media.length > 5 && (
-                <Typography variant="body2" color="error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-                  Media exceeds its maximum count
-                </Typography>
-              )}
-            </CardMedia>
-            <CardContent style={{ padding: '1rem' }}>
-              <Tooltip title={post.title} placement="top" arrow>
-                <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
-                </Typography>
-              </Tooltip>
-              <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block',float: 'right', fontWeight: '500' }}>
-                Price: ₹{post.price}
-              </Typography>
-              <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
-                Gender: {post.gender}
-              </Typography>
-              <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                Post Status: {post.postStatus}
-              </Typography>
-              {/* {post.stockStatus === 'In Stock' && ( */}
-                <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block',float: 'right',marginBottom: '0.5rem' }}>
-                  People Count: {post.peopleCount}
-                </Typography>
-              {/* )} */}
-              {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                Service Days: {post.serviceDays}
-              </Typography>
-              <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                UserCode : {post.userCode}
-              </Typography> */}
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  style={{ marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis',
-                    maxHeight: '4.5rem',  // This keeps the text within three lines based on the line height.
-                    lineHeight: '1.5rem'  // Adjust to control exact line spacing.
-                  }}>
-                  Description: {post.description}
-                </Typography>
-            </CardContent>
-            <CardActions style={{ justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
-              <Box>
-                <Button color="primary" sx={{marginRight:'10px'}} onClick={() => handleEdit(post)}>Edit</Button> 
-                <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
-              </Box>
-              <Button color="primary" variant="contained"  sx={{borderRadius:'8px'}} onClick={() => handleChatsOpen(post)}>Chats</Button> 
-            </CardActions>
-          </Card>
-        </Grid>
-      ))}
+                    gap: '0.1rem',
+                    // marginBottom: '1rem'
+                    height: '170px'
+                  }}
+                    onClick={() => openPostDetail(post)}
+                  >
+                    {post.media && post.media.slice(0, 5).map((base64Image, index) => (
+                      <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
+                        height: '160px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        flexShrink: 0,
+                        cursor: 'pointer' // Make the image look clickable
+                      }} />
+                    ))}
+                  </div>
+                  {post.media && post.media.length > 5 && (
+                    <Typography variant="body2" color="error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
+                      Media exceeds its maximum count
+                    </Typography>
+                  )}
+                </CardMedia>
+                <CardContent style={{ padding: '1rem' }}>
+                  <Tooltip title={post.title} placement="top" arrow>
+                    <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
+                    </Typography>
+                  </Tooltip>
+                  <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block', float: 'right', fontWeight: '500' }}>
+                    Price: ₹{post.price}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Gender: {post.gender}
+                  </Typography>
+                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                    Post Status: {post.postStatus}
+                  </Typography>
+                  {/* {post.stockStatus === 'In Stock' && ( */}
+                  <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
+                    People Count: {post.peopleCount}
+                  </Typography>
+                  {/* )} */}
+                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+      Service Days: {post.serviceDays}
+    </Typography>
+    <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+      UserCode : {post.userCode}
+    </Typography> */}
+                  <Typography
+                    variant="body2"
+                    color="textSecondary"
+                    style={{
+                      marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
+                      maxHeight: '4.5rem',  // This keeps the text within three lines based on the line height.
+                      lineHeight: '1.5rem'  // Adjust to control exact line spacing.
+                    }}>
+                    Description: {post.description}
+                  </Typography>
+                </CardContent>
+                <CardActions style={{ justifyContent: 'space-between', padding: '0.5rem 1rem' }}>
+                  <Box>
+                    <Button color="primary" sx={{ marginRight: '10px' }} onClick={() => handleEdit(post)}>Edit</Button>
+                    <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
+                  </Box>
+                  <Button color="primary" variant="contained" sx={{ borderRadius: '8px' }} onClick={() => handleChatsOpen(post)}>Chats</Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Typography textAlign="center" color='grey' padding="1rem" variant="body1">
+            You don't have any posts...
+          </Typography>
+        )}
       </Grid>)}
       </Box>
 
