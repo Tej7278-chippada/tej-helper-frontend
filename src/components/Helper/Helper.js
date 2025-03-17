@@ -16,7 +16,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 // import RefreshIcon from '@mui/icons-material/Refresh';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
@@ -24,15 +24,7 @@ import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-const ChangeView = ({ center }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (center) {
-      map.setView(center, 13);
-    }
-  }, [center, map]);
-  return null;
-};
+
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -77,6 +69,39 @@ const Helper = ()=> {
     iconAnchor: [12, 41], // Position relative to the point
     popupAnchor: [1, -34],
   });
+
+  // const [map, setMap] = useState(null);
+
+  const ChangeView = ({ center, getZoomLevel }) => {
+    // const map = useMap();
+    useEffect(() => {
+      if (mapRef.current && userLocation && center) {
+        mapRef.current.setView(center, getZoomLevel);
+      }
+    }, [center, getZoomLevel]);
+    return null;
+  };
+
+  // Auto-zoom and center map on selected distance
+  const getZoomLevel = (distance) => {
+    // Adjust zoom level based on distance
+    if (distance <= 2) return 13;
+    if (distance <= 5) return 12;
+    if (distance <= 10) return 11;
+    if (distance <= 20) return 10;
+    if (distance <= 50) return 9;
+    if (distance <= 70) return 8;
+    if (distance <= 100) return 8;
+    return 7;
+  };
+
+  // Auto-zoom and center map on selected distance
+  // useEffect(() => {
+  //   if (mapRef.current && userLocation) {
+  //     // const zoomLevel = distanceRange > 100 ? 9 : distanceRange > 50 ? 10 : 11; // Adjust zoom based on range
+  //     // mapRef.current.setView([userLocation.latitude, userLocation.longitude], zoomLevel);
+  //   }
+  // }, [distanceRange, userLocation]);
 
 
   // Fetch user's location and address
@@ -217,7 +242,7 @@ const Helper = ()=> {
     setAnchorEl(null);
   };
 
-  const distanceValues = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
+  const distanceValues = [2, 5, 10, 20, 50, 70, 100, 150, 200];
 
   // Normalize distances into equal positions (0 to distanceValues.length - 1)
   const marks = distanceValues.map((value, index) => ({
@@ -229,6 +254,9 @@ const Helper = ()=> {
     const selectedDistance = distanceValues[newValue];
     setDistanceRange(selectedDistance);  // Convert index back to actual distance
     localStorage.setItem('distanceRange', selectedDistance); 
+    if (mapRef.current && userLocation) {
+      mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(selectedDistance));
+    }
   };
 
   // Calculate distance between two coordinates using Haversine formula
@@ -354,12 +382,15 @@ const Helper = ()=> {
 
                 {/* Map */}
                 <Box sx={{ height: '300px', borderRadius: '8px', overflow: 'hidden' }}>
+                {/* {userLocation && ( */}
                   <MapContainer
                     center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
-                    zoom={13}
+                    zoom={getZoomLevel(distanceRange)}
                     style={{ height: '100%', width: '100%' }}
                     attributionControl={false}
                     ref={mapRef}
+                    // whenCreated={setMap}
+                    whenCreated={(map) => (mapRef.current = map)}
                   >
                     <ChangeView center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]} />
                     <TileLayer
@@ -372,7 +403,30 @@ const Helper = ()=> {
                         <Popup>Your Current Location</Popup>
                       </Marker>
                     )}
+                    {/* Distance Circles */}
+                    {userLocation && distanceValues.map((radius) => (
+                      <Circle
+                        key={radius}
+                        center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
+                        radius={radius * 1000}
+                        pathOptions={{
+                          color: radius === distanceRange ? "#1976d2" : "rgba(10, 30, 110, 0)", //#1976d2 #999
+                          fillColor: radius === distanceRange ? "rgba(10, 30, 110, 0.05) " : "rgba(10, 30, 110, 0) ",
+                          fillOpacity: 0.2,
+                          weight: radius === distanceRange ? 1 : 1,
+                        }}
+                        // eventHandlers={{
+                        //   click: () => {
+                        //     setDistanceRange(radius);
+                        //     mapRef.current.setView([userLocation.latitude, userLocation.longitude], radius > 100 ? 9 : radius > 50 ? 10 : 11);
+                        //   },
+                        // }}
+                      >
+                        {/* <Popup>{distanceRange} km</Popup> */}
+                      </Circle>
+                    ))}
                   </MapContainer>
+                {/* )} */}
                 </Box>
 
                 {/* Locate Me Button */}
