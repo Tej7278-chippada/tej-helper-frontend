@@ -638,7 +638,7 @@ const Helper = ()=> {
               <SkeletonCards/>
             ) : 
             ( locationFilteredPosts.length > 0 ? (
-              <Grid container spacing={isMobile ? 2 : 2}>
+              <Grid container spacing={isMobile ? 1.5 : 1.5}>
                 {locationFilteredPosts.map((post) => (
                   <Grid item xs={12} sm={6} md={4} key={post._id}>
                     <Card style={{

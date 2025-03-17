@@ -1,14 +1,17 @@
 // src/components/SkeletonProductDetail.js
 import React from 'react';
-import { Box, Skeleton, Grid, Card, CardContent } from '@mui/material';
+import { Box, Skeleton, Grid, Card, CardContent, useMediaQuery } from '@mui/material';
+import { useTheme } from '@emotion/react';
 
-function SkeletonProductDetail() {
+const SkeletonProductDetail = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
     return (
         <Box sx={{ padding: '0rem' }}>
             <Grid container spacing={2}>
                 {/* Media Section Skeleton */}
                 <Grid item xs={12} md={6}>
-                    <Card sx={{ height: 200, borderRadius: 3 }}>
+                    <Card sx={{ height: isMobile ? 250 : 300, borderRadius: 3 }}>
                         <Skeleton variant="rectangular" width="100%" height="100%" />
                     </Card>
                 </Grid>
@@ -55,7 +58,7 @@ function SkeletonProductDetail() {
 
             </Grid>
         </Box>
-    );
-}
+    )
+};
 
 export default SkeletonProductDetail;

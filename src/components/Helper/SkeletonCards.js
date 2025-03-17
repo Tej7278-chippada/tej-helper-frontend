@@ -10,7 +10,7 @@ const SkeletonCards = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={1.5}>
       {Array.from({ length: isMobile ? 6 : 12 }).map((_, index) => (
         <Grid item xs={12} sm={6} md={4} key={index}>
           <Card style={{

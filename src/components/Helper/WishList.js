@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardMedia, CardContent, Typography, Tooltip, IconButton, Grid, Box } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, Tooltip, IconButton, Grid, Box, useMediaQuery } from '@mui/material';
 // import { fetchWishlist, removeFromWishlist } from '../../api/api';
 import LazyImage from './LazyImage';
 import SkeletonCards from './SkeletonCards';
@@ -8,6 +8,7 @@ import Layout from '../Layout';
 import { useNavigate } from 'react-router-dom';
 import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
 import { fetchWishlist, removeFromWishlist } from '../api/api';
+import { useTheme } from '@emotion/react';
 
 const WishList = () => {
   const [wishlist, setWishlist] = useState([]);
@@ -16,6 +17,8 @@ const WishList = () => {
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -55,18 +58,18 @@ const WishList = () => {
   return (
     <Layout>
       <Box p={'4px'} sx={{ margin: '0rem' }}>
-        <Typography variant="h6" align="left" marginInline="6px" gutterBottom>
+        <Typography variant="h6" align="left" marginInline="8px" marginTop="4px" gutterBottom>
           Wishlisted Posts
         </Typography>
 
         {/* <div style={{
           backgroundSize: 'cover', backgroundPosition: 'center', backdropFilter: 'blur(10px)'
         }}> */}
-          <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+          <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: isMobile ? '6px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
             {loading ? (
               <SkeletonCards />
             ) : (
-              <Grid container spacing={2}>
+              <Grid container spacing={1}>
                 {wishlist.length > 0 ? (
                   wishlist.map((post) => (
                     <Grid item xs={12} sm={6} md={4} key={post._id}>
