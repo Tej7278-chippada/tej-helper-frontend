@@ -358,9 +358,9 @@ const Helper = ()=> {
             <Card
               sx={{
                 position: 'absolute',
-                top: '10%',
-                left: '5%',
-                width: '90%',
+                top: '50px',
+                left: '2%',
+                width: '95%',
                 maxWidth: '400px',
                 zIndex: 1000,
                 borderRadius: '10px',
@@ -521,8 +521,8 @@ const Helper = ()=> {
             // open={Boolean(anchorEl)}
             // onClose={handleDistanceMenuClose}
             sx={{ position: 'absolute',
-              top: '10%',
-              right: '5%',
+              top: '50px',
+              right: '2%',
               // width: '90%',
               // maxWidth: '400px',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px',
