@@ -97,6 +97,7 @@ function PostService() {
   const [currentAddress, setCurrentAddress] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [loadingPostDeletion, setLoadingPostDeletion] = useState(false);
 
 
     const fetchPostsData = useCallback(async () => {
@@ -340,18 +341,21 @@ function PostService() {
         //   setSnackbar({ open: true, message: 'Post not found for deletion.', severity: 'error' });
         //   return;
         // }
-      
+        setLoadingPostDeletion(true);
         try {
           await deleteUserPost(selectedPost._id);
           // showNotification(`Post "${post.title}" deleted successfully.`, "success");
           setSnackbar({ open: true, message: `Post "${selectedPost.title}" deleted successfully.`, severity: 'success' });
           await fetchPostsData(); // Refresh posts list
+          setLoadingPostDeletion(false);
         } catch (error) {
           console.error("Error deleting post:", error);
           // showNotification(`Failed to delete "${post.title}". Please try again later.`, "error");
           setSnackbar({ open: true, message: `Failed to delete "${selectedPost.title}". Please try again later.`, severity: 'error' });
+          setLoadingPostDeletion(false);
         }
         setDeleteDialogOpen(false); // Close dialog after action
+        setLoadingPostDeletion(false);
       };
     
       // const showNotification = (message, severity) => {
@@ -931,7 +935,7 @@ function PostService() {
                         disabled={loading}
                         style={loading ? { cursor: 'wait' } : {}} sx={{ borderRadius: '0.5rem' }}
                     >
-                        {loading ? 'Processing...' : (editingProduct ? 'Update Post' : 'Add Post')}
+                        {loading ?  <> <CircularProgress size={20} sx={{ marginRight: '8px' }} /> {editingProduct ? 'Updating...' : 'Adding...'} </> : (editingProduct ? 'Update Post' : 'Add Post')}
                     </Button>
                 </DialogActions>
             </form>
@@ -979,7 +983,7 @@ function PostService() {
               Cancel
             </Button>
             <Button onClick={handleConfirmDelete} variant='contained' color="error" sx={{ marginRight: '10px', borderRadius:'8px' }}>
-              Delete Post
+              {loadingPostDeletion ? <> <CircularProgress size={20} sx={{marginRight:'8px'}}/> Deleting... </> : "Delete Post"}
             </Button>
           </DialogActions>
         </Dialog>
