@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Slider, Snackbar, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -93,7 +93,10 @@ const Helper = ()=> {
     if (distance <= 50) return 9;
     if (distance <= 70) return 8;
     if (distance <= 100) return 8;
-    return 7;
+    if (distance <= 200) return 7;
+    if (distance <= 500) return 6;
+    if (distance <= 1000) return 5;
+    return 4;
   };
 
   // Auto-zoom and center map on selected distance
@@ -426,6 +429,19 @@ const Helper = ()=> {
                         {/* <Popup>{distanceRange} km</Popup> */}
                       </Circle>
                     ))}
+                    {/* Render a circle for custom distances (if it's not in distanceValues) */}
+                    {userLocation && !distanceValues.includes(distanceRange) && (
+                      <Circle
+                        center={[userLocation.latitude, userLocation.longitude]}
+                        radius={distanceRange * 1000}
+                        pathOptions={{
+                          color: "#ff9800", // Orange color for custom distance
+                          fillColor: "rgba(255, 152, 0, 0.2)", 
+                          fillOpacity: 0.2,
+                          weight: 1,
+                        }}
+                      />
+                    )}
                   </MapContainer>
                 {/* )} */}
                 </Box>
@@ -545,13 +561,34 @@ const Helper = ()=> {
                 {distanceRange} km
               </Typography>
               {!isMobile && (
-                <IconButton 
-                  sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto' }}
-                  onClick={() => setShowDistanceRanges(false)}
-                  variant="text"
-                >
-                  <CloseIcon/>
-                </IconButton>
+                <Box sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
+                  <TextField
+                    label="Custom Distance (km)"
+                    type="number"
+                    value={distanceRange}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 1 && value <= 1000) { // Limit range between 1-1000 km
+                        setDistanceRange(value);
+                        localStorage.setItem("distanceRange", value);
+                        if (mapRef.current && userLocation) {
+                          mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(value));
+                        }
+                      }
+                    }}
+                    fullWidth={isMobile}
+                    sx={{
+                      width: isMobile ? "80px" : "80px", marginRight:'4px', 
+                      "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
+                    }}
+                  />
+                  <IconButton
+                    onClick={() => setShowDistanceRanges(false)}
+                    variant="text"
+                  >
+                    <CloseIcon/>
+                  </IconButton>
+                </Box>
               )}
               </Box>
               {/* Distance Slider */}
@@ -575,10 +612,35 @@ const Helper = ()=> {
               
             </Box>
             {isMobile && (
-            <Box sx={{ padding: '12px'}}>
-              <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
+            <Box sx={{ padding: '12px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <TextField
+                label="Custom Distance (km)"
+                type="number"
+                value={distanceRange}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  if (value >= 1 && value <= 1000) { // Limit range between 1-1000 km
+                    setDistanceRange(value);
+                    localStorage.setItem("distanceRange", value);
+                    if (mapRef.current && userLocation) {
+                      mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(value));
+                    }
+                  }
+                }}
+                sx={{
+                  width: "80px",
+                  "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
+                }}
+              />
+              <IconButton
+                onClick={() => setShowDistanceRanges(false)}
+                variant="text" 
+              >
+                <CloseIcon/>
+              </IconButton>
+              {/* <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
                 Close
-              </Button>
+              </Button> */}
             </Box>
             )}
           </Card>
