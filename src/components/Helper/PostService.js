@@ -95,6 +95,8 @@ function PostService() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [currentAddress, setCurrentAddress] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
 
     const fetchPostsData = useCallback(async () => {
@@ -185,7 +187,12 @@ function PostService() {
         const { latitude, longitude } = JSON.parse(storedLocation);
         // setUserLocation({ latitude, longitude });
         setCurrentLocation({ latitude, longitude });
-        fetchAddress(latitude, longitude);
+        fetchAddress(latitude, longitude);setLocationDetails({
+          latitude,
+          longitude,
+          // accuracy: position.coords.accuracy, // GPS accuracy in meters
+        });
+
       } else {
         // Fetch location only if not stored
         locateUser();
@@ -319,25 +326,32 @@ function PostService() {
         }
       };
 
-      const handleDelete = async (postId) => {
-        const post = posts.find((p) => p._id === postId); // Find the product to get its title
+      const handleDeleteClick = (post) => {
+        setSelectedPost(post);  // Store selected post details
+        setDeleteDialogOpen(true);  // Open confirmation dialog
+      };
+
+      const handleConfirmDelete  = async () => {
+        if (!selectedPost) return;
+        // const post = posts.find((p) => p._id === postId); // Find the product to get its title
       
-        if (!post) {
-          // showNotification("Post not found for deletion.", "error");
-          setSnackbar({ open: true, message: 'Post not found for deletion.', severity: 'error' });
-          return;
-        }
+        // if (!post) {
+        //   // showNotification("Post not found for deletion.", "error");
+        //   setSnackbar({ open: true, message: 'Post not found for deletion.', severity: 'error' });
+        //   return;
+        // }
       
         try {
-          await deleteUserPost(postId);
+          await deleteUserPost(selectedPost._id);
           // showNotification(`Post "${post.title}" deleted successfully.`, "success");
-          setSnackbar({ open: true, message: `Post "${post.title}" deleted successfully.`, severity: 'success' });
+          setSnackbar({ open: true, message: `Post "${selectedPost.title}" deleted successfully.`, severity: 'success' });
           await fetchPostsData(); // Refresh posts list
         } catch (error) {
           console.error("Error deleting post:", error);
           // showNotification(`Failed to delete "${post.title}". Please try again later.`, "error");
-          setSnackbar({ open: true, message: `Failed to delete "${post.title}". Please try again later.`, severity: 'error' });
+          setSnackbar({ open: true, message: `Failed to delete "${selectedPost.title}". Please try again later.`, severity: 'error' });
         }
+        setDeleteDialogOpen(false); // Close dialog after action
       };
     
       // const showNotification = (message, severity) => {
@@ -550,7 +564,7 @@ function PostService() {
                 <CardActions style={{ justifyContent: 'space-between', padding: '8px 1rem' }}>
                   <Box>
                     <Button color="primary" sx={{ marginRight: '10px' }} onClick={() => handleEdit(post)}>Edit</Button>
-                    <Button color="secondary" onClick={() => handleDelete(post._id)}>Delete</Button>
+                    <Button color="secondary" key={post._id} onClick={() => handleDeleteClick(post)}>Delete</Button>
                   </Box>
                   <Button color="primary" variant="contained" sx={{ borderRadius: '8px' }} onClick={() => handleChatsOpen(post)}>Chats</Button>
                 </CardActions>
@@ -944,6 +958,31 @@ function PostService() {
             {successMessage}
           </Alert>
         </Snackbar> */}
+
+        {/* existed post Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          aria-labelledby="delete-dialog-title" 
+          sx={{ '& .MuiPaper-root': { borderRadius: '14px' }, }}
+        >
+          <DialogTitle id="delete-dialog-title" >
+            Are you sure you want to delete this post?
+          </DialogTitle>
+          <DialogContent style={{ padding: '2rem' }}>
+            <Typography color='error'>
+              If you proceed, the post <strong>{selectedPost?.title}</strong> will be removed permanently...
+            </Typography>
+          </DialogContent>
+          <DialogActions style={{ padding: '1rem' , gap: 1}}>
+            <Button onClick={() => setDeleteDialogOpen(false)} variant='outlined' color="primary" sx={{borderRadius:'8px'}}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} variant='contained' color="error" sx={{ marginRight: '10px', borderRadius:'8px' }}>
+              Delete Post
+            </Button>
+          </DialogActions>
+        </Dialog>
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}
