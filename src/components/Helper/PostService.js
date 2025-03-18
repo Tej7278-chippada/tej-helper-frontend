@@ -1,19 +1,19 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, } from '@mui/material';
-import API, { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, } from '@mui/material';
+import { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 // import { MapContainer, Marker, Popup } from 'react-leaflet';
 import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+// import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 // Fix for Leaflet marker icon issue
@@ -21,6 +21,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useTheme } from '@emotion/react';
 import CloseIcon from '@mui/icons-material/Close';
+import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -77,12 +78,13 @@ function PostService() {
   const [mapMode, setMapMode] = useState('normal');
   const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
   const [locationDetails, setLocationDetails] = useState(null);
-  const { id } = useParams(); // Extract sellerId from URL
+  // const { id } = useParams(); // Extract sellerId from URL
   // const [error, setError] = useState('');
   // const [successMessage, setSuccessMessage] = useState('');
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
 
     const fetchPostsData = useCallback(async () => {
@@ -280,6 +282,7 @@ function PostService() {
 
   const locateUser = async () => {
     if (navigator.geolocation) {
+      setLoadingLocation(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
@@ -291,6 +294,7 @@ function PostService() {
             longitude,
             accuracy: position.coords.accuracy, // GPS accuracy in meters
           });
+          setLoadingLocation(false);
           // console.log("User's current location:", latitude, longitude);
           // Fetch location details using an IP geolocation API
           // try {
@@ -328,6 +332,7 @@ function PostService() {
           console.error('Error getting location:', error);
           // setError('Failed to fetch your current location. Please enable location access.');
           setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
+          setLoadingLocation(false);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
       );
@@ -337,24 +342,24 @@ function PostService() {
     }
   };
 
-  const saveLocation = async () => {
-    try {
-      const authToken = localStorage.getItem('authToken');
-      await API.put(`/api/auth/${id}/location`, {
-        location: {
-          latitude: currentLocation.lat,
-          longitude: currentLocation.lng,
-        },
-      }, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      // setSuccessMessage('Location saved successfully.');
-      setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
-    } catch (err) {
-      // setError('Failed to save location. Please try again later.');
-      setSnackbar({ open: true, message: 'Failed to save your current location. Please try again later.', severity: 'error' });
-    }
-  };
+  // const saveLocation = async () => {
+  //   try {
+  //     const authToken = localStorage.getItem('authToken');
+  //     await API.put(`/api/auth/${id}/location`, {
+  //       location: {
+  //         latitude: currentLocation.lat,
+  //         longitude: currentLocation.lng,
+  //       },
+  //     }, {
+  //       headers: { Authorization: `Bearer ${authToken}` },
+  //     });
+  //     // setSuccessMessage('Location saved successfully.');
+  //     setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
+  //   } catch (err) {
+  //     // setError('Failed to save location. Please try again later.');
+  //     setSnackbar({ open: true, message: 'Failed to save your current location. Please try again later.', severity: 'error' });
+  //   }
+  // };
 
   // if (error) return <Alert severity="error">{error}</Alert>;
 
@@ -662,28 +667,47 @@ function PostService() {
                       {/* )} */}
                     </MapContainer>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                      <Button
-                        variant="contained"
+                      <IconButton
+                        sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'}}
                         onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
-                        startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon/> : <MapRoundedIcon />}
+                        // startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon/> : <MapRoundedIcon />}
                       >
-                        {mapMode === 'normal' ? 'Satellite View' : 'Normal View'}
-                      </Button>
-                      {currentLocation && (
+                        <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
+                          <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
+                        </Tooltip>
+                      </IconButton>
+                      {/* {currentLocation && (
                         <Button
                           variant="contained"
                           onClick={saveLocation}
                         >
                           Save Location
                         </Button>
+                      )} */}
+                      {locationDetails && (
+                        <Box sx={{mx:'10px'}}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Accuracy (meters):
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {locationDetails.accuracy}
+                          </Typography>
+                        </Box>
                       )}
-                      <Button
-                        variant="contained"
+                      <IconButton
+                        sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'}}
                         onClick={locateUser}
-                        startIcon={<LocationOnIcon />}
+                        // startIcon={<LocationOnIcon />}
+                        disabled={loadingLocation}
                       >
-                        Locate Me
-                      </Button>
+                       <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'} arrow placement="right">
+                          <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
+                        </Tooltip>
+                      </IconButton>
                     </Box>
                   </Box>
                 </Box>

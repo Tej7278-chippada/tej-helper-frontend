@@ -58,7 +58,7 @@ const WishList = () => {
   return (
     <Layout>
       <Box p={'4px'} sx={{ margin: '0rem' }}>
-        <Typography variant="h6" align="left" marginInline="8px" marginTop="4px" gutterBottom>
+        <Typography variant="h6" align="left" mx="8px" marginTop="4px" gutterBottom>
           Wishlisted Posts
         </Typography>
 

@@ -121,7 +121,7 @@ function RouteMapDialog({ open, onClose, post }) {
             longitude,
             accuracy: position.coords.accuracy, // GPS accuracy in meters
           });
-          console.log("User's current location:", latitude, longitude);
+          // console.log("User's current location:", latitude, longitude);
           setLoadingLocation(false); // Hide progress indicator
         },
         (error) => {
@@ -134,6 +134,7 @@ function RouteMapDialog({ open, onClose, post }) {
       );
     } else {
       console.error('Geolocation is not supported by this browser.');
+      setSnackbar({ open: true, message: 'Geolocation is not supported by this browser.', severity: 'error' });
     }
   }
   };

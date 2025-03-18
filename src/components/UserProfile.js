@@ -228,7 +228,7 @@ const UserProfile = () => {
         backgroundColor: 'rgba(255, 255, 255, 0.9)',
         borderRadius: '8px', scrollbarWidth: 'thin'
       }}>
-        <Typography variant="h6" style={{ flexGrow: 1, marginInline: '10px' }} gutterBottom>
+        <Typography variant="h6" style={{ flexGrow: 1, mx: '10px' }} gutterBottom>
           User Profile
         </Typography>
         <Box
