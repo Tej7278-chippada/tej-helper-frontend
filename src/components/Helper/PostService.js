@@ -22,6 +22,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { useTheme } from '@emotion/react';
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -29,6 +30,14 @@ const customIcon = new L.Icon({
   shadowUrl: markerShadow,
   iconSize: [25, 41], // Default size
   iconAnchor: [12, 41], // Position relative to the point
+  popupAnchor: [1, -34],
+});
+
+const userLocationIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
   popupAnchor: [1, -34],
 });
 
@@ -76,7 +85,7 @@ function PostService() {
   // const navigate = useNavigate();
   const navigate = useNavigate();
   const [mapMode, setMapMode] = useState('normal');
-  const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
+  const [currentLocation, setCurrentLocation] = useState({ latitude: 0, longitude: 0 });
   const [locationDetails, setLocationDetails] = useState(null);
   // const { id } = useParams(); // Extract sellerId from URL
   // const [error, setError] = useState('');
@@ -85,6 +94,7 @@ function PostService() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [loadingLocation, setLoadingLocation] = useState(false);
+  const [currentAddress, setCurrentAddress] = useState('');
 
 
     const fetchPostsData = useCallback(async () => {
@@ -100,21 +110,107 @@ function PostService() {
           setLoading(false);
         }
     }, []);
+
+    const locateUser = useCallback(async () => {
+      if (navigator.geolocation) {
+        setLoadingLocation(true);
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            setCurrentLocation({ latitude, longitude });
+            const locationData = { latitude, longitude };
+            localStorage.setItem('userLocation', JSON.stringify(locationData));
+            // Set location details manually using lat/lng
+            fetchAddress(latitude, longitude);
+            setLocationDetails({
+              latitude,
+              longitude,
+              accuracy: position.coords.accuracy, // GPS accuracy in meters
+            });
+            setLoadingLocation(false);
+            // console.log("User's current location:", latitude, longitude);
+            // Fetch location details using an IP geolocation API
+            // try {
+            //   const response = await fetch(`https://ipapi.co/${latitude},${longitude}/json/`);
+            //   const data = await response.json();
+            //   setLocationDetails({
+            //     ip: data.ip,
+            //     street: data.street || 'Not available',
+            //     area: data.area || 'Not available',
+            //     city: data.city,
+            //     state: data.region,
+            //     nation: data.country_name,
+            //     pincode: data.postal,
+            //     accuracy: position.coords.accuracy, // GPS accuracy in meters
+            //   });
+            // 🌍 Fetch location details using OpenStreetMap's Nominatim API
+            // try {
+            //   const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+            //   const data = await response.json();
+  
+            //   setLocationDetails({
+            //     street: data.address.road || 'Not available',
+            //     area: data.address.neighbourhood || 'Not available',
+            //     city: data.address.city || data.address.town || 'Not available',
+            //     state: data.address.state || 'Not available',
+            //     nation: data.address.country || 'Not available',
+            //     pincode: data.address.postcode || 'Not available',
+            //   });
+            // } catch (err) {
+            //   console.error('Error fetching location details:', err);
+            //   setError('Failed to fetch location details. Please try again later.');
+            // }
+          },
+          (error) => {
+            console.error('Error getting location:', error);
+            // setError('Failed to fetch your current location. Please enable location access.');
+            setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
+            setLoadingLocation(false);
+          },
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
+        );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+        setSnackbar({ open: true, message: 'Geolocation is not supported by this browser.', severity: 'error' });
+      }
+    }, []);
     
-      useEffect(() => {
-        // fetchProducts().then((response) => setProducts(response.data));
-        // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
-        fetchPostsData();
+    useEffect(() => {
+      // fetchProducts().then((response) => setProducts(response.data));
+      // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
+      fetchPostsData();
+      const storedLocation = localStorage.getItem("userLocation");
+      if (storedLocation) {
+        // Use the stored location
+        const { latitude, longitude } = JSON.parse(storedLocation);
+        // setUserLocation({ latitude, longitude });
+        setCurrentLocation({ latitude, longitude });
+        fetchAddress(latitude, longitude);
+      } else {
+        // Fetch location only if not stored
         locateUser();
-    
-        // window.addEventListener('scroll', handleScroll);
-        return () => {
-        //   window.removeEventListener('scroll', handleScroll);
-        //   if (scrollTimeoutRef.current) {
-        //     clearTimeout(scrollTimeoutRef.current);
-        //   }
-        };
-      }, [fetchPostsData]);
+      }
+      
+  
+      // window.addEventListener('scroll', handleScroll);
+      return () => {
+      //   window.removeEventListener('scroll', handleScroll);
+      //   if (scrollTimeoutRef.current) {
+      //     clearTimeout(scrollTimeoutRef.current);
+      //   }
+      };
+    }, [fetchPostsData, locateUser]);
+
+    // Fetch address from latitude and longitude
+    const fetchAddress = async (lat, lng) => {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await response.json();
+        setCurrentAddress(data.display_name);
+      } catch (error) {
+        console.error("Error fetching address:", error);
+      }
+    };
     
       const handleSubmit = async (e) => {
         e.preventDefault();
@@ -136,8 +232,8 @@ function PostService() {
 
         // Append location data
         data.append('location', JSON.stringify({
-          latitude: currentLocation.lat,
-          longitude: currentLocation.lng,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
           accuracy: locationDetails.accuracy,
           street: locationDetails.street,
           area: locationDetails.area,
@@ -189,6 +285,8 @@ function PostService() {
           peopleCount: post.peopleCount,
           serviceDays: post.serviceDays,
           description: post.description,
+          latitude: post.location.latitude,
+          longitude: post.location.longitude,
           // media: null, // Reset images to avoid re-uploading
         });
         setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
@@ -280,67 +378,7 @@ function PostService() {
       navigate(`/post/${post._id}`);
     };
 
-  const locateUser = async () => {
-    if (navigator.geolocation) {
-      setLoadingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setCurrentLocation({ lat: latitude, lng: longitude });
-
-          // Set location details manually using lat/lng
-          setLocationDetails({
-            latitude,
-            longitude,
-            accuracy: position.coords.accuracy, // GPS accuracy in meters
-          });
-          setLoadingLocation(false);
-          // console.log("User's current location:", latitude, longitude);
-          // Fetch location details using an IP geolocation API
-          // try {
-          //   const response = await fetch(`https://ipapi.co/${latitude},${longitude}/json/`);
-          //   const data = await response.json();
-          //   setLocationDetails({
-          //     ip: data.ip,
-          //     street: data.street || 'Not available',
-          //     area: data.area || 'Not available',
-          //     city: data.city,
-          //     state: data.region,
-          //     nation: data.country_name,
-          //     pincode: data.postal,
-          //     accuracy: position.coords.accuracy, // GPS accuracy in meters
-          //   });
-          // 🌍 Fetch location details using OpenStreetMap's Nominatim API
-          // try {
-          //   const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-          //   const data = await response.json();
-
-          //   setLocationDetails({
-          //     street: data.address.road || 'Not available',
-          //     area: data.address.neighbourhood || 'Not available',
-          //     city: data.address.city || data.address.town || 'Not available',
-          //     state: data.address.state || 'Not available',
-          //     nation: data.address.country || 'Not available',
-          //     pincode: data.address.postcode || 'Not available',
-          //   });
-          // } catch (err) {
-          //   console.error('Error fetching location details:', err);
-          //   setError('Failed to fetch location details. Please try again later.');
-          // }
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          // setError('Failed to fetch your current location. Please enable location access.');
-          setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
-          setLoadingLocation(false);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-      setSnackbar({ open: true, message: 'Geolocation is not supported by this browser.', severity: 'error' });
-    }
-  };
+ 
 
   // const saveLocation = async () => {
   //   try {
@@ -533,12 +571,12 @@ function PostService() {
             '& .MuiPaper-root': { // Target the dialog paper
                 borderRadius: '16px', // Apply border radius
                 scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent',
-            }, '& .MuiDialogContent-root': { margin: isMobile ? '0rem' : '1rem', padding: isMobile ? '1rem' : '0rem', 
+            }, '& .MuiDialogContent-root': { margin: isMobile ? '0rem' : '1rem', padding: isMobile ? '8px' : '0rem', 
             }, '& .MuiDialogActions-root': { margin: isMobile ? '1rem' : '1rem',
             }, 
         }}>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
-                <DialogTitle>{editingProduct ? "Edit Product" : "Add Product"}
+                <DialogTitle>{editingProduct ? "Edit Post" : "Add Post"}
                 <IconButton
                   onClick={handleCloseDialog}
                   style={{
@@ -554,7 +592,7 @@ function PostService() {
                 </DialogTitle>
                 <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '0rem' }}>
                 <Box sx={{paddingBottom:'4rem',marginBottom:'0rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
-                {locationDetails && (
+                {/* {locationDetails && (
                     <Box sx={{ margin: '1rem' }}>
                       <Typography variant="h6" gutterBottom>
                         Current Location Details
@@ -642,15 +680,24 @@ function PostService() {
                         </Grid>
                       </Grid>
                     </Box>
-                  )}
+                  )} */}
+                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    lat, lng: {formData.latitude} {formData.longitude}
+                  </Typography> */}
+                  <Box display="flex" justifyContent="start" mb={2} mt={1}>
+                    <LocationOnIcon color='primary'/>
+                    <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
+                     {currentAddress || "Fetching location..."}
+                    </Typography>
+                  </Box>
                   <Box sx={{ height: '300px', marginTop: '1rem', paddingInline:'6px' }}>
                     <MapContainer
-                      center={[currentLocation.lat, currentLocation.lng] }
+                      center={formData.latitude ? [formData.latitude, formData.longitude] : [currentLocation.latitude, currentLocation.longitude] }
                       zoom={13}
                       style={{ height: '100%', width: '100%', borderRadius:'8px', }}
                       attributionControl={false}  // Disables the watermark
                     >
-                      <ChangeView center={[currentLocation.lat, currentLocation.lng] } />
+                      <ChangeView center={formData.latitude ? [formData.latitude, formData.longitude] : [currentLocation.latitude, currentLocation.longitude] } />
                       <TileLayer
                         url={mapMode === 'normal'
                           ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -661,12 +708,17 @@ function PostService() {
                         <Popup>User Location</Popup>
                       </Marker> */}
                       {/* {currentLocation && ( */}
-                        <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
+                      {formData.latitude && (
+                        <Marker position={[formData.latitude, formData.longitude]} icon={customIcon} >
+                          <Popup>Post Previous Location</Popup>
+                        </Marker>
+                      )}
+                        <Marker position={[currentLocation.latitude, currentLocation.longitude]} icon={userLocationIcon}>
                           <Popup>Your Current Location</Popup>
                         </Marker>
                       {/* )} */}
                     </MapContainer>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', marginBottom:'1rem' }}>
                       <IconButton
                         sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
                           backgroundColor: 'rgba(255, 255, 255, 0.26)',
@@ -729,22 +781,22 @@ function PostService() {
                             </div>
                         )}
                     </Card>
-                    <Card style={{ borderRadius: '1rem', marginBottom: '2rem' }}>
-                        <div style={{ marginBottom: '1rem', margin: '1rem' }}>
-                            <Typography variant="subtitle1">Add Product Photos</Typography>
+                    <Card style={{ borderRadius: '1rem', marginBottom: '2rem', marginInline:'2px' }}>
+                        <div style={{ marginBottom: '10px', margin: '10px' }}>
+                            <Typography variant="subtitle1">Add Post Photos</Typography>
                             <input type="file" multiple onChange={handleFileChange} />
                             {/* onChange={(e) => setFormData({ ...formData, images: e.target.files })} */}
-                            <Typography variant="body2">Note : Maximum 5 Photos & Each Photo size should less than 2 MB</Typography>
+                            <Typography variant="body2" color="grey">Note : Maximum 5 Photos & Each Photo size should less than 2 MB</Typography>
                             {mediaError && <Alert severity="error">{mediaError}</Alert>}
                             {newMedia.length > 0 && (
-                                <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
+                                <div style={{ display: 'flex', gap: '4px', marginTop: '10px', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
                                     {newMedia.map((file, index) => (
                                         <div key={index} style={{ position: 'relative' }}>
                                             <img
                                                 src={URL.createObjectURL(file)}
                                                 alt={`Preview ${index}`}
                                                 style={{
-                                                    height: '200px',
+                                                    height: '160px',
                                                     borderRadius: '8px',
                                                     objectFit: 'cover',
                                                     flexShrink: 0,
@@ -764,12 +816,21 @@ function PostService() {
                         </div></Card>
                     <TextField
                         label="Post Title"
-                        fullWidth
+                        fullWidth sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '1rem',
+                            bgcolor: theme.palette.background.paper,
+                          },
+                          '& .MuiInputBase-input': {
+                            // padding: '10px 14px',
+                          },
+                          //  maxWidth: 600, mx: 'auto', paddingTop: '1rem'
+                        }}
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
                     />
-                    <FormControl fullWidth>
+                    <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                         <InputLabel>Categories</InputLabel>
                         <Select
                             value={formData.categories}
@@ -785,12 +846,12 @@ function PostService() {
                         <TextField
                             label="Price to the service (INR)"
                             type="number"
-                            fullWidth
+                            fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                             value={formData.price}
                             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                             required
                         />
-                        <FormControl fullWidth>
+                        <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                             <InputLabel>Required Gender to service</InputLabel>
                             <Select
                                 value={formData.gender}
@@ -804,7 +865,7 @@ function PostService() {
                         </FormControl>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <FormControl fullWidth required>
+                        <FormControl fullWidth required sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                             <InputLabel>Post Status</InputLabel>
                             <Select
                                 value={formData.postStatus}
@@ -820,7 +881,7 @@ function PostService() {
                             <TextField
                                 label="People Count"
                                 type="number"
-                                fullWidth
+                                fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                                 value={formData.peopleCount}
                                 onChange={(e) => setFormData({ ...formData, peopleCount: e.target.value })} required
                             />
@@ -829,7 +890,7 @@ function PostService() {
                     <TextField
                         label="Service Days"
                         type="number"
-                        fullWidth
+                        fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                         value={formData.serviceDays}
                         onChange={(e) => setFormData({ ...formData, serviceDays: e.target.value })}
                         required
@@ -838,7 +899,7 @@ function PostService() {
                         label="Description"
                         multiline
                         rows={6}
-                        fullWidth
+                        fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         required
@@ -854,7 +915,7 @@ function PostService() {
                         variant="contained"
                         color="primary"
                         disabled={loading}
-                        style={loading ? { cursor: 'wait' } : {}} sx={{ borderRadius: '14px' }}
+                        style={loading ? { cursor: 'wait' } : {}} sx={{ borderRadius: '0.5rem' }}
                     >
                         {loading ? 'Processing...' : (editingProduct ? 'Update Post' : 'Add Post')}
                     </Button>
