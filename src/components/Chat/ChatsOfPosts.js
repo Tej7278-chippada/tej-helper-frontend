@@ -146,7 +146,7 @@ const ChatsOfPosts = () => {
                   ) : (
                     buyers.map((chat) => (
                       <Box
-                        key={chat._id}
+                        key={chat.id}
                         sx={{
                           mb: '4px',
                           display: 'flex',
