@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardMedia, CardContent, Typography, Tooltip, IconButton, Grid, Box, useMediaQuery } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, Tooltip, IconButton, Grid, Box, useMediaQuery, CircularProgress } from '@mui/material';
 // import { fetchWishlist, removeFromWishlist } from '../../api/api';
 import LazyImage from './LazyImage';
 import SkeletonCards from './SkeletonCards';
@@ -19,6 +19,7 @@ const WishList = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [loadingPostRemove, setLoadingPostRemove] = useState({}); // Track loading per post
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -38,12 +39,15 @@ const WishList = () => {
   }, []);
 
   const handleRemove = async (postId) => {
+    setLoadingPostRemove((prev) => ({ ...prev, [postId]: true })); // Set loading for specific post
     try {
       await removeFromWishlist(postId);
       setWishlist((prev) => prev.filter((post) => post._id !== postId));
     } catch (error) {
       console.error('Error removing post:', error);
       alert('Failed to remove post from wishlist.');
+    } finally {
+      setLoadingPostRemove((prev) => ({ ...prev, [postId]: false })); // Reset loading state
     }
   };
 
@@ -144,7 +148,7 @@ const WishList = () => {
                               bottom: '10px',
                               right: '8px',
                               backgroundColor: hoveredId === post._id ? '#ffe6e6' : 'rgba(255, 255, 255, 0.2)',
-                              borderRadius: hoveredId === post._id ? '6px' : '50%',
+                              borderRadius: hoveredId === post._id ? '12px' : '12px',
                               boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
                               display: 'flex',
                               alignItems: 'center', color: 'red'
@@ -163,10 +167,10 @@ const WishList = () => {
                                   transition: 'opacity 0.3s, transform 0.3s',
                                 }}
                               >
-                                Remove from Wishlist
+                                {loadingPostRemove[post._id] ? 'Removing...' : 'Remove from wishlist'}
                               </span>
                             )}
-                            <HeartBrokenIcon />
+                            {loadingPostRemove[post._id] ? <CircularProgress size={20}/> : <HeartBrokenIcon />}
                           </IconButton>
                         </CardMedia>
                         <CardContent style={{ padding: '10px' }}>
