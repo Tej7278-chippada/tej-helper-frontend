@@ -890,6 +890,7 @@ function PostService() {
                     )}
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
+                    {!(formData.categories === 'UnPaid') && (
                         <TextField
                             label="Price to the service (INR)"
                             type="number"
@@ -898,6 +899,7 @@ function PostService() {
                             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                             required
                         />
+                    )}
                         <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                             <InputLabel>Required Gender to service</InputLabel>
                             <Select
