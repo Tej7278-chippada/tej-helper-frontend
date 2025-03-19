@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardMedia, CardContent, Typography, Tooltip, IconButton, Grid, Box, useMediaQuery, CircularProgress } from '@mui/material';
+import { Card, CardMedia, CardContent, Typography, Tooltip, IconButton, Grid, Box, useMediaQuery, CircularProgress, Snackbar, Alert } from '@mui/material';
 // import { fetchWishlist, removeFromWishlist } from '../../api/api';
 import LazyImage from './LazyImage';
 import SkeletonCards from './SkeletonCards';
@@ -13,13 +13,14 @@ import { useTheme } from '@emotion/react';
 const WishList = () => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // const [error, setError] = useState(null);
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [hoveredId, setHoveredId] = useState(null);
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loadingPostRemove, setLoadingPostRemove] = useState({}); // Track loading per post
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -29,7 +30,8 @@ const WishList = () => {
         setWishlist(response.data.wishlist.reverse() || []); // Assuming the backend response has `wishlist` array
       } catch (error) {
         console.error('Error fetching wishlist:', error);
-        setError('Failed to fetch wishlist.');
+        // setError('Failed to fetch wishlist.');
+        setSnackbar({ open: true, message: 'Failed to fetch your wishlist.', severity: 'error' });
         // setLoading(false);
       } finally {
         setLoading(false);
@@ -38,16 +40,18 @@ const WishList = () => {
     loadWishlist();
   }, []);
 
-  const handleRemove = async (postId) => {
-    setLoadingPostRemove((prev) => ({ ...prev, [postId]: true })); // Set loading for specific post
+  const handleRemove = async (post) => {
+    setLoadingPostRemove((prev) => ({ ...prev, [post._id]: true })); // Set loading for specific post
     try {
-      await removeFromWishlist(postId);
-      setWishlist((prev) => prev.filter((post) => post._id !== postId));
+      await removeFromWishlist(post._id);
+      setWishlist((prev) => prev.filter((prevPost) => prevPost._id !== post._id));
+      setSnackbar({ open: true, message: `Post ${post.title} removed from wishlist successfully.`, severity: 'success' });
     } catch (error) {
       console.error('Error removing post:', error);
-      alert('Failed to remove post from wishlist.');
+      // alert('Failed to remove post from wishlist.');
+      setSnackbar({ open: true, message: 'Failed to removing post from your wishlist.', severity: 'error' });
     } finally {
-      setLoadingPostRemove((prev) => ({ ...prev, [postId]: false })); // Reset loading state
+      setLoadingPostRemove((prev) => ({ ...prev, [post._id]: false })); // Reset loading state
     }
   };
 
@@ -57,7 +61,9 @@ const WishList = () => {
   };
 
   // if (loading) return <p>Loading wishlist...</p>;
-  if (error) return <p>{error}</p>;
+  // if (error) return <p>{error}</p>;
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
     <Layout>
@@ -139,7 +145,7 @@ const WishList = () => {
                           <IconButton
                             onClick={(event) => {
                               event.stopPropagation(); // Prevent triggering the parent onClick
-                              handleRemove(post._id);
+                              handleRemove(post);
                             }}
                             onMouseEnter={() => setHoveredId(post._id)} // Set hoveredId to the current button's ID
                             onMouseLeave={() => setHoveredId(null)} // Reset hoveredId when mouse leaves
@@ -213,6 +219,16 @@ const WishList = () => {
           <ProductDetail product={selectedProduct} onClose={() => setSelectedProduct(null)} />
         )} */}
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };
