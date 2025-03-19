@@ -318,11 +318,31 @@ function PostDetailsById({ onClose, user }) {
   // };
 
   const shareLocation = () => {
-    const url = `https://www.google.com/maps?q=${post.location.latitude},${post.location.longitude}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setSuccessMessage('Post location link copied.');
-    });
+    const { latitude, longitude } = post.location;
+    const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+  
+    // Try to open in an external maps application
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+    const iosMapsUrl = `maps://maps.apple.com/?q=${latitude},${longitude}`;
+    const androidMapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+  
+    if (isMobile) {
+      // Open Apple Maps on iOS, Google Maps on Android
+      const mapLink = navigator.userAgent.includes("iPhone") ? iosMapsUrl : androidMapsUrl;
+      window.open(mapLink, "_blank");
+    } else {
+      // Open Google Maps on desktop
+      window.open(mapsUrl, "_blank");
+    }
+  
+    // Fallback: Copy to clipboard if maps app is unavailable
+    setTimeout(() => {
+      navigator.clipboard.writeText(mapsUrl).then(() => {
+        setSuccessMessage("Post location link copied to clipboard.");
+      });
+    }, 500); // Delay to avoid clipboard overwrite if maps app opens
   };
+  
   
 
 
@@ -540,7 +560,7 @@ function PostDetailsById({ onClose, user }) {
                   </Grid> */}
                   <Grid item xs={12} sm={12}>
                     <Typography variant="body2" color='grey' style={{ fontWeight: 500 }}>
-                      See post location on other maps by searching this post location link on google
+                      See post location on other maps or search this link on Google
                       <IconButton
                         style={{
                           // display: 'inline-block',
@@ -551,7 +571,7 @@ function PostDetailsById({ onClose, user }) {
                         }}
                         onClick={shareLocation}
                       >
-                      <CustomTooltip  title="Copy Post location" arrow placement="top">
+                      <CustomTooltip  title="open Post location" arrow placement="top">
                         <LinkRoundedIcon />
                       </CustomTooltip >
                     </IconButton>
