@@ -317,30 +317,67 @@ function PostDetailsById({ onClose, user }) {
   //   }
   // };
 
-  const shareLocation = () => {
-    const { latitude, longitude } = post.location;
-    const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+  // const shareLocation = () => {
+  //   const { latitude, longitude } = post.location;
+  //   const mapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
   
-    // Try to open in an external maps application
-    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
-    const iosMapsUrl = `maps://maps.apple.com/?q=${latitude},${longitude}`;
-    const androidMapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+  //   // Try to open in an external maps application
+  //   const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+  //   const iosMapsUrl = `maps://maps.apple.com/?q=${latitude},${longitude}`;
+  //   const androidMapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+  
+  //   if (isMobile) {
+  //     // Open Apple Maps on iOS, Google Maps on Android
+  //     const mapLink = navigator.userAgent.includes("iPhone") ? iosMapsUrl : androidMapsUrl;
+  //     window.open(mapLink, "_blank");
+  //   } else {
+  //     // Open Google Maps on desktop
+  //     window.open(mapsUrl, "_blank");
+  //   }
+  
+  //   // Fallback: Copy to clipboard if maps app is unavailable
+  //   setTimeout(() => {
+  //     navigator.clipboard.writeText(mapsUrl).then(() => {
+  //       setSuccessMessage("Post location link copied to clipboard.");
+  //     });
+  //   }, 500); // Delay to avoid clipboard overwrite if maps app opens
+  // };
+
+  const openPostLocation = () => {
+    const { latitude, longitude } = post.location;
+    const locationUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
+  
+    // Try to open in external map apps
+    const appleMapsUrl = `maps://maps.apple.com/?q=${latitude},${longitude}`;
+    const googleMapsUrl = `geo:${latitude},${longitude}?q=${latitude},${longitude}`;
+    // const wazeUrl = `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`;
   
     if (isMobile) {
-      // Open Apple Maps on iOS, Google Maps on Android
-      const mapLink = navigator.userAgent.includes("iPhone") ? iosMapsUrl : androidMapsUrl;
-      window.open(mapLink, "_blank");
+      // Check if navigator is available (for detecting platform)
+      // const mapLink = navigator.userAgent.includes("iPhone") ? iosMapsUrl : androidMapsUrl;
+      if (navigator.userAgent) {
+        const isApple = /iPhone|iPad|Macintosh/.test(navigator.userAgent);
+        const isAndroid = /Android/.test(navigator.userAgent);
+    
+        if (isApple) {
+          window.open(appleMapsUrl, '_blank'); // Open in Apple Maps on iOS/macOS
+        } else if (isAndroid) {
+          window.open(googleMapsUrl, '_blank'); // Open in Google Maps on Android
+        } else {
+          // If it's a desktop/laptop or no maps app is found, copy the link
+          navigator.clipboard.writeText(locationUrl).then(() => {
+            setSuccessMessage('Post location link copied. Paste it in Google to search.');
+          });
+        }
+      }
     } else {
       // Open Google Maps on desktop
-      window.open(mapsUrl, "_blank");
-    }
-  
-    // Fallback: Copy to clipboard if maps app is unavailable
-    setTimeout(() => {
-      navigator.clipboard.writeText(mapsUrl).then(() => {
-        setSuccessMessage("Post location link copied to clipboard.");
+      window.open(locationUrl, "_blank");
+      // Fallback if no userAgent detection is possible
+      navigator.clipboard.writeText(locationUrl).then(() => {
+        setSuccessMessage('Post location link copied. Paste it in Google to search.');
       });
-    }, 500); // Delay to avoid clipboard overwrite if maps app opens
+    }
   };
   
   
@@ -569,7 +606,7 @@ function PostDetailsById({ onClose, user }) {
                           backgroundColor: 'rgba(255, 255, 255, 0)',
                           boxShadow: '0 2px 5px rgba(0, 0, 0, 0)', marginLeft: '10px', padding:'0px'
                         }}
-                        onClick={shareLocation}
+                        onClick={openPostLocation}
                       >
                       <CustomTooltip  title="open Post location" arrow placement="top">
                         <LinkRoundedIcon />

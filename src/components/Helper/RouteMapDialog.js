@@ -223,7 +223,8 @@ function RouteMapDialog({ open, onClose, post }) {
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
-
+  // Define the bounds of the world
+  const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile ? true : true} sx={{
@@ -256,13 +257,26 @@ function RouteMapDialog({ open, onClose, post }) {
               style={{ height: '100%', width: '100%', borderRadius: '8px', }}
               attributionControl={false}  // Disables the watermark
               ref={mapRef}
+              maxBounds={worldBounds} // Restrict the map to the world bounds
+              maxBoundsViscosity={1.0} // Prevents the map from being dragged outside the bounds
             >
               <ChangeView center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]} />
               <TileLayer
                 url={mapMode === 'normal'
                   ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                  : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                  : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+                }
+                noWrap={true} // Disable infinite wrapping
+                // attribution="Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community"
               />
+              {/* Labels and Roads Layer (Overlay) */}
+              {mapMode === 'satellite' && (
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png" //url="https://cartodb-basemaps-a.global.ssl.fastly.net/light_only_labels/{z}/{x}/{y}{r}.png"
+                  // attribution="© OpenStreetMap contributors, © CartoDB"
+                  opacity={1} // Make it semi-transparent if needed
+                />
+              )}
               <Marker position={[post.location.latitude, post.location.longitude]} icon={customIcon}
               >
                 <Popup>Post Location</Popup>
