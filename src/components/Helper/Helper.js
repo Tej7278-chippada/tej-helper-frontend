@@ -326,6 +326,9 @@ const Helper = ()=> {
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
+  // Define the bounds of the world
+  const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
+
   return (
     <Layout username={tokenUsername}>
       <Box>
@@ -395,13 +398,23 @@ const Helper = ()=> {
                     ref={mapRef}
                     // whenCreated={setMap}
                     whenCreated={(map) => (mapRef.current = map)}
+                    maxBounds={worldBounds} // Restrict the map to the world bounds
+                    maxBoundsViscosity={1.0} // Prevents the map from being dragged outside the bounds
                   >
                     <ChangeView center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]} />
                     <TileLayer
                       url={mapMode === 'normal'
                         ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
                         : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                      noWrap={true} // Disable infinite wrapping
                     />
+                    {/* Labels and Roads Layer (Overlay) */}
+                    {mapMode === 'satellite' && (
+                      <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+                        opacity={1} // Make it semi-transparent if needed
+                      />
+                    )}
                     {userLocation && (
                       <Marker position={[userLocation.latitude, userLocation.longitude]} icon={customIcon}>
                         <Popup>Your Current Location</Popup>
