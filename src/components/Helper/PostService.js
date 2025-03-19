@@ -861,6 +861,7 @@ function PostService() {
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                         required
                     />
+                    <div style={{ display: 'flex', gap: '1rem' }}>
                     <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                         <InputLabel>Categories</InputLabel>
                         <Select
@@ -873,6 +874,21 @@ function PostService() {
                             <MenuItem value="Emergency">Emergency Service</MenuItem>
                         </Select>
                     </FormControl>
+                    {editingProduct && (
+                      <FormControl fullWidth required sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
+                          <InputLabel>Post Status</InputLabel>
+                          <Select
+                              value={formData.postStatus}
+                              onChange={(e) => setFormData({ ...formData, postStatus: e.target.value })}
+                              required
+                          >
+                              <MenuItem value="Active">Active</MenuItem>
+                              <MenuItem value="InActive">Inactive</MenuItem>
+                              <MenuItem value="Closed">Closed</MenuItem>
+                          </Select>
+                      </FormControl>
+                    )}
+                    </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         <TextField
                             label="Price to the service (INR)"
@@ -896,18 +912,6 @@ function PostService() {
                         </FormControl>
                     </div>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <FormControl fullWidth required sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
-                            <InputLabel>Post Status</InputLabel>
-                            <Select
-                                value={formData.postStatus}
-                                onChange={(e) => setFormData({ ...formData, postStatus: e.target.value })}
-                                required
-                            >
-                                <MenuItem value="Active">Active</MenuItem>
-                                <MenuItem value="InActive">Inactive</MenuItem>
-                                <MenuItem value="Closed">Closed</MenuItem>
-                            </Select>
-                        </FormControl>
                         {/* {formData.stockStatus === 'In Stock' && ( */}
                             <TextField
                                 label="People Count"
@@ -917,8 +921,7 @@ function PostService() {
                                 onChange={(e) => setFormData({ ...formData, peopleCount: e.target.value })} required
                             />
                         {/* )} */}
-                    </div>
-                    <TextField
+                        <TextField
                         label="Service Days"
                         type="number"
                         fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
@@ -926,6 +929,8 @@ function PostService() {
                         onChange={(e) => setFormData({ ...formData, serviceDays: e.target.value })}
                         required
                     />
+                    </div>
+                    
                     <TextField
                         label="Description"
                         multiline
