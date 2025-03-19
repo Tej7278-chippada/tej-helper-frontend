@@ -192,7 +192,7 @@ const Login = () => {
         <TextField
           label="Username or Email"
           variant="outlined"
-          fullWidth
+          fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
           margin="normal"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
@@ -201,7 +201,7 @@ const Login = () => {
           label="Password"
           type={showPassword ? 'text' : 'password'} // Toggle between text and password
           variant="outlined"
-          fullWidth
+          fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -220,27 +220,28 @@ const Login = () => {
         />
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
-        <Button type="submit" variant="contained" color="primary" fullWidth style={{ marginTop: '1rem' }} disabled={loading}>
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: '1rem', borderRadius:'12px' }} disabled={loading}>
         {loading ? <CircularProgress size={24} /> : 'Login'}
         </Button>
-        <Button variant="text" color="primary" fullWidth onClick={handleForgotPassword} style={{ marginTop: '10px' }}>
-              Forgot Password?
-            </Button>
+        <Button variant="text" color="primary" fullWidth onClick={handleForgotPassword} sx={{ marginTop: '10px', borderRadius:'12px' }}>
+          Forgot Password?
+        </Button>
         <Typography variant="body2" align="center" style={{ marginTop: '10px' }}>
           Don't have an account?{' '}
           {/* <Button href="/register" variant="text">
             Register  Can be used only site deployed on custom domain, cant use on static domain of netlify
           </Button> */}
-          <Link to="/register" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block' }}>
+          <Link to="/register" sx={{ color: 'inherit', textDecoration: 'none', display: 'inline-block', borderRadius: '12px' }}>
             <Button variant="text">
               Register
             </Button>
           </Link>
         </Typography>
       </form>
-      <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth>
-            <DialogContent>
-              {/* Close button */}
+      <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth fullScreen={isMobile ? true : false}
+        sx={{ margin: '1rem', '& .MuiPaper-root': { borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },'& .MuiDialogContent-root': { padding: isMobile ? '1rem' : '1rem', },}}>
+        <DialogContent sx={{scrollbarWidth:'thin'}}>
+        {/* Close button */}
         {/* <IconButton
           onClick={() => setForgotPasswordOpen(false)}
           style={{
@@ -254,11 +255,11 @@ const Login = () => {
           <CloseIcon />
         </IconButton> */}
               <ForgotPassword />
-            </DialogContent>
-            <DialogActions>
-            <Button onClick={() => setForgotPasswordOpen(false)} color="secondary">Close</Button>
-          </DialogActions>
-          </Dialog>
+        </DialogContent>
+        <DialogActions>
+          <Button sx={{borderRadius:'12px'}} onClick={() => setForgotPasswordOpen(false)} color="secondary">Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
 
     {/* Forgot Password Dialog */}

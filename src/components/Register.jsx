@@ -241,11 +241,11 @@ const Register = () => {
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh"
           padding={isMobile ? 2 : 4} // Adjust padding for mobile
         >
-          <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
-            Register
+          <Typography variant={isMobile ? "h5" : "h5"} gutterBottom>
+            Create New Account
           </Typography>
           <form onSubmit={handleRegister} style={{ maxWidth: '400px', width: '100%' }}>
-            <Box textAlign="center" paddingTop={4} mb={2} >
+            <Box textAlign="center" paddingTop={3} mb={2} >
               {croppedImage ? (
                 <div>
                   <img
@@ -317,18 +317,18 @@ const Register = () => {
             <TextField
               label="Username (Format ex: Abc1234)"
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',} , '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
-            <TextField label="Email" fullWidth margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <TextField label="Phone" fullWidth margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <TextField label="Email" fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}} margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <TextField label="Phone" fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}} margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} />
             <TextField
               label="Password"
               type={showPassword ? 'text' : 'password'} // Toggle between text and password
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -349,7 +349,7 @@ const Register = () => {
               label="Confirm Password"
               type={showConfirmPassword ? 'text' : 'password'} // Toggle between text and password
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -368,7 +368,7 @@ const Register = () => {
             />
             <TextField
               label="Pincode"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={address.pincode}
               onChange={(e) => {
@@ -380,7 +380,7 @@ const Register = () => {
             <TextField
               label="Street"
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={address.street}
               onChange={(e) => handleAddressChange('street', e.target.value)}
@@ -388,7 +388,7 @@ const Register = () => {
             <TextField
               label="Area"
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={address.area}
               onChange={(e) => handleAddressChange('area', e.target.value)}
@@ -396,7 +396,7 @@ const Register = () => {
             <TextField
               label="City"
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={address.city}
               onChange={(e) => handleAddressChange('city', e.target.value)}
@@ -405,7 +405,7 @@ const Register = () => {
             <TextField
               select
               label="State"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}, '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={address.state}
               onChange={(e) => handleAddressChange('state', e.target.value)}
@@ -418,12 +418,12 @@ const Register = () => {
             </TextField>
             {error && <Alert severity="error">{error}</Alert>}
             {success && <Alert severity="success">{success}</Alert>}
-            <Button type="submit" style={{marginTop:'1rem'}} variant="contained" color="primary" fullWidth disabled={loading}>
+            <Button type="submit" sx={{marginTop:'1rem', borderRadius:'12px'}} variant="contained" color="primary" fullWidth disabled={loading}>
               {loading ? <CircularProgress size={24} /> : 'Register'}
             </Button>
-            <Typography variant="body2" align="center" style={{ marginTop: '10px' }}>
+            <Typography variant="body2" align="center" sx={{ marginTop: '10px' }}>
               Already have an account?{' '}
-              <Button href="/login" variant="text">
+              <Button href="/login" variant="text" sx={{borderRadius:'12px'}}>
                 Login
               </Button>
             </Typography>

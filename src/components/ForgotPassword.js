@@ -126,14 +126,14 @@ const ForgotPassword = () => {
   };
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" maxWidth="400px" margin="auto" padding={3} sx={{ gap: 2 }}>
+    <Box display="flex" flexDirection="column" alignItems="center" maxWidth="400px" margin="auto" padding={0} sx={{ gap: 2 }}>
         <Typography variant="h5" gutterBottom>Forgot Password</Typography>
         {step === 1 && (
           <>
             <TextField
               label="Username"
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',} , '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -141,14 +141,14 @@ const ForgotPassword = () => {
             <TextField
               label="Email or Phone"
               variant="outlined"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',} , '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={contact}
               onChange={(e) => setContact(e.target.value)}
             />
             {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
             {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-            <Button variant="contained" color="primary" fullWidth onClick={handleRequestOtp} disabled={loading} style={{ marginTop: '1rem' }}>
+            <Button variant="contained" color="primary" fullWidth onClick={handleRequestOtp} disabled={loading} sx={{ marginTop: '1rem', borderRadius:'12px' }}>
             {loading ? <CircularProgress size={24} /> : 'Request OTP'}
           </Button>
           </>
@@ -156,7 +156,7 @@ const ForgotPassword = () => {
         {step === 2 && (
           <>
             <Typography variant="body1" gutterBottom>Enter the 6-digit OTP:</Typography>
-            <Grid container spacing={1} justifyContent="center">
+            <Grid container spacing="4px" justifyContent="center">
               {otp.map((digit, index) => (
                 <Grid item key={index} xs="auto">
                   <TextField
@@ -169,7 +169,7 @@ const ForgotPassword = () => {
                     value={digit}
                     onChange={(e) => handleOtpChange(e, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
-                    sx={{
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',} , '& .MuiInputBase-input': { padding: '6px 8px', },
                       width: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
                       margin: { xs: '1 0.25rem', sm: '1 0.5rem', md: '1 0.25rem' },
                     }}
@@ -180,7 +180,7 @@ const ForgotPassword = () => {
             <TextField
               label="New Password"
               type="password"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',} , '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -188,19 +188,23 @@ const ForgotPassword = () => {
             <TextField
               label="Confirm New Password"
               type="password"
-              fullWidth
+              fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',} , '& .MuiInputBase-input': { padding: '14px 14px', },}}
               margin="normal"
               value={confirmNewPassword}
               onChange={(e) => setConfirmNewPassword(e.target.value)}
             />
             {success && <Alert severity="success" style={{ marginTop: '10px' }}>{success}</Alert>}
             {error && <Alert severity="error" style={{ marginTop: '10px' }}>{error}</Alert>}
-            <Button variant="outlined" color="secondary" fullWidth onClick={handleResendOtp} disabled={resendDisabled || loading} >
-              {resendDisabled ? `Resend OTP (${resendTimer}s)` : 'Resend OTP'}
-            </Button>
-            <Button variant="contained" color="primary" fullWidth onClick={handleResetPassword} disabled={loading}>
+            
+            <Button variant="contained" sx={{borderRadius:'12px'}} color="primary" fullWidth onClick={handleResetPassword} disabled={loading}>
               {loading ? <CircularProgress size={24} /> : 'Reset Password'}
             </Button>
+            <Box sx={{marginTop: '10px' , display:'flex', justifyContent:'center', alignItems:'center', gap:'10px'}}>
+              <Typography variant="body2" >Didn't receive OTP?</Typography>
+              <Button variant="text" sx={{borderRadius:'12px',  }} color="secondary" onClick={handleResendOtp} disabled={resendDisabled || loading} >
+                {resendDisabled ? `Resend OTP (${resendTimer}s)` : 'Resend OTP'}
+              </Button>
+            </Box>
           </>
         )}
         {step === 3 && (
