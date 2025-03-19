@@ -13,6 +13,8 @@ import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
 import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import CloseIcon from '@mui/icons-material/Close';
+import StarOutlineRoundedIcon from '@mui/icons-material/StarOutlineRounded';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -33,7 +35,9 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
   const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-
+  const [isHelper, setIsHelper] = useState(false);
+  const [helperCount, setHelperCount] = useState(0);
+  const [peopleCount, setPeopleCount] = useState(0);
 
   
 
@@ -52,6 +56,23 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
       setIsFetching(false);
     }
   }, [authToken, chatData.id, postId]);
+
+  useEffect(() => {
+    const fetchPostDetails = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/posts/${postId}`, {
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        const post = response.data;
+        setIsHelper(post.helperIds.includes(chatData.id));
+        setHelperCount(post.helperIds.length);
+        setPeopleCount(post.peopleCount);
+      } catch (error) {
+        console.error('Error fetching post details:', error);
+      }
+    };
+    fetchPostDetails();
+  }, [chatData.id, postId, authToken]);
 
   useEffect(() => {
     if (postId && chatData.id) {
@@ -149,6 +170,20 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
   const scrollToBottom = () => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const toggleHelper = async () => {
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/toggle-helper`, 
+        { postId, buyerId: chatData.id }, 
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+
+      setIsHelper(!isHelper);
+      setHelperCount(response.data.helperIds.length);
+    } catch (error) {
+      console.error('Error toggling helper:', error);
     }
   };
 
@@ -264,15 +299,20 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
             </Box>
             
           </Box> 
-          {isMobile && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <IconButton 
-              onClick={handleCloseDialog}
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-          )}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap:1 }}>
+            <IconButton onClick={toggleHelper} disabled={helperCount >= peopleCount && !isHelper}>
+              {isHelper ? <StarRoundedIcon fontSize="medium" /> : <StarOutlineRoundedIcon fontSize="medium" />}
+            </IconButton>
+            {isMobile && (
+              <Box >
+                <IconButton 
+                onClick={handleCloseDialog}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            )}
+          </Box>
         {/* ) : null} */}
       {/* </Box> */}
     </Box>
