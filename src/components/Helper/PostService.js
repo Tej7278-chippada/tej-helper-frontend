@@ -781,35 +781,37 @@ function PostService() {
                     </Box>
                   </Box>
                 </Box>
-                    <Card style={{ borderRadius: '1rem' }}>
+                    <Card style={{ borderRadius: '1rem', marginInline:'2px' }}>
                         {/* Existing media with delete option */}
                         {existingMedia.length > 0 && (
-                            <div style={{ marginBottom: '1rem', margin: '1rem' }}>
-                                <Typography variant="subtitle1">Existing Images</Typography>
-                                <div style={{ display: 'flex', overflowX: 'scroll', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
+                            <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
+                                <Typography ml={1} variant="subtitle1">Existing Images</Typography>
+                                <Box style={{ display: 'flex', overflowX: 'scroll', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
                                     {existingMedia.map((media) => (
                                         !media.remove && (
-                                            <div key={media._id} style={{ position: 'relative', margin: '5px' }}>
-                                                <img src={`data:image/jpeg;base64,${media.data}`} alt="Product Media" style={{ height: '200px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
+                                            <Box key={media._id} style={{ position: 'relative', margin: '2px' }}>
+                                                <img src={`data:image/jpeg;base64,${media.data}`} alt="Product Media" style={{ height: '160px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
                                                 <Button size="small" color="secondary" onClick={() => handleDeleteMedia(media._id)}>Remove</Button>
-                                            </div>
+                                            </Box>
                                         )
                                     ))}
-                                </div>
-                            </div>
+                                </Box>
+                            </Box>
                         )}
                     </Card>
                     <Card style={{ borderRadius: '1rem', marginBottom: '2rem', marginInline:'2px' }}>
-                        <div style={{ marginBottom: '10px', margin: '10px' }}>
-                            <Typography variant="subtitle1">Add Post Photos</Typography>
-                            <input type="file" multiple onChange={handleFileChange} />
-                            {/* onChange={(e) => setFormData({ ...formData, images: e.target.files })} */}
-                            <Typography variant="body2" color="grey">Note : Maximum 5 Photos & Each Photo size should less than 2 MB</Typography>
-                            {mediaError && <Alert severity="error">{mediaError}</Alert>}
+                        <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
+                            <Box sx={{marginInline:'4px'}}>
+                              <Typography variant="subtitle1">Add Post Photos</Typography>
+                              <input type="file" multiple onChange={handleFileChange} />
+                              {/* onChange={(e) => setFormData({ ...formData, images: e.target.files })} */}
+                              <Typography variant="body2" color="grey">Note : Maximum 5 Photos & Each Photo size should less than 2 MB</Typography>
+                              {mediaError && <Alert severity="error">{mediaError}</Alert>}
+                            </Box>
                             {newMedia.length > 0 && (
-                                <div style={{ display: 'flex', gap: '4px', marginTop: '10px', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
+                                <Box style={{ display: 'flex', gap: '4px', marginTop: '10px', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
                                     {newMedia.map((file, index) => (
-                                        <div key={index} style={{ position: 'relative' }}>
+                                        <Box key={index} style={{ position: 'relative' }}>
                                             <img
                                                 src={URL.createObjectURL(file)}
                                                 alt={`Preview ${index}`}
@@ -827,11 +829,11 @@ function PostService() {
                                                 onClick={() => setNewMedia((prev) => prev.filter((_, i) => i !== index))}>
                                                 Remove
                                             </Button>
-                                        </div>
+                                        </Box>
                                     ))}
-                                </div>
+                                </Box>
                             )}
-                        </div></Card>
+                        </Box></Card>
                     <TextField
                         label="Post Title"
                         fullWidth sx={{
