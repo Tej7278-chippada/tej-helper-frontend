@@ -101,11 +101,15 @@ function PostDetailsById({ onClose, user }) {
   useEffect(() => {
     const checkWishlistStatus = async () => {
       if (isAuthenticated && post) {
+        setWishLoading(true);
         try {
           const isInWishlist = await checkPostInWishlist(post._id);
           setWishlist(new Set(isInWishlist ? [post._id] : []));
+          setWishLoading(false);
         } catch (error) {
           console.error('Error checking wishlist status:', error);
+        } finally {
+          setWishLoading(false);
         }
       }
     };
