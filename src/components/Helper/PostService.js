@@ -858,7 +858,14 @@ function PostService() {
                           //  maxWidth: 600, mx: 'auto', paddingTop: '1rem'
                         }}
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        // onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) => {
+                          const maxLength = 100; // Set character limit
+                          if (e.target.value.length <= maxLength) {
+                            setFormData({ ...formData, title: e.target.value });
+                          }
+                        }}
+                        inputProps={{ maxLength: 100 }} // Ensures no more than 100 characters can be typed
                         required
                     />
                     <div style={{ display: 'flex', gap: '1rem' }}>
@@ -896,7 +903,21 @@ function PostService() {
                             type="number"
                             fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                             value={formData.price}
-                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                            onChange={(e) => { 
+                              let value = e.target.value;
+                              // Remove any invalid characters like "-", "+", or ","
+                              value = value.replace(/[-+,]/g, '');
+                              
+                              // Allow only numbers with up to two decimal places
+                              if (/^\d*\.?\d{0,2}$/.test(value)) {  
+                                const num = Number(value);
+                                
+                                // Ensure the value is within range (0 to 10,000,000)
+                                if (num >= 0 && num <= 10000000) {
+                                  setFormData({ ...formData, price: value });
+                                }
+                              }
+                            }}
                             required
                         />
                     )}
@@ -916,11 +937,28 @@ function PostService() {
                     <div style={{ display: 'flex', gap: '1rem' }}>
                         {/* {formData.stockStatus === 'In Stock' && ( */}
                             <TextField
-                                label="People Count"
+                                label="People Count" required
                                 type="number"
                                 fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                                 value={formData.peopleCount}
-                                onChange={(e) => setFormData({ ...formData, peopleCount: e.target.value })} required
+                                // onChange={(e) => setFormData({ ...formData, peopleCount: e.target.value })} required
+                                onChange={(e) => { 
+                                  let value = e.target.value;
+                                  
+                                  // Remove any invalid characters like "-", "+", ",", and "."
+                                  value = value.replace(/[-+,.]/g, '');
+                                  
+                                  // Allow only whole numbers (no decimals) and limit the range (0 to 10,000)
+                                  if (/^\d+$/.test(value)  && Number(value) <= 10000) {  
+                                    // const num = Number(value);
+                                    
+                                    // Ensure the value is within range (0 to 10,000,000)
+                                    // if (num >= 0 && num <= 10000) {
+                                      setFormData({ ...formData, peopleCount: value });
+                                    // }
+                                  }
+                                }}
+                                inputProps={{ min: 0, max: 10000, step: 1 }} // Ensures only valid whole numbers
                             />
                         {/* )} */}
                         <TextField
@@ -928,8 +966,25 @@ function PostService() {
                         type="number"
                         fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                         value={formData.serviceDays}
-                        onChange={(e) => setFormData({ ...formData, serviceDays: e.target.value })}
+                        // onChange={(e) => setFormData({ ...formData, serviceDays: e.target.value })}
                         required
+                        onChange={(e) => { 
+                          let value = e.target.value;
+                          
+                          // Remove any invalid characters like "-", "+", ",", and "."
+                          value = value.replace(/[-+,.]/g, '');
+                          
+                          // Allow only numbers with up to two decimal places
+                          if (/^\d+$/.test(value)  && Number(value) <= 10000) {  
+                            // const num = Number(value);
+                            
+                            // Ensure the value is within range (0 to 10,000,000)
+                            // if (num >= 0 && num <= 10000) {
+                              setFormData({ ...formData, serviceDays: value });
+                            // }
+                          }
+                        }}
+                        inputProps={{ min: 0, max: 10000, step: 1 }} // Ensures only valid whole numbers
                     />
                     </div>
                     
@@ -939,7 +994,14 @@ function PostService() {
                         rows={6}
                         fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        // onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(e) => {
+                          const maxLength = 1000; // Set character limit
+                          if (e.target.value.length <= maxLength) {
+                            setFormData({ ...formData, description: e.target.value });
+                          }
+                        }}
+                        inputProps={{ maxLength: 1000 }} // Ensures no more than 100 characters can be typed
                         required
                     />
 
