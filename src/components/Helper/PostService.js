@@ -962,20 +962,15 @@ function PostService() {
                                 onChange={(e) => { 
                                   let value = e.target.value;
                                   
-                                  // Remove any invalid characters like "-", "+", ",", and "."
-                                  value = value.replace(/[-+,.]/g, '');
+                                  // Remove any non-numeric characters except empty string (allow backspacing)
+                                  value = value.replace(/[^0-9]/g, ''); 
                                   
-                                  // Allow only whole numbers (no decimals) and limit the range (0 to 10,000)
-                                  if (/^\d+$/.test(value)  && Number(value) <= 10000) {  
-                                    // const num = Number(value);
-                                    
-                                    // Ensure the value is within range (0 to 10,000,000)
-                                    // if (num >= 0 && num <= 10000) {
-                                      setFormData({ ...formData, peopleCount: value });
-                                    // }
+                                  // Convert to a number if it's not empty
+                                  if (value === '' || (Number(value) <= 10000)) {  
+                                    setFormData({ ...formData, peopleCount: value });
                                   }
                                 }}
-                                inputProps={{ min: 0, max: 10000, step: 1 }} // Ensures only valid whole numbers
+                                inputProps={{ min: 1, max: 10000, step: 1 }} // Ensures only valid whole numbers
                             />
                         {/* )} */}
                         <TextField
@@ -987,21 +982,16 @@ function PostService() {
                         required
                         onChange={(e) => { 
                           let value = e.target.value;
+
+                          // Remove any non-numeric characters except empty string (allow backspacing)
+                          value = value.replace(/[^0-9]/g, ''); 
                           
-                          // Remove any invalid characters like "-", "+", ",", and "."
-                          value = value.replace(/[-+,.]/g, '');
-                          
-                          // Allow only numbers with up to two decimal places
-                          if (/^\d+$/.test(value)  && Number(value) <= 10000) {  
-                            // const num = Number(value);
-                            
-                            // Ensure the value is within range (0 to 10,000,000)
-                            // if (num >= 0 && num <= 10000) {
-                              setFormData({ ...formData, serviceDays: value });
-                            // }
+                          // Convert to a number if it's not empty
+                          if (value === '' || (Number(value) <= 10000)) {  
+                            setFormData({ ...formData, serviceDays: value });
                           }
                         }}
-                        inputProps={{ min: 0, max: 10000, step: 1 }} // Ensures only valid whole numbers
+                        inputProps={{ min: 1, max: 10000, step: 1 }} // Ensures only valid whole numbers
                     />
                     </div>
                     

@@ -336,7 +336,7 @@ const Helper = ()=> {
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
-          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '10px', marginLeft: '-1rem'}}>
+          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '6px', marginLeft: '-1rem'}}>
           <IconButton color="primary" onClick={() => setShowMap(true)} >
             <LocationOnIcon />
             <Typography variant="body1" sx={{marginLeft:'0px' }}>
@@ -514,14 +514,14 @@ const Helper = ()=> {
             sx={{
               backgroundColor: "#1976d2",
               color: "#fff",
-              padding: "8px 16px",
+              padding: "8px 12px",
               borderRadius: "24px",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
               "&:hover": { backgroundColor: "#1565c0" },
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              marginRight: "10px",
+              marginRight: "6px",
             }}
           >
             {distanceRange} km
@@ -576,23 +576,43 @@ const Helper = ()=> {
               {!isMobile && (
                 <Box sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
                   <TextField
-                    label="Custom Distance (km)"
+                    label="custom input (km)"
                     type="number"
                     value={distanceRange}
                     onChange={(e) => {
-                      const value = Number(e.target.value);
-                      if (value >= 1 && value <= 1000) { // Limit range between 1-1000 km
-                        setDistanceRange(value);
-                        localStorage.setItem("distanceRange", value);
+                      let value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numeric values
+                  
+                      if (value === '') {
+                        setDistanceRange('');
+                        // localStorage.removeItem("distanceRange"); // Clear storage when empty
+                        return;
+                      }
+                  
+                      const numericValue = Number(value);
+                      
+                      if (numericValue >= 1 && numericValue <= 1000) {
+                        setDistanceRange(numericValue);
+                        localStorage.setItem("distanceRange", numericValue);
+                        
                         if (mapRef.current && userLocation) {
-                          mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(value));
+                          mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(numericValue));
                         }
                       }
                     }}
                     fullWidth={isMobile}
                     sx={{
-                      width: isMobile ? "80px" : "80px", marginRight:'4px', 
-                      "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
+                      width: isMobile ? "80px" : "80px", marginRight:'4px',
+                      "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 12px', scrollbarWidth: 'none',  },
+                      
+                    }}
+                    inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
+                    InputLabelProps={{
+                      sx: {
+                        // fontSize: "14px", // Custom label font size
+                        // fontWeight: "bold", // Make label bold
+                        color: "primary.main", // Apply theme color
+                      },
+                      shrink: true, // Keep label always visible
                     }}
                   />
                   <IconButton
@@ -627,22 +647,41 @@ const Helper = ()=> {
             {isMobile && (
             <Box sx={{ padding: '12px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
               <TextField
-                label="Custom Distance (km)"
+                label="custom input (km)"
                 type="number"
                 value={distanceRange}
                 onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value >= 1 && value <= 1000) { // Limit range between 1-1000 km
-                    setDistanceRange(value);
-                    localStorage.setItem("distanceRange", value);
+                  let value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numeric values
+              
+                  if (value === '') {
+                    setDistanceRange('');
+                    // localStorage.removeItem("distanceRange"); // Clear storage when empty
+                    return;
+                  }
+              
+                  const numericValue = Number(value);
+                  
+                  if (numericValue >= 1 && numericValue <= 1000) {
+                    setDistanceRange(numericValue);
+                    localStorage.setItem("distanceRange", numericValue);
+                    
                     if (mapRef.current && userLocation) {
-                      mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(value));
+                      mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(numericValue));
                     }
                   }
                 }}
                 sx={{
                   width: "80px",
                   "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
+                }}
+                inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
+                InputLabelProps={{
+                  sx: {
+                    // fontSize: "14px", // Custom label font size
+                    // fontWeight: "bold", // Make label bold
+                    color: "primary.main", // Apply theme color
+                  },
+                  shrink: true, // Keep label always visible
                 }}
               />
               <IconButton
