@@ -1,6 +1,6 @@
 // src/components/ChatHistory.js
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, LinearProgress } from '@mui/material';
+import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 // import SendIcon from '@mui/icons-material/Send';
 // import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 // import Picker from 'emoji-picker-react';
@@ -38,7 +38,8 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
   const [isHelper, setIsHelper] = useState(false);
   const [helperCount, setHelperCount] = useState(0);
   const [peopleCount, setPeopleCount] = useState(0);
-
+  const [helperDialogOpen, setHelperDialogOpen] = useState(false);
+  const [loadingHelerAction, setLoadingHelperAction] = useState(false);
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -174,6 +175,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
   };
 
   const toggleHelper = async () => {
+    setLoadingHelperAction(true);
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/toggle-helper`, 
         { postId, buyerId: chatData.id }, 
@@ -182,8 +184,12 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
 
       setIsHelper(!isHelper);
       setHelperCount(response.data.helperIds.length);
+      setLoadingHelperAction(false);
+      setHelperDialogOpen(false);
     } catch (error) {
       console.error('Error toggling helper:', error);
+    } finally {
+      setLoadingHelperAction(false);
     }
   };
 
@@ -300,7 +306,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
             
           </Box> 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap:1 }}>
-            <IconButton onClick={toggleHelper} disabled={helperCount >= peopleCount && !isHelper}>
+            <IconButton onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper}>
               {isHelper ? <StarRoundedIcon fontSize="medium" /> : <StarOutlineRoundedIcon fontSize="medium" />}
             </IconButton>
             {isMobile && (
@@ -484,6 +490,40 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                 {/* </Toolbar> */}
               {/* </Box> */}
   </Box>
+  <Dialog
+    open={helperDialogOpen}
+    onClose={() => setHelperDialogOpen(false)}
+    aria-labelledby="delete-dialog-title" 
+    sx={{ '& .MuiPaper-root': { borderRadius: '14px' }, '& .MuiDialogTitle-root': { padding: '14px 16px' },}}
+  >
+    <DialogTitle id="delete-dialog-title" >
+      {isHelper ? 'Are you sure want to remove user from the Helper!' : 'Are you sure you want to tag this user to Helper!'}
+    </DialogTitle>
+    <DialogContent style={{ padding: '16px' }}>
+      <Typography color="grey">
+        {isHelper ?  'If you proceed, this user will removed from Helper list of this post...' : 'If you proceed, this user tagged to Helper list of this post...' }
+      </Typography>
+      {(peopleCount - helperCount === 1 ) && !isHelper && (
+      <Typography color="primary" mt={1}>
+        {/* {helperCount}{peopleCount} */}
+        Post status will be updated to <strong>Closed</strong> because you have received all the required helpers for your post.
+      </Typography>
+      )}
+      {(peopleCount === helperCount ) && isHelper && (
+      <Typography color="primary" mt={1}>
+        Post status will be updated to <strong>Active</strong> because you have removed one of your Helper from the required helpers for your post.
+      </Typography>
+      )}
+    </DialogContent>
+    <DialogActions style={{ padding: '1rem' , gap: 1}}>
+      <Button onClick={() => setHelperDialogOpen(false)} disabled={helperCount >= peopleCount && !isHelper} variant='text' color="error" sx={{borderRadius:'8px'}}>
+        Cancel
+      </Button>
+      <Button onClick={toggleHelper} disabled={helperCount >= peopleCount && !isHelper} variant='contained' color="primary" sx={{ marginRight: '0px', borderRadius:'8px' }}>
+        {loadingHelerAction ? <> <CircularProgress size={20} sx={{marginRight:'8px', color:'white'}}/> processing... </> : isHelper ? 'Remove user' : 'Tag user'}
+      </Button>
+    </DialogActions>
+  </Dialog>
   </>
   );
 };
