@@ -93,6 +93,13 @@ const ChatDialog = ({ open, onClose, post, user }) => {
     // if (message.trim() === '') return;
     if (!message.trim()) return;
 
+    // Prevent sending messages if post isInActive or closed & user is not a helper
+    if (post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
+      console.warn('You cannot send messages as this post is closed or InActive.');
+      // alert('u cant send');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -290,7 +297,7 @@ const ChatDialog = ({ open, onClose, post, user }) => {
           <IconButton color="primary" 
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
             onClick={handleSendMessage}
-            disabled={loading || message.trim() === ''}
+            disabled={loading || message.trim() === '' || post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))}
             >
             {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon />} 
           </IconButton>
