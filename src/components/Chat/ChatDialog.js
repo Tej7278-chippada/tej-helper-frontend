@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, Tooltip } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -11,6 +11,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -168,25 +169,52 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"  fullScreen={isMobile} sx={{
         margin: isMobile ? '10px' : '0px',
-        '& .MuiPaper-root': { borderRadius: '14px',  } //maxHeight: isMobile ? '300px' : 'auto'
+        '& .MuiPaper-root': { borderRadius: '14px',  } , //maxHeight: isMobile ? '300px' : 'auto'
+        '& .MuiDialogTitle-root': { padding: '14px',  }
       }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>Chat with {post.userCode}
-        <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-        >
-            <CloseIcon />
-        </IconButton>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems:'center', gap:1 }}>
+          {post.helperIds.includes(userId) && (
+            <Tooltip title="Helper tag" arrow placement="left" 
+              enterTouchDelay={0}  // Show tooltip immediately on touch
+              leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
+              disableInteractive // Prevent tooltip from disappearing on accidental touches
+            >
+              <IconButton 
+              // onClick={() => setHelperDialogOpen(true)} 
+              >
+                <StarRoundedIcon fontSize="medium" color="primary"/> 
+              </IconButton>
+            </Tooltip>
+          )}
+          <IconButton
+              aria-label="close"
+              onClick={onClose}
+              sx={{
+                color: (theme) => theme.palette.grey[500],
+              }}
+          >
+              <CloseIcon />
+          </IconButton>
+        </Box>
+        
       </DialogTitle>
     <DialogContent sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'#f5f5f5',
       scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
      }}>
+        {post.helperIds.includes(userId) && (
+          <Box sx={{
+            position: 'absolute',
+            top: '80px',
+            left: '0%',
+            width:'100%',
+            backgroundColor:'rgba(244, 238, 238, 0.24)',
+            boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+            borderRadius:'12px'
+            }} >
+            <Typography color="success" align="center" margin={1}>You are tagged as the Helper of this post.</Typography>
+          </Box>
+        )}
         <Box  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}}>
         {isFetching ? (
             // <Typography textAlign="center">Loading...</Typography>

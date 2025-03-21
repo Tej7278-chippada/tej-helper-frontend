@@ -15,6 +15,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const userName = localStorage.getItem('tokenUsername');
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
@@ -178,7 +179,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
                   wordWrap: 'break-word',
                 }}
               >
-                <strong>{comment.username || 'Anonymous'}</strong> {/* Display username */}
+                <strong>{comment.username || userName || 'Anonymous'}</strong> {/* Display username */}
                 <Typography sx={{ display: 'inline-block', float: 'right' }}>
                   <small>{new Date(comment.createdAt).toLocaleString()}</small>
                 </Typography>
