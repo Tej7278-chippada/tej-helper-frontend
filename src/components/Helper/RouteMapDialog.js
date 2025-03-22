@@ -21,6 +21,7 @@ import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 
 // Set default icon manually
@@ -249,8 +250,21 @@ function RouteMapDialog({ open, onClose, post }) {
         <Typography variant="h6">Route Map to Post Location</Typography>
 
         <Box sx={{ paddingBottom: '6rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
+          <Box display="flex" justifyContent="start" sx={{paddingTop: '1rem',}}>
+            <LocationOnIcon color='primary'/>
+            <Tooltip title="Post Address" arrow placement="top-start" 
+              enterTouchDelay={0}  // Show tooltip immediately on touch
+              leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
+              disableInteractive // Prevent tooltip from disappearing on accidental touches
+              >
+              <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
+              {post.location.address || "Fetching post address..."}
+                {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
+              </Typography>
+            </Tooltip>
+          </Box>
 
-          <Box sx={{ height: isMobile ? '400px' : '500px', marginTop: '1rem', padding: '10px' }}>
+          <Box sx={{ height: isMobile ? '400px' : '500px', padding: '10px' }}>
             <MapContainer
               center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]}
               zoom={13}

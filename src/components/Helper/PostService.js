@@ -249,6 +249,7 @@ function PostService() {
           state: locationDetails.state,
           nation: locationDetails.nation,
           pincode: locationDetails.pincode,
+          address: currentAddress,
         }));
         
         try {
