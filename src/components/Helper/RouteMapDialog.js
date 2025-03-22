@@ -258,7 +258,7 @@ function RouteMapDialog({ open, onClose, post }) {
               disableInteractive // Prevent tooltip from disappearing on accidental touches
               >
               <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
-              {post.location.address || "Fetching post address..."}
+              {post.location.address || "Post Address doesn't found..."}
                 {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
               </Typography>
             </Tooltip>

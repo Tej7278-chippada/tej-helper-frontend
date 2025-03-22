@@ -296,6 +296,7 @@ function PostService() {
           description: post.description,
           latitude: post.location.latitude,
           longitude: post.location.longitude,
+          address: post.location.address,
           // media: null, // Reset images to avoid re-uploading
         });
         setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
@@ -721,10 +722,18 @@ function PostService() {
                   {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     lat, lng: {formData.latitude} {formData.longitude}
                   </Typography> */}
-                  <Box display="flex" justifyContent="start" mb={2} mt={1}>
+                  {editingProduct && (
+                  <Box display="flex" justifyContent="start" mb={1} mt={1} marginInline="4px">
                     <LocationOnIcon color='primary'/>
                     <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
-                     {currentAddress || "Fetching location..."}
+                      <strong>Post Previous address :</strong> {formData.address || "Address doesn't found"}
+                    </Typography>
+                  </Box>
+                  )}
+                  <Box display="flex" justifyContent="start" mb={2} mt={1} marginInline="4px">
+                    <LocationOnIcon sx={{color:'rgba(52, 174, 11, 0.95)'}}/>
+                    <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
+                      <strong>Your current address :</strong> {currentAddress || "Fetching location..."}
                     </Typography>
                   </Box>
                   <Box sx={{ height: '300px', marginTop: '1rem', paddingInline:'6px' }}>
