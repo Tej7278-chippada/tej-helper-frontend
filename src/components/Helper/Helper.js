@@ -180,12 +180,13 @@ const Helper = ()=> {
         try {
             const response = await fetchPosts();
             // const { posts } = response.data;
-            setPosts(response.data);
+            setPosts(response.data.reverse() || []);
             // setTotalPages(totalPages);
             // setLoading(false);
         } catch (error) {
             console.error("Error fetching posts:", error);
             // setLoading(false);
+            setSnackbar({ open: true, message: 'Failed to fetch the posts within your distance radius.', severity: 'error' });
         }
     };
     fetchData();
