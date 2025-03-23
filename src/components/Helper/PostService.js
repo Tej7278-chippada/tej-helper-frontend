@@ -23,6 +23,10 @@ import { useTheme } from '@emotion/react';
 import CloseIcon from '@mui/icons-material/Close';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -98,6 +102,22 @@ function PostService() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [loadingPostDeletion, setLoadingPostDeletion] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [timeFrom, setTimeFrom] = useState(null);
+  const [timeTo, setTimeTo] = useState(null);
+
+  // Add these handlers to manage date and time changes
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
+  const handleTimeFromChange = (time) => {
+    setTimeFrom(time);
+  };
+
+  const handleTimeToChange = (time) => {
+    setTimeTo(time);
+  };
 
 
     const fetchPostsData = useCallback(async () => {
@@ -251,6 +271,17 @@ function PostService() {
           pincode: locationDetails.pincode,
           address: currentAddress,
         }));
+
+        // Append date and time data
+        if (selectedDate) {
+          data.append('serviceDate', selectedDate.toISOString());
+        }
+        if (timeFrom) {
+          data.append('timeFrom', timeFrom.toISOString());
+        }
+        if (timeTo) {
+          data.append('timeTo', timeTo.toISOString());
+        }
         
         try {
           if (editingProduct) {
@@ -299,6 +330,16 @@ function PostService() {
           address: post.location.address,
           // media: null, // Reset images to avoid re-uploading
         });
+        // Set the date and time fields if they exist in the post
+    if (post.serviceDate) {
+      setSelectedDate(new Date(post.serviceDate));
+    }
+    if (post.timeFrom) {
+      setTimeFrom(new Date(post.timeFrom));
+    }
+    if (post.timeTo) {
+      setTimeTo(new Date(post.timeTo));
+    }
         setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
         setOpenDialog(true);
       };
@@ -391,6 +432,9 @@ function PostService() {
         setMediaError('');
         setSubmitError(''); // Clear submission error when dialog is closed
         setFormData({ title: '', price: '', categories: '', gender: '', postStatus: '', peopleCount: '', serviceDays: '', description: '', media: null });
+        setSelectedDate(null);
+        setTimeFrom(null);
+        setTimeTo(null);
     };
 
     const openPostDetail = (post) => {
@@ -566,6 +610,12 @@ function PostService() {
                   {/* {post.stockStatus === 'In Stock' && ( */}
                   <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
                     People Count: {post.peopleCount}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Date : {new Date(post.serviceDate).toLocaleDateString()}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Time from - To : {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Typography>
                   {/* )} */}
                   {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
@@ -1003,6 +1053,34 @@ function PostService() {
                         }}
                         inputProps={{ min: 1, max: 10000, step: 1 }} // Ensures only valid whole numbers
                     />
+                    </div>
+
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                      <DatePicker
+                        label="Service Date"
+                        value={selectedDate}
+                        onChange={handleDateChange}
+                        renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
+                      />
+                    </LocalizationProvider>
+
+                    <div style={{ display: 'flex', gap: '1rem' }}>
+                      <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <TimePicker
+                          label="Time From"
+                          value={timeFrom}
+                          onChange={handleTimeFromChange}
+                          renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
+                        />
+                      </LocalizationProvider>
+                      <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <TimePicker
+                          label="Time To"
+                          value={timeTo}
+                          onChange={handleTimeToChange}
+                          renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
+                        />
+                      </LocalizationProvider>
                     </div>
                     
                     <TextField
