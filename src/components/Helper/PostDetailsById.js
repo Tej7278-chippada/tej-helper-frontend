@@ -7,7 +7,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 // import CommentPopup from './CommentPopup';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 // import Layout from '../Layout';
 import { useTheme } from '@emotion/react';
 // import SkeletonProductDetail from './SkeletonProductDetail';
@@ -62,6 +62,7 @@ function PostDetailsById({ onClose, user }) {
   const [routeMapDialogOpen, setRouteMapDialogOpen] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const userId = localStorage.getItem('userId');
+  const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
 
   
   useEffect(() => {
@@ -140,7 +141,15 @@ function PostDetailsById({ onClose, user }) {
 //   };
   
   const handleLike = async () => {
-    if (!isAuthenticated || likeLoading) return; // Prevent unauthenticated actions
+    if (likeLoading) return; // Prevent unauthenticated actions
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
     setLikeLoading(true); // Start the progress indicator
     try {
       const newLikedByUser = !post.likedByUser;
@@ -209,7 +218,15 @@ function PostDetailsById({ onClose, user }) {
   };
 
   const handleWishlistToggle = async (postId) => {
-    if (!isAuthenticated) return; // Prevent unauthenticated actions
+    // if (!isAuthenticated) return;
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
     setWishLoading(true); // Start the progress indicator
     try {
       if (wishlist.has(postId)) {
@@ -761,6 +778,7 @@ function PostDetailsById({ onClose, user }) {
           onClose={() => setCommentPopupOpen(false)}
           post={post} // Pass the current product
           onCommentAdded={onCommentAdded}  // Passing the comment added handler
+          setLoginMessage={setLoginMessage} 
         />
         <RouteMapDialog
           open={routeMapDialogOpen}
@@ -768,7 +786,9 @@ function PostDetailsById({ onClose, user }) {
           post={post} // Pass the current product
           // onCommentAdded={onCommentAdded}  // Passing the comment added handler
         />
-        <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} />
+        <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
+          isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage} 
+        />
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
@@ -789,6 +809,64 @@ function PostDetailsById({ onClose, user }) {
           {successMessage}
         </Alert>
       </Snackbar>
+      <Snackbar
+        open={loginMessage.open}
+        autoHideDuration={9000}
+        onClose={() => setLoginMessage({ ...loginMessage, open: false })}
+        message={
+          <span>
+            Please log in first.{" "}
+            <Link
+              to="/login"
+              style={{ color: "yellow", textDecoration: "underline", cursor: "pointer" }}
+            >
+              Click here to login
+            </Link>
+          </span>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        />
+        {/* <Alert
+          severity="warning"
+          variant="filled"
+          sx={{
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "5px",
+                // padding: "3px 8px",
+                marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          }
+        >
+          Please log in first.
+        </Alert>
+      </Snackbar> */}
+
       </Box>
     </Layout>
   );

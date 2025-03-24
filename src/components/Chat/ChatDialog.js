@@ -17,7 +17,7 @@ const socket = io(process.env.REACT_APP_API_URL);
 
 // const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatDialog = ({ open, onClose, post, user }) => {
+const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
   const userId = localStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken');
@@ -93,6 +93,14 @@ const ChatDialog = ({ open, onClose, post, user }) => {
   const handleSendMessage = async () => {
     // if (message.trim() === '') return;
     if (!message.trim()) return;
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
 
     // Prevent sending messages if post isInActive or closed & user is not a helper
     if (post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {

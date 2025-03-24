@@ -6,7 +6,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
 import { addComment } from '../api/api';
 
-function CommentPopup({ open, onClose, post, onCommentAdded }) {
+function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage }) {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState([]);
   const [commentAddedMessage, setCommentAddedMessage] = useState('');
@@ -26,7 +26,16 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
   }, [post]);
 
   const handleAddComment = async () => {
-    if (!isAuthenticated) return; // Prevent unauthenticated actions
+    // if (!isAuthenticated) return; // Prevent unauthenticated actions
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    if (!newComment.trim()) return;
     if (newComment.trim() && post?._id) {
       setLoading(true);
       try {
@@ -132,7 +141,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded }) {
             color="primary" 
             // style={{ width: '150px' }}
             sx={{borderRadius:2}}
-            disabled={loading}
+            disabled={loading || newComment.trim() === ''}
           >
             {loading ? <CircularProgress size={24} /> : 'Submit'}
           </Button>
