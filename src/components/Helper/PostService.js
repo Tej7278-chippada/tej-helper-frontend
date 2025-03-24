@@ -952,6 +952,7 @@ function PostService() {
                             value={formData.categories}
                             onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
                             required
+                            label="Categories"
                         >
                             <MenuItem value="Paid">Paid Service</MenuItem>
                             <MenuItem value="UnPaid">UnPaid Service</MenuItem>
@@ -965,6 +966,7 @@ function PostService() {
                               value={formData.postStatus}
                               onChange={(e) => setFormData({ ...formData, postStatus: e.target.value })}
                               required
+                              label="Post Status"
                           >
                               <MenuItem value="Active">Active</MenuItem>
                               <MenuItem value="InActive">Inactive</MenuItem>
@@ -1004,6 +1006,7 @@ function PostService() {
                                 value={formData.gender}
                                 onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                                 required
+                                label="Required Gender to service"
                             >
                                 <MenuItem value="Male">Male</MenuItem>
                                 <MenuItem value="Female">Female</MenuItem>
@@ -1057,8 +1060,8 @@ function PostService() {
 
                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                       <DatePicker
-                        label="Service Date"
-                        value={selectedDate}
+                        label="Service Date" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
+                        value={selectedDate} format="dd MM yyyy" // Formats date as "14 03 2025"
                         onChange={handleDateChange}
                         renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
                       />
@@ -1067,7 +1070,7 @@ function PostService() {
                     <div style={{ display: 'flex', gap: '1rem' }}>
                       <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <TimePicker
-                          label="Time From"
+                          label="Time From" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                           value={timeFrom}
                           onChange={handleTimeFromChange}
                           renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
@@ -1075,7 +1078,7 @@ function PostService() {
                       </LocalizationProvider>
                       <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <TimePicker
-                          label="Time To"
+                          label="Time To" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                           value={timeTo}
                           onChange={handleTimeToChange}
                           renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
