@@ -124,7 +124,7 @@ function PostService() {
         setLoading(true);
         try {
           const response = await fetchUserPosts();
-          setPosts(response.data); // Set products returned by the API
+          setPosts(response.data.reverse() || []); // Set products returned by the API
         } catch (error) {
           console.error('Error fetching your posts:', error);
           // setNotification({ open: true, message: 'Failed to fetch products.', type: 'error' });
@@ -521,7 +521,7 @@ function PostService() {
                 boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
                 cursor:'pointer'
-              }}
+              }} onClick={() => openPostDetail(post)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
                   e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
@@ -560,7 +560,7 @@ function PostService() {
                     // marginBottom: '1rem'
                     height: '170px'
                   }}
-                    onClick={() => openPostDetail(post)}
+                    // onClick={() => openPostDetail(post)}
                   >
                   {post.media && post.media.length > 0 ? (
                     post.media && post.media.slice(0, 5).map((base64Image, index) => (
@@ -637,10 +637,11 @@ function PostService() {
                 </CardContent>
                 <CardActions style={{ justifyContent: 'space-between', padding: '8px 1rem' }}>
                   <Box>
-                    <Button color="primary" sx={{ marginRight: '10px' }} onClick={() => handleEdit(post)}>Edit</Button>
-                    <Button color="secondary" key={post._id} onClick={() => handleDeleteClick(post)}>Delete</Button>
+                    <Button color="primary" sx={{ marginRight: '10px', borderRadius:'8px' }} onClick={(event) => {event.stopPropagation(); // Prevent triggering the parent onClick
+                      handleEdit(post);}}>Edit</Button>
+                    <Button color="secondary" key={post._id} sx={{borderRadius:'8px'}} onClick={(event) => {event.stopPropagation(); handleDeleteClick(post);}}>Delete</Button>
                   </Box>
-                  <Button color="primary" variant="contained" sx={{ borderRadius: '8px' }} onClick={() => handleChatsOpen(post)}>Chats</Button>
+                  <Button color="primary" variant="contained" sx={{ borderRadius: '8px' }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}>Chats</Button>
                 </CardActions>
               </Card>
             </Grid>
