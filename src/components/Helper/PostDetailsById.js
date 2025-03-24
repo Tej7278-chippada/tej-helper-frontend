@@ -54,6 +54,7 @@ function PostDetailsById({ onClose, user }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [likeLoading, setLikeLoading] = useState(false); // For like progress
+  const [wishStatusLoading, setWishStatusLoading] = useState(false);
   const [wishLoading, setWishLoading] = useState(false); // For like progress
 //   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
@@ -101,15 +102,15 @@ function PostDetailsById({ onClose, user }) {
   useEffect(() => {
     const checkWishlistStatus = async () => {
       if (isAuthenticated && post) {
-        setWishLoading(true);
+        setWishStatusLoading(true);
         try {
           const isInWishlist = await checkPostInWishlist(post._id);
           setWishlist(new Set(isInWishlist ? [post._id] : []));
-          setWishLoading(false);
+          setWishStatusLoading(false);
         } catch (error) {
           console.error('Error checking wishlist status:', error);
         } finally {
-          setWishLoading(false);
+          setWishStatusLoading(false);
         }
       }
     };
@@ -167,9 +168,26 @@ function PostDetailsById({ onClose, user }) {
       // const updatedPosts = await fetchPosts(); // This fetches all products after a comment is added
       // setPost(updatedPosts.data); // Update the product list in the state
       // setCommentPopupOpen(false); // Close the CommentPopup
+      
+      // Fetch the updated likes count after a comment is added
+      const updatedLikesCount = await fetchLikesCount(id);
+      
+      // Update the post state with the new likes count
+      // setPost((prevPost) => ({
+      //   ...prevPost,
+      //   likes: updatedLikesCount,
+      // }));
+
+      // Optionally, you can also fetch the updated post details if needed
+      const updatedPost = await fetchPostById(id);
+      setPost((prevPost) => ({
+        ...prevPost,
+        comments: updatedPost.data.comments,
+        likes: updatedLikesCount,
+      }));
     } catch (error) {
-      console.error("Error fetching posts after comment added:", error);
-    } finally {
+      console.error("Error fetching likes count or post details after comment added.", error);
+    // } finally {
       // setCommentPopupOpen(false); // Close the comment popup
     }
   };
@@ -505,7 +523,7 @@ function PostDetailsById({ onClose, user }) {
                       onClick={() => handleWishlistToggle(post._id)}
                       sx={{
                         color: wishlist.has(post._id) ? 'red' : 'gray',
-                      }} disabled={wishLoading} // Disable button while loading
+                      }} disabled={wishLoading || wishStatusLoading} // Disable button while loading
                     >
                       <Tooltip
                         title={wishlist.has(post._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
