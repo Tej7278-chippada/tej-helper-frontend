@@ -825,8 +825,8 @@ function PostDetailsById({ onClose, user }) {
           </span>
         }
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        />
-        {/* <Alert
+        >
+        <Alert
           severity="warning"
           variant="filled"
           sx={{
@@ -865,7 +865,7 @@ function PostDetailsById({ onClose, user }) {
         >
           Please log in first.
         </Alert>
-      </Snackbar> */}
+      </Snackbar>
 
       </Box>
     </Layout>
