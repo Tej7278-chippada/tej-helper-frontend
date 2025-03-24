@@ -513,6 +513,8 @@ function PostDetailsById({ onClose, user }) {
                         boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '10px'
                       }}
                       onClick={() => handleShare(post._id, post.title)}
+                      aria-label="Share Post"
+                      title="Share Post"
                     >
                       <CustomTooltip  title="Share this post" arrow placement="right">
                         <ShareIcon />
@@ -589,7 +591,7 @@ function PostDetailsById({ onClose, user }) {
                     {/* <Typography variant="body2" color="textSecondary">
                       {post.gender}
                     </Typography> */}
-                    <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                    <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
                       {post.postStatus}
                     </Typography>
                   </Grid>

@@ -501,6 +501,8 @@ function PostService() {
                 alignItems: 'center',
                 gap: '8px', marginRight: '10px'
               }}
+              aria-label="Add New Post"
+              title="Add New Post"
             >
               <PostAddRoundedIcon sx={{ fontSize: '20px' }} />
               {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Product</span> */}
@@ -604,7 +606,7 @@ function PostService() {
                   <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Gender: {post.gender}
                   </Typography>
-                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
                     Post Status: {post.postStatus}
                   </Typography>
                   {/* {post.stockStatus === 'In Stock' && ( */}

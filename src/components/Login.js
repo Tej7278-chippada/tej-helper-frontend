@@ -211,6 +211,8 @@ const Login = () => {
                 <IconButton
                   onClick={handleTogglePasswordVisibility}
                   edge="end"
+                  aria-label={showPassword ? "Hide password" : "Show password"} // Accessible name
+                  title={showPassword ? "Hide password" : "Show password"} // Tooltip for better UX
                 >
                   {showPassword ? <PasswordRoundedIcon /> : <PinOutlinedIcon />}
                 </IconButton>
