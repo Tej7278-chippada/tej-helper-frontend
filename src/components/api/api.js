@@ -2,6 +2,10 @@
 import axios from 'axios';
 
 const API = axios.create({ baseURL: process.env.REACT_APP_API_URL });
+// const API = axios.create({
+//   baseURL: process.env.REACT_APP_API_URL,
+//   withCredentials: true
+// });
 
 // Function to check and refresh the token
 const refreshAuthToken = async () => {
@@ -173,4 +177,43 @@ export const addComment = async (id, comment) => {
       console.error('Error adding comment:', error);
       throw error;
   }
+};
+
+
+// export const fetchNotifications = async () => {
+//   const response = await fetch('/api/notifications', {
+//     headers: {
+//       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+//     }
+//   });
+//   return response.json();
+// };
+
+// export const markNotificationAsRead = async (notificationId) => {
+//   const response = await fetch(`/api/notifications/${notificationId}/read`, {
+//     method: 'PUT',
+//     headers: {
+//       'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+//     }
+//   });
+//   return response.json();
+// };
+
+// Add these to your existing api.js exports
+export const fetchNotifications = async () => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.get('/api/notifications', {
+    headers: {
+      Authorization: `Bearer ${authToken}`
+    }
+  });
+};
+
+export const markNotificationAsRead = async (notificationId) => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.put(`/api/notifications/${notificationId}/read`, {}, {
+    headers: {
+      Authorization: `Bearer ${authToken}`
+    }
+  });
 };

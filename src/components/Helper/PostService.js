@@ -1,7 +1,7 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
 import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, } from '@mui/material';
-import { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
+import API, { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import Layout from '../Layout';
@@ -27,6 +27,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { io } from 'socket.io-client';
+import { NotificationAdd } from '@mui/icons-material';
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -105,6 +107,47 @@ function PostService() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [timeFrom, setTimeFrom] = useState(null);
   const [timeTo, setTimeTo] = useState(null);
+  // Initialize socket connection (add this near your other state declarations)
+const [socket, setSocket] = useState(null);
+const userId = localStorage.getItem('userId');
+
+// Add this useEffect for socket connection
+useEffect(() => {
+  const newSocket = io(`${process.env.REACT_APP_API_URL}`); // Replace with your backend URL
+  setSocket(newSocket);
+
+  return () => {
+    if (newSocket) newSocket.disconnect();
+  };
+}, []);
+
+// Add this useEffect to listen for notifications if needed
+useEffect(() => {
+  if (socket && userId) {
+    socket.emit('joinRoom', userId); // Join user's notification room
+    
+    socket.on('newNotification', (data) => {
+      setSnackbar({
+        open: true,
+        message: data.message,
+        severity: 'info',
+        action: (
+          <Button 
+            color="inherit" 
+            size="small"
+            onClick={() => navigate(`/post/${data.postId}`)}
+          >
+            View
+          </Button>
+        )
+      });
+    });
+
+    return () => {
+      socket.off('newNotification');
+    };
+  }
+}, [socket, userId, navigate]);
 
   // Add these handlers to manage date and time changes
   const handleDateChange = (date) => {
@@ -118,6 +161,90 @@ function PostService() {
   const handleTimeToChange = (time) => {
     setTimeTo(time);
   };
+
+  // Add this to your PostService.js component
+const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+// Add this effect to check current notification status
+useEffect(() => {
+  const checkNotificationStatus = async () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      const response = await API.get('/api/notifications/notification-status', {
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+      setNotificationsEnabled(response.data.notificationEnabled);
+    } catch (error) {
+      console.error('Error checking notification status:', error);
+    }
+  };
+  checkNotificationStatus();
+}, []);
+
+  // Add this function to request notification permissions
+  const requestNotificationPermission = async () => {
+    try {
+      // Check if service worker and push manager are supported
+      if (!('serviceWorker' in navigator)) {
+        throw new Error('Service workers not supported');
+      }
+      if (!('PushManager' in window)) {
+        throw new Error('Push notifications not supported');
+      }
+  
+      // Request permission
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        throw new Error('Permission not granted');
+      }
+  
+      // Register service worker and get subscription
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.REACT_APP_VAPID_PUBLIC_KEY
+      });
+  
+      // Send to backend with proper auth header
+      await API.post('/api/notifications/enable-push', {
+        token: JSON.stringify(subscription),
+        enabled: true
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+        }
+      });
+  
+      setSnackbar({ 
+        open: true, 
+        message: 'Notifications enabled!', 
+        severity: 'success' 
+      });
+      setNotificationsEnabled(true);
+    } catch (error) {
+      console.error('Error enabling notifications:', error);
+      setSnackbar({ 
+        open: true, 
+        message: `Failed to enable notifications: ${error.message}`,
+        severity: 'error' 
+      });
+    }
+  };
+
+// Add this useEffect to check notification status on component mount
+useEffect(() => {
+  if ('Notification' in window && navigator.serviceWorker) {
+    // Check if notifications are already enabled
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        // You might want to update UI to show notifications are enabled
+      }
+    });
+  }
+}, []);
 
 
     const fetchPostsData = useCallback(async () => {
@@ -485,6 +612,17 @@ function PostService() {
             <Typography variant="h6" style={{ flexGrow: 1 }}>
             User Posts
             </Typography>
+
+            {/* // Add this toggle button to your UI */}
+<Button 
+  variant="contained"
+  color={notificationsEnabled ? 'success' : 'primary'}
+  onClick={requestNotificationPermission}
+  startIcon={<NotificationAdd />}
+>
+  {notificationsEnabled ? 'Notifications Enabled' : 'Enable Notifications'}
+</Button>
+
             
             <Button
               variant="contained"

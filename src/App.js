@@ -16,6 +16,7 @@ import ChatsOfPosts from './components/Chat/ChatsOfPosts';
 // import ChatHistory from './components/Chat/ChatHistory';
 import ChatHistoryPage from './components/Chat/ChatHistoryPage';
 import NotFound from './components/NotFound'; // Import 404 Page
+import NotificationsPage from './components/Helper/NotificationsPage';
 
 const theme = createTheme({
   breakpoints: {
@@ -70,6 +71,11 @@ function App() {
           } />
           {/* 404 Not Found Page */}
           <Route path="*" element={<NotFound />} />
+          <Route path="/notifications" element={
+            <PrivateRoute>
+              <NotificationsPage />
+            </PrivateRoute>
+          } />
         </Routes>
       </Router>
     </ThemeProvider>
