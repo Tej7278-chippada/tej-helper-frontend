@@ -1,6 +1,6 @@
 // src/components/CommentPopup.js
 import React, { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Grid, Tooltip, Alert, Snackbar } from '@mui/material';
+import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Tooltip, Alert, Snackbar } from '@mui/material';
 // import { addComment } from '../../api/api';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
