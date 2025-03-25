@@ -208,7 +208,8 @@ function PostService() {
         const { latitude, longitude } = JSON.parse(storedLocation);
         // setUserLocation({ latitude, longitude });
         setCurrentLocation({ latitude, longitude });
-        fetchAddress(latitude, longitude);setLocationDetails({
+        fetchAddress(latitude, longitude);
+        setLocationDetails({
           latitude,
           longitude,
           // accuracy: position.coords.accuracy, // GPS accuracy in meters

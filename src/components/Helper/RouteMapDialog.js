@@ -68,7 +68,7 @@ function RouteMapDialog({ open, onClose, post }) {
   //   const [stockCountId, setStockCountId] = useState(null); // Track only stock count
   const [mapMode, setMapMode] = useState('normal');
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [locationDetails, setLocationDetails] = useState(null);
+  // const [locationDetails, setLocationDetails] = useState(null);
   // const [error, setError] = useState('');
   //   const [successMessage, setSuccessMessage] = useState('');
   const [distance, setDistance] = useState(null);
@@ -78,6 +78,7 @@ function RouteMapDialog({ open, onClose, post }) {
   const [routeCalculating, setRouteCalculating] = useState(false);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
+  const [currentAddress, setCurrentAddress] = useState('');
 
 
   // Expose removeViaPoint to the window object
@@ -100,6 +101,17 @@ function RouteMapDialog({ open, onClose, post }) {
     };
   }, []);
 
+  // Fetch address from latitude and longitude
+  const fetchAddress = async (lat, lng) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+      const data = await response.json();
+      setCurrentAddress(data.display_name);
+    } catch (error) {
+      console.error("Error fetching address:", error);
+    }
+  };
+
   const locateUser = async () => {
     const storedLocation = localStorage.getItem("userLocation");
 
@@ -107,6 +119,7 @@ function RouteMapDialog({ open, onClose, post }) {
       // Use the stored location
       const { latitude, longitude } = JSON.parse(storedLocation);
       setCurrentLocation({ lat: latitude, lng: longitude });
+      fetchAddress(latitude, longitude);
     } else {
     if (navigator.geolocation) {
       setLoadingLocation(true); // Show progress indicator
@@ -117,11 +130,12 @@ function RouteMapDialog({ open, onClose, post }) {
           setCurrentLocation({ lat: latitude, lng: longitude });
           localStorage.setItem('userLocation', JSON.stringify(locationData)); // Store in localStorage
           // Set location details manually using lat/lng
-          setLocationDetails({
-            latitude,
-            longitude,
-            accuracy: position.coords.accuracy, // GPS accuracy in meters
-          });
+          // setLocationDetails({
+          //   latitude,
+          //   longitude,
+          //   accuracy: position.coords.accuracy, // GPS accuracy in meters
+          // });
+          fetchAddress(latitude, longitude);
           // console.log("User's current location:", latitude, longitude);
           setLoadingLocation(false); // Hide progress indicator
         },
@@ -249,22 +263,30 @@ function RouteMapDialog({ open, onClose, post }) {
         </IconButton>
         <Typography variant="h6">Route Map to Post Location</Typography>
 
-        <Box sx={{ paddingBottom: '6rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
-          <Box display="flex" justifyContent="start" sx={{paddingTop: '1rem',}}>
+        <Box sx={{ paddingBottom: '4rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
+          <Box display="flex" justifyContent="start" sx={{paddingTop: '1rem', marginInline:'4px'}}>
             <LocationOnIcon color='primary'/>
             <Tooltip title="Post Address" arrow placement="top-start" 
               enterTouchDelay={0}  // Show tooltip immediately on touch
               leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
               disableInteractive // Prevent tooltip from disappearing on accidental touches
               >
-              <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
-              {post.location.address || "Post Address doesn't found..."}
+              <Typography variant="body1" sx={{marginLeft:'4px', color:'grey' }}>
+              <strong>Post address :</strong> {post.location.address || "Post Address doesn't found..."}
                 {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
               </Typography>
             </Tooltip>
           </Box>
+          {currentAddress && (
+          <Box display="flex" justifyContent="start" mb={1} mt={1} marginInline="4px">
+            <LocationOnIcon sx={{color:'rgba(52, 174, 11, 0.95)'}}/>
+            <Typography variant="body1" sx={{marginLeft:'4px', color:'grey' }}>
+              <strong>Your current address :</strong> {currentAddress || "Fetching location..."}
+            </Typography>
+          </Box>
+          )}
 
-          <Box sx={{ height: isMobile ? '400px' : '500px', padding: '10px' }}>
+          <Box sx={{ height: isMobile ? '350px' : '400px', padding: '10px' }}>
             <MapContainer
               center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]}
               zoom={13}
@@ -389,7 +411,7 @@ function RouteMapDialog({ open, onClose, post }) {
                   </Button> */}
 
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '0rem', alignItems: 'center', alignContent: 'center' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', padding:'10px 0px',  alignItems: 'center', alignContent: 'center' }}>
               {distance && (
                 <Typography variant="body1" color='grey' style={{ fontWeight: 500 }}>
                   Distance to post location: {distance}
@@ -413,7 +435,7 @@ function RouteMapDialog({ open, onClose, post }) {
           </Box>
 
         </Box>
-        <Box mt={1}>
+        {/* <Box mt={1}>
           {locationDetails && (
             <Box sx={{ margin: '1rem' }}>
               <Typography variant="h6" gutterBottom>
@@ -503,7 +525,7 @@ function RouteMapDialog({ open, onClose, post }) {
               </Grid>
             </Box>
           )}
-        </Box>
+        </Box> */}
 
 
 
