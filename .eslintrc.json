@@ -1,11 +1,20 @@
 {
-    "env": {
-      "serviceworker": true
-    },
-    "rules": {
-      "no-restricted-globals": ["error", {
-        "name": "self",
-        "message": "Use `self` explicitly for service worker context"
-      }]
+  "env": {
+    "browser": true,
+    "es6": true,
+    "serviceworker": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
     }
+  },
+  "rules": {
+    "no-restricted-globals": ["error", {
+      "name": "self",
+      "message": "Use `self` explicitly for service worker context"
+    }]
   }
+}

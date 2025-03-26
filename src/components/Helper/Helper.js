@@ -23,7 +23,7 @@ import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
+import { io } from 'socket.io-client';
 
 
 const Helper = ()=> {
@@ -107,6 +107,47 @@ const Helper = ()=> {
   //   }
   // }, [distanceRange, userLocation]);
 
+// Initialize socket connection (add this near your other state declarations)
+const [socket, setSocket] = useState(null);
+const userId = localStorage.getItem('userId');
+
+// Add this useEffect for socket connection
+useEffect(() => {
+  const newSocket = io(`${process.env.REACT_APP_API_URL}`); // Replace with your backend URL
+  setSocket(newSocket);
+
+  return () => {
+    if (newSocket) newSocket.disconnect();
+  };
+}, []);
+
+// Add this useEffect to listen for notifications if needed
+useEffect(() => {
+  if (socket && userId) {
+    socket.emit('joinRoom', userId); // Join user's notification room
+    
+    socket.on('newNotification', (data) => {
+      setSnackbar({
+        open: true,
+        message: data.message,
+        severity: 'info',
+        action: (
+          <Button 
+            color="inherit" 
+            size="small"
+            onClick={() => navigate(`/post/${data.postId}`)}
+          >
+            View
+          </Button>
+        )
+      });
+    });
+
+    return () => {
+      socket.off('newNotification');
+    };
+  }
+}, [socket, userId, navigate]);
 
   // Fetch user's location and address
   const fetchUserLocation = useCallback(() => {
