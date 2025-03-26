@@ -5,25 +5,22 @@ import {
   List,
   ListItem,
   ListItemText,
-  // Divider,
   Badge,
   Box,
   Toolbar,
-  // Button,
   IconButton,
   useTheme,
   useMediaQuery,
   Paper,
   CircularProgress,
-  Button,
   Snackbar,
   Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API, { fetchNotifications, markNotificationAsRead } from '../api/api';
 import Layout from '../Layout';
-import { NotificationAdd, NotificationsActive } from '@mui/icons-material';
 import SkeletonCards from './SkeletonCards';
+import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-material';
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -35,9 +32,52 @@ function NotificationsPage() {
   // Add this to your PostService.js component
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  const [loadingToggle, setLoadingToggle] = useState(false);
   
   // Add this effect to check current notification status
+  // useEffect(() => {
+  //   const checkNotificationStatus = async () => {
+  //     try {
+  //       const authToken = localStorage.getItem('authToken');
+  //       const response = await API.get('/api/notifications/notification-status', {
+  //         headers: {
+  //           Authorization: `Bearer ${authToken}`
+  //         }
+  //       });
+  //       setNotificationsEnabled(response.data.notificationEnabled);
+  //     } catch (error) {
+  //       console.error('Error checking notification status:', error);
+  //     }
+  //   };
+  //   checkNotificationStatus();
+  // }, []);
+  
+    
+  
+  // Add this useEffect to check notification status on component mount
+  // useEffect(() => {
+  //   if ('Notification' in window && navigator.serviceWorker) {
+  //     // Check if notifications are already enabled
+  //     Notification.requestPermission().then(permission => {
+  //       if (permission === 'granted') {
+  //         // You might want to update UI to show notifications are enabled
+  //       }
+  //     });
+  //   }
+  // }, []);
+
   useEffect(() => {
+    const fetchNotificationsData = async () => {
+      try {
+        const response = await fetchNotifications();
+        setNotifications(response.data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const checkNotificationStatus = async () => {
       try {
         const authToken = localStorage.getItem('authToken');
@@ -51,20 +91,44 @@ function NotificationsPage() {
         console.error('Error checking notification status:', error);
       }
     };
+
+    fetchNotificationsData();
     checkNotificationStatus();
   }, []);
-  
-    // Add this function to request notification permissions
-    const requestNotificationPermission = async () => {
+
+  const handleNotificationClick = async (notification) => {
+    if (!notification.isRead) {
       try {
-        // Check if service worker and push manager are supported
-        if (!('serviceWorker' in navigator)) {
-          throw new Error('Service workers not supported');
-        }
-        if (!('PushManager' in window)) {
-          throw new Error('Push notifications not supported');
-        }
-    
+        setLoadingView(notification._id);
+        await markNotificationAsRead(notification._id);
+        setNotifications(notifications.map(n => 
+          n._id === notification._id ? { ...n, isRead: true } : n
+        ));
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      } finally {
+        setLoadingView(null);
+      }
+    }
+    navigate(`/post/${notification.postId._id}`);
+  };
+
+  // Add this function to request notification permissions
+  const toggleNotifications  = async () => {
+    setLoadingToggle(true);
+    try {
+      // Check if service worker and push manager are supported
+      if (!('serviceWorker' in navigator)) {
+        throw new Error('Service workers not supported');
+      }
+      if (!('PushManager' in window)) {
+        throw new Error('Push notifications not supported');
+      }
+
+      if (loadingToggle) return null;
+
+      if (!notificationsEnabled) {
+  
         // Request permission
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
@@ -89,64 +153,42 @@ function NotificationsPage() {
           }
         });
     
+        setNotificationsEnabled(true);
         setSnackbar({ 
           open: true, 
           message: 'Notifications enabled!', 
           severity: 'success' 
         });
-        setNotificationsEnabled(true);
-      } catch (error) {
-        console.error('Error enabling notifications:', error);
+
+      } else {
+        // Disable notifications
+        await API.post('/api/notifications/enable-push', {
+          token: null,
+          enabled: false
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+
+        setNotificationsEnabled(false);
         setSnackbar({ 
           open: true, 
-          message: `Failed to enable notifications: ${error.message}`,
-          severity: 'error' 
+          message: 'Notifications Disabled!', 
+          severity: 'info' 
         });
       }
-    };
-  
-  // Add this useEffect to check notification status on component mount
-  useEffect(() => {
-    if ('Notification' in window && navigator.serviceWorker) {
-      // Check if notifications are already enabled
-      Notification.requestPermission().then(permission => {
-        if (permission === 'granted') {
-          // You might want to update UI to show notifications are enabled
-        }
+    } catch (error) {
+      console.error('Error toggling notifications:', error);
+      setSnackbar({ 
+        open: true, 
+        message: `Failed to toggling notifications: ${error.message}`,
+        severity: 'error' 
       });
+    } finally {
+      setLoadingToggle(false);
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchNotificationsData = async () => {
-      try {
-        const response = await fetchNotifications();
-        setNotifications(response.data);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchNotificationsData();
-  }, []);
-
-  const handleNotificationClick = async (notification) => {
-    if (!notification.isRead) {
-      try {
-        setLoadingView(notification._id);
-        await markNotificationAsRead(notification._id);
-        setNotifications(notifications.map(n => 
-          n._id === notification._id ? { ...n, isRead: true } : n
-        ));
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      } finally {
-        setLoadingView(null);
-      }
-    }
-    navigate(`/post/${notification.postId._id}`);
   };
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
@@ -158,7 +200,7 @@ function NotificationsPage() {
           <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
             Notifications ({notifications.filter(n => !n.isRead).length})
           </Typography>
-          <Button 
+          {/* <Button 
             variant="contained"
             color={notificationsEnabled ? 'success' : 'primary'}
             onClick={requestNotificationPermission}
@@ -168,6 +210,12 @@ function NotificationsPage() {
           </Button>
           <IconButton sx={{ backgroundColor: '#1976d2', color: '#fff', '&:hover': { backgroundColor: '#1565c0' } }}>
             <NotificationsActive />
+          </IconButton> */}
+          <IconButton 
+            onClick={toggleNotifications} disabled={loading}
+            sx={{ backgroundColor: notificationsEnabled ? '#2e7d32' : '#d32f2f', color: '#fff', '&:hover': { backgroundColor: '#1565c0', opacity: 0.8 } }}
+          >
+            {!loadingToggle ?  (notificationsEnabled ? <NotificationsActiveRounded /> : <NotificationsOffRounded />) : <CircularProgress size={24} color='white'/>}
           </IconButton>
         </Toolbar>
 
