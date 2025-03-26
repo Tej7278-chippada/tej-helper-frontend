@@ -14,12 +14,15 @@ import {
   useTheme,
   useMediaQuery,
   Paper,
-  CircularProgress
+  CircularProgress,
+  Button,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { fetchNotifications, markNotificationAsRead } from '../api/api';
+import API, { fetchNotifications, markNotificationAsRead } from '../api/api';
 import Layout from '../Layout';
-import { NotificationsActive } from '@mui/icons-material';
+import { NotificationAdd, NotificationsActive } from '@mui/icons-material';
 import SkeletonCards from './SkeletonCards';
 
 function NotificationsPage() {
@@ -29,6 +32,90 @@ function NotificationsPage() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [loadingView, setLoadingView] = useState(null);
+  // Add this to your PostService.js component
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  
+  // Add this effect to check current notification status
+  useEffect(() => {
+    const checkNotificationStatus = async () => {
+      try {
+        const authToken = localStorage.getItem('authToken');
+        const response = await API.get('/api/notifications/notification-status', {
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        setNotificationsEnabled(response.data.notificationEnabled);
+      } catch (error) {
+        console.error('Error checking notification status:', error);
+      }
+    };
+    checkNotificationStatus();
+  }, []);
+  
+    // Add this function to request notification permissions
+    const requestNotificationPermission = async () => {
+      try {
+        // Check if service worker and push manager are supported
+        if (!('serviceWorker' in navigator)) {
+          throw new Error('Service workers not supported');
+        }
+        if (!('PushManager' in window)) {
+          throw new Error('Push notifications not supported');
+        }
+    
+        // Request permission
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          throw new Error('Permission not granted');
+        }
+    
+        // Register service worker and get subscription
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: process.env.REACT_APP_VAPID_PUBLIC_KEY
+        });
+    
+        // Send to backend with proper auth header
+        await API.post('/api/notifications/enable-push', {
+          token: JSON.stringify(subscription),
+          enabled: true
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+    
+        setSnackbar({ 
+          open: true, 
+          message: 'Notifications enabled!', 
+          severity: 'success' 
+        });
+        setNotificationsEnabled(true);
+      } catch (error) {
+        console.error('Error enabling notifications:', error);
+        setSnackbar({ 
+          open: true, 
+          message: `Failed to enable notifications: ${error.message}`,
+          severity: 'error' 
+        });
+      }
+    };
+  
+  // Add this useEffect to check notification status on component mount
+  useEffect(() => {
+    if ('Notification' in window && navigator.serviceWorker) {
+      // Check if notifications are already enabled
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          // You might want to update UI to show notifications are enabled
+        }
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const fetchNotificationsData = async () => {
@@ -62,6 +149,8 @@ function NotificationsPage() {
     navigate(`/post/${notification.postId._id}`);
   };
 
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
   return (
     <Layout>
       <Box sx={{ p: isMobile ? '6px' : '10px', maxWidth: '800px', mx: 'auto' }}>
@@ -69,6 +158,14 @@ function NotificationsPage() {
           <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
             Notifications ({notifications.filter(n => !n.isRead).length})
           </Typography>
+          <Button 
+            variant="contained"
+            color={notificationsEnabled ? 'success' : 'primary'}
+            onClick={requestNotificationPermission}
+            startIcon={<NotificationAdd />}
+          >
+            {notificationsEnabled ? 'Notifications Enabled' : 'Enable Notifications'}
+          </Button>
           <IconButton sx={{ backgroundColor: '#1976d2', color: '#fff', '&:hover': { backgroundColor: '#1565c0' } }}>
             <NotificationsActive />
           </IconButton>
@@ -118,6 +215,16 @@ function NotificationsPage() {
           )}
         </Paper>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 }
