@@ -21,6 +21,7 @@ import API, { fetchNotifications, markNotificationAsRead } from '../api/api';
 import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-material';
+import { io } from 'socket.io-client';
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -65,6 +66,19 @@ function NotificationsPage() {
   //     });
   //   }
   // }, []);
+
+  const [socket, setSocket] = useState(null);
+  const userId = localStorage.getItem('userId');
+
+  // Add this useEffect for socket connection
+  useEffect(() => {
+    const newSocket = io(`${process.env.REACT_APP_API_URL}`); // Replace with your backend URL
+    setSocket(newSocket);
+
+    return () => {
+      if (newSocket) newSocket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchNotificationsData = async () => {
@@ -159,6 +173,11 @@ function NotificationsPage() {
           message: 'Notifications enabled!', 
           severity: 'success' 
         });
+
+        // Reconnect socket to ensure notifications are received
+        if (socket) {
+          socket.emit('joinRoom', userId);
+        }
 
       } else {
         // Disable notifications

@@ -9,7 +9,7 @@ import FilterListIcon from "@mui/icons-material/FilterList";
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
-import { fetchPosts } from '../api/api';
+import API, { fetchPosts } from '../api/api';
 import { useNavigate } from 'react-router-dom';
 import FilterPosts from './FilterPosts';
 import CloseIcon from '@mui/icons-material/Close'
@@ -122,26 +122,45 @@ useEffect(() => {
 }, []);
 
 // Add this useEffect to listen for notifications if needed
+// In your Helper.js component, modify the socket listener:
 useEffect(() => {
   if (socket && userId) {
-    socket.emit('joinRoom', userId); // Join user's notification room
+    socket.emit('joinRoom', userId);
     
-    socket.on('newNotification', (data) => {
-      setSnackbar({
-        open: true,
-        message: data.message,
-        severity: 'info',
-        action: (
-          <Button 
-            color="inherit" 
-            size="small"
-            onClick={() => navigate(`/post/${data.postId}`)}
-          >
-            View
-          </Button>
-        )
-      });
-    });
+    // Only listen for notifications if they're enabled
+    const checkAndListen = async () => {
+      try {
+        const authToken = localStorage.getItem('authToken');
+        const response = await API.get('/api/notifications/notification-status', {
+          headers: {
+            Authorization: `Bearer ${authToken}`
+          }
+        });
+        
+        if (response.data.notificationEnabled) {
+          socket.on('newNotification', (data) => {
+            setSnackbar({
+              open: true,
+              message: data.message,
+              severity: 'info',
+              action: (
+                <Button 
+                  color="inherit" 
+                  size="small"
+                  onClick={() => navigate(`/post/${data.postId}`)}
+                >
+                  View
+                </Button>
+              )
+            });
+          });
+        }
+      } catch (error) {
+        console.error('Error checking notification status:', error);
+      }
+    };
+
+    checkAndListen();
 
     return () => {
       socket.off('newNotification');
