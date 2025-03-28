@@ -687,9 +687,9 @@ useEffect(() => {
               
             </Box>
             {isMobile && (
-            <Box sx={{ padding: '12px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <Box sx={{ padding: '4px 8px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
               <TextField
-                label="custom input (km)"
+                label="custom range (km)"
                 type="number"
                 value={distanceRange}
                 onChange={(e) => {
@@ -737,6 +737,17 @@ useEffect(() => {
               </Button> */}
             </Box>
             )}
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                margin: '4px 10px', 
+                color: 'grey', 
+                whiteSpace: isMobile ? 'pre-line' : 'nowrap', 
+                textAlign: isMobile ? 'center' : 'inherit'
+              }}
+            >
+              *Distance range {isMobile ? '\n' : ' '} upto 1000km
+            </Typography>
           </Card>
           )}
           <Button
