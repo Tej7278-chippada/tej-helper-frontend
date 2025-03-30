@@ -17,11 +17,12 @@ import {
   Alert
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import API, { fetchNotifications, markNotificationAsRead } from '../api/api';
+import API, { clearAllNotifications, fetchNotifications, markNotificationAsRead } from '../api/api';
 import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-material';
 import { io } from 'socket.io-client';
+import ClearAllRoundedIcon from '@mui/icons-material/ClearAllRounded';
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -34,6 +35,7 @@ function NotificationsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [loadingToggle, setLoadingToggle] = useState(false);
+  const [loadingClear, setLoadingClear] = useState(false);
   
   // Add this effect to check current notification status
   // useEffect(() => {
@@ -210,6 +212,28 @@ function NotificationsPage() {
     }
   };
 
+  const handleClearAll = async () => {
+    setLoadingClear(true);
+    try {
+      await clearAllNotifications();
+      setNotifications([]);
+      setSnackbar({
+        open: true,
+        message: 'All notifications cleared!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error clearing notifications:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to clear notifications',
+        severity: 'error'
+      });
+    } finally {
+      setLoadingClear(false);
+    }
+  };
+
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
@@ -219,6 +243,22 @@ function NotificationsPage() {
           <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
             Notifications ({notifications.filter(n => !n.isRead).length})
           </Typography>
+          <Box>
+          <IconButton 
+            onClick={handleClearAll}
+            disabled={loading || notifications.length === 0 || loadingClear}
+            sx={{ 
+              mr: 2,
+              color: 'text.secondary',
+              '&:hover': { 
+                color: 'error.main',
+                backgroundColor: 'rgba(211, 47, 47, 0.08)' 
+              }
+            }}
+            aria-label="clear all notifications"
+          >
+            {loadingClear ? <CircularProgress size={24} /> : <ClearAllRoundedIcon />}
+          </IconButton>
           {/* <Button 
             variant="contained"
             color={notificationsEnabled ? 'success' : 'primary'}
@@ -236,6 +276,7 @@ function NotificationsPage() {
           >
             {!loadingToggle ?  (notificationsEnabled ? <NotificationsActiveRounded /> : <NotificationsOffRounded />) : <CircularProgress size={24} color='white'/>}
           </IconButton>
+          </Box>
         </Toolbar>
 
         <Paper sx={{ bgcolor: '#f5f5f5', p: '10px 12px', borderRadius: 3 }} elevation={3}>

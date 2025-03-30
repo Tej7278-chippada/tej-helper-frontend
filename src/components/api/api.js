@@ -217,3 +217,12 @@ export const markNotificationAsRead = async (notificationId) => {
     }
   });
 };
+
+export const clearAllNotifications = async () => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.delete('/api/notifications', {
+    headers: {
+      Authorization: `Bearer ${authToken}`
+    }
+  });
+};
