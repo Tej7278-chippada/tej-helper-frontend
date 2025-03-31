@@ -100,7 +100,9 @@ export const fetchUserPosts = () => {
   return API.get('/api/posts/my-posts', { headers });
 };
 
-export const fetchPosts = () => API.get('/api/posts');
+// export const fetchPosts = () => API.get('/api/posts');
+export const fetchPosts = (skip = 0, limit = 12) => 
+  API.get(`/api/posts?skip=${skip}&limit=${limit}`);
 
 export const fetchPostById = async (id) => {
   const authToken = localStorage.getItem('authToken');

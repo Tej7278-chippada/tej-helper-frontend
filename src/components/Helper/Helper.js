@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, LinearProgress, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -55,7 +55,20 @@ const Helper = ()=> {
   // const distanceOptions = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
   const [showDistanceRanges, setShowDistanceRanges] = useState(false);
-  
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const observer = useRef();
+  const lastPostRef = useCallback(node => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMorePosts();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore]);
 
   // Custom marker icon
   // const userLocationIcon = new L.Icon({
@@ -238,19 +251,43 @@ useEffect(() => {
         // setLoading(true);
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
         try {
-            const response = await fetchPosts();
-            // const { posts } = response.data;
-            setPosts(response.data.reverse() || []);
-            // setTotalPages(totalPages);
-            // setLoading(false);
+          setLoading(true);
+          const response = await fetchPosts(0, 12);
+          setPosts(response.data || []);
+          setSkip(12); // Set skip to 24 after initial load
+          setHasMore(response.data.length === 12); // If we got 24, there might be more
         } catch (error) {
-            console.error("Error fetching posts:", error);
-            // setLoading(false);
-            setSnackbar({ open: true, message: 'Failed to fetch the posts within your distance radius.', severity: 'error' });
+          console.error("Error fetching posts:", error);
+          setSnackbar({ open: true, message: 'Failed to fetch the posts within your distance radius.', severity: 'error' });
+        } finally {
+          setLoading(false);
         }
     };
     fetchData();
   }, []);
+
+  // Load more posts function
+  const loadMorePosts = async () => {
+    if (loading || !hasMore) return;
+    
+    try {
+      setLoading(true);
+      const response = await fetchPosts(skip, 12);
+      const newPosts = response.data;
+      
+      if (newPosts.length > 0) {
+        setPosts(prevPosts => [...prevPosts, ...newPosts]);
+        setSkip(prevSkip => prevSkip + 12);
+      }
+      
+      setHasMore(newPosts.length === 12); // If we got less than 24, we've reached the end
+    } catch (error) {
+      console.error("Error fetching more posts:", error);
+      setSnackbar({ open: true, message: 'Failed to fetch more posts.', severity: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get user's current location
   // useEffect(() => {
@@ -825,8 +862,8 @@ useEffect(() => {
             ) : 
             ( locationFilteredPosts.length > 0 ? (
               <Grid container spacing={isMobile ? 1.5 : 1.5}>
-                {locationFilteredPosts.map((post) => (
-                  <Grid item xs={12} sm={6} md={4} key={post._id}>
+                {locationFilteredPosts.map((post, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={`${post._id}-${index}`} ref={index === locationFilteredPosts.length - 3 ? lastPostRef : null}>
                     <Card style={{
                       margin: '0rem 0',  // spacing between up and down cards
                       cursor: 'pointer',
@@ -972,6 +1009,14 @@ useEffect(() => {
               <Typography color='error' textAlign="center" sx={{ m: 2 }}>No posts found within {distanceRange} km of your location...</Typography>
             )
             ))}
+
+            {loading && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems:'center', p: 4, gap:'1rem' }}>
+                {/* <CircularProgress /> */}
+                <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
+                <Typography color='grey' variant='body2'>Loading posts...</Typography>
+              </Box>
+            )}
           </Box>
 
 

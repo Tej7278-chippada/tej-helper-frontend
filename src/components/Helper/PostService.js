@@ -661,12 +661,20 @@ useEffect(() => {
                   <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
                     People Count: {post.peopleCount}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Date : {new Date(post.serviceDate).toLocaleDateString()}
                   </Typography>
                   <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Time from - To : {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Typography> */}
+                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
                   </Typography>
+                  {/* {!(post.createdAt === post.updatedAt) && ( */}
+                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+                  </Typography>
+                  {/* )} */}
                   {/* )} */}
                   {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
       Service Days: {post.serviceDays}
