@@ -587,7 +587,7 @@ function PostDetailsById({ onClose, user }) {
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Gender:
+                      Gender Required:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {post.gender}
@@ -614,18 +614,61 @@ function PostDetailsById({ onClose, user }) {
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      People Count: 
+                      People Required: 
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {post.peopleCount}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={12}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Service Required on: 
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Date: {new Date(post.serviceDate).toLocaleDateString()}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Time: {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Typography>
+                  </Grid>
+                  {/* <Grid item xs={12} sm={6}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Service required on time: 
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Typography>
+                  </Grid> */}
+                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Date : {new Date(post.serviceDate).toLocaleDateString()}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Time from - To : {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Typography> */}
+                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
+                  </Typography> */}
+                  {/* {!(post.createdAt === post.updatedAt) && ( */}
+                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                    Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+                  </Typography> */}
+                  {/* )} */}
+                  <Grid item xs={12} sm={12}>
                     <Typography variant="body2">Service required for {post.serviceDays} days</Typography>
                     {post.serviceDays && (
                       <Typography color='grey' variant="body2">
                         {/* {`Product will be delivered by ${calculateDeliveryDate(product.deliveryDays)}`} */}
                       </Typography>
+                    )}
+                  </Grid>
+                  <Grid item xs={12} sm={12}>
+                    <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
+                      Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
+                    </Typography>
+                    {post.updatedAt&& (
+                    <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
+                      Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+                    </Typography>
                     )}
                   </Grid>
                   {/* <Grid item xs={6} sm={4}>
