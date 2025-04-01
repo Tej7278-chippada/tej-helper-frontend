@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, Tooltip, Chip } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, Tooltip, Chip, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -26,7 +26,7 @@ const RECOMMENDED_MESSAGES = [
 
 // const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage }) => {
+const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage, setSnackbar }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
   const userId = localStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken');
@@ -38,7 +38,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const bottomRef = useRef(null); // Reference to the last transaction
   const inputRef = useRef(null);
   // const prevMessagesLength = useRef(0);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   // const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
   const [isFetching, setIsFetching] = useState(true);
 
@@ -74,7 +74,11 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       socket.emit('joinRoom', room);
 
       socket.on('receiveMessage', (newMessage) => {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setMessages((prevMessages) => {
+          // ✅ Remove the temp message when the actual message arrives
+          const filteredMessages = prevMessages.filter((msg) => msg.text !== newMessage.text || msg.isPending !== true);
+          return [...filteredMessages, { ...newMessage, isPending: false }];
+        });
       });
     }
 
@@ -102,7 +106,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const handleSendMessage = async (e, customMessage) => {
     // If customMessage is provided, use it, otherwise use the message state
     const messageToSend = typeof customMessage === 'string' ? customMessage : message;
-    
+
     // Ensure messageToSend is a string and not empty
     if (typeof messageToSend !== 'string' || !messageToSend.trim()) return;
     
@@ -122,10 +126,32 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       return;
     }
 
-    setLoading(true);
+    // 🚨 Check if the user is offline
+    if (!navigator.onLine) {
+      console.warn('User is offline. Message not sent.');
+      setSnackbar({ open: true, message: "Network is offline.", severity: "warning" });
+      return; // Do not proceed with sending
+    }
+  
+    const tempMessageId = `temp-${Date.now()}`;
+    const sentAt = new Date(); // Timestamp when sending starts
+    const optimisticMessage = {
+      _id: tempMessageId,
+      senderId: userId,
+      text: messageToSend,
+      createdAt: sentAt, // Store the timestamp
+      isPending: true,
+    };
+  
+    // Add optimistic message to chat
+    setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
+    setMessage('');
+    setTimeout(() => inputRef.current?.focus(), 50);
+  
+    // setLoading(true);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
         postId: post._id,
         sellerId: post.userId,
         buyerId: userId,
@@ -137,21 +163,27 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         }
       });
 
-      if (response) {
-        const newMessage = { senderId: userId, text: messageToSend, createdAt: new Date() };
-        const room = `${post._id}_${userId}`;
-        socket.emit('sendMessage', { room, message: newMessage });
+      // if (response) {
+      //   const newMessage = { senderId: userId, text: messageToSend, createdAt: new Date() };
+      //   const room = `${post._id}_${userId}`;
+      //   socket.emit('sendMessage', { room, message: newMessage });
 
-        setMessage('');
-        console.log("Message sent");
-        // fetchChatHistory(); // Refresh chat history
-        setTimeout(() => inputRef.current?.focus(), 50);
-      }
+      //   setMessage('');
+      //   console.log("Message sent");
+      //   // fetchChatHistory(); // Refresh chat history
+      //   setTimeout(() => inputRef.current?.focus(), 50);
+      // }
+  
+      // ✅ Real-time socket will handle replacing the message, so no need to update manually here.
     } catch (error) {
       console.error('Error sending message:', error);
-    } finally {
-      setLoading(false);
-    }
+      
+      // Remove the temporary message if the request fails
+      setMessages((prevMessages) => prevMessages.filter((msg) => msg._id !== tempMessageId));
+    } 
+    // finally {
+    //   setLoading(false);
+    // }
   };
 
   const handleQuickMessageClick = (quickMessage) => {
@@ -248,25 +280,38 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
               <ChatsSkeleton/>
             </Box>
           ) : messages.length > 0 ? (
-          messages.map((msg, index) => (
-            <Box key={index} sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1 }}
-              ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last transaction
-            >
-              <Box sx={{
-                bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
-                color: msg.senderId === userId ? '#fff' : '#000',
-                p: 1,
-                borderRadius: 2,
-                maxWidth: '70%',
-                wordWrap: 'break-word',
-              }}>
-                <Typography variant="body1">{msg.text}</Typography>
-                <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5 }}>
-                  {new Date(msg.createdAt).toLocaleString()}
-                </Typography>
+            messages.map((msg, index) => (
+              <Box key={msg._id} sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1 }}
+                ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last transaction
+              >
+                <Box sx={{
+                  bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
+                  color: msg.senderId === userId ? '#fff' : '#000',
+                  p: 1,
+                  borderRadius: 2,
+                  maxWidth: '70%',
+                  wordWrap: 'break-word',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: msg.senderId === userId ? 'flex-end' : 'flex-start',
+                }}>
+                  <Typography variant="body1" noWrap sx={{ whiteSpace: "pre-wrap", // Retain line breaks and tabs
+                    wordWrap: "break-word", }}
+                  >{msg.text}</Typography>
+                  
+                  <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                    {msg.isPending ? (
+                      <>
+                        {new Date(msg.createdAt).toLocaleString()} {/* Show when sending started */}
+                        <CircularProgress size={12} color="inherit" />
+                      </>
+                    ) : (
+                      new Date(msg.createdAt).toLocaleString()
+                    )}
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          ))
+            ))
         ) : 
         (
           // <Typography color='grey' textAlign="center" sx={{ m: 2 }}>Start chat</Typography>
@@ -404,9 +449,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             }}
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
             onClick={(e) => handleSendMessage(e)}
-            disabled={loading || message.trim() === '' || post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))}
+            disabled={ message.trim() === '' || post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))}
             >
-            {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px' }} />} 
+            <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px' }} />
           </IconButton>
         </Box>
       </DialogActions>

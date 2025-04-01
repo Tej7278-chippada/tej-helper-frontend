@@ -830,15 +830,15 @@ function PostDetailsById({ onClose, user }) {
           // onCommentAdded={onCommentAdded}  // Passing the comment added handler
         />
         <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
-          isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage} 
+          isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
         />
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
