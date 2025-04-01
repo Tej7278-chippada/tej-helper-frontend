@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, Tooltip } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, Tooltip, Chip } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -14,6 +14,15 @@ import ChatsSkeleton from './ChatsSkeleton';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
+
+// Recommended messages to start interaction
+const RECOMMENDED_MESSAGES = [
+  "Hi, I'm interested in your post",
+  "Is this still available?",
+  "What's your best price for this?",
+  "Can you share more details about the post?",
+  "When would be a good time to meet?"
+];
 
 // const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
@@ -90,17 +99,21 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     // prevMessagesLength.current = messages.length;
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    // if (message.trim() === '') return;
-    if (!message.trim()) return;
-    if (!isAuthenticated) { // Prevent unauthenticated actions
+  const handleSendMessage = async (e, customMessage) => {
+    // If customMessage is provided, use it, otherwise use the message state
+    const messageToSend = typeof customMessage === 'string' ? customMessage : message;
+    
+    // Ensure messageToSend is a string and not empty
+    if (typeof messageToSend !== 'string' || !messageToSend.trim()) return;
+    
+    if (!isAuthenticated) {
       setLoginMessage({
         open: true,
         message: 'Please log in first. Click here to login.',
         severity: 'warning',
       });
       return;
-    } 
+    }
 
     // Prevent sending messages if post isInActive or closed & user is not a helper
     if (post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
@@ -113,32 +126,37 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
 
     try {
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
-        // method: 'POST',
-        
-          postId: post._id,
-          sellerId: post.userId,
-          buyerId: userId,
-          text: message,    
-        
-      }, {headers: {
-        Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json',
-    }});
+        postId: post._id,
+        sellerId: post.userId,
+        buyerId: userId,
+        text: messageToSend,
+      }, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          'Content-Type': 'application/json',
+        }
+      });
 
       if (response) {
-        const newMessage = { senderId: userId, text: message, createdAt: new Date() };
+        const newMessage = { senderId: userId, text: messageToSend, createdAt: new Date() };
         const room = `${post._id}_${userId}`;
         socket.emit('sendMessage', { room, message: newMessage });
 
         setMessage('');
         console.log("Message sent");
         // fetchChatHistory(); // Refresh chat history
-        setTimeout(() => inputRef.current?.focus(), 50); // Keeps keyboard open
+        setTimeout(() => inputRef.current?.focus(), 50);
       }
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
+  };
+
+  const handleQuickMessageClick = (quickMessage) => {
+    setMessage(quickMessage);
+    handleSendMessage(null, quickMessage);
   };
 
   // Insert emoji at cursor position
@@ -251,7 +269,35 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           ))
         ) : 
         (
-          <Typography color='grey' textAlign="center" sx={{ m: 2 }}>Start chat</Typography>
+          // <Typography color='grey' textAlign="center" sx={{ m: 2 }}>Start chat</Typography>
+          <Box sx={{ textAlign: 'center', my: 2 }}>
+            <Typography color='grey' sx={{ mb: 2 }}>Start chat</Typography>
+            {/* Recommended messages chips */}
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              justifyContent: 'center', 
+              gap: 1,
+              px: 1,
+              mb: 2
+            }}>
+              {RECOMMENDED_MESSAGES.slice(0, 3).map((msg, index) => (
+                <Chip
+                  key={index}
+                  label={msg}
+                  onClick={() => handleQuickMessageClick(msg)}
+                  sx={{
+                    cursor: 'pointer',
+                    borderRadius: '16px',
+                    bgcolor: theme.palette.grey[200],
+                    '&:hover': {
+                      bgcolor: theme.palette.grey[300],
+                    }
+                  }}
+                />
+              ))}
+            </Box>
+          </Box>
         )}
         </Box>
         <IconButton
@@ -303,7 +349,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         
 
         {/* Input & Send Button */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? 0.5 : 1, padding: isMobile ? 0 : 1, flex: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? '2px' : '4px', padding: isMobile ? '2px' : '4px', position: 'relative',
+          bgcolor: theme.palette.background.paper,borderRadius: '20px',
+          border: `1px solid ${theme.palette.divider}`, flex: 1 }}>
           {/* <IconButton 
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
             onClick={handleEmojiToggle}>
@@ -311,31 +359,54 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           </IconButton> */}
           <TextField
             fullWidth
-            // inputRef={inputRef}
-            variant="outlined"
+            inputRef={inputRef}
+            variant="standard"
             placeholder="Type a message..."
             multiline
             value={message}
             minRows={1}
-            maxRows={3} 
+            maxRows={2} 
             onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            // onKeyPress={(e) => e.key === 'Enter' && handleSendMessage(e)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent new line
+                handleSendMessage(e);
+              }
+            }}
             sx={{ 
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '20px',
-                  bgcolor: theme.palette.background.paper,
+              // '& .MuiOutlinedInput-root': {
+              //   borderRadius: '20px',
+              //   bgcolor: theme.palette.background.paper,
+              // },
+              '& .MuiInputBase-root': {
+                padding: '8px 0', 
+                '&:before, &:after': {
+                  display: 'none', // Remove underline
                 },
-                '& .MuiInputBase-input': {
-                  padding: '0px 0px', scrollbarWidth: 'thin'
-                },
-              }}
+              },
+              '& .MuiInputBase-input': {
+                padding: '0px 10px', scrollbarWidth: 'none', maxHeight: '80px',
+                overflowY: 'auto',
+              },
+            }}
           />
           <IconButton color="primary" 
+            sx={{
+              // position: 'absolute',
+              right: '2px', padding:'6px 10px', borderRadius:6,
+              backgroundColor: message.trim() ? theme.palette.primary.main : 'transparent',
+              color: message.trim() ? '#fff' : theme.palette.text.secondary,
+              '&:hover': {
+                backgroundColor: message.trim() ? theme.palette.primary.dark : 'transparent',
+              },
+              transition: 'all 0.2s ease',
+            }}
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
-            onClick={handleSendMessage}
+            onClick={(e) => handleSendMessage(e)}
             disabled={loading || message.trim() === '' || post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))}
             >
-            {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon />} 
+            {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px' }} />} 
           </IconButton>
         </Box>
       </DialogActions>
