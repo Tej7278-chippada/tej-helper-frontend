@@ -461,7 +461,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
                     {/* <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
                       {new Date(msg.createdAt).toLocaleString()}
                     </Typography> */}
-                    <Typography variant="caption" sx={{ display: 'flex',  justifyContent:msg.senderId === userId ? 'flex-end' : 'flex-start', gap: 1, mt: 0 }}>
+                    <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', justifyContent:msg.senderId === userId ? 'flex-end' : 'flex-start', gap: 1, mt: 0 }}>
                       {msg.isPending ? (
                         <>
                           {format(new Date(msg.createdAt), "hh:mm:ss a")} {/* Show time only */} {/* Show when sending started {new Date(msg.createdAt).toLocaleString()}*/}
