@@ -84,18 +84,19 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           return [...filteredMessages, { ...newMessage, isPending: false }];
         });
       });
-      socket.on('messagesSeen', (messageIds) => {
+      // Listen for real-time seen updates
+      socket.on('messageSeenUpdate', ({ messageId }) => {
         setMessages(prevMessages => 
-          prevMessages.map(msg => 
-            messageIds.includes(msg._id) ? { ...msg, seen: true } : msg
-          )
+            prevMessages.map(msg => 
+              msg._id === messageId ? { ...msg, seen: true } : msg
+            )
         );
       });
     }
 
     return () => {
       socket.off('receiveMessage');
-      socket.off('messagesSeen');
+      socket.off('messageSeenUpdate');
       const room = `${post._id}_${userId}`; // Ensure unique room name
       socket.emit('leaveRoom', room);
     };
@@ -109,6 +110,12 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         messageIds
       }, {
         headers: { Authorization: `Bearer ${authToken}` }
+      });
+
+      // Emit real-time seen status to the other user
+      const room = `${post._id}_${userId}`;
+      messageIds.forEach(messageId => {
+        socket.emit('messageSeen', { room, messageId });
       });
     } catch (error) {
       console.error('Error marking messages as seen:', error);
@@ -125,6 +132,12 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   
     if (unseenMessageIds.length > 0) {
       markMessagesAsSeen(unseenMessageIds);
+      // Also update local state immediately for better UX
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          unseenMessageIds.includes(msg._id) ? { ...msg, seen: true } : msg
+        )
+    );
     }
   }, [messages, open, userId, markMessagesAsSeen]);
 

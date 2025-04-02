@@ -91,11 +91,12 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
           return [...filteredMessages, { ...newMessage, isPending: false }];
         });
       });
-      socket.on('messagesSeen', (messageIds) => {
+      // Listen for real-time seen updates
+      socket.on('messageSeenUpdate', ({ messageId }) => {
         setMessages(prevMessages => 
-          prevMessages.map(msg => 
-            messageIds.includes(msg._id) ? { ...msg, seen: true } : msg
-          )
+            prevMessages.map(msg => 
+              msg._id === messageId ? { ...msg, seen: true } : msg
+            )
         );
       });
     }
@@ -104,7 +105,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
       const room = `${postId}_${chatData.id}`; // Ensure unique room name
       socket.emit('leaveRoom', room);
       socket.off('receiveMessage');
-      socket.off('messagesSeen');
+      socket.off('messageSeenUpdate');
     };
   }, [chatData.id, fetchChatHistory, postId]);
 
@@ -117,13 +118,19 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
       }, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
+
+      // Emit real-time seen status to the other user
+      const room = `${postId}_${chatData.id}`;
+      messageIds.forEach(messageId => {
+        socket.emit('messageSeen', { room, messageId });
+      });
     } catch (error) {
       console.error('Error marking messages as seen:', error);
     }
   }, [postId, chatData.id , authToken]); // Adjust dependencies for ChatHistory.js
 
   useEffect(() => {
-    if (!open || messages.length === 0) return;
+    if (messages.length === 0) return;
   
     // Get IDs of unseen messages sent by the other user
     const unseenMessageIds = messages
@@ -132,8 +139,15 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
   
     if (unseenMessageIds.length > 0) {
       markMessagesAsSeen(unseenMessageIds);
+
+      // Also update local state immediately for better UX
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          unseenMessageIds.includes(msg._id) ? { ...msg, seen: true } : msg
+        )
+      );
     }
-  }, [messages, open, userId, markMessagesAsSeen]);
+  }, [messages, userId, markMessagesAsSeen]);
 
   const handleSendMessage = async () => {
     if (message.trim() === '') return;
