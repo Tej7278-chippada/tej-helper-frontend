@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, LinearProgress, Tooltip, Chip, CircularProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -13,6 +13,8 @@ import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { format } from "date-fns";
+import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
+import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -69,6 +71,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   }, [post._id, userId, authToken]);
 
   useEffect(() => {
+    if (!open) return;
     if (open) {
       fetchChatHistory();
       const room = `${post._id}_${userId}`; // Ensure unique room name
@@ -81,14 +84,49 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           return [...filteredMessages, { ...newMessage, isPending: false }];
         });
       });
+      socket.on('messagesSeen', (messageIds) => {
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            messageIds.includes(msg._id) ? { ...msg, seen: true } : msg
+          )
+        );
+      });
     }
 
     return () => {
       socket.off('receiveMessage');
+      socket.off('messagesSeen');
       const room = `${post._id}_${userId}`; // Ensure unique room name
       socket.emit('leaveRoom', room);
     };
   }, [open, fetchChatHistory, post._id, userId]);
+
+  const markMessagesAsSeen = useCallback(async (messageIds) => {
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/markAsSeen`, {
+        postId: post._id, // or postId in ChatHistory.js
+        buyerId: userId, // or chatData.id in ChatHistory.js
+        messageIds
+      }, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+    } catch (error) {
+      console.error('Error marking messages as seen:', error);
+    }
+  }, [post._id, userId, authToken]); // Adjust dependencies for ChatHistory.js
+
+  useEffect(() => {
+    if (!open || messages.length === 0) return;
+  
+    // Get IDs of unseen messages sent by the other user
+    const unseenMessageIds = messages
+      .filter(msg => msg.senderId !== userId && !msg.seen)
+      .map(msg => msg._id);
+  
+    if (unseenMessageIds.length > 0) {
+      markMessagesAsSeen(unseenMessageIds);
+    }
+  }, [messages, open, userId, markMessagesAsSeen]);
 
   const scrollToBottom = () => {
     if (bottomRef.current) {
@@ -327,7 +365,16 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                             <CircularProgress size={12} color="inherit" />
                           </>
                         ) : (
-                          format(new Date(msg.createdAt), "hh:mm:ss a") // Only show time  // new Date(msg.createdAt).toLocaleString()
+                          <>
+                            {format(new Date(msg.createdAt), "hh:mm:ss a")}  {/* // Only show time  // new Date(msg.createdAt).toLocaleString() */}
+                            {msg.senderId === userId && (
+                              msg.seen ? (
+                                <DoneAllRoundedIcon fontSize="inherit" /> // color="primary"
+                              ) : (
+                                <DoneRoundedIcon fontSize="inherit" />
+                              )
+                            )}
+                          </>
                         )}
                       </Typography>
                     </Box>

@@ -1,6 +1,6 @@
 // src/components/ChatHistory.js
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 // import SendIcon from '@mui/icons-material/Send';
 // import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 // import Picker from 'emoji-picker-react';
@@ -16,6 +16,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import StarOutlineRoundedIcon from '@mui/icons-material/StarOutlineRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { format } from "date-fns";
+import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
+import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -89,14 +91,49 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
           return [...filteredMessages, { ...newMessage, isPending: false }];
         });
       });
+      socket.on('messagesSeen', (messageIds) => {
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            messageIds.includes(msg._id) ? { ...msg, seen: true } : msg
+          )
+        );
+      });
     }
 
     return () => {
       const room = `${postId}_${chatData.id}`; // Ensure unique room name
       socket.emit('leaveRoom', room);
       socket.off('receiveMessage');
+      socket.off('messagesSeen');
     };
   }, [chatData.id, fetchChatHistory, postId]);
+
+  const markMessagesAsSeen = useCallback(async (messageIds) => {
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/markAsSeen`, {
+        postId: postId, // or postId in ChatHistory.js
+        buyerId: chatData.id, // or chatData.id in ChatHistory.js
+        messageIds
+      }, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+    } catch (error) {
+      console.error('Error marking messages as seen:', error);
+    }
+  }, [postId, chatData.id , authToken]); // Adjust dependencies for ChatHistory.js
+
+  useEffect(() => {
+    if (!open || messages.length === 0) return;
+  
+    // Get IDs of unseen messages sent by the other user
+    const unseenMessageIds = messages
+      .filter(msg => msg.senderId !== userId && !msg.seen)
+      .map(msg => msg._id);
+  
+    if (unseenMessageIds.length > 0) {
+      markMessagesAsSeen(unseenMessageIds);
+    }
+  }, [messages, open, userId, markMessagesAsSeen]);
 
   const handleSendMessage = async () => {
     if (message.trim() === '') return;
@@ -417,7 +454,16 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
                           <CircularProgress size={12} color="inherit" />
                         </>
                       ) : (
-                        format(new Date(msg.createdAt), "hh:mm:ss a") // Only show time  // new Date(msg.createdAt).toLocaleString()
+                        <>
+                          {format(new Date(msg.createdAt), "hh:mm:ss a")}  {/* // Only show time  // new Date(msg.createdAt).toLocaleString() */}
+                          {msg.senderId === userId && (
+                            msg.seen ? (
+                              <DoneAllRoundedIcon fontSize="inherit" /> //color="primary" 
+                            ) : (
+                              <DoneRoundedIcon fontSize="inherit" />
+                            )
+                          )}
+                        </>
                       )}
                     </Typography>
                   </Box>
