@@ -12,6 +12,7 @@ import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoub
 import io from 'socket.io-client';
 import ChatsSkeleton from './ChatsSkeleton';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
+import { format } from "date-fns";
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -218,6 +219,17 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   //   setShowEmojiPicker(!showEmojiPicker);
   //   if (!isPickerLoaded) setIsPickerLoaded(true); // Mark as loaded once opened
   // };
+
+  const groupMessagesByDate = (messages) => {
+    return messages.reduce((acc, msg) => {
+      const msgDate = format(new Date(msg.createdAt), "yyyy-MM-dd"); // Extract date only
+      if (!acc[msgDate]) acc[msgDate] = [];
+      acc[msgDate].push(msg);
+      return acc;
+    }, {});
+  };
+  
+  const groupedMessages = groupMessagesByDate(messages);
   
 
   
@@ -280,36 +292,49 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
               <ChatsSkeleton/>
             </Box>
           ) : messages.length > 0 ? (
-            messages.map((msg, index) => (
-              <Box key={msg._id} sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1 }}
-                ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last transaction
-              >
-                <Box sx={{
-                  bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
-                  color: msg.senderId === userId ? '#fff' : '#000',
-                  p: 1,
-                  borderRadius: 2,
-                  maxWidth: '70%',
-                  wordWrap: 'break-word',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: msg.senderId === userId ? 'flex-end' : 'flex-start',
-                }}>
-                  <Typography variant="body1" noWrap sx={{ whiteSpace: "pre-wrap", // Retain line breaks and tabs
-                    wordWrap: "break-word", }}
-                  >{msg.text}</Typography>
-                  
-                  <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                    {msg.isPending ? (
-                      <>
-                        {new Date(msg.createdAt).toLocaleString()} {/* Show when sending started */}
-                        <CircularProgress size={12} color="inherit" />
-                      </>
-                    ) : (
-                      new Date(msg.createdAt).toLocaleString()
-                    )}
-                  </Typography>
-                </Box>
+            Object.entries(groupedMessages).map(([date, msgs], dateIndex) => (
+              <Box key={`date-${dateIndex}`} sx={{ textAlign: "center", mt: 2 }}>
+                {/* Date Header in the Middle */}
+                <Typography variant="body2" sx={{ bgcolor: theme.palette.grey[200], px: 2, py: 1, borderRadius: 1, display: "inline-block" }}>
+                  {format(new Date(date), "EEEE, MMM dd, yyyy")}
+                </Typography>
+
+                {/* Render Messages for This Date */}
+                {msgs.map((msg, index) => (
+                  <Box key={msg._id || `msg-${index}`}  // Fallback to index if _id is missing
+                    sx={{ display: 'flex', justifyContent: msg.senderId === userId ? 'flex-end' : 'flex-start', m: 1, textAlign:'start' }}
+                    ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last message
+                  >
+                    <Box sx={{
+                      bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
+                      color: msg.senderId === userId ? '#fff' : '#000',
+                      p: 1,
+                      borderRadius: 2,
+                      maxWidth: '70%',
+                      wordWrap: 'break-word',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: msg.senderId === userId ? 'flex-end' : 'flex-start',
+                    }}>
+                      <Typography variant="body1" noWrap sx={{ whiteSpace: "pre-wrap", // Retain line breaks and tabs
+                        wordWrap: "break-word", maxWidth: '100%', }}
+                      >{msg.text}</Typography>
+                      
+                      <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0 }}>
+                        {msg.isPending ? (
+                          <>
+                            {format(new Date(msg.createdAt), "hh:mm:ss a")} {/* Show time only */} {/* Show when sending started {new Date(msg.createdAt).toLocaleString()}*/}
+                            <CircularProgress size={12} color="inherit" />
+                          </>
+                        ) : (
+                          format(new Date(msg.createdAt), "hh:mm:ss a") // Only show time  // new Date(msg.createdAt).toLocaleString()
+                        )}
+                      </Typography>
+                    </Box>
+                  </Box>
+                ))}
+                {/* Invisible div to trigger auto-scroll */}
+                <div ref={bottomRef} />
               </Box>
             ))
         ) : 
