@@ -24,6 +24,7 @@ const ChatsOfPosts = () => {
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [postTitle, setPostTitle] = useState(""); // Store post title
   const [openDialog, setOpenDialog] = useState(false);
+   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
 
 
   const fetchChatsOfPost = useCallback(async () => {
@@ -51,6 +52,7 @@ const ChatsOfPosts = () => {
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
+    setIsAuthenticated(!!authToken); // Check if user is authenticated
     if (!authToken) {
       navigate('/login');
     } else {
@@ -217,7 +219,7 @@ const ChatsOfPosts = () => {
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatData={chatDetailsById} postId={postId} />  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} isAuthenticated={isAuthenticated}/>  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
@@ -248,7 +250,7 @@ const ChatsOfPosts = () => {
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatHistory chatData={chatDetailsById} postId={postId} handleCloseDialog={handleCloseDialog} />
+            <ChatHistory chatData={chatDetailsById} postId={postId} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated}/>
           )}
         {/* </DialogContent> */}
       </Dialog>

@@ -20,7 +20,7 @@ const socket = io(process.env.REACT_APP_API_URL);
 
 const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
+const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
   const userId = localStorage.getItem('userId');
@@ -33,7 +33,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
   const bottomRef = useRef(null); // Reference to the last transaction
   const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
   const inputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isHelper, setIsHelper] = useState(false);
   const [helperCount, setHelperCount] = useState(0);
@@ -82,7 +82,11 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
       socket.emit('joinRoom', room);
 
       socket.on('receiveMessage', (newMessage) => {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
+        setMessages((prevMessages) => {
+          // ✅ Remove the temp message when the actual message arrives
+          const filteredMessages = prevMessages.filter((msg) => msg.text !== newMessage.text || msg.isPending !== true);
+          return [...filteredMessages, { ...newMessage, isPending: false }];
+        });
       });
     }
 
@@ -96,10 +100,29 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
   const handleSendMessage = async () => {
     if (message.trim() === '') return;
 
-    setLoading(true);
+    if (!isAuthenticated)  return;
+    
+
+    // setLoading(true);
+
+    const tempMessageId = `temp-${Date.now()}`;
+    const sentAt = new Date(); // Timestamp when sending starts
+    const optimisticMessage = {
+      _id: tempMessageId,
+      senderId: userId,
+      text: message,
+      createdAt: sentAt, // Store the timestamp
+      isPending: true,
+    };
+  
+    // Add optimistic message to chat
+    setMessages((prevMessages) => [...prevMessages, optimisticMessage]);
+    setMessage('');
+    setTimeout(() => inputRef.current?.focus(), 50);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/sendMessage`, {
+      // const response = 
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/sendMessage`, {
         // method: 'POST',
         
           postId: postId,
@@ -111,21 +134,24 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
         Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json',
     }});
 
-      if (response) {
-        const newMessage = { senderId: userId, text: message, createdAt: new Date() };
-        const room = `${postId}_${chatData.id}`;
-        socket.emit('sendMessage', { room, message: newMessage });
+      // if (response) {
+      //   const newMessage = { senderId: userId, text: message, createdAt: new Date() };
+      //   const room = `${postId}_${chatData.id}`;
+      //   socket.emit('sendMessage', { room, message: newMessage });
 
-        setMessage('');
-        console.log("Message sent");
-        // fetchChatHistory(); // Refresh chat history
-        setTimeout(() => inputRef.current?.focus(), 50); // Keeps keyboard open
-      }
+      //   setMessage('');
+      //   console.log("Message sent");
+      //   // fetchChatHistory(); // Refresh chat history
+      //   setTimeout(() => inputRef.current?.focus(), 50); // Keeps keyboard open
+      // }
     } catch (error) {
       console.error('Error sending message:', error);
-    } finally {
-      setLoading(false); 
-    }
+      // Remove the temporary message if the request fails
+      setMessages((prevMessages) => prevMessages.filter((msg) => msg._id !== tempMessageId));
+    } 
+    // finally {
+    //   setLoading(false); 
+    // }
   };
 
   // const onEmojiClick = (event, emojiObject) => {
@@ -360,8 +386,18 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                   }}>
                     {msg.text}
                   </Typography>
-                <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
+                {/* <Typography variant="caption" sx={{ display: 'block', textAlign: 'right' }}>
                   {new Date(msg.createdAt).toLocaleString()}
+                </Typography> */}
+                <Typography variant="caption" sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0 }}>
+                  {msg.isPending ? (
+                    <>
+                      {new Date(msg.createdAt).toLocaleString()} {/* Show time only */} {/* Show when sending started {new Date(msg.createdAt).toLocaleString()}*/}
+                      <CircularProgress size={12} color="inherit" />
+                    </>
+                  ) : (
+                    new Date(msg.createdAt).toLocaleString() // Only show time  // new Date(msg.createdAt).toLocaleString()
+                  )}
                 </Typography>
               </Box>
             </Box>
@@ -369,7 +405,9 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
 
         ) : 
         (
-          <Typography color='grey'>Start chat</Typography>
+          <Box sx={{ textAlign: 'center', my: 2 }}>
+            <Typography color='grey' sx={{ mb: 2 }}>Start chat</Typography>
+          </Box>
         )}
         {/* </Box> */}
         
@@ -405,9 +443,11 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
           left: 0,
           right: 0,
           zIndex: 10,
-          bgcolor: 'white',
-          boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
-          padding: '10px',  display: 'flex', alignItems: 'center', gap: 1
+          // bgcolor: 'white',
+          // boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
+          padding: '4px',  display: 'flex', alignItems: 'center', gap: 1, margin:'8px 8px',
+          bgcolor: theme.palette.background.paper, borderRadius: '20px',
+          border: `1px solid ${theme.palette.divider}`, flex: 1
         }}
       >
                 {/* <Toolbar sx={{
@@ -423,19 +463,14 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                   marginTop: '1rem',
                 }}> */}
                   {/* <Box  sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}> */}
-                    {/* <IconButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
-                      <EmojiEmotionsIcon />
-                    </IconButton> */}
-                    <IconButton 
-                      onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
-                      onClick={handleEmojiToggle}>
-                      {showEmojiPicker ? <EmojiEmotionsRoundedIcon /> : <SentimentSatisfiedRoundedIcon />}
-                    </IconButton>
-                    {/* {showEmojiPicker && (
-                      <Box sx={{ position: 'absolute', bottom: 60, left: 20 }}>
-                        <Picker onEmojiClick={onEmojiClick} />
-                      </Box>
-                    )} */}
+                    {!isMobile && (
+                      <IconButton 
+                        onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
+                        onClick={handleEmojiToggle}>
+                        {showEmojiPicker ? <EmojiEmotionsRoundedIcon /> : <SentimentSatisfiedRoundedIcon />}
+                      </IconButton>
+                    )}
+                    
                     {/* Lazy Loaded Emoji Picker */}
                     {showEmojiPicker && (
                       <Box sx={{ position: 'absolute', bottom: 70, left: 10, zIndex: 10, backgroundColor: '#fff',
@@ -458,33 +493,51 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog }) => {
                     <TextField
                       fullWidth
                       inputRef={inputRef}
-                      variant="outlined"
+                      variant="standard"
                       placeholder="Type a message..."
                       multiline
                       value={message}
                       minRows={1}
-                      maxRows={isMobile ? 2 : 1} 
+                      maxRows={2} 
                       onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      // onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault(); // Prevent new line
+                          handleSendMessage();
+                        }
+                      }}
                       sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: '20px',
-                          bgcolor: theme.palette.background.paper,
+                        // '& .MuiOutlinedInput-root': {
+                        //   borderRadius: '20px',
+                        //   bgcolor: theme.palette.background.paper,
+                        // },
+                        '& .MuiInputBase-root': {
+                          padding: '8px 0', 
+                          '&:before, &:after': {
+                            display: 'none', // Remove underline
+                          },
                         },
                         '& .MuiInputBase-input': {
-                          padding: '0px 0px', scrollbarWidth: 'thin'
+                          padding: '0px 10px', scrollbarWidth: 'none', maxHeight: '80px', overflowY: 'auto',
                         },
                       }}
                     />
-                    {/* <IconButton color="primary" onClick={handleSendMessage}>
-                      <SendIcon />
-                    </IconButton> */}
-                    <IconButton color="primary" 
+                    <IconButton color="primary" sx={{
+                        // position: 'absolute',
+                        right: '2px', padding:'6px 10px', borderRadius:6,
+                        backgroundColor: message.trim() ? theme.palette.primary.main : 'transparent',
+                        color: message.trim() ? '#fff' : theme.palette.text.secondary,
+                        '&:hover': {
+                          backgroundColor: message.trim() ? theme.palette.primary.dark : 'transparent',
+                        },
+                        transition: 'all 0.2s ease',
+                      }}
                       onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
                       onClick={handleSendMessage}
-                      disabled={loading || message.trim() === ''}
+                      disabled={message.trim() === '' || !isAuthenticated}
                       >
-                      {loading ? <LinearProgress sx={{ width: 24, height: 4, borderRadius: 2, mt: 0 }} /> : <SendRoundedIcon />} 
+                      <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px' }} />
                     </IconButton>
                   </Box>
                 {/* </Toolbar> */}
