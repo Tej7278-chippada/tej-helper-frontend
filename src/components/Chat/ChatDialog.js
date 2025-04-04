@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -172,8 +172,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     }
 
     // Prevent sending messages if post isInActive or closed & user is not a helper
-    if (post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
+    if (post.postStatus === 'InActive' || post.user.id === userId || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
       console.warn('You cannot send messages as this post is closed or InActive.');
+      setSnackbar({ open: true, message: `${ post.user.id === userId ? 'You cant send message' : `You cannot send messages as this post is ${post.postStatus === 'Closed' ? 'Closed' :  'InActive'}` }`, severity: "warning" });
       // alert('u cant send');
       return;
     }
@@ -205,7 +206,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     try {
       await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
         postId: post._id,
-        sellerId: post.userId,
+        sellerId: post.user.id,
         buyerId: userId,
         text: messageToSend,
       }, {
@@ -293,7 +294,19 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         '& .MuiPaper-root': { borderRadius: '14px',  } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }
       }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>Chat with {post.userCode}
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}> 
+        <Box sx={{ display: 'flex', alignItems:'center', gap:1 }}>
+          {/* {post.user?.profilePic && ( */}
+            <Avatar
+              src={`data:image/png;base64,${post.user.profilePic}`}
+              alt={post.user.username[0]}
+              style={{ width: 40, height: 40, borderRadius: '50%' }}
+            />
+          {/* )} */}
+          <Typography variant="body1" style={{ fontWeight: 500 }}>
+            {post.user?.username}
+          </Typography>
+        </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems:'center', gap:1 }}>
           {post.helperIds.includes(userId) && (
             <Tooltip title="Helper tag" arrow placement="left" 

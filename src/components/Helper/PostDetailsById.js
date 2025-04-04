@@ -1,8 +1,10 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button, styled } from '@mui/material';
-import { ThumbUp, Comment } from '@mui/icons-material';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button, styled, Avatar } from '@mui/material';
+import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
+import ThumbUpRoundedIcon from '@mui/icons-material/ThumbUpRounded';
+import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
+import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
 // import { addToWishlist, checkIfLiked, checkProductInWishlist, fetchLikesCount, fetchProductById, fetchProductStockCount, likeProduct, removeFromWishlist } from '../../api/api';
 // import CommentPopup from './CommentPopup';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -20,7 +22,6 @@ import ImageZoomDialog from './ImageZoomDialog';
 import CommentPopup from './CommentPopup';
 import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import RouteMapDialog from './RouteMapDialog';
-import ChatRoundedIcon from '@mui/icons-material/ChatRounded';
 import ChatDialog from '../Chat/ChatDialog';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
 
@@ -587,22 +588,6 @@ function PostDetailsById({ onClose, user }) {
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Gender Required:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {post.gender}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Price:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      ₹{post.price}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Post Status: 
                     </Typography>
                     {/* <Typography variant="body2" color="textSecondary">
@@ -614,10 +599,26 @@ function PostDetailsById({ onClose, user }) {
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Price:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      ₹{post.price}
+                    </Typography>
+                  </Grid>
+                  {/* <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Post Status: 
+                    </Typography>
+                    <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                      {post.postStatus}
+                    </Typography>
+                  </Grid> */}
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
                       People Required: 
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {post.peopleCount}
+                      {post.peopleCount} ({post.gender})
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={12}>
@@ -661,16 +662,7 @@ function PostDetailsById({ onClose, user }) {
                       </Typography>
                     )}
                   </Grid>
-                  <Grid item xs={12} sm={12}>
-                    <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
-                      Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
-                    </Typography>
-                    {post.updatedAt&& (
-                    <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
-                      Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
-                    </Typography>
-                    )}
-                  </Grid>
+                  
                   {/* <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       IP address: 
@@ -731,7 +723,7 @@ function PostDetailsById({ onClose, user }) {
                     Route Map
                   </Button>
                 </Box>
-                {!(post.userId === userId) && 
+                {!(post.user.id === userId) && 
                 <Box >
                   <Button
                     variant="contained"
@@ -739,7 +731,7 @@ function PostDetailsById({ onClose, user }) {
                     // onClick={() => openRouteMapDialog(post)}
                     // disabled={stockCountId === 0}
                     style={{ margin: "0rem", borderRadius: '8px' }}
-                    startIcon={<ChatRoundedIcon />}
+                    startIcon={<ForumRoundedIcon />}
                     onClick={() => setChatDialogOpen(true)}
                   >
                     Chat
@@ -751,52 +743,57 @@ function PostDetailsById({ onClose, user }) {
               </Box>
           </Box>
 
-          <Grid item xs={12} sx={{ paddingTop: '2rem' }}>
+          <Grid item xs={12} sx={{ paddingTop: '1rem' }}>
             <Grid2 sx={{
-              bottom: '6px',
-              right: '1rem', position: 'relative', display: 'inline-block', float: 'right',
+              bottom: '8px',
+              right: '0px', position: 'relative', display: 'inline-block', float: 'right',
             }}>
               <IconButton
-                onClick={handleLike}
+                onClick={handleLike} sx={{gap:'2px'}}
                 disabled={likeLoading} // Disable button while loading, sx={{ color: product.likedByUser ? 'blue' : 'gray' }} 
               >
                 {likeLoading ? (
                   <CircularProgress size={24} color="inherit" /> // Show spinner while loading
                 ) : post.likedByUser ? (
-                  <ThumbUp />
+                  <ThumbUpRoundedIcon />
                 ) : (
-                  <ThumbUpOffAltIcon />
+                  <ThumbUpOutlinedIcon />
                 )}
                 {post.likes}
               </IconButton>
-              <IconButton 
+              <IconButton sx={{gap:'2px'}}
                 onClick={() => openComments(post)}
               >
-                <Comment /> {post.comments?.length || 0}
+                <ChatRoundedIcon /> {post.comments?.length || 0}
               </IconButton>
             </Grid2>
-            <Typography variant="h6" style={{ paddingLeft: '6px', fontWeight: 500 }}>
+            <Typography variant="body1" style={{ paddingLeft: '6px', fontWeight: 500 }}>
               Post Description:
             </Typography>
-            <Typography variant="body2" color="textSecondary" style={{
-              marginTop: '0.5rem',
-              lineHeight: '1.5',
-              textAlign: 'justify', whiteSpace: "pre-wrap", // Retain line breaks and tabs
-              wordWrap: "break-word", // Handle long words gracefully
-              backgroundColor: "#f5f5f5",
-              padding: "1rem",
-              borderRadius: "8px",
-              border: "1px solid #ddd",
-            }}>
-              {post.description}
-            </Typography>
+            <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px'}}>
+              <Typography variant="body1" color="textSecondary" style={{
+                marginTop: '0.5rem',
+                lineHeight: '1.5',
+                // textAlign: 'justify',
+                whiteSpace: "pre-wrap", // Retain line breaks and tabs
+                wordWrap: "break-word", // Handle long words gracefully
+                // backgroundColor: "#f5f5f5",
+                padding: "1rem",
+                borderRadius: "8px",
+                // border: "1px solid #ddd",
+              }}>
+                {post.description}
+              </Typography>
+              
+            </Box>
           </Grid>
-          <Grid item xs={6} sm={4} mt={1} ml={1}>
+          <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px', my:1, padding:'1rem'}}>
+          <Grid item xs={6} sm={4} >
             <Typography variant="body1" style={{ fontWeight: 500 }}>
-              User Details:
+              Post Owner Details:
             </Typography>
-            <Typography variant="body2" color="textSecondary">
-              {post.userId}
+            {/* <Typography variant="body2" color="textSecondary">
+              {post.user.id}
             </Typography>
             <Grid item xs={6} sm={4}>
               <Typography variant="body1" style={{ fontWeight: 500 }}>
@@ -805,8 +802,33 @@ function PostDetailsById({ onClose, user }) {
               <Typography variant="body2" color="textSecondary">
                 {post.userCode}
               </Typography>
+            </Grid> */}
+            <Grid item xs={12} sm={4} my={1} display="flex" alignItems="center">
+              {/* {post.user?.profilePic && ( */}
+                <Avatar
+                  src={`data:image/png;base64,${post.user.profilePic}`}
+                  alt={post.user.username[0]}
+                  sx={{ width: 40, height: 40, borderRadius: '50%', marginRight: 1 }}
+                />
+              {/* )} */}
+              <Typography variant="body1" style={{ fontWeight: 500 }}>
+                {post.user?.username}
+              </Typography>
             </Grid>
           </Grid>
+          <Grid item xs={12} sm={12} pt={1}>
+            <Typography variant="body2" color="textSecondary" >
+              Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
+            </Typography>
+            {post.updatedAt&& (
+            <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
+              Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+            </Typography>
+            )}
+          </Grid>
+          </Box>
+
+
           
 
         </div>

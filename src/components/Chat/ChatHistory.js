@@ -380,12 +380,12 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
                   ? `data:image/jpeg;base64,${chatData.profilePic}`
                   : 'https://placehold.co/56x56?text=No+Image'
               }
-              sx={{ width: 56, height: 56, mr: 2 }}
+              sx={{ width: 46, height: 46, mr: 1 }}
             >
               {chatData.profilePic}
             </Avatar>
             <Box >
-              <Typography variant="h5">
+              <Typography variant="h6" fontWeight="400" fontFamily="sans-serif">
                 {chatData.username}
               </Typography>
               {/* <Typography>Chat History{postId}</Typography>
@@ -411,7 +411,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
         {/* ) : null} */}
       {/* </Box> */}
     </Box>
-    <Box height={isMobile ? 'calc(82vh - 64px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
+    <Box height={isMobile ? 'calc(82vh - 44px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
       sx={{
       overflowY: 'auto',
       padding: '0px', scrollbarWidth:'thin', 

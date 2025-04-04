@@ -150,7 +150,7 @@ const ChatsOfPosts = () => {
                       <Box
                         key={chat.id}
                         sx={{
-                          mb: '4px',
+                          mb: '4px', p: 1,
                           display: 'flex',
                           alignItems: 'center', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', backgroundColor: 'white',
                           cursor: 'pointer', borderRadius: '8px',
@@ -196,7 +196,7 @@ const ChatsOfPosts = () => {
                           alt={chat.username}
                           sx={{ width: 50, height: 50, mx: 1 }}
                         />
-                        <Typography variant="h6" m="1rem" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis',}}>
+                        <Typography variant="h6" m={1} sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis', fontWeight:400, fontFamily:'sans-serif'}}>
                           {chat.username}
                           {/* {chat.id} */}
                         </Typography>
