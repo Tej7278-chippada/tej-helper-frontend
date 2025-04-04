@@ -38,13 +38,15 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   // const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const bottomRef = useRef(null); // Reference to the last transaction
   const inputRef = useRef(null);
   // const prevMessagesLength = useRef(0);
   // const [loading, setLoading] = useState(false);
   // const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
   const [isFetching, setIsFetching] = useState(true);
-
+  const bottomRef = useRef(null); // Reference to the last message
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef(null);
 
 //   useEffect(() => {
 //     // if (open) {
@@ -147,13 +149,31 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     }
   };
 
-  // Scroll to bottom on new message
+  const handleScroll = (event) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 5; // Allow small buffer
+    setShowScrollButton(!isAtBottom);
+
+    setIsScrolling(true);
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsScrolling(false);
+    }, 3000);
+  };
+
   useEffect(() => {
-    // if (messages.length > prevMessagesLength.current) {
-      bottomRef.current?.scrollIntoView({ behavior:'auto' });
-    // }
-    // prevMessagesLength.current = messages.length;
+    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
+
+  // // Scroll to bottom on new message
+  // useEffect(() => {
+  //   // if (messages.length > prevMessagesLength.current) {
+  //     bottomRef.current?.scrollIntoView({ behavior:'auto' });
+  //   // }
+  //   // prevMessagesLength.current = messages.length;
+  // }, [messages]);
 
   const handleSendMessage = async (e, customMessage) => {
     // If customMessage is provided, use it, otherwise use the message state
@@ -303,7 +323,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
               style={{ width: 40, height: 40, borderRadius: '50%' }}
             />
           {/* )} */}
-          <Typography variant="body1" style={{ fontWeight: 500 }}>
+          <Typography variant="h6" style={{ fontWeight: 400 }}>
             {post.user?.username}
           </Typography>
         </Box>
@@ -333,23 +353,23 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         </Box>
         
       </DialogTitle>
-    <DialogContent sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'#f5f5f5',
+    <DialogContent onScroll={handleScroll} sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'#f5f5f5',
       scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
      }}>
         {post.helperIds.includes(userId) && (
           <Box sx={{
             position: 'absolute',
-            top: '80px',
+            top: '70px',
             left: '0%',
             width:'100%',
             backgroundColor:'rgba(244, 238, 238, 0.24)',
             boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
             borderRadius:'12px'
             }} >
-            <Typography color="success" align="center" margin={1}>You are tagged as the Helper of this post.</Typography>
+            <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You are tagged as the Helper of this post.</Typography>
           </Box>
         )}
-        <Box  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}}>
+        <Box  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}} >
         {isFetching ? (
             // <Typography textAlign="center">Loading...</Typography>
             <Box sx={{ margin: '0rem', textAlign: 'center' }}>
@@ -443,27 +463,43 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           </Box>
         )}
         </Box>
+        {(showScrollButton && isScrolling) && (
         <IconButton
           style={{
-            position: 'absolute',
-            bottom: isMobile ? '80px' : '95px',
-            right: isMobile ? '4px' : '12px',
+            position: 'sticky',
+            bottom: isMobile ? '10px' : '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease-in-out',
+            // right: isMobile ? '4px' : '12px',
             // padding: '6px 4px',
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
-            alignItems: 'center',
-            padding: '4px', // Reduce padding to shrink button size
-            width:isMobile ? '30px' : '25px', // Set smaller width
-            height: isMobile ? '35px' : '30px', // Set smaller height
-            color: '#1a73e8', // Google Blue style
+            alignItems: 'center', backgroundColor:'#f5f5f5', 
+            justifyContent: 'center',
+            padding: '6px 10px', // Reduce padding to shrink button size
+            width: 'auto', // Set smaller width
+            height: isMobile ? '30px' : '30px', // Set smaller height
+            color: '#grey', // Google Blue #1a73e8 style
           }}
           // onClick={handleAddTransaction}
           onClick={scrollToBottom}
           onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus when selecting emoji
         >
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: isMobile ? '12px' : '14px',
+              marginRight: '6px', // Space between text and icon
+              color: 'grey',
+            }}
+          >
+            Scroll to bottom
+          </Typography>
           <KeyboardDoubleArrowDownRoundedIcon style={{ fontSize: '14px' }}/>
         </IconButton>
+        )}
 
         
         
