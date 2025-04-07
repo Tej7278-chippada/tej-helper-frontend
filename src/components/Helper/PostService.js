@@ -651,15 +651,15 @@ useEffect(() => {
                   <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block', float: 'right', fontWeight: '500' }}>
                     Price: ₹{post.price}
                   </Typography>
-                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                    Gender: {post.gender}
+                  <Typography variant="body2" color={post.categories === 'Emergency' ? 'rgba(194, 28, 28, 0.89)' : 'textSecondary'} style={{ marginBottom: '0.5rem' }}>
+                    Category: {post.categories}
                   </Typography>
                   <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
                     Post Status: {post.postStatus}
                   </Typography>
                   {/* {post.stockStatus === 'In Stock' && ( */}
                   <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                    People Count: {post.peopleCount}
+                    People Count: {post.peopleCount} ({post.gender})
                   </Typography>
                   {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Date : {new Date(post.serviceDate).toLocaleDateString()}
@@ -671,9 +671,11 @@ useEffect(() => {
                     Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
                   </Typography>
                   {/* {!(post.createdAt === post.updatedAt) && ( */}
+                  {post.updatedAt && (
                   <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
                   </Typography>
+                  )}
                   {/* )} */}
                   {/* )} */}
                   {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
@@ -1149,7 +1151,7 @@ useEffect(() => {
                         label="Description"
                         multiline
                         rows={6}
-                        fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
+                        fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem'}, '& .MuiInputBase-input': {scrollbarWidth: 'thin'} }}
                         value={formData.description}
                         // onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                         onChange={(e) => {

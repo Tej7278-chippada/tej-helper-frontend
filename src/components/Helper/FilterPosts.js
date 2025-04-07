@@ -226,7 +226,8 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                     gap: '0.1rem',
                                                     // marginBottom: '1rem'
                                                     height:'170px'}} onClick={() => openPostDetail(post)}>
-                                                    {post.media && post.media.slice(0, 5).map((base64Image, index) => (
+                                                    {post.media && post.media.length > 0 ? (
+                                                     post.media.slice(0, 5).map((base64Image, index) => (
                                                       <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{
                                                         height: '160px',
                                                         borderRadius: '8px',
@@ -234,7 +235,17 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                         flexShrink: 0,
                                                         cursor: 'pointer' // Make the image look clickable
                                                       }}/>
-                                                    ))}
+                                                    ))
+                                                    ) : (
+                                                      <img
+                                                        src='https://placehold.co/56x56?text=No+Imag'
+                                                        alt="No media available"
+                                                        style={{
+                                                          height: '160px',
+                                                          borderRadius: '8px',
+                                                        }}
+                                                      />
+                                                    )}
                                                   </div>
                                                   {post.media && post.media.length > 5 && (
                                                     <Typography variant="body2" color="error" style={{ textAlign: 'center', marginTop: '0.5rem' }}>
@@ -251,14 +262,14 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                   <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block',float: 'right', fontWeight: '500' }}>
                                                     Price: ₹{post.price}
                                                   </Typography>
-                                                  <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
-                                                    Gender: {post.gender}
-                                                  </Typography>
-                                                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block',float: 'right', marginBottom: '0.5rem' }}>
-                                                    Post Status: {post.postStatus}
-                                                  </Typography>
-                                                  <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
+                                                  <Typography variant="body2" color={post.categories === 'Emergency' ? 'rgba(194, 28, 28, 0.89)' : 'textSecondary'} style={{  marginBottom: '0.5rem' }}>
                                                     Category: {post.categories}
+                                                  </Typography>
+                                                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block',float: 'right', marginBottom: '0.5rem' }}>
+                                                    Status: {post.postStatus}
+                                                  </Typography>
+                                                  <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
+                                                    People Required: {post.peopleCount} ({post.gender})
                                                   </Typography>
                                                   {/* {post.postStatus === 'In Stock' && (
                                                     <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block',float: 'right',marginBottom: '0.5rem' }}>

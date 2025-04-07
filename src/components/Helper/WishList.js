@@ -198,15 +198,21 @@ const WishList = () => {
                         </CardMedia>
                         <CardContent style={{ padding: '10px' }}>
                           <Tooltip title={post.title} placement="top" arrow>
-                            <Typography variant="h5" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                             </Typography>
                           </Tooltip>
                           <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block', float: 'right', fontWeight: '500' }}>
                             Price: ₹{post.price}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                            Gender: {post.gender}
+                          <Typography variant="body2" color={post.categories === 'Emergency' ? 'rgba(194, 28, 28, 0.89)' : 'textSecondary'} style={{ marginBottom: '0.5rem' }}>
+                            Category: {post.categories}
+                          </Typography>
+                          <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block',float: 'right', marginBottom: '0.5rem' }}>
+                            Status: {post.postStatus}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary" style={{  marginBottom: '0.5rem' }}>
+                            People Required: {post.peopleCount} ({post.gender})
                           </Typography>
                           <Typography
                             variant="body2"

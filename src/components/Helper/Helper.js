@@ -850,7 +850,7 @@ useEffect(() => {
           
         </Toolbar>
 
-        <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: isMobile ? '6px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        <Box mb={1} sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
             {loadingLocation ? (
               // renderSkeletonCards()
               <SkeletonCards />
@@ -952,16 +952,16 @@ useEffect(() => {
                         <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block', float: 'right', fontWeight: '500' }}>
                           Price: ₹{post.price}
                         </Typography>
-                        <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                          Gender: {post.gender}
+                        <Typography variant="body2" color={post.categories === 'Emergency' ? 'rgba(194, 28, 28, 0.89)' : 'textSecondary'} style={{ marginBottom: '0.5rem' }}>
+                          Category: {post.categories}
                         </Typography>
                         {/* {post.stockStatus === 'In Stock' && ( */}
                         <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                          People Count: {post.peopleCount}
+                          People Required: {post.peopleCount} ({post.gender})
                         </Typography>
                         {/* )} */}
-                        <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'red'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
-                          Post Status: {post.postStatus}
+                        <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
+                          Status: {post.postStatus}
                         </Typography>
                         {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                           Service Days: {post.serviceDays}
