@@ -43,6 +43,9 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
   const [peopleCount, setPeopleCount] = useState(0);
   const [helperDialogOpen, setHelperDialogOpen] = useState(false);
   const [loadingHelerAction, setLoadingHelperAction] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef(null);
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -251,6 +254,24 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
+  
+  const handleScroll = (event) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    const isAtBottom = scrollHeight - scrollTop <= clientHeight + 5; // Allow small buffer
+    setShowScrollButton(!isAtBottom);
+
+    setIsScrolling(true);
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsScrolling(false);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+  }, [messages]);
 
   const toggleHelper = async () => {
     setLoadingHelperAction(true);
@@ -411,7 +432,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
         {/* ) : null} */}
       {/* </Box> */}
     </Box>
-    <Box height={isMobile ? 'calc(82vh - 44px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
+    <Box onScroll={handleScroll} height={isMobile ? 'calc(82vh - 44px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
       sx={{
       overflowY: 'auto',
       padding: '0px', scrollbarWidth:'thin', 
@@ -497,28 +518,42 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
         {/* </Box> */}
         
       {/* </Box> */}
+      {(showScrollButton && isScrolling) && (
       <IconButton
           style={{
             position: 'sticky',
-            bottom: isMobile ? '30px' : '35px',
-            left : '100%',
-            // left: isMobile ? '4px' : '12px',
+            bottom: isMobile ? '10px' : '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease-in-out',
+            // right: isMobile ? '4px' : '12px',
             // padding: '6px 4px',
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
-            alignItems: 'center',
-            padding: '4px', // Reduce padding to shrink button size
-            width:isMobile ? '30px' : '25px', // Set smaller width
-            height: isMobile ? '35px' : '30px', // Set smaller height
-            color: '#1a73e8', // Google Blue style
+            alignItems: 'center', backgroundColor:'#f5f5f5', 
+            justifyContent: 'center',
+            padding: '6px 10px', // Reduce padding to shrink button size
+            width: 'auto', // Set smaller width
+            height: isMobile ? '30px' : '30px', // Set smaller height
+            color: '#grey', // Google Blue #1a73e8 style
           }}
           // onClick={handleAddTransaction}
           onClick={scrollToBottom}
           onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus when selecting emoji
         >
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: isMobile ? '12px' : '14px',
+              marginRight: '6px', // Space between text and icon
+              color: 'grey',
+            }}
+          >
+            Scroll to bottom
+          </Typography>
           <KeyboardDoubleArrowDownRoundedIcon style={{ fontSize: '14px' }}/>
-        </IconButton>
+        </IconButton>)}
       
     </Box>
     
