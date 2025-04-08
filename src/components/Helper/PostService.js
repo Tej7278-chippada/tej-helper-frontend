@@ -29,6 +29,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { io } from 'socket.io-client';
 import { NotificationAdd } from '@mui/icons-material';
+import axios from "axios";
+const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -110,6 +112,64 @@ function PostService() {
   // Initialize socket connection (add this near your other state declarations)
 const [socket, setSocket] = useState(null);
 const userId = localStorage.getItem('userId');
+
+// const [formData, setFormData] = useState({ title: "", media: [] });
+  const [generatedImages, setGeneratedImages] = useState([]);
+  // const [newMedia, setNewMedia] = useState([]);
+
+  // Fetch images from Unsplash based on title
+  const fetchUnsplashImages = async (query) => {
+    try {
+      const response = await fetch(
+        `https://api.unsplash.com/search/photos?query=${query}&per_page=6&client_id=${UnsplashAccessKey}`
+      );
+      const data = await response.json();
+      if (data.results) {
+        setGeneratedImages(data.results);
+      }
+    } catch (error) {
+      console.error("Error fetching images:", error);
+    }
+  };
+
+  // Handle title input change
+  const handleTitleChange = (e) => {
+    const title = e.target.value;
+    setFormData((prev) => ({ ...prev, title }));
+
+    if (title.length > 2) {
+      fetchUnsplashImages(title);
+    } else {
+      setGeneratedImages([]);
+    }
+  };
+
+  // Add selected image to new media
+  const handleSelectImage = (imageUrl) => {
+    fetch(imageUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = new File([blob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
+        setNewMedia((prev) => [...prev, file]);
+      })
+      .catch((err) => console.error("Error converting image:", err));
+  };
+
+
+const [query, setQuery] = useState("");
+    const [imageUrl, setImageUrl] = useState(null);
+    const [loadingImg, setLoadingImg] = useState(false);
+
+    const fetchImage = async () => {
+        setLoadingImg(true);
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/images`, { params: { query } });
+            setImageUrl(response.data.imageUrl);
+        } catch (error) {
+            console.error("Error fetching image:", error.message);
+        }
+        setLoadingImg(false);
+    };
 
 // Add this useEffect for socket connection
 useEffect(() => {
@@ -343,12 +403,6 @@ useEffect(() => {
           handleCloseDialog();       // Close dialog
         } catch (error) {
           console.error("Error submitting post:", error);
-          // showNotification(
-          //   editingProduct
-          //     ? `${formData.title} details can't be updated, please try again later.`
-          //     : `New post can't be added, please try again later.`,
-          //   'error'
-          // );
           setSnackbar({ open: true, message: editingProduct
             ? `${formData.title} details can't be updated, please try again later.`
             : `New post can't be added, please try again later.`, severity: 'error' });
@@ -356,9 +410,6 @@ useEffect(() => {
           setLoading(false); // Stop loading state
         }
       };
-      // const handleCloseNotification = () => {
-      //   setNotification({ ...notification, open: false });
-      // };
     
       const handleEdit = (post) => {
         setEditingProduct(post);
@@ -983,6 +1034,40 @@ useEffect(() => {
                                 </Box>
                             )}
                         </Box></Card>
+                        <Box>
+      <TextField
+        label="Post Title"
+        fullWidth
+        value={formData.title}
+        onChange={handleTitleChange}
+      />
+      <Button onClick={() => fetchUnsplashImages(formData.title)}>Generate</Button>
+
+      {/* Floating Card for Generated Images */}
+      {generatedImages.length > 0 && (
+        <Card style={{ position: "absolute", background: "#fff", padding: "10px", zIndex: 1000 }}>
+          <Typography variant="subtitle1">Select an Image</Typography>
+          <Box style={{ display: "flex", gap: "10px", overflowX: "auto" }}>
+            {generatedImages.map((img) => (
+              <img
+                key={img.id}
+                src={img.urls.thumb}
+                alt="Generated"
+                style={{ cursor: "pointer", height: "100px", borderRadius: "8px" }}
+                onClick={() => handleSelectImage(img.urls.full)}
+              />
+            ))}
+          </Box>
+        </Card>
+      )}
+
+      {/* Selected Images */}
+      <Box>
+        {newMedia.map((file, index) => (
+          <img key={index} src={URL.createObjectURL(file)} alt="Selected" style={{ width: "100px" }} />
+        ))}
+      </Box>
+    </Box>
                     <TextField
                         label="Post Title"
                         fullWidth sx={{
