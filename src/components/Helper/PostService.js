@@ -466,15 +466,15 @@ useEffect(() => {
           // media: null, // Reset images to avoid re-uploading
         });
         // Set the date and time fields if they exist in the post
-    if (post.serviceDate) {
-      setSelectedDate(new Date(post.serviceDate));
-    }
-    if (post.timeFrom) {
-      setTimeFrom(new Date(post.timeFrom));
-    }
-    if (post.timeTo) {
-      setTimeTo(new Date(post.timeTo));
-    }
+        if (post.serviceDate) {
+          setSelectedDate(new Date(post.serviceDate));
+        }
+        if (post.timeFrom) {
+          setTimeFrom(new Date(post.timeFrom));
+        }
+        if (post.timeTo) {
+          setTimeTo(new Date(post.timeTo));
+        }
         setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
         setOpenDialog(true);
       };
@@ -483,25 +483,29 @@ useEffect(() => {
         setExistingMedia(existingMedia.map(media => media._id === mediaId ? { ...media, remove: true } : media));
       };
     
-      const handleFileChange = (e) => {
+      const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
+        const resizedFiles = [];
       
-        // Filter files larger than 2MB
-        const oversizedFiles = selectedFiles.filter(file => file.size > 2 * 1024 * 1024);
-        const totalMediaCount = selectedFiles.length + existingMedia.filter((media) => !media.remove).length;
+        for (const file of selectedFiles) {
+          if (file.size > 2 * 1024 * 1024) { // If file is larger than 2MB
+            const resizedBlob = await resizeImage(file, 2 * 1024 * 1024);
+            const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+            resizedFiles.push(resizedFile);
+          } else {
+            resizedFiles.push(file); // Keep original if <= 2MB
+          }
+        }
       
-        // Check for conditions and update errors
-        if (oversizedFiles.length > 0 && totalMediaCount > 5) {
-          setMediaError("Photo size must be less than 2MB && Maximum 5 photos allowed.");
-        } else if (oversizedFiles.length > 0 || totalMediaCount > 5) {
-          setMediaError(
-            `${oversizedFiles.length > 0 ? "Files must be under 2MB each." : ""} ${totalMediaCount > 5 ? "Maximum 5 photos allowed." : ""}`
-          );
+        const totalMediaCount = resizedFiles.length + newMedia.length + existingMedia.filter((media) => !media.remove).length;
+        
+        // Check conditions for file count and size
+        if (totalMediaCount > 5) {
+          setMediaError("Maximum 5 photos allowed.");
         } else {
           setMediaError("");
-      
           // Append newly selected files at the end of the existing array
-          setNewMedia(prevMedia => [...prevMedia, ...selectedFiles]);
+          setNewMedia((prevMedia) => [...prevMedia, ...resizedFiles]); // Add resized/valid files
         }
       };
 
