@@ -29,7 +29,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { io } from 'socket.io-client';
 // import { NotificationAdd } from '@mui/icons-material';
-import axios from "axios";
+// import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
 
 // Set default icon manually
@@ -139,16 +139,59 @@ const userId = localStorage.getItem('userId');
   //   }
   // };
 
+  const resizeImage = (blob, maxSize) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(blob);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+  
+        // Set the new dimensions
+        let width = img.width;
+        let height = img.height;
+        const scaleFactor = Math.sqrt(maxSize / blob.size); // Reduce size proportionally
+  
+        width *= scaleFactor;
+        height *= scaleFactor;
+        canvas.width = width;
+        canvas.height = height;
+  
+        ctx.drawImage(img, 0, 0, width, height);
+  
+        // Convert canvas to Blob
+        canvas.toBlob(
+          (resizedBlob) => {
+            resolve(resizedBlob);
+          },
+          "image/jpeg",
+          0.8 // Compression quality
+        );
+      };
+    });
+  };
+  
+
   // Add selected image to new media
-  const handleSelectImage = (imageUrl) => {
-    fetch(imageUrl)
-      .then((res) => res.blob())
-      .then((blob) => {
+  const handleSelectImage = async (imageUrl) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+  
+      if (blob.size > 2 * 1024 * 1024) { // If the image is larger than 2MB
+        const resizedBlob = await resizeImage(blob, 2 * 1024 * 1024); // Resize image
+        const file = new File([resizedBlob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
+        setNewMedia((prev) => [...prev, file]);
+      } else {
+        // Directly add if the image is <= 2MB
         const file = new File([blob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
         setNewMedia((prev) => [...prev, file]);
-      })
-      .catch((err) => console.error("Error converting image:", err));
+      }
+    } catch (err) {
+      console.error("Error processing image:", err);
+    }
   };
+  
 
 
 // const [query, setQuery] = useState("");
