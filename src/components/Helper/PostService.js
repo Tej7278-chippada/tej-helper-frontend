@@ -28,9 +28,9 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { io } from 'socket.io-client';
-import { NotificationAdd } from '@mui/icons-material';
+// import { NotificationAdd } from '@mui/icons-material';
 import axios from "axios";
-const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
+// const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -120,29 +120,24 @@ const userId = localStorage.getItem('userId');
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
     try {
-      const response = await fetch(
-        `https://api.unsplash.com/search/photos?query=${query}&per_page=6&client_id=${UnsplashAccessKey}`
-      );
-      const data = await response.json();
-      if (data.results) {
-        setGeneratedImages(data.results);
-      }
+      const response = await API.get(`/api/posts/generate-images?query=${query}`);
+      setGeneratedImages(response.data.results);
     } catch (error) {
       console.error("Error fetching images:", error);
     }
   };
 
   // Handle title input change
-  const handleTitleChange = (e) => {
-    const title = e.target.value;
-    setFormData((prev) => ({ ...prev, title }));
+  // const handleTitleChange = (e) => {
+  //   const title = e.target.value;
+  //   setFormData((prev) => ({ ...prev, title }));
 
-    if (title.length > 2) {
-      fetchUnsplashImages(title);
-    } else {
-      setGeneratedImages([]);
-    }
-  };
+  //   if (title.length > 2) {
+  //     fetchUnsplashImages(title);
+  //   } else {
+  //     setGeneratedImages([]);
+  //   }
+  // };
 
   // Add selected image to new media
   const handleSelectImage = (imageUrl) => {
@@ -156,20 +151,20 @@ const userId = localStorage.getItem('userId');
   };
 
 
-const [query, setQuery] = useState("");
-    const [imageUrl, setImageUrl] = useState(null);
-    const [loadingImg, setLoadingImg] = useState(false);
+// const [query, setQuery] = useState("");
+//     const [imageUrl, setImageUrl] = useState(null);
+//     const [loadingImg, setLoadingImg] = useState(false);
 
-    const fetchImage = async () => {
-        setLoadingImg(true);
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/images`, { params: { query } });
-            setImageUrl(response.data.imageUrl);
-        } catch (error) {
-            console.error("Error fetching image:", error.message);
-        }
-        setLoadingImg(false);
-    };
+//     const fetchImage = async () => {
+//         setLoadingImg(true);
+//         try {
+//             const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/images`, { params: { query } });
+//             setImageUrl(response.data.imageUrl);
+//         } catch (error) {
+//             console.error("Error fetching image:", error.message);
+//         }
+//         setLoadingImg(false);
+//     };
 
 // Add this useEffect for socket connection
 useEffect(() => {
@@ -1035,40 +1030,25 @@ useEffect(() => {
                             )}
                         </Box></Card>
                         <Box>
-      <TextField
-        label="Post Title"
-        fullWidth
-        value={formData.title}
-        onChange={handleTitleChange}
-      />
-      <Button onClick={() => fetchUnsplashImages(formData.title)}>Generate</Button>
+                          {/* <TextField
+                            label="Post Title"
+                            fullWidth
+                            value={formData.title}
+                            onChange={handleTitleChange}
+                          />
+                          <Button onClick={() => fetchUnsplashImages(formData.title)}>Generate</Button> */}
 
-      {/* Floating Card for Generated Images */}
-      {generatedImages.length > 0 && (
-        <Card style={{ position: "absolute", background: "#fff", padding: "10px", zIndex: 1000 }}>
-          <Typography variant="subtitle1">Select an Image</Typography>
-          <Box style={{ display: "flex", gap: "10px", overflowX: "auto" }}>
-            {generatedImages.map((img) => (
-              <img
-                key={img.id}
-                src={img.urls.thumb}
-                alt="Generated"
-                style={{ cursor: "pointer", height: "100px", borderRadius: "8px" }}
-                onClick={() => handleSelectImage(img.urls.full)}
-              />
-            ))}
-          </Box>
-        </Card>
-      )}
+                          
 
-      {/* Selected Images */}
-      <Box>
-        {newMedia.map((file, index) => (
-          <img key={index} src={URL.createObjectURL(file)} alt="Selected" style={{ width: "100px" }} />
-        ))}
-      </Box>
-    </Box>
-                    <TextField
+                          {/* Selected Images */}
+                          {/* <Box>
+                            {newMedia.map((file, index) => (
+                              <img key={index} src={URL.createObjectURL(file)} alt="Selected" style={{ width: "100px" }} />
+                            ))}
+                          </Box> */}
+                        </Box>
+                      <Box>
+                      <TextField
                         label="Post Title"
                         fullWidth sx={{
                           '& .MuiOutlinedInput-root': {
@@ -1090,7 +1070,40 @@ useEffect(() => {
                         }}
                         inputProps={{ maxLength: 100 }} // Ensures no more than 100 characters can be typed
                         required
-                    />
+                      />
+                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
+                    
+                    <Typography variant="body2" color="grey" sx={{display: 'inline-block', mx:'10px', my:'4px'}}>You can generate images related to Title of the post.</Typography>
+                    <Button variant="text" sx={{float:'inline-end', mr:'10px', borderRadius:'8px'}} onClick={() => fetchUnsplashImages(formData.title)}>Generate</Button>
+                    
+                    </Box>
+                    {/* Floating Card for Generated Images */}
+                    
+                      <Card sx={{ position: "relative", background: "#fff", padding: "10px", zIndex: 1000, mx:'2px' }}>
+                      {generatedImages.length > 0 ? (
+                        <>
+                        <Typography variant="subtitle1">Select an Image</Typography>
+                        <Box style={{ display: "flex", gap: "4px", paddingBottom:'4px', overflowX: "auto", scrollbarWidth: 'thin', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
+                          {generatedImages.map((img) => (
+                            <img
+                              key={img.id}
+                              src={img.urls.thumb}
+                              alt="Generated"
+                              style={{ cursor: "pointer", height: "120px", borderRadius: "8px" }}
+                              onClick={() => handleSelectImage(img.urls.full)}
+                            />
+                          ))}
+                        </Box>
+                        </>
+                        ) : 
+                        (
+                          <Box sx={{ textAlign: 'center', my: 2 }}>
+                            <Typography color='grey' sx={{ mb: 2 }}>Images can't found, please check the starting two words correctly in the tiltle.</Typography>
+                          </Box>
+                        )}
+                      </Card>
+                    
+                    </Box>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                     <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                         <InputLabel>Categories</InputLabel>
