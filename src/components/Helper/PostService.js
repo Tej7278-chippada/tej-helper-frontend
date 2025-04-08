@@ -491,7 +491,31 @@ useEffect(() => {
     
       const handleDeleteMedia = (mediaId) => {
         setExistingMedia(existingMedia.map(media => media._id === mediaId ? { ...media, remove: true } : media));
+         // Calculate the total media count after deletion
+        const updatedTotalMedia = newMedia.length + existingMedia.filter(media => !media.remove && media._id !== mediaId).length;
+
+        // Remove error message if media count is within the limit
+        if (updatedTotalMedia <= 5) {
+          setMediaError("");
+        }
       };
+
+      const handleRemoveNewMedia = (index) => {
+        setNewMedia((prev) => {
+          const updatedMedia = prev.filter((_, i) => i !== index);
+      
+          // Calculate the total media count after deletion
+          const updatedTotalMedia = updatedMedia.length + existingMedia.filter(media => !media.remove).length;
+      
+          // Remove error message if media count is within the limit
+          if (updatedTotalMedia <= 5) {
+            setMediaError("");
+          }
+      
+          return updatedMedia;
+        });
+      };
+      
     
       const handleFileChange = async (e) => {
         const selectedFiles = Array.from(e.target.files);
@@ -1043,7 +1067,7 @@ useEffect(() => {
                                     {existingMedia.map((media) => (
                                         !media.remove && (
                                             <Box key={media._id} style={{ position: 'relative', margin: '2px' }}>
-                                                <img src={`data:image/jpeg;base64,${media.data}`} alt="Product Media" style={{ height: '160px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
+                                                <img src={`data:image/jpeg;base64,${media.data}`} alt="Post Media" style={{ height: '160px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
                                                 <Button size="small" color="secondary" onClick={() => handleDeleteMedia(media._id)}>Remove</Button>
                                             </Box>
                                         )
@@ -1076,18 +1100,14 @@ useEffect(() => {
                                                     cursor: 'pointer' // Make the image look clickable
                                                 }}
                                             />
-                                            <Button
-                                                size="small"
-                                                color="secondary"
-                                                onClick={() => setNewMedia((prev) => prev.filter((_, i) => i !== index))}>
-                                                Remove
-                                            </Button>
+                                            <Button size="small" color="secondary" onClick={() => handleRemoveNewMedia(index)}>Remove</Button>
                                         </Box>
                                     ))}
                                 </Box>
                             )}
-                        </Box></Card>
-                        <Box>
+                        </Box>
+                      </Card>
+                      <Box>
                           {/* <TextField
                             label="Post Title"
                             fullWidth
@@ -1104,7 +1124,7 @@ useEffect(() => {
                               <img key={index} src={URL.createObjectURL(file)} alt="Selected" style={{ width: "100px" }} />
                             ))}
                           </Box> */}
-                        </Box>
+                      </Box>
                       <Box>
                       <TextField
                         label="Post Title"
