@@ -18,6 +18,8 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
+
 
 // Set default icon manually
 const customIcon = new L.Icon({
@@ -321,6 +323,15 @@ const UserProfile = () => {
                   {`${userData.address.street}, ${userData.address.area}, ${userData.address.city}, ${userData.address.state} - ${userData.address.pincode}`}
                   </Typography>
                   )}
+                </Grid>
+                <Grid item xs={12} sm={12} display="flex" alignItems="center">
+                  <Typography mr={1} variant="body1" style={{ fontWeight: 500 }}>
+                    Trust Level:
+                  </Typography>
+                  <StarRoundedIcon sx={{ color: 'gold', fontSize: 18, marginRight: 0.5 }} />
+                  <Typography variant="body2" color="textSecondary">
+                    {userData.trustLevel || "N/A"}
+                  </Typography>
                 </Grid>
               </Grid>
             </Box>

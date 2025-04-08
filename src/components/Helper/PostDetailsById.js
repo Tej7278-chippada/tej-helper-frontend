@@ -24,6 +24,8 @@ import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import RouteMapDialog from './RouteMapDialog';
 import ChatDialog from '../Chat/ChatDialog';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
+import RateUserDialog from './RateUserDialog';
+import StarRoundedIcon from '@mui/icons-material/StarRounded';
 
 const CustomTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -64,6 +66,11 @@ function PostDetailsById({ onClose, user }) {
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const userId = localStorage.getItem('userId');
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [isRateDialogOpen, setRateDialogOpen] = useState(false);
+
+  const handleOpenRateDialog = () => setRateDialogOpen(true);
+  const handleCloseRateDialog = () => setRateDialogOpen(false);
+
 
   
   useEffect(() => {
@@ -803,7 +810,27 @@ function PostDetailsById({ onClose, user }) {
                 {post.userCode}
               </Typography>
             </Grid> */}
-            <Grid item xs={12} sm={4} my={1} display="flex" alignItems="center">
+              <Box display="flex" alignItems="center" spacing={1} justifyContent="flex-end" sx={{display: 'inline-block', float: 'right',}}>
+                {/* Trust Level */}
+                <Grid item>
+                  <Box display="flex" alignItems="center">
+                    <Typography variant="body2" color="textSecondary" mr={1}>
+                      Trust Level
+                    </Typography>
+                    <StarRoundedIcon sx={{ color: 'gold', fontSize: 18, marginRight: 0.5 }} />
+                    <Typography variant="body2" color="textSecondary">
+                      {post.user.trustLevel || "N/A"}
+                    </Typography>
+                  </Box>
+                </Grid>
+                {/* Rate User Button */}
+                <Grid item justifyContent="flex-end">
+                  <Button variant="text" size="small" onClick={handleOpenRateDialog}>
+                    Rate User
+                  </Button>
+                </Grid>
+              </Box>
+            <Grid item xs={12} sm={4} my={1} display="flex" alignItems="center" >
               {/* {post.user?.profilePic && ( */}
                 <Avatar
                   src={`data:image/png;base64,${post.user.profilePic}`}
@@ -814,7 +841,9 @@ function PostDetailsById({ onClose, user }) {
               <Typography variant="body1" style={{ fontWeight: 500 }}>
                 {post.user?.username}
               </Typography>
+             
             </Grid>
+            
           </Grid>
           <Grid item xs={12} sm={12} pt={1}>
             <Typography variant="body2" color="textSecondary" >
@@ -826,7 +855,11 @@ function PostDetailsById({ onClose, user }) {
             </Typography>
             )}
           </Grid>
+
+
           </Box>
+
+          
 
 
           
@@ -852,6 +885,15 @@ function PostDetailsById({ onClose, user }) {
           // onCommentAdded={onCommentAdded}  // Passing the comment added handler
         />
         <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
+          isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+        />
+        {/* Rating Dialog */}
+        <RateUserDialog
+          userId={post.user.id}
+          open={isRateDialogOpen}
+          onClose={handleCloseRateDialog}
+          post={post}
+          isMobile={isMobile}
           isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
         />
       <Snackbar
