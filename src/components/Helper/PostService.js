@@ -1063,10 +1063,10 @@ useEffect(() => {
                         {existingMedia.length > 0 && (
                             <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
                                 <Typography ml={1} variant="subtitle1">Existing Images</Typography>
-                                <Box style={{ display: 'flex', overflowX: 'scroll', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
+                                <Box style={{ display: 'flex', gap: '4px', overflowX: 'scroll', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
                                     {existingMedia.map((media) => (
                                         !media.remove && (
-                                            <Box key={media._id} style={{ position: 'relative', margin: '2px' }}>
+                                            <Box key={media._id} style={{ position: 'relative', display:'flex', alignItems:'flex-start', flexDirection:'column'  }}>
                                                 <img src={`data:image/jpeg;base64,${media.data}`} alt="Post Media" style={{ height: '160px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
                                                 <Button size="small" color="secondary" onClick={() => handleDeleteMedia(media._id)}>Remove</Button>
                                             </Box>
@@ -1088,7 +1088,7 @@ useEffect(() => {
                             {newMedia.length > 0 && (
                                 <Box style={{ display: 'flex', gap: '4px', marginTop: '10px', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
                                     {newMedia.map((file, index) => (
-                                        <Box key={index} style={{ position: 'relative' }}>
+                                        <Box key={index} style={{display:'flex', position: 'relative', alignItems:'flex-start', flexDirection:'column' }}>
                                             <img
                                                 src={URL.createObjectURL(file)}
                                                 alt={`Preview ${index}`}
@@ -1161,7 +1161,7 @@ useEffect(() => {
                       {generatedImages.length > 0 ? (
                         <>
                         <Typography variant="subtitle1">Select an Image</Typography>
-                        <Box style={{ display: "flex", gap: "4px", paddingBottom:'4px', overflowX: "auto", scrollbarWidth: 'thin', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
+                        <Box style={{ display: "flex", gap: "4px", paddingBottom:'0px', overflowX: "auto", scrollbarWidth: 'none', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
                           {generatedImages.map((img) => (
                             <img
                               key={img.id}
