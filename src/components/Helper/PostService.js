@@ -172,21 +172,31 @@ const userId = localStorage.getItem('userId');
   };
   
 
-  // Add selected image to new media
+  // Add selected image to new media from UnSplash
   const handleSelectImage = async (imageUrl) => {
     try {
       const response = await fetch(imageUrl);
       const blob = await response.blob();
-  
+      const existingMediaCount = existingMedia.filter((media) => !media.remove).length;
+      const totalMediaCount = newMedia.length + existingMediaCount + 1; // Adding 1 for the new image
+
+      if (totalMediaCount > 5) {
+        setMediaError("Maximum 5 photos allowed.");
+        return; // Prevent adding the image
+      }
+
+      let file;
       if (blob.size > 2 * 1024 * 1024) { // If the image is larger than 2MB
         const resizedBlob = await resizeImage(blob, 2 * 1024 * 1024); // Resize image
-        const file = new File([resizedBlob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
-        setNewMedia((prev) => [...prev, file]);
+        file = new File([resizedBlob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
+        // setNewMedia((prev) => [...prev, file]);
       } else {
         // Directly add if the image is <= 2MB
-        const file = new File([blob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
-        setNewMedia((prev) => [...prev, file]);
+        file = new File([blob], `unsplash-${Date.now()}.jpg`, { type: "image/jpeg" });
+        // setNewMedia((prev) => [...prev, file]);
       }
+      setNewMedia((prev) => [...prev, file]);
+      setMediaError(""); // Clear error if image is added successfully
     } catch (err) {
       console.error("Error processing image:", err);
     }
@@ -497,9 +507,10 @@ useEffect(() => {
           }
         }
       
-        const totalMediaCount = resizedFiles.length + newMedia.length + existingMedia.filter((media) => !media.remove).length;
+        const existingMediaCount = existingMedia.filter((media) => !media.remove).length;
+        const totalMediaCount = resizedFiles.length + newMedia.length + existingMediaCount;
         
-        // Check conditions for file count and size
+        // Check conditions for file count
         if (totalMediaCount > 5) {
           setMediaError("Maximum 5 photos allowed.");
         } else {
