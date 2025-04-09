@@ -111,24 +111,27 @@ function PostService() {
   const [timeFrom, setTimeFrom] = useState(null);
   const [timeTo, setTimeTo] = useState(null);
   // Initialize socket connection (add this near your other state declarations)
-const [socket, setSocket] = useState(null);
-const userId = localStorage.getItem('userId');
-
-// const [formData, setFormData] = useState({ title: "", media: [] });
+  const [socket, setSocket] = useState(null);
+  const userId = localStorage.getItem('userId');
   const [generatedImages, setGeneratedImages] = useState([]);
-  // const [newMedia, setNewMedia] = useState([]);
   const [loadingGeneration, setLoadingGeneration] = useState(false);
   const [loadingImage, setLoadingImage] = useState(null); // Track which image is loading
   const [addedImages, setAddedImages] = useState([]); // Store successfully added image URLs
+  const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
 
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
     try {
       setLoadingGeneration(true);
+      setNoImagesFound(false); // Reset no images found state
       const response = await API.get(`/api/posts/generate-images?query=${query}`);
+      if (response.data.results.length === 0) {
+        setNoImagesFound(true); // Set no images found state
+      }
       setGeneratedImages(response.data.results);
     } catch (error) {
       console.error("Error fetching images:", error);
+      setNoImagesFound(true); // Also set the state if API fails
     } finally {
       setLoadingGeneration(false);
     }
@@ -191,6 +194,7 @@ const userId = localStorage.getItem('userId');
       if (totalMediaCount > 5) {
         setMediaError("Maximum 5 photos allowed.");
         setLoadingImage(null); // Remove loading if failed
+        setSnackbar({ open: true, message: 'Maximum 5 photos allowed.', severity: 'warning' });
         return; // Prevent adding the image
       }
 
@@ -550,6 +554,7 @@ useEffect(() => {
         // Check conditions for file count
         if (totalMediaCount > 5) {
           setMediaError("Maximum 5 photos allowed.");
+          setSnackbar({ open: true, message: 'Maximum 5 photos allowed.', severity: 'warning' });
         } else {
           setMediaError("");
           // Append newly selected files at the end of the existing array
@@ -608,6 +613,8 @@ useEffect(() => {
         setEditingProduct(null); // Ensure it's not in editing mode
         setExistingMedia([]); // Clear any existing media
         setNewMedia([]); // Clear new media files
+        setGeneratedImages([]);
+        setNoImagesFound(false); // Reset no images found state
         setOpenDialog(true);
     };
     
@@ -622,6 +629,8 @@ useEffect(() => {
         setSelectedDate(null);
         setTimeFrom(null);
         setTimeTo(null);
+        setGeneratedImages([]);
+        setNoImagesFound(false); // Reset no images found state
     };
 
     const openPostDetail = (post) => {
@@ -1090,12 +1099,28 @@ useEffect(() => {
                         )}
                     </Card>
                     <Card sx={{ borderRadius: '1rem', marginBottom: '0rem', mx:'2px' }}>
-                        <Box sx={{ mx: '6px', mb:'4px' }}>
-                            <Box sx={{mx:'4px'}}>
+                        <Box sx={{ mx: '6px', my:'4px' }}>
+                            <Box sx={{mx:'6px' }}>
                               <Typography variant="subtitle1">Add Post Photos</Typography>
-                              <input type="file" multiple onChange={handleFileChange} />
+                              <Box sx={{mx:'4px', display:'flex', flexDirection: isMobile ? 'column' : 'row', alignItems: isMobile ? 'null' : 'center', gap: isMobile ? '2px' : '14px' }}>
+                              {/* Styled Upload Button */}
+                              <Button 
+                                variant="text"  
+                                component="label" size="small"
+                                sx={{ my: 1, borderRadius: "8px", textTransform: "none", bgcolor:'rgba(24, 170, 248, 0.07)' }}
+                              >
+                                Choose Photos
+                                <input 
+                                  type="file" 
+                                  multiple 
+                                  hidden 
+                                  accept="image/png, image/jpeg, image/jpg, image/webp"
+                                  onChange={handleFileChange} 
+                                />
+                              </Button>
                               {/* onChange={(e) => setFormData({ ...formData, images: e.target.files })} */}
-                              <Typography variant="body2" color="grey">Note : Maximum 5 Photos & Each Photo size should less than 2 MB</Typography>
+                              <Typography variant="body2" color="grey">Note : Maximum 5 Photos allowed.</Typography>
+                              </Box>
                               {mediaError && <Alert severity="error">{mediaError}</Alert>}
                             </Box>
                             {newMedia.length > 0 && (
@@ -1162,15 +1187,12 @@ useEffect(() => {
                         inputProps={{ maxLength: 100 }} // Ensures no more than 100 characters can be typed
                         required
                       />
-                    <Box display="flex" justifyContent="center" alignItems="center" gap={1}>
-                    
-                    <Typography variant="body2" color="grey" sx={{display: 'inline-block', mx:'10px', my:'4px'}}>You can generate images related to Title of the post.</Typography>
-                    <Button variant="text" sx={{float:'inline-end', mr:'10px', borderRadius:'8px'}} onClick={() => fetchUnsplashImages(formData.title)}>Generate</Button>
-                    
-                    </Box>
-                    {/* Floating Card for Generated Images */}
-                    
-                      <Card sx={{ position: "relative", background: "#fff", padding: "10px", zIndex: 1000, mx:'2px' }}>
+                      <Box display="flex" justifyContent="center" alignItems="center" flexDirection="row" m={1} gap={1}>
+                        <Typography variant="body2" color="grey" >You can generate images related to Title of the post.</Typography>
+                        <Button variant="text" sx={{ borderRadius:'8px', bgcolor:'rgba(24, 170, 248, 0.07)', px: isMobile ? '24px' : 'null'}} onClick={() => fetchUnsplashImages(formData.title)} disabled={loadingGeneration}>Generate</Button>
+                      </Box>
+                      {/* Floating Card for Generated Images */}
+                      {/* <Card sx={{ position: "relative", background: "#fff", padding: "10px", zIndex: 1000, mx:'2px' }}> */}
                       {loadingGeneration ? (
                         <Box sx={{ display: 'flex', justifyContent: 'center', flexDirection:'column', alignItems:'center', p: 6, gap:'1rem' }}>
                           <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
@@ -1178,70 +1200,68 @@ useEffect(() => {
                         </Box>
                       ) : (
                       generatedImages.length > 0 ? (
-                        <>
-                        <Typography variant="subtitle1">Select an Image</Typography>
-                        <Box style={{ display: "flex", gap: "4px", paddingBottom:'0px', overflowX: "auto", scrollbarWidth: 'none', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
-                          {generatedImages.map((img) => (
-                          <Box key={img.id} sx={{ position: "relative", cursor: "pointer" }} onClick={() => handleSelectImage(img.urls.full)}>
-                            <img
-                              // key={img.id}
-                              src={img.urls.thumb}
-                              alt="Generated"
-                              style={{ height: "120px", borderRadius: "8px", opacity: loadingImage === img.urls.full ? 0.6 : 1 }}
-                              // onClick={() => handleSelectImage(img.urls.full)}
-                            />
-                            {/* Loading progress overlay */}
-                            {loadingImage === img.urls.full && (
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  top: "50%",
-                                  left: "50%",
-                                  transform: "translate(-50%, -50%)",
-                                  bgcolor: "rgba(0, 0, 0, 0.5)",
-                                  borderRadius: "50%",
-                                  padding: "10px",
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <CircularProgress size={24} sx={{ color: "#fff" }} />
-                              </Box>
-                            )}
+                        <Card sx={{ position: "relative", background: "#fff", padding: "10px", zIndex: 1000, mx:'2px' }}>
+                          <Typography variant="subtitle1">Select an Image</Typography>
+                          <Box style={{ display: "flex", gap: "4px", paddingBottom:'0px', overflowX: "auto", scrollbarWidth: 'none', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
+                            {generatedImages.map((img) => (
+                            <Box key={img.id} sx={{ position: "relative", cursor: "pointer" }} onClick={() => handleSelectImage(img.urls.full)}>
+                              <img
+                                // key={img.id}
+                                src={img.urls.thumb}
+                                alt="Generated"
+                                style={{ height: "120px", borderRadius: "8px", opacity: loadingImage === img.urls.full ? 0.6 : 1 }}
+                                // onClick={() => handleSelectImage(img.urls.full)}
+                              />
+                              {/* Loading progress overlay */}
+                              {loadingImage === img.urls.full && (
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    top: "50%",
+                                    left: "50%",
+                                    transform: "translate(-50%, -50%)",
+                                    bgcolor: "rgba(0, 0, 0, 0.5)",
+                                    borderRadius: "50%",
+                                    padding: "10px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <CircularProgress size={24} sx={{ color: "#fff" }} />
+                                </Box>
+                              )}
 
-                            {/* Green tick when successfully added */}
-                            {addedImages.includes(img.urls.full) && (
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  bottom: "8px",
-                                  right: "5px",
-                                  backgroundColor: "green",
-                                  borderRadius: "50%",
-                                  width: "24px",
-                                  height: "24px",
-                                  display: "flex",
-                                  justifyContent: "center",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <TaskAltRoundedIcon sx={{ color: "white", fontSize: "18px" }} />
-                              </Box>
-                            )}
+                              {/* Green tick when successfully added */}
+                              {addedImages.includes(img.urls.full) && (
+                                <Box
+                                  sx={{
+                                    position: "absolute",
+                                    bottom: "8px",
+                                    right: "5px",
+                                    backgroundColor: "green",
+                                    borderRadius: "50%",
+                                    width: "24px",
+                                    height: "24px",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  <TaskAltRoundedIcon sx={{ color: "white", fontSize: "18px" }} />
+                                </Box>
+                              )}
+                            </Box>
+                            ))}
                           </Box>
-                          ))}
-                        </Box>
-                        </>
-                        ) : 
-                        (
+                        </Card>
+                        ) : noImagesFound ? (
                           <Box sx={{ textAlign: 'center', my: 2 }}>
-                            <Typography color='grey' sx={{ mb: 2 }}>Images can't found, please check the starting two words correctly in the tiltle.</Typography>
+                            <Typography color="warning" sx={{ mb: 2 }}>Images doesn't found related to the title, please check the title.</Typography>
                           </Box>
-                        )
+                        ) : null
                       )}
-                      </Card>
-                    
+                      {/* </Card> */}
                     </Box>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                     <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
