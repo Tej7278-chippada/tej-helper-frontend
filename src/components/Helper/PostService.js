@@ -1381,7 +1381,9 @@ useEffect(() => {
                         label="Service Date" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                         value={selectedDate} format="dd MM yyyy" // Formats date as "14 03 2025"
                         onChange={handleDateChange}
-                        renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
+                        slotProps={{
+                          textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '1rem' } } }
+                        }}
                       />
                     </LocalizationProvider>
 
@@ -1391,7 +1393,9 @@ useEffect(() => {
                           label="Time From" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                           value={timeFrom}
                           onChange={handleTimeFromChange}
-                          renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
+                          slotProps={{
+                            textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '1rem' } } }
+                          }}
                         />
                       </LocalizationProvider>
                       <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -1399,7 +1403,9 @@ useEffect(() => {
                           label="Time To" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                           value={timeTo}
                           onChange={handleTimeToChange}
-                          renderInput={(params) => <TextField {...params} fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem' }}} />}
+                          slotProps={{
+                            textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '1rem' } } }
+                          }}
                         />
                       </LocalizationProvider>
                     </div>
