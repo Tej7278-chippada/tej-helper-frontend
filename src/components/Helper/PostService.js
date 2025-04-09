@@ -1,6 +1,6 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, } from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
@@ -28,6 +28,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { io } from 'socket.io-client';
+import TaskAltRoundedIcon from '@mui/icons-material/TaskAltRounded';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
@@ -116,14 +117,20 @@ const userId = localStorage.getItem('userId');
 // const [formData, setFormData] = useState({ title: "", media: [] });
   const [generatedImages, setGeneratedImages] = useState([]);
   // const [newMedia, setNewMedia] = useState([]);
+  const [loadingGeneration, setLoadingGeneration] = useState(false);
+  const [loadingImage, setLoadingImage] = useState(null); // Track which image is loading
+  const [addedImages, setAddedImages] = useState([]); // Store successfully added image URLs
 
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
     try {
+      setLoadingGeneration(true);
       const response = await API.get(`/api/posts/generate-images?query=${query}`);
       setGeneratedImages(response.data.results);
     } catch (error) {
       console.error("Error fetching images:", error);
+    } finally {
+      setLoadingGeneration(false);
     }
   };
 
@@ -175,6 +182,7 @@ const userId = localStorage.getItem('userId');
   // Add selected image to new media from UnSplash
   const handleSelectImage = async (imageUrl) => {
     try {
+      setLoadingImage(imageUrl); // Start loading progress on the selected image
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const existingMediaCount = existingMedia.filter((media) => !media.remove).length;
@@ -182,6 +190,7 @@ const userId = localStorage.getItem('userId');
 
       if (totalMediaCount > 5) {
         setMediaError("Maximum 5 photos allowed.");
+        setLoadingImage(null); // Remove loading if failed
         return; // Prevent adding the image
       }
 
@@ -197,8 +206,12 @@ const userId = localStorage.getItem('userId');
       }
       setNewMedia((prev) => [...prev, file]);
       setMediaError(""); // Clear error if image is added successfully
+      // Show green tick after successful addition
+      setAddedImages((prev) => [...prev, imageUrl]);
     } catch (err) {
       console.error("Error processing image:", err);
+    } finally {
+      setLoadingImage(null); // Remove loading animation
     }
   };
   
@@ -1076,9 +1089,9 @@ useEffect(() => {
                             </Box>
                         )}
                     </Card>
-                    <Card style={{ borderRadius: '1rem', marginBottom: '2rem', marginInline:'2px' }}>
-                        <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
-                            <Box sx={{marginInline:'4px'}}>
+                    <Card sx={{ borderRadius: '1rem', marginBottom: '0rem', mx:'2px' }}>
+                        <Box sx={{ mx: '6px', mb:'4px' }}>
+                            <Box sx={{mx:'4px'}}>
                               <Typography variant="subtitle1">Add Post Photos</Typography>
                               <input type="file" multiple onChange={handleFileChange} />
                               {/* onChange={(e) => setFormData({ ...formData, images: e.target.files })} */}
@@ -1086,7 +1099,7 @@ useEffect(() => {
                               {mediaError && <Alert severity="error">{mediaError}</Alert>}
                             </Box>
                             {newMedia.length > 0 && (
-                                <Box style={{ display: 'flex', gap: '4px', marginTop: '10px', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
+                                <Box sx={{ display: 'flex', gap: '4px', marginTop: '10px', mx:'4px', overflowX: 'auto', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
                                     {newMedia.map((file, index) => (
                                         <Box key={index} style={{display:'flex', position: 'relative', alignItems:'flex-start', flexDirection:'column' }}>
                                             <img
@@ -1158,18 +1171,65 @@ useEffect(() => {
                     {/* Floating Card for Generated Images */}
                     
                       <Card sx={{ position: "relative", background: "#fff", padding: "10px", zIndex: 1000, mx:'2px' }}>
-                      {generatedImages.length > 0 ? (
+                      {loadingGeneration ? (
+                        <Box sx={{ display: 'flex', justifyContent: 'center', flexDirection:'column', alignItems:'center', p: 6, gap:'1rem' }}>
+                          <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
+                          <Typography color='grey' variant='body2'>Generating Images...</Typography>
+                        </Box>
+                      ) : (
+                      generatedImages.length > 0 ? (
                         <>
                         <Typography variant="subtitle1">Select an Image</Typography>
                         <Box style={{ display: "flex", gap: "4px", paddingBottom:'0px', overflowX: "auto", scrollbarWidth: 'none', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
                           {generatedImages.map((img) => (
+                          <Box key={img.id} sx={{ position: "relative", cursor: "pointer" }} onClick={() => handleSelectImage(img.urls.full)}>
                             <img
-                              key={img.id}
+                              // key={img.id}
                               src={img.urls.thumb}
                               alt="Generated"
-                              style={{ cursor: "pointer", height: "120px", borderRadius: "8px" }}
-                              onClick={() => handleSelectImage(img.urls.full)}
+                              style={{ height: "120px", borderRadius: "8px", opacity: loadingImage === img.urls.full ? 0.6 : 1 }}
+                              // onClick={() => handleSelectImage(img.urls.full)}
                             />
+                            {/* Loading progress overlay */}
+                            {loadingImage === img.urls.full && (
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: "50%",
+                                  left: "50%",
+                                  transform: "translate(-50%, -50%)",
+                                  bgcolor: "rgba(0, 0, 0, 0.5)",
+                                  borderRadius: "50%",
+                                  padding: "10px",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <CircularProgress size={24} sx={{ color: "#fff" }} />
+                              </Box>
+                            )}
+
+                            {/* Green tick when successfully added */}
+                            {addedImages.includes(img.urls.full) && (
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  bottom: "8px",
+                                  right: "5px",
+                                  backgroundColor: "green",
+                                  borderRadius: "50%",
+                                  width: "24px",
+                                  height: "24px",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <TaskAltRoundedIcon sx={{ color: "white", fontSize: "18px" }} />
+                              </Box>
+                            )}
+                          </Box>
                           ))}
                         </Box>
                         </>
@@ -1178,7 +1238,8 @@ useEffect(() => {
                           <Box sx={{ textAlign: 'center', my: 2 }}>
                             <Typography color='grey' sx={{ mb: 2 }}>Images can't found, please check the starting two words correctly in the tiltle.</Typography>
                           </Box>
-                        )}
+                        )
+                      )}
                       </Card>
                     
                     </Box>
