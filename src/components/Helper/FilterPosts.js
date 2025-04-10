@@ -93,7 +93,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                     Filters
                                 </Typography>
                                 <Box display="flex" gap={2} flexWrap="wrap" paddingBottom="0.6rem">
-                                    <FormControl style={{ flex: '1 1 200px' }}>
+                                    <FormControl sx={{flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
                                         <InputLabel>Category</InputLabel>
                                         <Select
                                             name="categories"
@@ -108,7 +108,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                         </Select>
                                     </FormControl>
 
-                                    <FormControl style={{ flex: '1 1 200px' }}>
+                                    <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
                                         <InputLabel>Gender</InputLabel>
                                         <Select
                                             name="gender"
@@ -120,10 +120,11 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                             <MenuItem value="Male">Male</MenuItem>
                                             <MenuItem value="Female">Female</MenuItem>
                                             <MenuItem value="Kids">Kids</MenuItem>
+                                            <MenuItem value="Everyone">Everyone</MenuItem>
                                         </Select>
                                     </FormControl>
 
-                                    <FormControl style={{ flex: '1 1 200px' }}>
+                                    <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
                                         <InputLabel>Post Status</InputLabel>
                                         <Select
                                             name="postStatus"
@@ -144,14 +145,14 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                             type="number"
                                             value={localFilters.priceRange[0]}
                                             onChange={(e) => handlePriceChange(e, 'min')}
-                                            fullWidth
+                                            fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                                         />
                                         <TextField
                                             label="Max Price"
                                             type="number"
                                             value={localFilters.priceRange[1]}
                                             onChange={(e) => handlePriceChange(e, 'max')}
-                                            fullWidth
+                                            fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
                                         />
                                     </Box>
                                 </Box>
@@ -160,7 +161,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                 <Button
                                   variant="outlined"
                                   onClick={handleResetFilters}
-                                  style={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem' }} fullWidth
+                                  sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem', borderRadius:'8px' }} fullWidth
                                 >
                                   Reset Filters
                                 </Button>
@@ -169,7 +170,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                 <Button
                                     variant="contained"
                                     onClick={handleApplyFilters}
-                                    style={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem' ,}} fullWidth
+                                    sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem' , borderRadius:'8px'}} fullWidth
                                 >
                                     Apply Filters
                                 </Button>
@@ -207,6 +208,7 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                   transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
                                                 }}
                                                   // onClick={() => openProductDetail(product)}
+                                                  onClick={() => openPostDetail(post)}
                                                   onMouseEnter={(e) => {
                                                     e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
                                                     e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
@@ -225,7 +227,9 @@ const FilterPosts = ({ filterCriteria, applyFilters, posts, filteredPosts, onClo
                                                     borderRadius: '8px',
                                                     gap: '0.1rem',
                                                     // marginBottom: '1rem'
-                                                    height:'170px'}} onClick={() => openPostDetail(post)}>
+                                                    height:'170px'}}
+                                                    //  onClick={() => openPostDetail(post)}
+                                                    >
                                                     {post.media && post.media.length > 0 ? (
                                                      post.media.slice(0, 5).map((base64Image, index) => (
                                                       <LazyImage key={index} base64Image={base64Image} alt={`Post ${index}`} style={{

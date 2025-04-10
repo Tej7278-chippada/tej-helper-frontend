@@ -857,9 +857,11 @@ useEffect(() => {
             </Grid>
           ))
         ) : (
-          <Typography textAlign="center" color='grey' padding="1rem" variant="body1">
-            You don't have any posts...
-          </Typography>
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography color='grey' padding="1rem" variant="body1">
+              You don't have any posts...
+            </Typography>
+          </Box>
         )}
       </Grid>)}
       </Box>
@@ -1329,6 +1331,7 @@ useEffect(() => {
                                 <MenuItem value="Male">Male</MenuItem>
                                 <MenuItem value="Female">Female</MenuItem>
                                 <MenuItem value="Kids">Kids</MenuItem>
+                                <MenuItem value="Everyone">Everyone</MenuItem>
                             </Select>
                         </FormControl>
                     </div>
