@@ -882,23 +882,24 @@ useEffect(() => {
                         e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
                         e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
                       }} 
-                      onTouchStart={(e) => {
-                        if (e.currentTarget) {
-                          e.currentTarget.style.transform = 'scale(1.03)';
-                          e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 0, 0, 0.2)'; // More subtle effect
-                          e.currentTarget.style.borderRadius = '14px'; // Ensure smooth edges
-                        }
-                      }}
-                      onTouchEnd={(e) => {
-                        if (e.currentTarget) {
-                          setTimeout(() => {
-                            if (e.currentTarget) {
-                              e.currentTarget.style.transform = 'scale(1)';
-                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                            }
-                          }, 150);
-                        }
-                      }}>
+                      // onTouchStart={(e) => {
+                      //   if (e.currentTarget) {
+                      //     e.currentTarget.style.transform = 'scale(1.03)';
+                      //     e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 0, 0, 0.2)'; // More subtle effect
+                      //     e.currentTarget.style.borderRadius = '14px'; // Ensure smooth edges
+                      //   }
+                      // }}
+                      // onTouchEnd={(e) => {
+                      //   if (e.currentTarget) {
+                      //     setTimeout(() => {
+                      //       if (e.currentTarget) {
+                      //         e.currentTarget.style.transform = 'scale(1)';
+                      //         e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                      //       }
+                      //     }, 150);
+                      //   }
+                      // }}
+                      >
                       {/* CardMedia for Images with Scroll */}
                       <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                         <div style={{
