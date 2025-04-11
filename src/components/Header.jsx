@@ -7,9 +7,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { userData } from '../utils/userData';
-// import { getUserIdFromToken, useUserData } from '../hooks/useUserData';
-// import { jwtDecode } from 'jwt-decode';
 
 const Header = ({ username }) => {
   const location = useLocation();
@@ -23,23 +20,9 @@ const Header = ({ username }) => {
   const [loggedInUsers, setLoggedInUsers] = useState([]);
   const navigate = useNavigate();
   const [currentUsername, setCurrentUsername] = useState(username || '');
-  const loggedUserData = userData();
 
   // Only show search bar when user is logged in and on chat page
   // const showSearchBar = location.pathname.includes('/productList') && username;
-
-  // const authToken = localStorage.getItem('authToken');
-  // let userId = '';
-
-  // if (authToken) {
-  //   try {
-  //     const decoded = jwtDecode(authToken); // decoded is an object: { id, tokenUsername, iat, exp }
-  //     userId = decoded.id;
-  //     console.log("Decoded User ID:", userId);
-  //   } catch (err) {
-  //     console.error('Invalid token:', err);
-  //   }
-  // }
 
 
 
@@ -164,8 +147,8 @@ const Header = ({ username }) => {
   };
 
   const openUserProfile = () => {
-    // const userId = localStorage.getItem('userId'); 
-    navigate(`/user/${loggedUserData?.userId || null}`); //, { replace: true }
+    const userId = localStorage.getItem('userId'); 
+    navigate(`/user/${userId}`); //, { replace: true }
   };
 
   const toUserPosts = () => {
@@ -245,7 +228,7 @@ const Header = ({ username }) => {
             <>
               <IconButton onClick={handleProfileClick} color="inherit">
                 <AccountCircleIcon />
-                <Typography variant="body1">{loggedUserData?.userName || null}</Typography>
+                <Typography variant="body1">{currentUsername}</Typography>
               </IconButton>
               <Menu
                 anchorEl={anchorEl}

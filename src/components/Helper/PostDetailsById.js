@@ -26,8 +26,6 @@ import ChatDialog from '../Chat/ChatDialog';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
 import RateUserDialog from './RateUserDialog';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import { userData } from '../../utils/userData';
-// import { getUserIdFromToken, useUserData } from '../../hooks/useUserData';
 
 const CustomTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -66,13 +64,12 @@ function PostDetailsById({ onClose, user }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [routeMapDialogOpen, setRouteMapDialogOpen] = useState(false);
   const [chatDialogOpen, setChatDialogOpen] = useState(false);
-  // const userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('userId');
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [isRateDialogOpen, setRateDialogOpen] = useState(false);
 
   const handleOpenRateDialog = () => setRateDialogOpen(true);
   const handleCloseRateDialog = () => setRateDialogOpen(false);
-  const loggedUserData = userData();
 
 
   
@@ -733,7 +730,7 @@ function PostDetailsById({ onClose, user }) {
                     Route Map
                   </Button>
                 </Box>
-                {!(post.user.id === loggedUserData?.userId) && 
+                {!(post.user.id === userId) && 
                 <Box >
                   <Button
                     variant="contained"
