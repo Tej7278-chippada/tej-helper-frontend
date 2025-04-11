@@ -29,7 +29,7 @@ import { userData } from '../../utils/userData';
 
 
 const Helper = ()=> {
-  // const tokenUsername = localStorage.getItem('tokenUsername');
+  const tokenUsername = localStorage.getItem('tokenUsername');
   // const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState([]);
   const theme = useTheme();
@@ -432,7 +432,7 @@ useEffect(() => {
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
   return (
-    <Layout username={loggedUserData?.userName || null}>
+    <Layout username={tokenUsername}>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between'}}> 
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>

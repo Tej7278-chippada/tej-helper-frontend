@@ -12,7 +12,6 @@ import ForgotPassword from './ForgotPassword';
 // import CloseIcon from '@mui/icons-material/Close';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
-import { userData } from '../utils/userData';
 
 const theme = createTheme({
   breakpoints: {
@@ -40,7 +39,7 @@ const Login = () => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm')); // Media query for small screens
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  const loggedUserData = userData();
+  
 
   // const isEmail = (input) => {
   //   // Regex to check if input is an email
@@ -59,19 +58,18 @@ const Login = () => {
           { headers: { Authorization: `Bearer ${authToken}` } }
           );
           const newToken  = response.data.authToken;
-          // const tokenUsername = localStorage.getItem('tokenUsername');
-          // const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-          // tokens[tokenUsername] = newToken ;
-          tokens[loggedUserData?.userName || null] = newToken;
-          // localStorage.setItem('authTokens', JSON.stringify(tokens));
+          const tokenUsername = localStorage.getItem('tokenUsername');
+          const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
+          tokens[tokenUsername] = newToken ;
+          localStorage.setItem('authTokens', JSON.stringify(tokens));
           localStorage.setItem('authToken', newToken );
           // console.log('authToken refreshed..! :', newToken);
         } catch (error) {
           console.error('Failed to extend session:', error);
           localStorage.removeItem('authToken');
           localStorage.removeItem('authTokens');
-          // localStorage.removeItem('tokenUsername');
-          // localStorage.removeItem('userId');
+          localStorage.removeItem('tokenUsername');
+          localStorage.removeItem('userId');
           navigate('/login', { replace: true });
           console.log('Refresh token failed. Token expired or invalid.');
         }
@@ -116,14 +114,14 @@ const Login = () => {
       if (authToken && userId){
 
       // Store authToken uniquely for the user
-      // const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-      // tokens[tokenUsername] = authToken;
-      // localStorage.setItem('authTokens', JSON.stringify(tokens));
+      const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
+      tokens[tokenUsername] = authToken;
+      localStorage.setItem('authTokens', JSON.stringify(tokens));
 
       // Set authToken and active user in localStorage
       localStorage.setItem('authToken', authToken);
-      // localStorage.setItem('activeUser', tokenUsername);
-      // localStorage.setItem('tokenUsername', tokenUsername);
+      localStorage.setItem('activeUser', tokenUsername);
+      localStorage.setItem('tokenUsername', tokenUsername);
       // localStorage.setItem('userId', userId); // Store userId
 
       setSuccess('Login successful!');

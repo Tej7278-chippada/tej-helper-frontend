@@ -8,12 +8,11 @@ import Layout from '../Layout';
 import apiClient from '../../utils/axiosConfig';
 // import ChatDialog from './ChatDialog';
 import ChatHistory from './ChatHistory';
-import { userData } from '../../utils/userData';
 // import CloseIcon from '@mui/icons-material/Close';
 
 
 const ChatsOfPosts = () => {
-  // const tokenUsername = localStorage.getItem('tokenUsername');
+  const tokenUsername = localStorage.getItem('tokenUsername');
   const navigate = useNavigate();
   const { postId } = useParams();
   // const [chats, setChats] = useState([]);
@@ -25,8 +24,7 @@ const ChatsOfPosts = () => {
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [postTitle, setPostTitle] = useState(""); // Store post title
   const [openDialog, setOpenDialog] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
-  const loggedUserData = userData();
+   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
 
 
   const fetchChatsOfPost = useCallback(async () => {
@@ -75,7 +73,7 @@ const ChatsOfPosts = () => {
   };
 
   return (
-    <Layout username={loggedUserData?.userName || null}>
+    <Layout username={tokenUsername}>
       <Box mt={isMobile ? '2px' : '4px'} mb={isMobile ? '4px' : '8px'}>
 
         <Box
