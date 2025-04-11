@@ -1,6 +1,7 @@
 // src/api/api.js
 import axios from 'axios';
-
+import { userData } from '../../utils/userData';
+const loggedUserData = userData();
 const API = axios.create({ baseURL: process.env.REACT_APP_API_URL });
 // const API = axios.create({
 //   baseURL: process.env.REACT_APP_API_URL,
@@ -20,19 +21,20 @@ const refreshAuthToken = async () => {
       const newToken = data.authToken;
 
       // Update tokens in localStorage
-      const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-      const tokenUsername = localStorage.getItem('tokenUsername');
-      tokens[tokenUsername] = newToken;
-      localStorage.setItem('authTokens', JSON.stringify(tokens));
+      // const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
+      // const tokenUsername = localStorage.getItem('tokenUsername');
+      // tokens[tokenUsername] = newToken;
+      tokens[loggedUserData?.userName || null] = newToken;
+      // localStorage.setItem('authTokens', JSON.stringify(tokens));
       localStorage.setItem('authToken', newToken);
     } catch (error) {
       console.error('Error refreshing token:', error);
       // If token refresh fails, log the user out
       localStorage.removeItem('authToken');
       localStorage.removeItem('authTokens');
-      localStorage.removeItem('tokenUsername');
-      localStorage.removeItem('userId');
-      localStorage.removeItem('currentPage');
+      // localStorage.removeItem('tokenUsername');
+      // localStorage.removeItem('userId');
+      // localStorage.removeItem('currentPage');
       window.location.reload();
     }
   }
