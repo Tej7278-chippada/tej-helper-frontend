@@ -122,7 +122,7 @@ const Login = () => {
       localStorage.setItem('authToken', authToken);
       localStorage.setItem('activeUser', tokenUsername);
       localStorage.setItem('tokenUsername', tokenUsername);
-      localStorage.setItem('userId', userId); // Store userId
+      // localStorage.setItem('userId', userId); // Store userId
 
       setSuccess('Login successful!');
       navigate('/', { replace: true });

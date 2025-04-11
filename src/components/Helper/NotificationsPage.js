@@ -23,6 +23,8 @@ import SkeletonCards from './SkeletonCards';
 import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-material';
 import { io } from 'socket.io-client';
 import ClearAllRoundedIcon from '@mui/icons-material/ClearAllRounded';
+import { userData } from '../../utils/userData';
+// import { useUserData } from '../../hooks/useUserData';
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -70,7 +72,9 @@ function NotificationsPage() {
   // }, []);
 
   const [socket, setSocket] = useState(null);
-  const userId = localStorage.getItem('userId');
+  // const userId = localStorage.getItem('userId');
+  const loggedUserData = userData();
+  const userId = loggedUserData?.userId || null;
 
   // Add this useEffect for socket connection
   useEffect(() => {

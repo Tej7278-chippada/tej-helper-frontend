@@ -69,6 +69,38 @@ const extendSession = () => {
 
 export default API;
 
+// // src/api/api.js
+// export const refreshAuthToken = async () => {
+//   const refreshToken = localStorage.getItem('refreshToken');
+//   if (!refreshToken) return null;
+
+//   try {
+//     const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/refresh-token`, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: `Bearer ${refreshToken}`,
+//       },
+//     });
+
+//     if (!res.ok) throw new Error('Refresh failed');
+//     const data = await res.json();
+
+//     localStorage.setItem('authToken', data.authToken);
+//     return data.authToken;
+//   } catch (error) {
+//     console.error('Failed to refresh token:', error);
+//     // Optional: logout and cleanup
+//     localStorage.removeItem('authToken');
+//     localStorage.removeItem('refreshToken');
+//     localStorage.removeItem('tokenUsername');
+//     localStorage.removeItem('userId');
+//     window.location.href = '/login';
+//     return null;
+//   }
+// };
+
+
 export const addUserPost = (data) => {
   const authToken = localStorage.getItem('authToken');
   const headers = {

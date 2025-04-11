@@ -18,6 +18,8 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { format } from "date-fns";
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
+import { userData } from '../../utils/userData';
+// import { useUserData } from '../../hooks/useUserData';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -26,7 +28,9 @@ const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Pick
 const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
-  const userId = localStorage.getItem('userId');
+  // const userId = localStorage.getItem('userId');
+  const loggedUserData = userData();
+  const userId = loggedUserData?.userId || null;
   const authToken = localStorage.getItem('authToken');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);

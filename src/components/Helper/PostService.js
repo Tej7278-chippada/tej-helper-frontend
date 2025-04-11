@@ -29,6 +29,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { io } from 'socket.io-client';
 import TaskAltRoundedIcon from '@mui/icons-material/TaskAltRounded';
+import { userData } from '../../utils/userData';
+// import { useUserData } from '../../hooks/useUserData';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
@@ -112,7 +114,9 @@ function PostService() {
   const [timeTo, setTimeTo] = useState(null);
   // Initialize socket connection (add this near your other state declarations)
   const [socket, setSocket] = useState(null);
-  const userId = localStorage.getItem('userId');
+  // const userId = localStorage.getItem('userId');
+  const loggedUserData = userData();
+  const userId = loggedUserData?.userId || null;
   const [generatedImages, setGeneratedImages] = useState([]);
   const [loadingGeneration, setLoadingGeneration] = useState(false);
   const [loadingImage, setLoadingImage] = useState(null); // Track which image is loading

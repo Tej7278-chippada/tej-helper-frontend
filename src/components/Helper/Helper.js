@@ -24,6 +24,8 @@ import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { io } from 'socket.io-client';
+import { userData } from '../../utils/userData';
+// import { useUserData } from '../../hooks/useUserData';
 
 
 const Helper = ()=> {
@@ -122,7 +124,9 @@ const Helper = ()=> {
 
 // Initialize socket connection (add this near your other state declarations)
 const [socket, setSocket] = useState(null);
-const userId = localStorage.getItem('userId');
+// const userId = localStorage.getItem('userId');
+const loggedUserData = userData();
+const userId = loggedUserData?.userId || null;
 
 // Add this useEffect for socket connection
 useEffect(() => {

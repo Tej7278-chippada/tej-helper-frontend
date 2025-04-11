@@ -9,6 +9,13 @@ import { useNavigate } from 'react-router-dom';
 import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
 import { fetchWishlist, removeFromWishlist } from '../api/api';
 import { useTheme } from '@emotion/react';
+// import { userData } from '../../utils/userData';
+// import { jwtDecode } from 'jwt-decode';
+// import { getUserIdFromToken, useUserData } from '../../hooks/useUserData';
+
+
+
+
 
 const WishList = () => {
   const [wishlist, setWishlist] = useState([]);
@@ -21,6 +28,21 @@ const WishList = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loadingPostRemove, setLoadingPostRemove] = useState({}); // Track loading per post
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  //  const authToken = localStorage.getItem('authToken');
+  // let decodedUserId = '';
+  // let decodedUsername = '';
+  // const user = userData();
+
+  // if (authToken) {
+  //   try {
+  //     const decoded = jwtDecode(authToken); // decoded is an object: { id, tokenUsername, iat, exp }
+  //     decodedUserId = decoded.id;
+  //     decodedUsername = decoded.tokenUsername
+  //     console.log("Decoded User ID:", decodedUserId);
+  //   } catch (err) {
+  //     console.error('Invalid token:', err);
+  //   }
+  // }
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -69,7 +91,9 @@ const WishList = () => {
     <Layout>
       <Box p={'4px'} sx={{ margin: '0rem' }}>
         <Typography variant="h6" align="left" mx="8px" marginTop="4px" gutterBottom>
-          Wishlisted Posts
+          Wishlisted Posts 
+          {/* <strong>{decodedUserId}</strong> {decodedUsername}   */}
+          {/* {user?.userId} {user?.userName} */}
         </Typography>
 
         {/* <div style={{
