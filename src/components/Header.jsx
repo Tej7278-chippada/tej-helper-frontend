@@ -7,6 +7,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { userData } from '../utils/userData';
 
 const Header = ({ username }) => {
   const location = useLocation();
@@ -20,7 +21,8 @@ const Header = ({ username }) => {
   const [loggedInUsers, setLoggedInUsers] = useState([]);
   const navigate = useNavigate();
   const [currentUsername, setCurrentUsername] = useState(username || '');
-
+  const loggedUserData = userData();
+  const userId = (loggedUserData.userId);
   // Only show search bar when user is logged in and on chat page
   // const showSearchBar = location.pathname.includes('/productList') && username;
 
@@ -32,7 +34,8 @@ const Header = ({ username }) => {
     setLoggedInUsers(users);
 
     // Load the last active user from localStorage if available
-    const activeUser = localStorage.getItem('activeUser');
+    // const activeUser = localStorage.getItem('activeUser');
+    const activeUser = (loggedUserData?.userName || 'UserName');
     if (activeUser) {
       const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
     const activeToken = tokens[username];
@@ -41,6 +44,7 @@ const Header = ({ username }) => {
     }
       setCurrentUsername(activeUser);
     }
+    console.log('logged user:', currentUsername);
   }, [username]);
 
   // useEffect(() => {
@@ -147,7 +151,8 @@ const Header = ({ username }) => {
   };
 
   const openUserProfile = () => {
-    const userId = localStorage.getItem('userId'); 
+    // const userId = localStorage.getItem('userId'); 
+    // const userId = (loggedUserData?.userId || 'userId');
     navigate(`/user/${userId}`); //, { replace: true }
   };
 
@@ -227,7 +232,7 @@ const Header = ({ username }) => {
           {currentUsername && (
             <>
               <IconButton onClick={handleProfileClick} color="inherit">
-                <AccountCircleIcon />
+                <AccountCircleIcon sx={{marginRight:'4px'}}/>
                 <Typography variant="body1">{currentUsername}</Typography>
               </IconButton>
               <Menu
