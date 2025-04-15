@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, CircularProgress, Typography, List, ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar } from '@mui/material';
 import API from '../api/api';
-// import API from '../api';
+import { userData } from '../../utils/userData';
 
-const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated, setLoginMessage, setSnackbar }) => {
+const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar }) => {
   const [rating, setRating] = useState(3);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
   const [totalReviews, setTotalReviews] = useState(0);
-  // const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(true);
   const [ratings, setRatings] = useState([]);
+  const loggedUserData = userData();
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -24,16 +25,28 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
   }, [open]);
 
   const fetchUserRating = async () => {
-    // setIsFetching(true);
+    setIsFetching(true);
     try {
       const response = await API.get(`/api/auth/rating/${userId}`);
       setAverageRating(response.data.averageRating);
       setTotalReviews(response.data.totalReviews);
       setRatings(response.data.ratings);
+
+      // Autofill if logged-in user already rated this user
+      const existingRating = response.data.ratings.find(
+        (r) => r.userId?._id === loggedUserData?.userId || ''
+      );
+      if (existingRating) {
+        setRating(existingRating.rating);
+        setComment(existingRating.comment);
+      } else {
+        setRating(0); // Reset to default if not found
+        setComment('');
+      }
     } catch (error) {
       console.error('Error fetching user rating:', error);
-    // } finally {
-    //   setIsFetching(false);
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -112,7 +125,7 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
         </Box>
         
       </DialogTitle>
-      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', backgroundColor: "#f5f5f5",}}>
+      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', backgroundColor: "#f5f5f5", borderRadius:'1rem'}}>
         
 
         
@@ -148,36 +161,45 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
           }}
         >
           {/* {post.user.ratings && post.user.ratings.length ? ( */}
-           {ratings.length ? (
+          {isFetching ? (
+            <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" height="200px" gap="1rem">
+              <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
+              <Typography color='grey' variant='body2'>Loading Ratings...</Typography>
+            </Box>
+          ) : ratings.length ? (
             ratings.map((rating, index) => (
               <Box
                 key={index}
                 sx={{
                   margin: "6px",
-                  padding: "1rem",
-                  borderRadius: "6px",
+                  padding: "12px",
+                  borderRadius: "8px",
                   border: "1px solid #ddd",
                   marginTop: "6px",
                   backgroundColor: "#fff"
                 }}
               >
                 <Box display="flex" alignItems="center" gap={1}>
-                  <img
+                  <Avatar
                     src={`data:image/jpeg;base64,${btoa(
                       String.fromCharCode(...new Uint8Array(rating.userId?.profilePic?.data || []))
                     )}` }
-                    alt='profile'
+                    alt={rating.userId?.username[0]}
                     style={{ width: 32, height: 32, borderRadius: '50%' }}
                   />
                   <Typography fontWeight="bold">
                     {rating.userId?.username || "Anonymous"}
                   </Typography>
-                  <Typography variant="caption" color="textSecondary" marginLeft="auto">
+                  <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'auto'}}/>
+                  {/* <Typography variant="caption" color="textSecondary" marginLeft="auto">
                     {new Date(rating.createdAt).toLocaleString()}
-                  </Typography>
+                  </Typography> */}
                 </Box>
-                <Rating value={rating.rating || 0} precision={0.5} readOnly />
+                {/* <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/> */}
                 <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
+                <Typography variant="caption" color="textSecondary" >
+                  {new Date(rating.createdAt).toLocaleString()}
+                </Typography>
               </Box>
             ))
           ) : (

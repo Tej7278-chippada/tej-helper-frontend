@@ -6,6 +6,10 @@ export const userData = () => {   // getUserIdFromToken
   const token = localStorage.getItem('authToken');
   if (!token) return null;
 
+  // const authToken = localStorage.getItem('authToken');
+  // const decodedToken = JSON.parse(atob(authToken.split('.')[1]));
+  // const currentUserId = decodedToken.id;
+
   try {
     const decoded = jwtDecode(token);
     return {    // this is from: jwt.sign({ id: user._id, ... })
