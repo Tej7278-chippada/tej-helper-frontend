@@ -22,7 +22,7 @@ const Header = ({ username }) => {
   const navigate = useNavigate();
   const [currentUsername, setCurrentUsername] = useState(username || '');
   const loggedUserData = userData();
-  const userId = (loggedUserData.userId);
+  const userId = (loggedUserData?.userId || '');
   // Only show search bar when user is logged in and on chat page
   // const showSearchBar = location.pathname.includes('/productList') && username;
 
@@ -35,7 +35,7 @@ const Header = ({ username }) => {
 
     // Load the last active user from localStorage if available
     // const activeUser = localStorage.getItem('activeUser');
-    const activeUser = (loggedUserData?.userName || 'UserName');
+    const activeUser = (loggedUserData?.userName || '');
     if (activeUser) {
       const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
     const activeToken = tokens[username];

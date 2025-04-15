@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, CircularProgress, Typography } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, CircularProgress, Typography, List, ListItem, ListItemAvatar, Avatar, ListItemText } from '@mui/material';
 import API from '../api/api';
 // import API from '../api';
 
@@ -9,31 +9,45 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
   const [totalReviews, setTotalReviews] = useState(0);
-  const [isFetching, setIsFetching] = useState(true);
+  // const [isFetching, setIsFetching] = useState(true);
   const [ratings, setRatings] = useState([]);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
     if (open) {
       fetchUserRating();
+      // fetchUserRatings();
     }
-    if (post) {
-      setRatings([...post.user.ratings].reverse() || []); // Set existing comments when component loads
-    }
-  }, [open, post]);
+    // if (post) {
+    //   setRatings([...post.user.ratings].reverse() || []); // Set existing comments when component loads
+    // }
+  }, [open]);
 
   const fetchUserRating = async () => {
-    setIsFetching(true);
+    // setIsFetching(true);
     try {
       const response = await API.get(`/api/auth/rating/${userId}`);
       setAverageRating(response.data.averageRating);
       setTotalReviews(response.data.totalReviews);
+      setRatings(response.data.ratings);
     } catch (error) {
       console.error('Error fetching user rating:', error);
-    } finally {
-      setIsFetching(false);
+    // } finally {
+    //   setIsFetching(false);
     }
   };
+
+  // const fetchUserRatings = async () => {
+  //   setIsFetching(true);
+  //   try {
+  //     const response = await API.get(`/api/auth/ratings/${userId}`);
+  //     setRatings(response.data.ratings.reverse()); // Show latest first
+  //   } catch (error) {
+  //     console.error('Error fetching user ratings:', error);
+  //   } finally {
+  //     setIsFetching(false);
+  //   }
+  // };
 
   const handleSubmit = async () => {
     if (!rating || rating < 1 || rating > 5) return;
@@ -50,7 +64,8 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
     setLoading(true);
     try {
       const authToken = localStorage.getItem('authToken');
-      await API.post(`/api/auth/rate/${userId}`, { rating, comment }, {
+      const newRating = {  rating, comment };
+      await API.post(`/api/auth/rate/${userId}`,  newRating , {
         headers: { Authorization: `Bearer ${authToken}` }
       });
 
@@ -58,8 +73,12 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
       fetchUserRating();
 
       setLoading(false);
-      onClose(); // Close dialog after submitting
+      // onClose(); // Close dialog after submitting
       setSnackbar({ open: true, message: "Rating added successfully.", severity: "success" });
+      // Add the new comment to the top of the list
+      // setRatings((prevRatings) => [newRating, ...prevRatings]);
+      // Refresh ratings after submitting
+// fetchUserRatings();
     } catch (error) {
       console.error('Error submitting rating:', error);
       setLoading(false);
@@ -69,20 +88,27 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
   return (
     <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ margin: isMobile ? '10px' : '0px',
         '& .MuiPaper-root': { borderRadius: '14px',  } , //maxHeight: isMobile ? '300px' : 'auto'
-        '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '14px',  }
+        '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '4px',  }
         }}>
-      <DialogTitle>Rate this User
+      <DialogTitle>
+        {/* Rate this User */}
         {/* Show existing rating */}
         <Box display="flex" alignItems="center" gap={1}>
-          {isFetching ? (
-            <CircularProgress size={20} />
-          ) : (
-            <>
+          
+            <Box sx={{display: isMobile? 'flex' : 'flex', justifyContent:'space-between', gap:'10px'}}>
               <Typography variant="body1">Profile Trust Level:</Typography>
-              <Rating value={averageRating || 0} precision={0.5} readOnly />
-              <Typography variant="body2">({totalReviews} reviews)</Typography>
-            </>
-          )}
+              <Box marginLeft="auto" sx={{display: isMobile? 'unset' : 'flex',float:'inline-end', gap: isMobile ? '4px' : '10px', alignItems:'center' }}>
+                <Rating value={averageRating || 0} precision={0.5} readOnly />
+                <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
+                  {/* {isFetching ? (
+                  <CircularProgress size={20} />
+                    ) : ( */}
+                    <Typography variant="body2" color="textPrimary"> {averageRating || "N/A"} </Typography>
+                  {/* )} */}
+                  <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography>
+                </Box>
+              </Box>
+            </Box>
         </Box>
         
       </DialogTitle>
@@ -121,56 +147,60 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
             },
           }}
         >
-          {post.user.ratings && post.user.ratings.length ? (
+          {/* {post.user.ratings && post.user.ratings.length ? ( */}
+           {ratings.length ? (
             ratings.map((rating, index) => (
-              <Typography
+              <Box
                 key={index}
-                component="div"
-                style={{
+                sx={{
                   margin: "6px",
-                //   backgroundColor: "#f5f5f5",
                   padding: "1rem",
                   borderRadius: "6px",
                   border: "1px solid #ddd",
                   marginTop: "6px",
-                  lineHeight: "1.5",
-                  textAlign: "justify",
-                  whiteSpace: "pre-wrap",
-                  wordWrap: "break-word",
+                  backgroundColor: "#fff"
                 }}
               >
-                {/* <strong>{rating.comment || userName || 'Anonymous'}</strong>  */}
-                {/* Display username */}
-                <Typography sx={{ paddingTop: "1rem" }}>
-                  {rating.userId}
-                </Typography>
-                <Typography sx={{ display: "inline-block", float: "right" }}>
-                  {/* <small>{new Date(comment.createdAt).toLocaleString()}</small> */}
-                </Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <img
+                    src={`data:image/jpeg;base64,${btoa(
+                      String.fromCharCode(...new Uint8Array(rating.userId?.profilePic?.data || []))
+                    )}` }
+                    alt='profile'
+                    style={{ width: 32, height: 32, borderRadius: '50%' }}
+                  />
+                  <Typography fontWeight="bold">
+                    {rating.userId?.username || "Anonymous"}
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary" marginLeft="auto">
+                    {new Date(rating.createdAt).toLocaleString()}
+                  </Typography>
+                </Box>
                 <Rating value={rating.rating || 0} precision={0.5} readOnly />
-                <Typography sx={{ paddingTop: "1rem" }}>
-                  {rating.comment}
-                </Typography>
-              </Typography>
+                <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
+              </Box>
             ))
           ) : (
             <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
               No Ratings available.
             </Typography>
           )}
+          
         </Box>
       </DialogContent>
       <DialogActions sx={{gap: 1, m:'10px'}}>
         <Box width="100%">
             {/* User Rating Input */}
             <Box>
+              <Box sx={{display:'flex', gap:'10px'}}>
                 <Typography variant="body2" color="textSecondary">
-                Your Rating:
+                Rate this User:
                 </Typography>
                 <Rating
                 value={rating}
                 onChange={(e, newValue) => setRating(newValue)}
                 />
+                </Box>
                 <TextField
                 fullWidth
                 multiline
@@ -203,7 +233,7 @@ const RateUserDialog = ({ userId, open, onClose, post, isMobile, isAuthenticated
                     disabled={loading}
                     style={{ margin: "0rem", borderRadius: '8px' }}
                 >
-                    Submit
+                    { loading ? <CircularProgress size={20}/> : 'Submit' }
                 </Button>
             </Box>
         </Box>
