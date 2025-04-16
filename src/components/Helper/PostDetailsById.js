@@ -813,7 +813,7 @@ function PostDetailsById({ onClose, user }) {
               <Box display="flex" alignItems="center" spacing={1} justifyContent="flex-end" sx={{display: 'inline-block', float: 'right',}}>
                 {/* Trust Level */}
                 <Grid item>
-                  <Box display="flex" alignItems="center">
+                  <Box display="flex" >
                     <Typography variant="body2" color="textSecondary" mr={1}>
                       Trust Level
                     </Typography>

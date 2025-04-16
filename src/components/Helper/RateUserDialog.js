@@ -63,7 +63,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   // };
 
   const handleSubmit = async () => {
-    if (!rating || rating < 1 || rating > 5) return;
+    if (!rating || rating < 1 || rating > 5 || userId === loggedUserData?.userId) return;
 
     if (!isAuthenticated) {
       setLoginMessage({
@@ -211,6 +211,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         </Box>
       </DialogContent>
       <DialogActions sx={{gap: 1, m:'10px'}}>
+        {userId !== loggedUserData?.userId  && (
         <Box width="100%">
             {/* User Rating Input */}
             <Box>
@@ -259,6 +260,12 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
                 </Button>
             </Box>
         </Box>
+        )}
+        {userId === loggedUserData?.userId && (
+          <Button onClick={onClose} disabled={loading} style={{ margin: "0rem", borderRadius: '8px' }}>
+            Close
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
