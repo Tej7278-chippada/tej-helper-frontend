@@ -190,12 +190,17 @@ useEffect(() => {
           const { latitude, longitude } = position.coords;
           const locationData = { latitude, longitude };
           setUserLocation(locationData);
+          setLoadingLocation(false);
           localStorage.setItem('userLocation', JSON.stringify(locationData)); // Store in localStorage
           fetchAddress(latitude, longitude);
           setLocationDetails({
             accuracy: position.coords.accuracy, // GPS accuracy in meters
           });
-          setLoadingLocation(false);
+          saveLocation(latitude, longitude);
+          const savedDistance = localStorage.getItem('distanceRange');
+          if (savedDistance) {
+            setDistanceRange(Number(savedDistance));
+          }
         },
         (error) => {
           console.error('Error fetching location:', error);
@@ -208,6 +213,28 @@ useEffect(() => {
       setLoadingLocation(false);
     }
   }, []);
+
+  const saveLocation = async (latitude, longitude) => {
+    // setSavingLocation(true);
+    try {
+      const authToken = localStorage.getItem('authToken');
+      await API.put(`/api/auth/${userId}/location`, {
+        location: {
+          latitude: latitude,
+          longitude: longitude,
+        },
+      }, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      // setSuccessMessage('Location saved successfully.');
+      // setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
+      // setSavingLocation(false);
+    } catch (err) {
+      // setError('Failed to save location. Please try again later.');
+      // setSnackbar({ open: true, message: 'Failed to save location. Please try again later.', severity: 'error' });
+      // setSavingLocation(false);
+    }
+  };
 
   // useEffect(() => {
   //   fetchUserLocation();
