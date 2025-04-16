@@ -125,7 +125,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         </Box>
         
       </DialogTitle>
-      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', backgroundColor: "#f5f5f5", borderRadius:'1rem'}}>
+      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', backgroundColor: "#f5f5f5", borderRadius:'8px', mx:1}}>
         
 
         
@@ -171,7 +171,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
               <Box
                 key={index}
                 sx={{
-                  margin: "6px",
+                  margin: "0px",
                   padding: "12px",
                   borderRadius: "8px",
                   border: "1px solid #ddd",

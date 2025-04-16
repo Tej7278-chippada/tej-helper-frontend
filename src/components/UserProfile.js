@@ -1,7 +1,7 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import API from './api/api';
@@ -19,6 +19,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
+import CloseIcon from '@mui/icons-material/Close'
 
 
 // Set default icon manually
@@ -67,6 +68,7 @@ const UserProfile = () => {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [savingLocation, setSavingLocation] = useState(false);
+  const [showRatings, setShowRatings] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -262,7 +264,7 @@ const UserProfile = () => {
                     ? `data:image/jpeg;base64,${userData.profilePic}`
                     : 'https://placehold.co/56x56?text=No+Image'
                 }
-                sx={{ width: isMobile ? '160px' : 'fit-content', height: isMobile ? '160px' : 'auto', borderRadius: isMobile ? '50%' : '50%' }}
+                sx={{ width: isMobile ? '160px' : 'auto', height: isMobile ? '160px' : 'auto', borderRadius: isMobile ? '50%' : '50%' }} // fit-content
               />
             </Box>
           </Box>
@@ -324,15 +326,6 @@ const UserProfile = () => {
                   </Typography>
                   )}
                 </Grid>
-                <Grid item xs={12} sm={12} display="flex" alignItems="center">
-                  <Typography mr={1} variant="body1" style={{ fontWeight: 500 }}>
-                    Trust Level:
-                  </Typography>
-                  <StarRoundedIcon sx={{ color: 'gold', fontSize: 18, marginRight: 0.5 }} />
-                  <Typography variant="body2" color="textSecondary">
-                    {userData.trustLevel || "N/A"}
-                  </Typography>
-                </Grid>
               </Grid>
             </Box>
             
@@ -348,7 +341,12 @@ const UserProfile = () => {
                 justifyContent: 'right',
                 marginTop: '1rem',
               }}>
-                <Box >
+                <Box sx={{display:'flex', justifyContent:'space-between', flex:1, alignItems:'center'}}>
+                  <Box sx={{display:'flex', alignItems:'center' }}>
+                    <Button variant="text" size="small" onClick={() => setShowRatings(true)}>
+                      Ratings
+                    </Button>
+                  </Box>
                   <IconButton
                     onClick={handleOpenDeleteDialog}
                     onMouseEnter={() => setHoveredId(userData._id)} // Set hoveredId to the current button's ID
@@ -384,6 +382,85 @@ const UserProfile = () => {
               </Toolbar>
             </Box>
           </Box>
+            {showRatings && (
+            <Card
+              sx={{
+                position: 'absolute',
+                top: isMobile ? '150px' : '50px',
+                left: isMobile ? '2%' : null,
+                right : isMobile ? null : '2%',
+                width: '95%', 
+                maxWidth: '400px',
+                zIndex: 1000,
+                borderRadius: '10px',
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                backgroundColor: '#fff', '& .MuiCardContent-root': {padding: '10px' },
+              }}
+            >
+              <CardContent>
+                {/* Close Button */}
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Typography variant="h6">Your Profile Ratings</Typography>
+                  <IconButton onClick={() => setShowRatings(false)}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+                <Box display="flex"  mb={1} gap={1}>
+                  <Typography variant="body2" color="textSecondary" >
+                    Trust Level
+                  </Typography>
+                  <StarRoundedIcon sx={{ color: 'gold', fontSize: 18 }} />
+                  <Typography variant="body2" color="textSecondary" ml="-4px">
+                    {userData.trustLevel || "N/A"}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">({userData.totalReviews} reviews)</Typography>
+                </Box>
+                <Box sx={{ height: '300px', overflowY: 'auto', scrollbarWidth:'thin', bgcolor:'rgba(0, 0, 0, 0.07)', borderRadius:'8px', scrollbarColor: '#aaa transparent', cursor:'pointer'}}>
+                { userData.ratings.length ? (
+                  userData.ratings.map((rating, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        margin: "6px",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #ddd",
+                        marginTop: "6px",
+                        backgroundColor: "#fff"
+                      }}
+                    >
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Avatar
+                          src={`data:image/jpeg;base64,${btoa(
+                            String.fromCharCode(...new Uint8Array(rating.userId?.profilePic?.data || []))
+                          )}` }
+                          alt={rating.userId?.username[0]}
+                          style={{ width: 32, height: 32, borderRadius: '50%' }}
+                        />
+                        <Typography fontWeight="bold">
+                          {rating.userId?.username || "Anonymous"}
+                        </Typography>
+                        <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'auto'}}/>
+                        {/* <Typography variant="caption" color="textSecondary" marginLeft="auto">
+                          {new Date(rating.createdAt).toLocaleString()}
+                        </Typography> */}
+                      </Box>
+                      {/* <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/> */}
+                      <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
+                      <Typography variant="caption" color="textSecondary" >
+                        {new Date(rating.createdAt).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  ))
+                ) : (
+                  <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
+                    No Ratings available.
+                  </Typography>
+                )}
+                </Box>
+              </CardContent>
+            </Card>
+            )}
         </Box>
         <Box sx={{paddingBottom:'4rem',marginBottom:'1rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
         
