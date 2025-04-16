@@ -931,8 +931,8 @@ useEffect(() => {
                       <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                         <div style={{
                           display: 'flex',
-                          overflowX: 'auto',
-                          scrollbarWidth: 'thin',
+                          overflowX: 'auto', overflowY: 'hidden',
+                          scrollbarWidth: 'none',
                           scrollbarColor: '#888 transparent',
                           borderRadius: '8px',
                           gap: '0.1rem',
