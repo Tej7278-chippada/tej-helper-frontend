@@ -417,7 +417,7 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
           </Box> 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap:1 }}>
             <IconButton onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper}>
-              {isHelper ? <StarRoundedIcon fontSize="medium" /> : <StarOutlineRoundedIcon fontSize="medium" />}
+              {isHelper ? <StarRoundedIcon fontSize="medium" color="primary"/> : <StarOutlineRoundedIcon fontSize="medium" />}
             </IconButton>
             {isMobile && (
               <Box >

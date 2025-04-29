@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar, Badge, styled } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -302,6 +302,13 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   };
   
   const groupedMessages = groupMessagesByDate(messages);
+
+  // Styled Badge to position media image on bottom-right corner
+  const SmallAvatar = styled(Avatar)(({ theme }) => ({
+    width: 20,
+    height: 20,
+    border: `2px solid ${theme.palette.background.paper}`,
+  }));
   
 
   
@@ -315,17 +322,34 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         '& .MuiDialogTitle-root': { padding: '14px',  }
       }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}> 
-        <Box sx={{ display: 'flex', alignItems:'center', gap:1 }}>
+        <Box sx={{ display: 'flex', alignItems:'center', gap:2 }}>
           {/* {post.user?.profilePic && ( */}
-            <Avatar
-              src={`data:image/png;base64,${post.user.profilePic}`}
-              alt={post.user.username[0]}
-              style={{ width: 40, height: 40, borderRadius: '50%' }}
-            />
+            {/* Main user avatar with media thumbnail badge */}
+            <Badge
+              overlap="circular"
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              badgeContent={
+                post.media?.[0] && (
+                  <SmallAvatar src={`data:image/png;base64,${post.media[0]}`} alt="Post Media" />
+                )
+              }
+            >
+              <Avatar
+                src={`data:image/png;base64,${post.user.profilePic}`}
+                alt={post.user.username?.[0]}
+                sx={{ width: 48, height: 48 }}
+              />
+            </Badge>
           {/* )} */}
-          <Typography variant="h6" style={{ fontWeight: 400 }}>
-            {post.user?.username}
-          </Typography>
+          {/* Username and post title */}
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {post.user?.username}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis'}}>
+              {post.title}
+            </Typography>
+          </Box>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems:'center', gap:1 }}>
           {post.helperIds.includes(userId) && (
@@ -360,7 +384,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         {post.helperIds.includes(userId) && (
           <Box sx={{
             position: 'absolute',
-            top: '70px',
+            top: '75px',
             left: '0%',
             width:'100%',
             backgroundColor:'rgba(244, 238, 238, 0.24)',

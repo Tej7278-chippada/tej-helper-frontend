@@ -1,13 +1,19 @@
 // Header.js
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, TextField, List, ListItem, ListItemText, Box, CircularProgress, Paper, useMediaQuery, IconButton, Menu, MenuItem, Dialog, } from '@mui/material';
+import { AppBar, Toolbar, Typography, TextField, List, ListItem, ListItemText, Box, CircularProgress, Paper, useMediaQuery, IconButton, Menu, MenuItem, Dialog, ListItemIcon, Avatar, Divider, } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+// import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { userData } from '../utils/userData';
+import PersonIcon from '@mui/icons-material/Person';
+import PostAddIcon from '@mui/icons-material/PostAdd';
+import ChatIcon from '@mui/icons-material/Chat';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const Header = ({ username }) => {
   const location = useLocation();
@@ -231,21 +237,69 @@ const Header = ({ username }) => {
           )} */}
           {currentUsername && (
             <>
-              <IconButton onClick={handleProfileClick} color="inherit">
-                <AccountCircleIcon sx={{marginRight:'4px'}}/>
-                <Typography variant="body1">{currentUsername}</Typography>
+              <IconButton
+                onClick={handleProfileClick}
+                color="inherit"
+                size="small"
+                sx={{ borderRadius: 6, px: 1, py: 0.5, '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+              >
+                <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
+                  {currentUsername.charAt(0).toUpperCase()}
+                </Avatar>
+                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                  {currentUsername}
+                </Typography>
               </IconButton>
+
               <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
+                PaperProps={{
+                  elevation: 4,
+                  sx: {
+                    mt: 0.5, ml: 1.5,
+                    minWidth: 100,
+                    borderRadius: 2,
+                    '& .MuiMenuItem-root': {
+                      gap: 0,
+                    },
+                  },
+                }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
               >
-                <MenuItem onClick={() => openUserProfile()}>My Profile</MenuItem>
-                <MenuItem onClick={toUserPosts}>My Posts</MenuItem>
-                <MenuItem onClick={() => navigate('/chatsOfUser')}>Chats</MenuItem>
-                <MenuItem onClick={() => navigate('/wishlist')}>Wishlist</MenuItem>
-                <MenuItem onClick={() => navigate('/notifications')}>Notifications</MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={() => { openUserProfile(); handleClose(); }}>
+                  <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
+                  My Profile
+                </MenuItem>
+                <MenuItem onClick={() => { toUserPosts(); handleClose(); }}>
+                  <ListItemIcon><PostAddIcon fontSize="small" /></ListItemIcon>
+                  My Posts
+                </MenuItem>
+                <MenuItem onClick={() => { navigate('/chatsOfUser'); handleClose(); }}>
+                  <ListItemIcon><ChatIcon fontSize="small" /></ListItemIcon>
+                  Chats
+                </MenuItem>
+                <MenuItem onClick={() => { navigate('/wishlist'); handleClose(); }}>
+                  <ListItemIcon><FavoriteIcon fontSize="small" /></ListItemIcon>
+                  Wishlist
+                </MenuItem>
+                <MenuItem onClick={() => { navigate('/notifications'); handleClose(); }}>
+                  <ListItemIcon><NotificationsIcon fontSize="small" /></ListItemIcon>
+                  Notifications
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={() => { handleLogout(); handleClose(); }}>
+                  <ListItemIcon><LogoutIcon fontSize="small" /></ListItemIcon>
+                  Logout
+                </MenuItem>
               </Menu>
               <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
                 <List style={{ cursor: 'pointer' }}>
