@@ -13,6 +13,7 @@ import PostService from './components/Helper/PostService';
 import PostDetailsById from './components/Helper/PostDetailsById';
 import WishList from './components/Helper/WishList';
 import ChatsOfPosts from './components/Chat/ChatsOfPosts';
+import ChatsOfUser from './components/Chat/ChatsOfUser';
 // import ChatHistory from './components/Chat/ChatHistory';
 import ChatHistoryPage from './components/Chat/ChatHistoryPage';
 import NotFound from './components/NotFound'; // Import 404 Page
@@ -74,6 +75,11 @@ function App() {
           <Route path="/notifications" element={
             <PrivateRoute>
               <NotificationsPage />
+            </PrivateRoute>
+          } />
+          <Route path="/chatsOfUser" element={
+            <PrivateRoute>
+              <ChatsOfUser />
             </PrivateRoute>
           } />
         </Routes>

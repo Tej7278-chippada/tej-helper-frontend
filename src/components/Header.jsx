@@ -242,6 +242,7 @@ const Header = ({ username }) => {
               >
                 <MenuItem onClick={() => openUserProfile()}>My Profile</MenuItem>
                 <MenuItem onClick={toUserPosts}>My Posts</MenuItem>
+                <MenuItem onClick={() => navigate('/chatsOfUser')}>Chats</MenuItem>
                 <MenuItem onClick={() => navigate('/wishlist')}>Wishlist</MenuItem>
                 <MenuItem onClick={() => navigate('/notifications')}>Notifications</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>

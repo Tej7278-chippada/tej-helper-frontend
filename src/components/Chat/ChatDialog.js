@@ -336,6 +336,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             >
               <IconButton 
               // onClick={() => setHelperDialogOpen(true)} 
+              aria-label="Helper tag"
               >
                 <StarRoundedIcon fontSize="medium" color="primary"/> 
               </IconButton>
