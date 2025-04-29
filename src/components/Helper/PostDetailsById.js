@@ -55,6 +55,7 @@ function PostDetailsById({ onClose, user }) {
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile1 = useMediaQuery(theme.breakpoints.down("md"));
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [likeLoading, setLikeLoading] = useState(false); // For like progress
   const [wishStatusLoading, setWishStatusLoading] = useState(false);
@@ -453,7 +454,7 @@ function PostDetailsById({ onClose, user }) {
         }}>
           <Box
             display="flex"
-            flexDirection={isMobile ? "column" : "row"}
+            flexDirection={isMobile1 ? "column" : "row"}
             gap={2} sx={{ bgcolor: '#f5f5f5', borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px' }}
           >
             <Box sx={{
@@ -479,7 +480,7 @@ function PostDetailsById({ onClose, user }) {
                     scrollbarWidth: 'none',
                     scrollbarColor: '#888 transparent',
                     // borderRadius: '8px',
-                    gap: isMobile ? '3px' : '4px', height: isMobile ? '250px' : '300px',
+                    gap: isMobile ? '3px' : '4px', height: isMobile1 ? '250px' : '300px',
                   }}>
                     {post.media && post.media.length > 0 ? (
                       post.media.map((base64Image, index) => (

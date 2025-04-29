@@ -4,7 +4,7 @@ import { Box, Grid, Card, Skeleton } from '@mui/material';
 
 const ChatsSkeleton = ({ isMobile }) => {
   // Number of skeleton items to display
-  const skeletonCount = isMobile ? 6 : 4;
+  const skeletonCount = isMobile ? 6 : 8;
 
   return (
     <Box sx={{ position:'relative'}}>
