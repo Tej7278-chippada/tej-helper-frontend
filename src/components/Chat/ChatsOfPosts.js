@@ -1,7 +1,7 @@
 // components/Chat/ChatsOfPosts.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, } from '@mui/material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, } from '@mui/material';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
 import Layout from '../Layout';
@@ -9,6 +9,8 @@ import apiClient from '../../utils/axiosConfig';
 // import ChatDialog from './ChatDialog';
 import ChatHistory from './ChatHistory';
 // import CloseIcon from '@mui/icons-material/Close';
+import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
+import RateUserDialog from '../Helper/RateUserDialog';
 
 
 const ChatsOfPosts = () => {
@@ -23,6 +25,8 @@ const ChatsOfPosts = () => {
   const [loading, setLoading] = useState(true); // Track loading state
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
   const [postTitle, setPostTitle] = useState(""); // Store post title
+  const [postImage, setPostImage] = useState("");
+  const [postStatus, setPoststatus] = useState("");
   const [openDialog, setOpenDialog] = useState(false);
    const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
 
@@ -38,6 +42,8 @@ const ChatsOfPosts = () => {
       const post = response.data.posts.find(post => post._id === postId);
       setBuyers(post?.buyers || []);
       setPostTitle(post?.title || ""); // Store post title
+      setPostImage(post?.media?.length ? post.media[0] : "");
+      setPoststatus(post?.postStatus || "");
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.error('Unauthorized user, redirecting to login');
@@ -70,6 +76,23 @@ const ChatsOfPosts = () => {
 
   const handleCloseDialog = () => {
     setOpenDialog(false); // Close the dialog
+  };
+  const [isRateDialogOpen, setRateDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
+
+  const handleOpenRateDialog = ({userID}) => {
+    setSelectedUserId(userID);
+    setRateDialogOpen(true);
+  };
+  const handleCloseRateDialog = () => {
+    setRateDialogOpen(false);
+    setSelectedUserId(null);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -104,15 +127,44 @@ const ChatsOfPosts = () => {
                   padding: '8px 16px', // Padding for a clean look
                 }}
               >
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography position="relative" variant="h6" color='grey'
-                    style={{ marginBottom: '0.0rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis',
-                      maxHeight: '4.5rem',  // This keeps the text within three lines based on the line height.
-                      lineHeight: '1.5rem'  // Adjust to control exact line spacing.
-                    }}
-                    >Chats of <span style={{ fontWeight: "normal", color: "black" }}>{postTitle}</span>
-                  </Typography>
-                  {/* <Typography position="relative" variant="h5">{postId}</Typography> */}
+                <Box display="flex" alignItems="center" mb={0}>
+                  <Avatar
+                    src={
+                      postImage
+                        ? `data:image/jpeg;base64,${postImage}`
+                        : 'https://placehold.co/56x56?text=No+Image'
+                    }
+                    alt={postTitle[0]}
+                    sx={{ width: 50, height: 50, mr: 2, borderRadius: 2 }}
+                  />
+
+                  <Box>
+                    <Box sx={{display:'flex'}}>
+                    <Typography variant="body2" color="text.secondary">
+                      Chats of
+                    </Typography>
+                    <Typography variant="body2" sx={{marginLeft:'auto'}}>
+                      {postStatus}
+                    </Typography>
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        display: '-webkit-box',
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxHeight: '1.5rem',
+                        lineHeight: '1.5rem',
+                        fontWeight: 500,
+                        fontFamily: 'sans-serif',
+                        color: 'black',
+                      }}
+                    >
+                      {postTitle}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
               <Box bgcolor="#f5f5f5"
@@ -200,6 +252,16 @@ const ChatsOfPosts = () => {
                           {chat.username}
                           {/* {chat.id} */}
                         </Typography>
+                        <IconButton
+                          aria-label="View post details"
+                          onClick={(event) => { event.stopPropagation(); // Prevent triggering the parent onClick
+                           handleOpenRateDialog({userID : chat.id}); }}
+                          // onClick={handleOpenRateDialog}
+                          variant="text"
+                          sx={{marginLeft:'auto'}}
+                        >
+                          <AssignmentIndRoundedIcon/>
+                        </IconButton>
                       </Box>
                     ))
                   )}
@@ -254,6 +316,82 @@ const ChatsOfPosts = () => {
           )}
         {/* </DialogContent> */}
       </Dialog>
+      {/* Rating Dialog */}
+      <RateUserDialog
+        userId={selectedUserId}
+        open={isRateDialogOpen}
+        onClose={handleCloseRateDialog}
+        // post={post}
+        isMobile={isMobile}
+        isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+      />
+      <Snackbar
+        open={loginMessage.open}
+        autoHideDuration={9000}
+        onClose={() => setLoginMessage({ ...loginMessage, open: false })}
+        message={
+          <span>
+            Please log in first.{" "}
+            <Link
+              to="/login"
+              style={{ color: "yellow", textDecoration: "underline", cursor: "pointer" }}
+            >
+              Click here to login
+            </Link>
+          </span>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert
+          severity="warning"
+          variant="filled"
+          sx={{
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "5px",
+                // padding: "3px 8px",
+                marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          }
+        >
+          Please log in first.
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };
