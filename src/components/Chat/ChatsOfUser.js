@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfUser.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton } from '@mui/material';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -79,6 +79,14 @@ const ChatsOfUser = () => {
     navigate(`/post/${postId}`);
   };
 
+   // Styled Badge to position media image on bottom-right corner
+   const SmallAvatar = styled(Avatar)(({ theme }) => ({
+    width: 20,
+    height: 20,
+    border: `2px solid ${theme.palette.background.paper}`,
+    fontSize: 12,
+  }));
+
   return (
     <Layout username={tokenUsername}>
       <Box mt={isMobile ? '2px' : '4px'} mb={isMobile ? '4px' : '8px'} sx={{ maxWidth: '800px', mx: 'auto'}}>
@@ -111,7 +119,7 @@ const ChatsOfUser = () => {
                 }}
               >
                 <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography position="relative" variant="h6" color='grey'
+                  <Typography position="relative" variant="h5" color='grey'
                     style={{
                       marginBottom: '0.0rem',
                       display: '-webkit-box',
@@ -151,7 +159,7 @@ const ChatsOfUser = () => {
                       }}
                     >
                       <Typography variant="h6" color="textSecondary" gutterBottom>
-                        You don't have any Chats as a Buyer...
+                        You don't have any Chats as a Helper...
                       </Typography>
                       <Box mt={2}></Box>
                     </Box>
@@ -200,7 +208,26 @@ const ChatsOfUser = () => {
                           }
                         }}
                       >
-                        <Avatar
+                        <Badge
+                          overlap="circular"
+                          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                          badgeContent={
+                            chat.seller && (
+                              <SmallAvatar src={chat.seller.profilePic ? `data:image/png;base64,${chat.seller.profilePic}` : undefined} alt={chat.seller.username?.[0]} />
+                            )
+                          }
+                        >
+                          <Avatar
+                            src={
+                              chat.posts?.postImage
+                                ? `data:image/jpeg;base64,${chat.posts.postImage}`
+                                : 'https://placehold.co/56x56?text=No+Image'
+                            }
+                            alt={chat.posts.postTitle?.[0]}
+                            sx={{ width: 48, height: 48, mx: 1 }}
+                          />
+                        </Badge>
+                        {/* <Avatar
                           src={
                             chat.posts?.postImage
                               ? `data:image/jpeg;base64,${chat.posts.postImage}`
@@ -208,7 +235,7 @@ const ChatsOfUser = () => {
                           }
                           alt={chat.posts.postTitle || 'Post Image'}
                           sx={{ width: 50, height: 50, mx: 1 }}
-                        />
+                        /> */}
                         <Typography variant="h6" m={1} sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis', fontWeight:400, fontFamily:'sans-serif'}}>
                           {chat.posts.postTitle}
                           {/* {chat.posts.postId} */}

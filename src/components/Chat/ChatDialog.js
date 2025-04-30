@@ -308,6 +308,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     width: 20,
     height: 20,
     border: `2px solid ${theme.palette.background.paper}`,
+    fontSize: 12,
   }));
   
 
@@ -330,7 +331,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               badgeContent={
                 post.media?.[0] && (
-                  <SmallAvatar src={`data:image/png;base64,${post.media[0]}`} alt="Post Media" />
+                  <SmallAvatar src={`data:image/png;base64,${post.media[0]}`} alt={post.title?.[0]} />
                 )
               }
             >
