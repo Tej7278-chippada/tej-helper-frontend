@@ -84,10 +84,16 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
   useEffect(() => {
     if (postId && chatData.id) {
       fetchChatHistory();
-      const room = `${postId}_${chatData.id}`; // Ensure unique room name
-      socket.emit('joinRoom', room);
+      const room = `post_${postId}_user_${chatData.id}_user_${userId}`; // Ensure unique room name
+      // Join the specific room
+      socket.emit('joinChatRoom', { 
+        postId: postId, 
+        userId: chatData.id, 
+        otherUserId: userId
+      });
 
       socket.on('receiveMessage', (newMessage) => {
+        // Only process messages for this specific chat
         setMessages((prevMessages) => {
           // ✅ Remove the temp message when the actual message arrives
           const filteredMessages = prevMessages.filter((msg) => msg.text !== newMessage.text || msg.isPending !== true);
@@ -105,32 +111,39 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
     }
 
     return () => {
-      const room = `${postId}_${chatData.id}`; // Ensure unique room name
-      socket.emit('leaveRoom', room);
+      // const room = `${postId}_${chatData.id}`; // Ensure unique room name
+      // Leave the room
+      socket.emit('leaveChatRoom', { 
+        postId: postId, 
+        userId: chatData.id, 
+        otherUserId: userId 
+      });
       socket.off('receiveMessage');
       socket.off('messageSeenUpdate');
     };
-  }, [chatData.id, fetchChatHistory, postId]);
+  }, [chatData.id, fetchChatHistory, postId, userId]);
 
   const markMessagesAsSeen = useCallback(async (messageIds) => {
+    if (!messageIds || messageIds.length === 0) return;
     try {
       await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/markAsSeen`, {
         postId: postId, // or postId in ChatHistory.js
         buyerId: chatData.id, // or chatData.id in ChatHistory.js
+        sellerId: userId,
         messageIds
       }, {
         headers: { Authorization: `Bearer ${authToken}` }
       });
 
       // Emit real-time seen status to the other user
-      const room = `${postId}_${chatData.id}`;
+      const room = `post_${postId}_user_${chatData.id}_user_${userId}`;
       messageIds.forEach(messageId => {
         socket.emit('messageSeen', { room, messageId });
       });
     } catch (error) {
       console.error('Error marking messages as seen:', error);
     }
-  }, [postId, chatData.id , authToken]); // Adjust dependencies for ChatHistory.js
+  }, [postId, chatData.id , userId, authToken]); // Adjust dependencies for ChatHistory.js
 
   useEffect(() => {
     if (messages.length === 0) return;

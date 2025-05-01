@@ -140,12 +140,12 @@ const ChatsOfPosts = () => {
 
                   <Box>
                     <Box sx={{display:'flex'}}>
-                    <Typography variant="body2" color="text.secondary">
-                      Chats of
-                    </Typography>
-                    <Typography variant="body2" sx={{marginLeft:'auto'}}>
-                      {postStatus}
-                    </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Chats of
+                      </Typography>
+                      <Typography variant="body2" color={postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} sx={{marginLeft:'auto'}}>
+                        {postStatus}
+                      </Typography>
                     </Box>
                     <Typography
                       variant="h6"
