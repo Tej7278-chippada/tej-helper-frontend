@@ -47,6 +47,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const otherUserId = post.user.id; // The user we're chatting with
 
 //   useEffect(() => {
 //     // if (open) {
@@ -100,6 +102,21 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             )
         );
       });
+
+      // Notify server that this user is online
+      socket.emit('userOnline', userId);
+
+      // Listen for status changes of the other user
+      socket.on('userStatusChange', ({ userId: changedUserId, isOnline: status }) => {
+        if (changedUserId === otherUserId) {
+          setIsOnline(status);
+        }
+      });
+
+      // Check initial online status
+      socket.emit('checkOnlineStatus', otherUserId, (status) => {
+        setIsOnline(status);
+      });
     }
 
     return () => {
@@ -114,6 +131,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       });
       socket.off('receiveMessage');
       socket.off('messageSeenUpdate');
+      // When closing chat, notify server
+      socket.emit('userAway', userId);
+      socket.off('userStatusChange');
     };
   }, [open, fetchChatHistory, post._id, userId, post.user.id]);
 
@@ -361,6 +381,26 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {post.user?.username}
+              {isOnline ? (
+                <Typography 
+                  component="span" 
+                  variant="caption"
+                  color="primary"
+                  sx={{ ml: 1 }}
+                >
+                  Online
+                </Typography>
+              ) : (
+                <Typography 
+                  component="span" 
+                  variant="caption"
+                  color="error"
+                  sx={{ ml: 1 }}
+                >
+                  Offline
+                </Typography>
+              )
+            }
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis'}}>
               {post.title}

@@ -46,6 +46,8 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef(null);
+  const [isOnline, setIsOnline] = useState(false);
+  const otherUserId = chatData.id; // The user we're chatting with
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -108,6 +110,21 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
             )
         );
       });
+
+      // Notify server that this user is online
+      socket.emit('userOnline', userId);
+
+      // Listen for status changes of the other user
+      socket.on('userStatusChange', ({ userId: changedUserId, isOnline: status }) => {
+        if (changedUserId === otherUserId) {
+          setIsOnline(status);
+        }
+      });
+
+      // Check initial online status
+      socket.emit('checkOnlineStatus', otherUserId, (status) => {
+        setIsOnline(status);
+      });
     }
 
     return () => {
@@ -120,6 +137,9 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
       });
       socket.off('receiveMessage');
       socket.off('messageSeenUpdate');
+      // When closing chat, notify server
+      socket.emit('userAway', userId);
+      socket.off('userStatusChange');
     };
   }, [chatData.id, fetchChatHistory, postId, userId]);
 
@@ -422,6 +442,26 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
               <Typography variant="h6" fontWeight="400" fontFamily="sans-serif">
                 {chatData.username}
               </Typography>
+              {isOnline ? (
+                <Typography 
+                  component="span" 
+                  variant="caption"
+                  color="primary"
+                  sx={{ ml: 0 }}
+                >
+                  Online
+                </Typography>
+              ) : (
+                  <Typography 
+                    component="span" 
+                    variant="caption"
+                    color="error"
+                    sx={{ ml: 0 }}
+                  >
+                    Offline
+                  </Typography>
+                )
+              }
               {/* <Typography>Chat History{postId}</Typography>
               <Typography>BuyerId {chatData.id}</Typography>
               <Typography>SellerId {userId}</Typography>  */}
