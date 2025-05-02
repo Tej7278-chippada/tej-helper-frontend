@@ -48,6 +48,9 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
   const scrollTimeoutRef = useRef(null);
   const [isOnline, setIsOnline] = useState(false);
   const otherUserId = chatData.id; // The user we're chatting with
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeout = useRef(null);
+  const typingDebounceTimeout = useRef(null);
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -82,6 +85,12 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
     };
     fetchPostDetails();
   }, [chatData.id, postId, authToken]);
+
+  const handleTypingEvent = useCallback(({ userId: typingUserId, isTyping: typing, postId: typingPostId }) => {
+    if (typingUserId === otherUserId && typingPostId === postId) {
+      setIsTyping(typing);
+    }
+  }, [otherUserId, postId]);
 
   useEffect(() => {
     if (postId && chatData.id) {
@@ -125,6 +134,9 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
       socket.emit('checkOnlineStatus', otherUserId, (status) => {
         setIsOnline(status);
       });
+
+      // Listen for typing events
+      socket.on('userTyping', handleTypingEvent);
     }
 
     return () => {
@@ -140,6 +152,8 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
       // When closing chat, notify server
       socket.emit('userAway', userId);
       socket.off('userStatusChange');
+      socket.off('userTyping', handleTypingEvent);
+      clearTimeout(typingTimeout.current);
     };
   }, [chatData.id, fetchChatHistory, postId, userId]);
 
@@ -335,6 +349,42 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
   };
   
   const groupedMessages = groupMessagesByDate(messages);
+
+  const handleInputChange = (e) => {
+    setMessage(e.target.value);
+    
+    // if (!typingTimeout.current && e.target.value.length > 0) {
+    //   socket.emit('typing', { 
+    //     postId, 
+    //     userId: chatData.id, 
+    //     otherUserId: userId,
+    //     isTyping: true 
+    //   });
+    // }
+    // Only emit typing after 500ms of typing (not on every keystroke)
+    clearTimeout(typingDebounceTimeout.current);
+    typingDebounceTimeout.current = setTimeout(() => {
+      if (e.target.value.length > 0) {
+        socket.emit('typing', { 
+          postId, 
+          userId: chatData.id, 
+          otherUserId: userId,
+          isTyping: true 
+        });
+      }
+    }, 200);
+    
+    // Set timeout to stop typing indicator after 3 seconds of inactivity
+    clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => {
+      socket.emit('typing', { 
+        postId, 
+        userId: chatData.id, 
+        otherUserId: userId,
+        isTyping: false 
+      });
+    }, 2000);
+  };
 
   
 
@@ -571,6 +621,78 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
         {/* </Box> */}
         
       {/* </Box> */}
+      {isTyping && (
+        <Box 
+          sx={{
+            position: 'sticky',
+            bottom: isMobile ? '5px' : '5px',
+            // left: '50%',
+            // transform: 'translateX(-50%)',
+            transition: 'opacity 0.3s ease-in-out',
+            display: 'flex',
+            alignItems: 'center',
+            px: 1,
+            // py: 1,
+            animation: 'fadeIn 0.3s ease',
+            '@keyframes fadeIn': {
+              from: { opacity: 0 },
+              to: { opacity: 1 }
+            }
+          }}
+        >
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              bgcolor: 'background.paper',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 2,
+              boxShadow: 1
+            }}
+          >
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              sx={{ display: 'flex', alignItems: 'center' }}
+            >
+              <Box 
+                component="span" 
+                sx={{ 
+                  display: 'inline-block',
+                  animation: 'pulse 1.5s infinite',
+                  '@keyframes pulse': {
+                    '0%': { opacity: 0.5 },
+                    '50%': { opacity: 1 },
+                    '100%': { opacity: 0.5 }
+                  }
+                }}
+              >
+                {chatData.username} is typing...
+              </Box>
+              <Box sx={{ display: 'flex', ml: 0.5 }}>
+                {[...Array(3)].map((_, i) => (
+                  <Box
+                    key={i}
+                    sx={{
+                      width: 4,
+                      height: 4,
+                      bgcolor: 'text.secondary',
+                      borderRadius: '50%',
+                      ml: 0.5,
+                      animation: `bounce 1.5s infinite ${i * 0.2}s`,
+                      '@keyframes bounce': {
+                        '0%, 100%': { transform: 'translateY(0)' },
+                        '50%': { transform: 'translateY(-3px)' }
+                      }
+                    }}
+                  />
+                ))}
+              </Box>
+            </Typography>
+          </Box>
+        </Box>
+      )}
       {(showScrollButton && isScrolling) && (
       <IconButton
           style={{
@@ -672,7 +794,8 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
                       value={message}
                       minRows={1}
                       maxRows={2} 
-                      onChange={(e) => setMessage(e.target.value)}
+                      // onChange={(e) => setMessage(e.target.value)}
+                      onChange={handleInputChange}
                       // onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && !e.shiftKey) {
