@@ -1,15 +1,44 @@
 // Layout.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './Header';
 // import Footer from './Footer';
+import MenuBar from './MenuBar';
 
 const Layout = ({ children, username }) => {
+  const [showMenu, setShowMenu] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < lastScrollY) {
+        setShowMenu(true); // scrolling up
+      } else if (currentScrollY > lastScrollY) {
+        setShowMenu(false); // scrolling down
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('activeUser');
+    localStorage.removeItem('tokenUsername');
+    localStorage.removeItem('loggedInUsers');
+    window.location.href = '/login'; // force reload to login page
+  };
+  
   return (
-    <div style={{ display: 'flex', flexDirection: 'column',  }}> {/* minHeight: '100vh' */}
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'  }}> {/* minHeight: '100vh' */}
       <Header username={username} />
-      <div style={{ flex: 0 }}>
+      <div style={{ flex: 1, paddingBottom: '56px' }}> {/* Make space for menu */}
         {children}
       </div>
+      <MenuBar visible={showMenu} onLogout={handleLogout} />
       {/* <Footer /> */}
     </div>
     // <Box display="flex" flexDirection="column" height="100vh">

@@ -167,8 +167,8 @@ const Header = ({ username }) => {
   };
   
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+    <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem' }}>
+      <AppBar position="fixed">
         <Toolbar>
         <Typography variant={isMobile ? "h6" : "h5"} component="div" sx={{ flexGrow: 1 }}>
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block' }}>
