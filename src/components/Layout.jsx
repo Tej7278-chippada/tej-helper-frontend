@@ -23,22 +23,24 @@ const Layout = ({ children, username }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('activeUser');
-    localStorage.removeItem('tokenUsername');
-    localStorage.removeItem('loggedInUsers');
-    window.location.href = '/login'; // force reload to login page
-  };
+  // const handleLogout = () => {
+  //   localStorage.removeItem('authToken');
+  //   localStorage.removeItem('userId');
+  //   localStorage.removeItem('activeUser');
+  //   localStorage.removeItem('tokenUsername');
+  //   localStorage.removeItem('loggedInUsers');
+  //   window.location.href = '/login'; // force reload to login page
+  // };
   
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh'  }}> {/* minHeight: '100vh' */}
+    <div style={{ display: 'flex', flexDirection: 'column'  }}> {/* minHeight: '100vh' */}
       <Header username={username} />
       <div style={{ flex: 1, paddingBottom: '56px' }}> {/* Make space for menu */}
         {children}
       </div>
-      <MenuBar visible={showMenu} onLogout={handleLogout} />
+      <MenuBar visible={showMenu} 
+        // onLogout={handleLogout} 
+      />
       {/* <Footer /> */}
     </div>
     // <Box display="flex" flexDirection="column" height="100vh">

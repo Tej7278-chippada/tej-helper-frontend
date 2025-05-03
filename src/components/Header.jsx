@@ -279,7 +279,7 @@ const Header = ({ username }) => {
                   <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
                   My Profile
                 </MenuItem>
-                <MenuItem onClick={() => { toUserPosts(); handleClose(); }}>
+                {/* <MenuItem onClick={() => { toUserPosts(); handleClose(); }}>
                   <ListItemIcon><PostAddIcon fontSize="small" /></ListItemIcon>
                   My Posts
                 </MenuItem>
@@ -290,7 +290,7 @@ const Header = ({ username }) => {
                 <MenuItem onClick={() => { navigate('/wishlist'); handleClose(); }}>
                   <ListItemIcon><FavoriteIcon fontSize="small" /></ListItemIcon>
                   Wishlist
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem onClick={() => { navigate('/notifications'); handleClose(); }}>
                   <ListItemIcon><NotificationsIcon fontSize="small" /></ListItemIcon>
                   Notifications

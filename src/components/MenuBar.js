@@ -8,16 +8,16 @@ import PostAddIcon from '@mui/icons-material/PostAdd';
 import ChatIcon from '@mui/icons-material/Chat';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import LogoutIcon from '@mui/icons-material/Logout';
+// import LogoutIcon from '@mui/icons-material/Logout';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 
 const navItems = [
     { label: 'Helper', icon: <HomeRoundedIcon />, path: `/` },
-    { label: 'Profile', icon: <PersonIcon />, path: `/user/${localStorage.getItem('userId')}` },
+    // { label: 'Profile', icon: <PersonIcon />, path: `/user/${localStorage.getItem('userId')}` },
     { label: 'Posts', icon: <PostAddIcon />, path: '/userposts' },
     { label: 'Chats', icon: <ChatIcon />, path: '/chatsOfUser' },
     { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist' },
-    { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
+    // { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
   ];
 
 const MenuBar = ({ visible, onLogout }) => {
@@ -57,11 +57,11 @@ const MenuBar = ({ visible, onLogout }) => {
             onClick={() => navigate(item.path)}
           />
         ))}
-        <BottomNavigationAction
+        {/* <BottomNavigationAction
           label="Logout"
           icon={<LogoutIcon />}
           onClick={onLogout}
-        />
+        /> */}
       </BottomNavigation>
     </Paper>
   );
