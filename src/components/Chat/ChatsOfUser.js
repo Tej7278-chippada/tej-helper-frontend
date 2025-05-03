@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfUser.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled } from '@mui/material';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled, Backdrop, CircularProgress } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -24,6 +24,7 @@ const ChatsOfUser = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
+  const [loadingSelectedChat, setLoadingSelectedChat] = useState(false);
 
   const fetchChatsOfUser = useCallback(async () => {
     setLoading(true);
@@ -56,15 +57,20 @@ const ChatsOfUser = () => {
   }, [fetchChatsOfUser, navigate]);
 
   const handleChatClick = async (chat) => {
-    setChatDetailsById(chat);
-    // Fetch product details
-    const response = await fetchPostById(chat.posts.postId);
-    setPost({
-      ...response.data,
-    });
-    // if (isMobile) {
-      setOpenDialog(true);
-    // }
+    setLoadingSelectedChat(true);
+    try {
+      setChatDetailsById(chat);
+      // Fetch product details
+      const response = await fetchPostById(chat.posts.postId);
+      setPost({
+        ...response.data,
+      });
+      // if (isMobile) {
+        setOpenDialog(true);
+      // }
+    } finally {
+      setLoadingSelectedChat(false);
+    }
   };
 
   const handleCloseDialog = () => {
@@ -143,6 +149,16 @@ const ChatsOfUser = () => {
                   height: isMobile ? 'calc(88vh - 64px)' : 'calc(83vh - 64px)',
                 }}
               >
+                <Backdrop
+                  sx={{
+                    color: '#fff',
+                    zIndex: (theme) => theme.zIndex.drawer + 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  }}
+                  open={loadingSelectedChat}
+                >
+                  <CircularProgress color="inherit" />
+                </Backdrop>
                 <Box style={{ paddingTop: '8px', paddingBottom: '1rem' }}>
                   {loading ? (
                     <SkeletonChats />
@@ -176,37 +192,46 @@ const ChatsOfUser = () => {
                           backgroundColor: 'white',
                           cursor: 'pointer',
                           borderRadius: '8px',
-                          transition: 'transform 0.2s',
+                          transition: 'transform 0.2s, box-shadow 0.2s, border-radius 0.2s',
                           WebkitTapHighlightColor: 'transparent', // Removes the default tap highlight
+                          '&:hover': {
+                            transform: 'scale(1.01)',
+                            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+                          },
+                          '&:active': {
+                            transform: 'scale(1.03)',
+                            boxShadow: '0 6px 14px rgba(0, 0, 0, 0.2)',
+                            borderRadius: '14px'
+                          }
                         }}
                         // onClick={() => handleChatClick({ _id: buyer.id })}
                         onClick={() => handleChatClick(chat)}
                         // onClick={() => setChatDialogOpen(true)}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.01)'; // Slight zoom on hover
-                          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
-                          e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
-                        }}
-                        onTouchStart={(e) => {
-                          if (e.currentTarget) {
-                            e.currentTarget.style.transform = 'scale(1.03)';
-                            e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 0, 0, 0.2)'; // More subtle effect
-                            e.currentTarget.style.borderRadius = '14px'; // Ensure smooth edges
-                          }
-                        }}
-                        onTouchEnd={(e) => {
-                          if (e.currentTarget) {
-                            setTimeout(() => {
-                              if (e.currentTarget) {
-                                e.currentTarget.style.transform = 'scale(1)';
-                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
-                              }
-                            }, 150);
-                          }
-                        }}
+                        // onMouseEnter={(e) => {
+                        //   e.currentTarget.style.transform = 'scale(1.01)'; // Slight zoom on hover
+                        //   e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
+                        // }}
+                        // onMouseLeave={(e) => {
+                        //   e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
+                        //   e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
+                        // }}
+                        // onTouchStart={(e) => {
+                        //   if (e.currentTarget) {
+                        //     e.currentTarget.style.transform = 'scale(1.03)';
+                        //     e.currentTarget.style.boxShadow = '0 6px 14px rgba(0, 0, 0, 0.2)'; // More subtle effect
+                        //     e.currentTarget.style.borderRadius = '14px'; // Ensure smooth edges
+                        //   }
+                        // }}
+                        // onTouchEnd={(e) => {
+                        //   if (e.currentTarget) {
+                        //     setTimeout(() => {
+                        //       if (e.currentTarget) {
+                        //         e.currentTarget.style.transform = 'scale(1)';
+                        //         e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+                        //       }
+                        //     }, 150);
+                        //   }
+                        // }}
                       >
                         <Badge
                           overlap="circular"

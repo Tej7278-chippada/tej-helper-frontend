@@ -37,6 +37,10 @@ const MenuBar = ({ visible, onLogout }) => {
         zIndex: 1200, 
         // backgroundColor: '#fff',
         // borderTop: '1px solid #ddd',
+        transition: 'transform 0.3s ease, opacity 0.3s ease',
+        transform: visible ? 'translateY(0)' : 'translateY(100%)',
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
       }}
       elevation={3}
     >
