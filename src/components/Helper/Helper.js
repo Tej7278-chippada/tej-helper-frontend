@@ -461,8 +461,8 @@ useEffect(() => {
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
-          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '6px', marginLeft: '-1rem'}}>
-          <IconButton color="primary" onClick={() => setShowMap(true)} >
+          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '6px', marginLeft: isMobile ? '-12px' : '-14px'}}>
+          <IconButton color="primary" onClick={() => setShowMap(true)} sx={{borderRadius: 6, px: 0.5, py: 0.5,  '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' }}}>
             <LocationOnIcon />
             <Typography variant="body1" sx={{marginLeft:'0px' }}>
               {/* {currentAddress || "Fetching location..."} */}

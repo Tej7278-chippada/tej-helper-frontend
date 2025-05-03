@@ -71,6 +71,8 @@ function PostDetailsById({ onClose, user }) {
 
   const handleOpenRateDialog = () => setRateDialogOpen(true);
   const handleCloseRateDialog = () => setRateDialogOpen(false);
+  const tokenUsername = localStorage.getItem('tokenUsername');
+  
 
 
   
@@ -443,7 +445,7 @@ function PostDetailsById({ onClose, user }) {
   }
 
   return (
-    <Layout>
+    <Layout username={tokenUsername}>
       <Box>
 
         <div style={{

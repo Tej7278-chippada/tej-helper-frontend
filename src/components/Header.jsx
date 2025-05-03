@@ -31,6 +31,7 @@ const Header = ({ username }) => {
   const userId = (loggedUserData?.userId || '');
   // Only show search bar when user is logged in and on chat page
   // const showSearchBar = location.pathname.includes('/productList') && username;
+  const userProfilePic = localStorage.getItem('tokenProfilePic');
 
 
 
@@ -87,6 +88,7 @@ const Header = ({ username }) => {
     localStorage.removeItem('userId');
     localStorage.removeItem('userLocation'); 
     localStorage.removeItem('distanceRange');
+    localStorage.removeItem('tokenProfilePic');
     navigate('/login');
   };
   
@@ -241,14 +243,23 @@ const Header = ({ username }) => {
                 onClick={handleProfileClick}
                 color="inherit"
                 size="small"
-                sx={{ borderRadius: 6, px: 1, py: 0.5, '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
+                sx={{ borderRadius: 6, px: 0.5, py: 0.5, '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
               >
-                <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
+                <Avatar
+                  src={
+                    (userProfilePic === null )
+                      ? 'https://placehold.co/56x56?text=No+Image'
+                      : `data:image/jpeg;base64,${userProfilePic}`
+                  }
+                  // alt={currentUsername[0]}
+                  sx={{ width: 32, height: 32, mr: 0, color:'inherit', bgcolor:'rgba(255, 255, 255, 0.27)', borderRadius: '50%', fontSize: 12, border: `2px solid rgba(255, 255, 255, 0.3)`, }}
+                />
+                {/* <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
                   {currentUsername.charAt(0).toUpperCase()}
-                </Avatar>
-                <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                </Avatar> */}
+                {/* <Typography variant="body1" sx={{ fontWeight: 500 }}>
                   {currentUsername}
-                </Typography>
+                </Typography> */}
               </IconButton>
 
               <Menu

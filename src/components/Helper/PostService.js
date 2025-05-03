@@ -118,6 +118,7 @@ function PostService() {
   const [loadingImage, setLoadingImage] = useState(null); // Track which image is loading
   const [addedImages, setAddedImages] = useState([]); // Store successfully added image URLs
   const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
+  const tokenUsername = localStorage.getItem('tokenUsername');
 
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
@@ -674,7 +675,7 @@ useEffect(() => {
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
     return (
-        <Layout>
+        <Layout username={tokenUsername}>
         <Box>
         <Toolbar > {/* style={{ display: 'flex', marginTop: '5rem', marginBottom: '-3rem' }} */}
             <Typography variant="h6" style={{ flexGrow: 1 }}>

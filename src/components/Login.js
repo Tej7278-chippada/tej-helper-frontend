@@ -70,6 +70,7 @@ const Login = () => {
           localStorage.removeItem('authTokens');
           localStorage.removeItem('tokenUsername');
           localStorage.removeItem('userId');
+          localStorage.setItem('tokenProfilePic', tokenPic);
           navigate('/login', { replace: true });
           console.log('Refresh token failed. Token expired or invalid.');
         }
@@ -101,7 +102,7 @@ const Login = () => {
       setIdentifier('');
       setPassword('');
 
-      const { authToken, tokenUsername, userId } = response.data;
+      const { authToken, tokenUsername, userId, tokenPic } = response.data;
       // if (authToken) {
       //   // Store the token in localStorage
       //   localStorage.setItem('authToken', authToken);
@@ -123,6 +124,7 @@ const Login = () => {
       localStorage.setItem('activeUser', tokenUsername);
       localStorage.setItem('tokenUsername', tokenUsername);
       localStorage.setItem('userId', userId); // Store userId
+      localStorage.setItem('tokenProfilePic', tokenPic);
 
       setSuccess('Login successful!');
       navigate('/', { replace: true });

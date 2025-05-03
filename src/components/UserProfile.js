@@ -69,6 +69,7 @@ const UserProfile = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [savingLocation, setSavingLocation] = useState(false);
   const [showRatings, setShowRatings] = useState(false);
+  const tokenUsername = localStorage.getItem('tokenUsername');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -215,7 +216,7 @@ const UserProfile = () => {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Layout>
+    <Layout username={tokenUsername}>
       {/* <Snackbar
         open={!!successMessage}
         autoHideDuration={9000}

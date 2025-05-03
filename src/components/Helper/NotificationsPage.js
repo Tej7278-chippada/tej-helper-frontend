@@ -36,6 +36,7 @@ function NotificationsPage() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [loadingToggle, setLoadingToggle] = useState(false);
   const [loadingClear, setLoadingClear] = useState(false);
+  const tokenUsername = localStorage.getItem('tokenUsername');
   
   // Add this effect to check current notification status
   // useEffect(() => {
@@ -237,7 +238,7 @@ function NotificationsPage() {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Layout>
+    <Layout username={tokenUsername}>
       <Box sx={{ p: isMobile ? '6px' : '10px', maxWidth: '800px', mx: 'auto' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
           <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>

@@ -21,6 +21,7 @@ const WishList = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [loadingPostRemove, setLoadingPostRemove] = useState({}); // Track loading per post
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  const tokenUsername = localStorage.getItem('tokenUsername');
 
   useEffect(() => {
     const loadWishlist = async () => {
@@ -66,7 +67,7 @@ const WishList = () => {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Layout>
+    <Layout username={tokenUsername}>
       <Box p={'4px'} sx={{ margin: '0rem' }}>
         <Typography variant="h6" align="left" mx="8px" marginTop="4px" gutterBottom>
           Wishlisted Posts
