@@ -1,27 +1,43 @@
-/* eslint-disable no-restricted-globals */
-// Service workers have different global scope than regular web pages
-
-// Push event listener
-addEventListener('push', (event) => {
-    const payload = event.data ? event.data.json() : {};
-    const options = {
-      body: payload.body,
-      icon: payload.icon || '/logo192.png', // Default icon
-      data: payload.data || { url: '/' }    // Default URL
+// public/service-worker.js
+self.addEventListener('push', (event) => {
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch (e) {
+    // Fallback for non-JSON payloads
+    payload = {
+      title: 'New Notification',
+      body: event.data.text() || 'You have a new notification',
+      icon: '/logo192.png',
+      data: { url: '/' }
     };
-  
-    event.waitUntil(
-      registration.showNotification(
-        payload.title || 'New Notification',
-        options
-      )
-    );
-  });
-  
-  // Notification click handler
-  addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(
-      self.clients.openWindow(event.notification.data.url)
-    );
-  });
+  }
+
+  const options = {
+    body: payload.body,
+    icon: payload.icon || '/logo192.png',
+    badge: '/logo192.png',
+    data: payload.data || { url: '/' }
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(
+      payload.title || 'New Notification',
+      options
+    )
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(event.notification.data.url);
+    })
+  );
+});

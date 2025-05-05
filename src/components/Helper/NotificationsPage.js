@@ -23,6 +23,7 @@ import SkeletonCards from './SkeletonCards';
 import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-material';
 import { io } from 'socket.io-client';
 import ClearAllRoundedIcon from '@mui/icons-material/ClearAllRounded';
+import { urlBase64ToUint8Array } from '../../utils/pushNotifications';
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -136,10 +137,10 @@ function NotificationsPage() {
     try {
       // Check if service worker and push manager are supported
       if (!('serviceWorker' in navigator)) {
-        throw new Error('Service workers not supported');
+        throw new Error('Service workers not supported in this browser');
       }
       if (!('PushManager' in window)) {
-        throw new Error('Push notifications not supported');
+        throw new Error('Push notifications not supported in this browser');
       }
 
       if (loadingToggle) return null;
@@ -149,14 +150,15 @@ function NotificationsPage() {
         // Request permission
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') {
-          throw new Error('Permission not granted');
+          throw new Error(' Browser Notifications Permission not granted');
         }
+        // console.log('VAPID Public Key:', process.env.REACT_APP_VAPID_PUBLIC_KEY);
     
         // Register service worker and get subscription
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: process.env.REACT_APP_VAPID_PUBLIC_KEY
+          applicationServerKey: urlBase64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY)
         });
     
         // Send to backend with proper auth header
@@ -173,7 +175,7 @@ function NotificationsPage() {
         setNotificationsEnabled(true);
         setSnackbar({ 
           open: true, 
-          message: 'Notifications enabled!', 
+          message: 'Notifications enabled successfully!', 
           severity: 'success' 
         });
 

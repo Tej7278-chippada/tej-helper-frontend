@@ -1,5 +1,5 @@
 // src/App.js
-import React from 'react';
+import React, {useEffect} from 'react';
 import './App.css';
 import Login from './components/Login';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -32,6 +32,19 @@ const theme = createTheme({
 });
 
 function App() {
+  useEffect(() => {
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      async function registerServiceWorker() {
+        try {
+          const registration = await navigator.serviceWorker.register('/service-worker.js');
+          console.log('ServiceWorker registration successful');
+        } catch (err) {
+          console.error('ServiceWorker registration failed:', err);
+        }
+      }
+      registerServiceWorker();
+    }
+  }, []);
   return (
     <ThemeProvider theme={theme}>
       <Router>
