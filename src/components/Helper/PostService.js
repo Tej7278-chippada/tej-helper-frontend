@@ -27,7 +27,6 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { io } from 'socket.io-client';
 import TaskAltRoundedIcon from '@mui/icons-material/TaskAltRounded';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
@@ -111,8 +110,6 @@ function PostService() {
   const [timeFrom, setTimeFrom] = useState(null);
   const [timeTo, setTimeTo] = useState(null);
   // Initialize socket connection (add this near your other state declarations)
-  const [socket, setSocket] = useState(null);
-  const userId = localStorage.getItem('userId');
   const [generatedImages, setGeneratedImages] = useState([]);
   const [loadingGeneration, setLoadingGeneration] = useState(false);
   const [loadingImage, setLoadingImage] = useState(null); // Track which image is loading
@@ -236,44 +233,6 @@ function PostService() {
 //         }
 //         setLoadingImg(false);
 //     };
-
-// Add this useEffect for socket connection
-useEffect(() => {
-  const newSocket = io(`${process.env.REACT_APP_API_URL}`); // Replace with your backend URL
-  setSocket(newSocket);
-
-  return () => {
-    if (newSocket) newSocket.disconnect();
-  };
-}, []);
-
-// Add this useEffect to listen for notifications if needed
-useEffect(() => {
-  if (socket && userId) {
-    socket.emit('joinRoom', userId); // Join user's notification room
-    
-    socket.on('newNotification', (data) => {
-      setSnackbar({
-        open: true,
-        message: data.message,
-        severity: 'info',
-        action: (
-          <Button 
-            color="inherit" 
-            size="small"
-            onClick={() => navigate(`/post/${data.postId}`)}
-          >
-            View
-          </Button>
-        )
-      });
-    });
-
-    return () => {
-      socket.off('newNotification');
-    };
-  }
-}, [socket, userId, navigate]);
 
   // Add these handlers to manage date and time changes
   const handleDateChange = (date) => {

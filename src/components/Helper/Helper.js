@@ -120,66 +120,6 @@ const Helper = ()=> {
   //   }
   // }, [distanceRange, userLocation]);
 
-// Initialize socket connection (add this near your other state declarations)
-const [socket, setSocket] = useState(null);
-const userId = localStorage.getItem('userId');
-
-// Add this useEffect for socket connection
-useEffect(() => {
-  const newSocket = io(`${process.env.REACT_APP_API_URL}`); // Replace with your backend URL
-  setSocket(newSocket);
-
-  return () => {
-    if (newSocket) newSocket.disconnect();
-  };
-}, []);
-
-// Add this useEffect to listen for notifications if needed
-// In your Helper.js component, modify the socket listener:
-useEffect(() => {
-  if (socket && userId) {
-    socket.emit('joinRoom', userId);
-    
-    // Only listen for notifications if they're enabled
-    const checkAndListen = async () => {
-      try {
-        const authToken = localStorage.getItem('authToken');
-        const response = await API.get('/api/notifications/notification-status', {
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }
-        });
-        
-        if (response.data.notificationEnabled) {
-          socket.on('newNotification', (data) => {
-            setSnackbar({
-              open: true,
-              message: data.message,
-              severity: 'info',
-              action: (
-                <Button 
-                  color="inherit" 
-                  size="small"
-                  onClick={() => navigate(`/post/${data.postId}`)}
-                >
-                  View
-                </Button>
-              )
-            });
-          });
-        }
-      } catch (error) {
-        console.error('Error checking notification status:', error);
-      }
-    };
-
-    checkAndListen();
-
-    return () => {
-      socket.off('newNotification');
-    };
-  }
-}, [socket, userId, navigate]);
 
   // Fetch user's location and address
   const fetchUserLocation = useCallback(() => {
@@ -1065,8 +1005,9 @@ useEffect(() => {
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        action={snackbar.action}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+        <Alert onClose={handleCloseSnackbar} action={snackbar.action} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

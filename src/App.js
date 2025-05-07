@@ -18,6 +18,7 @@ import ChatsOfUser from './components/Chat/ChatsOfUser';
 import ChatHistoryPage from './components/Chat/ChatHistoryPage';
 import NotFound from './components/NotFound'; // Import 404 Page
 import NotificationsPage from './components/Helper/NotificationsPage';
+import NearPostsNotification from './components/Helper/NearPostsNotification';
 
 const theme = createTheme({
   breakpoints: {
@@ -48,6 +49,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Router>
+        <NearPostsNotification/>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
