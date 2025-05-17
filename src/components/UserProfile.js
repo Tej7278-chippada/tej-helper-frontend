@@ -20,6 +20,7 @@ import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import CloseIcon from '@mui/icons-material/Close'
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 
 // Set default icon manually
@@ -64,12 +65,13 @@ const UserProfile = () => {
   // const [successMessage, setSuccessMessage] = useState('');
   const [mapMode, setMapMode] = useState('normal');
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [locationDetails, setLocationDetails] = useState(null);
+  // const [locationDetails, setLocationDetails] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [savingLocation, setSavingLocation] = useState(false);
   const [showRatings, setShowRatings] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
+  const [currentAddress, setCurrentAddress] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -79,6 +81,8 @@ const UserProfile = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         setUserData(response.data);
+        fetchAddress(response.data.location.latitude, response.data.location.longitude);
+        
       } catch (err) {
         // setError('Failed to fetch User details. Please try again later.');
         setSnackbar({ open: true, message: 'Failed to fetch User details. Please try again later.', severity: 'error' });
@@ -127,11 +131,12 @@ const UserProfile = () => {
           setCurrentLocation({ lat: latitude, lng: longitude });
 
           // Set location details manually using lat/lng
-          setLocationDetails({
-            latitude,
-            longitude,
-            accuracy: position.coords.accuracy, // GPS accuracy in meters
-          });
+          // setLocationDetails({
+          //   latitude,
+          //   longitude,
+          //   accuracy: position.coords.accuracy, // GPS accuracy in meters
+          // });
+          fetchAddress(latitude, longitude);
           // console.log("User's current location:", latitude, longitude);
           setLoadingLocation(false);
           // Fetch location details using an IP geolocation API
@@ -198,6 +203,18 @@ const UserProfile = () => {
       // setError('Failed to save location. Please try again later.');
       setSnackbar({ open: true, message: 'Failed to save location. Please try again later.', severity: 'error' });
       setSavingLocation(false);
+    }
+  };
+
+  // Fetch address from latitude and longitude
+  const fetchAddress = async (latitude, longitude) => {
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+      const data = await response.json();
+      setCurrentAddress(data.display_name);
+      console.log("address fetched");
+    } catch (error) {
+      console.error("Error fetching address:", error);
     }
   };
   
@@ -463,73 +480,118 @@ const UserProfile = () => {
             </Card>
             )}
         </Box>
-        <Box sx={{paddingBottom:'4rem',marginBottom:'1rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
         
-          <Box sx={{ height: '300px', marginTop: '1rem', padding:'10px' }}>
-            <MapContainer
-              center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]}
-              zoom={13}
-              style={{ height: '100%', width: '100%', borderRadius:'8px', }}
-              attributionControl={false}  // Disables the watermark
-            >
-              <ChangeView center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]} />
+      </Box>
+      <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
+        <Box sx={{ height: '300px', marginTop: '1rem', padding: '10px' }}>
+          <Box display="flex" justifyContent="start" sx={{ marginBottom: isMobile ? '6px' : '8px' }}>
+            {/* <IconButton color="primary" sx={{borderRadius: 6, px: 0.5, py: 0.5,  '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' }}}> */}
+            <LocationOnIcon color="primary" />
+            <Typography variant="body1" sx={{ color: 'grey', }}>
+              {/* {currentAddress || "Fetching location..."} */}
+              <strong>Your current address :</strong> {(currentAddress) || "Fetching location..."}
+            </Typography>
+            {/* </IconButton> */}
+          </Box>
+          <MapContainer
+            center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]}
+            zoom={13}
+            style={{ height: '100%', width: '100%', borderRadius: '8px', }}
+            attributionControl={false}  // Disables the watermark
+          >
+            <ChangeView center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]} />
+            <TileLayer
+              url={mapMode === 'normal'
+                ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+            />
+            {/* Labels and Roads Layer (Overlay) */}
+            {mapMode === 'satellite' && (
               <TileLayer
-                url={mapMode === 'normal'
-                  ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-                  : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+                url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+                opacity={1} // Make it semi-transparent if needed
               />
-              <Marker position={[userData.location.latitude, userData.location.longitude]} icon={customIcon}
-              >
-                <Popup>User Location</Popup>
+            )}
+            <Marker position={[userData.location.latitude, userData.location.longitude]} icon={customIcon}
+            >
+              <Popup>User Location</Popup>
+            </Marker>
+            {currentLocation && (
+              <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
+                <Popup>Your Current Location</Popup>
               </Marker>
-              {currentLocation && (
-                <Marker position={[currentLocation.lat, currentLocation.lng]} icon={customIcon}>
-                  <Popup>Your Current Location</Popup>
-                </Marker>
-              )}
-            </MapContainer>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-              <IconButton
-                sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
-                }}
-                onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
-              >
-                <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
-                <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
-              </Tooltip>
-              </IconButton>
-              {currentLocation && (
+            )}
+          </MapContainer>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem',
+            flexDirection: 'column', // Stack buttons and labels vertically
+            alignItems: 'center', // Center align items
+            gap: '8px' // Add some spacing between rows
+           }}>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              width: '100%' // Ensure buttons take full width
+              }}>
+              {/* Map Mode Button */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <IconButton
-                  sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
+                  sx={{
+                    fontWeight: '500', width: '60px', borderRadius: '10px',
                     backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
                   }}
-                  onClick={saveLocation}
-                  disabled={loadingLocation && savingLocation}
+                  onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
                 >
-                  <Tooltip title={savingLocation ? 'Caliculating route...' : 'Show the route and distance'} arrow placement="right">
-                    <>{savingLocation ? <CircularProgress size={24} /> : <SaveRoundedIcon />}</>
+                  <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
+                    <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
                   </Tooltip>
                 </IconButton>
+                <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                  {mapMode === 'normal' ? 'Normal' : 'Salellite'}
+                </Typography>
+              </Box>
+              {currentLocation && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <IconButton
+                    sx={{
+                      fontWeight: '500', width: '60px', borderRadius: '10px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                    }}
+                    onClick={saveLocation}
+                    disabled={loadingLocation && savingLocation}
+                  >
+                    <Tooltip title={savingLocation ? 'Caliculating route...' : 'Show the route and distance'} arrow placement="right">
+                      <>{savingLocation ? <CircularProgress size={24} /> : <SaveRoundedIcon />}</>
+                    </Tooltip>
+                  </IconButton>
+                  <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                    Save Location
+                  </Typography>
+                </Box>
               )}
-              <IconButton
-                sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
-                }}
-                onClick={locateUser}
-              >
-                <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'} arrow placement="right">
-                  <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
-                </Tooltip>
-              </IconButton>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <IconButton
+                  sx={{
+                    fontWeight: '500', width: '60px', borderRadius: '10px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
+                  }}
+                  onClick={locateUser}
+                >
+                  <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'} arrow placement="right">
+                    <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
+                  </Tooltip>
+                </IconButton>
+                <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                  Locate Me
+                </Typography>
+              </Box>
             </Box>
           </Box>
-          
         </Box>
-        <Box mt={1} sx={{ borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+      </Box>
+        {/* <Box mt={1} sx={{ borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
           {locationDetails && (
             <Box sx={{ margin: '1rem' }}>
               <Typography variant="h6" gutterBottom>
@@ -619,8 +681,7 @@ const UserProfile = () => {
               </Grid>
             </Box>
           )}
-        </Box>
-      </Box>
+        </Box> */}
 
       {/* Delete Confirmation Dialog */}
       <Dialog
