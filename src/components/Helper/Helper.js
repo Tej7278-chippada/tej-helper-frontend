@@ -69,6 +69,7 @@ const Helper = ()=> {
     });
     if (node) observer.current.observe(node);
   }, [loading, hasMore]);
+  const userId = localStorage.getItem('userId');
 
   // Custom marker icon
   // const userLocationIcon = new L.Icon({
@@ -173,6 +174,7 @@ const Helper = ()=> {
       // setError('Failed to save location. Please try again later.');
       // setSnackbar({ open: true, message: 'Failed to save location. Please try again later.', severity: 'error' });
       // setSavingLocation(false);
+      console.error('Error saving location:', err);
     }
   };
 
