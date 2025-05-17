@@ -14,7 +14,7 @@ import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 const navItems = [
     { label: 'Helper', icon: <HomeRoundedIcon />, path: `/` },
     // { label: 'Profile', icon: <PersonIcon />, path: `/user/${localStorage.getItem('userId')}` },
-    { label: 'Posts', icon: <PostAddIcon />, path: '/userposts' },
+    { label: 'My Posts', icon: <PostAddIcon />, path: '/userposts' },
     { label: 'Chats', icon: <ChatIcon />, path: '/chatsOfUser' },
     { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist' },
     // { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
@@ -53,7 +53,7 @@ const MenuBar = ({ visible, onLogout }) => {
         }}
       >
         {navItems.map((item) => (
-          <BottomNavigationAction
+          <BottomNavigationAction sx={{padding:'2px'}}
             key={item.label}
             label={item.label}
             icon={item.icon}
