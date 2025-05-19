@@ -475,7 +475,7 @@ const Helper = ()=> {
             <LocationOnIcon />
             <Typography variant="body1" sx={{marginLeft:'0px' }}>
               {/* {currentAddress || "Fetching location..."} */}
-              {(currentAddress.split(" ").length > (isMobile ? 1 : 2) ? `${currentAddress.split(" ").slice(0, (isMobile ? 1 : 2)).join(" ")}...` : currentAddress) || "Fetching location..."}
+              {(currentAddress.split(" ").length > (isMobile ? 2 : 3) ? `${currentAddress.split(" ").slice(0, (isMobile ? 2 : 3)).join(" ")}...` : currentAddress) || "Fetching location..."}
             </Typography>
           </IconButton>
           </Box>
@@ -595,7 +595,8 @@ const Helper = ()=> {
 
                 {/* Locate Me Button */}
                 <Box display="flex" justifyContent="space-between" marginTop="1rem">
-                <IconButton
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <IconButton
                     style={{
                       // display: 'inline-block',
                       // float: 'right',
@@ -609,6 +610,10 @@ const Helper = ()=> {
                       <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
                     </Tooltip>
                   </IconButton>
+                  <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                    {mapMode === 'normal' ? 'Normal' : 'Salellite'}
+                  </Typography>
+                </Box>
                   {locationDetails && (
                   <Box sx={{mx:'10px'}}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
@@ -619,20 +624,25 @@ const Helper = ()=> {
                     </Typography>
                   </Box>
                   )}
-                  <IconButton
-                    onClick={fetchUserLocation}
-                    disabled={loadingLocation}
-                    sx={{
-                      width: '60px', borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px',
-                      // height: '50px',
-                    }}
-                  >
-                    <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'}>
-                      <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
-                    </Tooltip>
-                  </IconButton>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <IconButton
+                      onClick={fetchUserLocation}
+                      disabled={loadingLocation}
+                      sx={{
+                        width: '60px', borderRadius: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px',
+                        // height: '50px',
+                      }}
+                    >
+                      <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'}>
+                        <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
+                      </Tooltip>
+                    </IconButton>
+                    <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                      Locate Me
+                    </Typography>
+                  </Box>
                 </Box>
               </CardContent>
             </Card>

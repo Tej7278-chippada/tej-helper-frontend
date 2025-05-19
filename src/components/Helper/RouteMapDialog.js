@@ -263,7 +263,7 @@ function RouteMapDialog({ open, onClose, post }) {
         </IconButton>
         <Typography variant="h6">Route Map to Post Location</Typography>
 
-        <Box sx={{ paddingBottom: '4rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
+        <Box sx={{ paddingBottom: '5rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
           <Box display="flex" justifyContent="start" sx={{paddingTop: '1rem', marginInline:'4px'}}>
             <LocationOnIcon color='primary'/>
             <Tooltip title="Post Address" arrow placement="top-start" 
@@ -333,20 +333,25 @@ function RouteMapDialog({ open, onClose, post }) {
                   >
                     {mapMode === 'normal' ? 'Satellite View' : 'Normal View'}
                   </Button> */}
-              <IconButton
-                style={{
-                  // display: 'inline-block',
-                  // float: 'right',
-                  fontWeight: '500', width: '60px', borderRadius: '10px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                  boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
-                }}
-                onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
-              >
-                <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
-                  <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
-                </Tooltip>
-              </IconButton>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <IconButton
+                      style={{
+                        // display: 'inline-block',
+                        // float: 'right',
+                        fontWeight: '500', width: '60px', borderRadius: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
+                      }}
+                      onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                    >
+                      <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
+                        <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
+                      </Tooltip>
+                    </IconButton>
+                    <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                      {mapMode === 'normal' ? 'Normal' : 'Salellite'}
+                    </Typography>
+                  </Box>
               {/* {currentLocation && (
                     <Button
                       variant="contained"
@@ -358,21 +363,26 @@ function RouteMapDialog({ open, onClose, post }) {
               <Box m={1}>
 
                 {currentLocation && (
-                  <IconButton
-                    style={{
-                      // display: 'inline-block',
-                      // float: 'right',
-                      fontWeight: '500', width: '60px', borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-                    }}
-                    onClick={showDistanceAndRoute}
-                    disabled={loadingLocation && routeCalculating} // Disable button while loading
-                  >
-                    <Tooltip title={routeCalculating ? 'Caliculating route...' : 'Show the route and distance'} arrow placement="right">
-                      <>{routeCalculating ? <CircularProgress size={24} /> : <RouteRoundedIcon />}</>
-                    </Tooltip>
-                  </IconButton>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <IconButton
+                      style={{
+                        // display: 'inline-block',
+                        // float: 'right',
+                        fontWeight: '500', width: '60px', borderRadius: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                      }}
+                      onClick={showDistanceAndRoute}
+                      disabled={loadingLocation && routeCalculating} // Disable button while loading
+                    >
+                      <Tooltip title={routeCalculating ? 'Caliculating route...' : 'Show the route and distance'} arrow placement="right">
+                        <>{routeCalculating ? <CircularProgress size={24} /> : <RouteRoundedIcon />}</>
+                      </Tooltip>
+                    </IconButton>
+                    <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                      Show Route
+                    </Typography>
+                  </Box>
                 )}
               </Box>
               {/* {currentLocation && (
@@ -385,7 +395,7 @@ function RouteMapDialog({ open, onClose, post }) {
                     </Button>
                   )} */}
               <Box >
-
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <IconButton
                   style={{
                     // display: 'inline-block',
@@ -401,6 +411,10 @@ function RouteMapDialog({ open, onClose, post }) {
                     <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
                   </Tooltip>
                 </IconButton>
+                <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                  Locate Me
+                </Typography>
+              </Box>
               </Box>
               {/* <Button
                     variant="contained"
