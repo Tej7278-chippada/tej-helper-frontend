@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
-import FilterListIcon from "@mui/icons-material/FilterList";
+// import FilterListIcon from "@mui/icons-material/FilterList";
 // import FavoriteIcon from '@mui/icons-material/Favorite';
 // import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import SkeletonCards from './SkeletonCards';
@@ -11,7 +11,7 @@ import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
 import API, { fetchPosts } from '../api/api';
 import { useNavigate } from 'react-router-dom';
-import FilterPosts from './FilterPosts';
+// import FilterPosts from './FilterPosts';
 import CloseIcon from '@mui/icons-material/Close'
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 // import RefreshIcon from '@mui/icons-material/Refresh';
@@ -33,16 +33,16 @@ const Helper = ()=> {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
-  const [filteredPosts, setFilteredPosts] = useState([]);
-  const [locationFilteredPosts, setLocationFilteredPosts] = useState([]);
-  const [fetchLocationFilteredPosts, setFetchLocationFilteredPosts] = useState(false);
-  const [filterOpen, setFilterOpen] = useState(false);
-  const [filterCriteria, setFilterCriteria] = useState({
-    category: '',
-    gender: '',
-    postStatus: '',
-    priceRange: [0, 10000],
-  });
+  // const [filteredPosts, setFilteredPosts] = useState([]);
+  // const [locationFilteredPosts, setLocationFilteredPosts] = useState([]);
+  // const [fetchLocationFilteredPosts, setFetchLocationFilteredPosts] = useState(false);
+  // const [filterOpen, setFilterOpen] = useState(false);
+  // const [filterCriteria, setFilterCriteria] = useState({
+  //   category: '',
+  //   gender: '',
+  //   postStatus: '',
+  //   priceRange: [0, 10000],
+  // });
   const [userLocation, setUserLocation] = useState(null);
   const [currentAddress, setCurrentAddress] = useState('');
   const [distanceRange, setDistanceRange] = useState(10); // Default distance range in km
@@ -440,23 +440,23 @@ const Helper = ()=> {
     navigate(`/post/${post._id}`);
   };
 
-  // Handle opening and closing the filter card
-  const handleFilterToggle = () => {
-    setFilterOpen((prev) => !prev);
-  };
+  // // Handle opening and closing the filter card
+  // const handleFilterToggle = () => {
+  //   setFilterOpen((prev) => !prev);
+  // };
 
-  // Apply filters to the posts
-  const applyFilters = (newFilters) => {
-    setFilterCriteria(newFilters);
-    const filtered = posts.filter((post) => {
-      const matchCategory = newFilters.categories ? post.categories === newFilters.categories : true;
-      const matchGender = newFilters.gender ? post.gender === newFilters.gender : true;
-      const matchPostStatus = newFilters.postStatus ? post.postStatus === newFilters.postStatus : true;
-      const matchPrice = post.price >= newFilters.priceRange[0] && post.price <= newFilters.priceRange[1];
-      return matchCategory && matchGender && matchPostStatus && matchPrice;
-    });
-    setFilteredPosts(filtered);
-  };
+  // // Apply filters to the posts
+  // const applyFilters = (newFilters) => {
+  //   setFilterCriteria(newFilters);
+  //   const filtered = posts.filter((post) => {
+  //     const matchCategory = newFilters.categories ? post.categories === newFilters.categories : true;
+  //     const matchGender = newFilters.gender ? post.gender === newFilters.gender : true;
+  //     const matchPostStatus = newFilters.postStatus ? post.postStatus === newFilters.postStatus : true;
+  //     const matchPrice = post.price >= newFilters.priceRange[0] && post.price <= newFilters.priceRange[1];
+  //     return matchCategory && matchGender && matchPostStatus && matchPrice;
+  //   });
+  //   setFilteredPosts(filtered);
+  // };
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
@@ -655,7 +655,7 @@ const Helper = ()=> {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-              marginRight: "6px",
+              // marginRight: "6px",
             }}
           >
             {distanceRange} km
@@ -950,7 +950,7 @@ const Helper = ()=> {
             </Box>
           </Card>
           )}
-          <Button
+          {/* <Button
             variant="contained"
             onClick={handleFilterToggle}
             sx={{
@@ -968,8 +968,8 @@ const Helper = ()=> {
             }}
           >
             <FilterListIcon sx={{ fontSize: '20px' }} />
-            {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span> */}
-          </Button>
+            <span style={{ fontSize: '14px', fontWeight: '500' }}>Filter</span>
+          </Button> */}
           {/* <Button
             variant="contained"
             onClick={() => navigate('/wishlist')}
@@ -1172,7 +1172,7 @@ const Helper = ()=> {
 
       </Box>
       {/* Filter Floating Card */}
-      {filterOpen && (
+      {/* {filterOpen && (
         <FilterPosts
           filterCriteria={filterCriteria}
           applyFilters={applyFilters}
@@ -1180,7 +1180,7 @@ const Helper = ()=> {
           filteredPosts={filteredPosts}
           onClose={handleFilterToggle}
         />
-      )}
+      )} */}
 
       <Snackbar
         open={snackbar.open}
