@@ -401,6 +401,8 @@ function PostService() {
           nation: locationDetails.nation,
           pincode: locationDetails.pincode,
           address: currentAddress,
+          coordinates: [currentLocation.longitude, currentLocation.latitude],
+          type: 'Point',
         }));
 
         // Append date and time data
@@ -449,6 +451,8 @@ function PostService() {
           description: post.description,
           latitude: post.location.latitude,
           longitude: post.location.longitude,
+          coordinates: [post.location.longitude, post.location.latitude],
+          type: 'Point',
           address: post.location.address,
           // media: null, // Reset images to avoid re-uploading
         });

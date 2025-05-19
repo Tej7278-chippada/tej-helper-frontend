@@ -101,8 +101,18 @@ export const fetchUserPosts = () => {
 };
 
 // export const fetchPosts = () => API.get('/api/posts');
-export const fetchPosts = (skip = 0, limit = 12) => 
-  API.get(`/api/posts?skip=${skip}&limit=${limit}`);
+export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null) => {
+  const params = { skip, limit };
+  
+  // Add location parameters if provided
+  if (userLocation && distanceRange) {
+    params.userLat = userLocation.latitude;
+    params.userLng = userLocation.longitude;
+    params.distance = distanceRange;
+  }
+  
+  return API.get('/api/posts', { params });
+};
 
 export const fetchPostById = async (id) => {
   const authToken = localStorage.getItem('authToken');

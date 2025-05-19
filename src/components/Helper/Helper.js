@@ -57,6 +57,7 @@ const Helper = ()=> {
   const [showDistanceRanges, setShowDistanceRanges] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [skip, setSkip] = useState(0);
   const observer = useRef();
   const lastPostRef = useCallback(node => {
@@ -68,8 +69,9 @@ const Helper = ()=> {
       }
     });
     if (node) observer.current.observe(node);
-  }, [loading, hasMore]);
+  }, [loading, hasMore, loadingMore]);
   const userId = localStorage.getItem('userId');
+  // const [totalPosts, setTotalPosts] = useState(0);
 
   // Custom marker icon
   // const userLocationIcon = new L.Icon({
@@ -216,15 +218,22 @@ const Helper = ()=> {
 
   // Fetch posts data
   useEffect(() => {
+    if (!distanceRange) {
+      setPosts([]);
+      return;
+    };
     const fetchData = async () => {
         // setLoading(true);
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
         try {
           setLoading(true);
-          const response = await fetchPosts(0, 12);
-          setPosts(response.data || []);
+          const response = await fetchPosts(0, 12, userLocation, distanceRange);
+          setPosts(response.data.posts || []);
+          // setTotalPosts(response.data.totalCount || 0);
           setSkip(12); // Set skip to 24 after initial load
-          setHasMore(response.data.length === 12); // If we got 24, there might be more
+          // Check if there are more posts to load
+          setHasMore(response.data.posts.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
+          console.log(`posts fetched in range ${distanceRange} and initial count ${response.data.posts.length} and total count ${response.data.totalCount}`)
         } catch (error) {
           console.error("Error fetching posts:", error);
           setSnackbar({ open: true, message: 'Failed to fetch the posts within your distance radius.', severity: 'error' });
@@ -232,29 +241,36 @@ const Helper = ()=> {
           setLoading(false);
         }
     };
-    fetchData();
-  }, []);
+    if (userLocation && distanceRange) {
+      fetchData();
+    }
+  }, [userLocation, distanceRange]); // Add distanceRange as dependency
 
   // Load more posts function
   const loadMorePosts = async () => {
-    if (loading || !hasMore) return;
+    if (loadingMore || !hasMore) return;
     
     try {
-      setLoading(true);
-      const response = await fetchPosts(skip, 12);
-      const newPosts = response.data;
+      setLoadingMore(true);
+      const response = await fetchPosts(skip, 12, userLocation, distanceRange);
+      const newPosts = response.data.posts || [];
       
       if (newPosts.length > 0) {
         setPosts(prevPosts => [...prevPosts, ...newPosts]);
-        setSkip(prevSkip => prevSkip + 12);
+        setSkip(prevSkip => prevSkip + newPosts.length);
+        // Update hasMore based on whether we've reached the total count
+        setHasMore(posts.length + newPosts.length < response.data.totalCount);
+        console.log(`Fetched ${newPosts.length} new posts (skip: ${skip}, total: ${response.data.totalCount})`);
+      } else {
+        setHasMore(false);
       }
       
-      setHasMore(newPosts.length === 12); // If we got less than 24, we've reached the end
+      // setHasMore(newPosts.length === 12); // If we got less than 24, we've reached the end
     } catch (error) {
       console.error("Error fetching more posts:", error);
       setSnackbar({ open: true, message: 'Failed to fetch more posts.', severity: 'error' });
     } finally {
-      setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -331,39 +347,39 @@ const Helper = ()=> {
   };
 
   // Calculate distance between two coordinates using Haversine formula
-  const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371; // Radius of the Earth in km
-    const dLat = (lat2 - lat1) * (Math.PI / 180);
-    const dLon = (lon2 - lon1) * (Math.PI / 180);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
-  };
+  // const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  //   const R = 6371; // Radius of the Earth in km
+  //   const dLat = (lat2 - lat1) * (Math.PI / 180);
+  //   const dLon = (lon2 - lon1) * (Math.PI / 180);
+  //   const a =
+  //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+  //     Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+  //     Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  //   return R * c; // Distance in km
+  // };
 
   // Filter posts based on distance range
-  useEffect(() => {
-    setFetchLocationFilteredPosts(true);
-    if (userLocation && posts.length > 0) {
-      const filtered = posts.filter((post) => {
-        if (post.location && post.location.latitude && post.location.longitude) {
-          const distance = calculateDistance(
-            userLocation.latitude,
-            userLocation.longitude,
-            post.location.latitude,
-            post.location.longitude
-          );
-          return distance <= distanceRange;
-        }
-        return false;
-        // setFetchLocationFilteredPosts(false);
-      });
-      setLocationFilteredPosts(filtered);
-      setFetchLocationFilteredPosts(false);
-    }
-  }, [userLocation, posts, distanceRange]);
+  // useEffect(() => {
+  //   setFetchLocationFilteredPosts(true);
+  //   if (userLocation && posts.length > 0) {
+  //     const filtered = posts.filter((post) => {
+  //       if (post.location && post.location.latitude && post.location.longitude) {
+  //         const distance = calculateDistance(
+  //           userLocation.latitude,
+  //           userLocation.longitude,
+  //           post.location.latitude,
+  //           post.location.longitude
+  //         );
+  //         return distance <= distanceRange;
+  //       }
+  //       return false;
+  //       // setFetchLocationFilteredPosts(false);
+  //     });
+  //     setLocationFilteredPosts(filtered);
+  //     setFetchLocationFilteredPosts(false);
+  //   }
+  // }, [userLocation, posts, distanceRange]);
 
   
 
@@ -381,7 +397,7 @@ const Helper = ()=> {
   // Apply filters to the posts
   const applyFilters = (newFilters) => {
     setFilterCriteria(newFilters);
-    const filtered = locationFilteredPosts.filter((post) => {
+    const filtered = posts.filter((post) => {
       const matchCategory = newFilters.categories ? post.categories === newFilters.categories : true;
       const matchGender = newFilters.gender ? post.gender === newFilters.gender : true;
       const matchPostStatus = newFilters.postStatus ? post.postStatus === newFilters.postStatus : true;
@@ -826,13 +842,13 @@ const Helper = ()=> {
               // <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: "50vh" }}>
               //   <CircularProgress />
               // </Box>
-            ) : ( fetchLocationFilteredPosts ? (
+            ) : ( loading ? (
               <SkeletonCards/>
             ) : 
-            ( locationFilteredPosts.length > 0 ? (
+            ( posts.length > 0 ? (
               <Grid container spacing={isMobile ? 1.5 : 1.5}>
-                {locationFilteredPosts.map((post, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={`${post._id}-${index}`} ref={index === locationFilteredPosts.length - 3 ? lastPostRef : null}>
+                {posts.map((post, index) => (
+                  <Grid item xs={12} sm={6} md={4} key={`${post._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null}>
                     <Card style={{
                       margin: '0rem 0',  // spacing between up and down cards
                       cursor: 'pointer',
@@ -980,12 +996,17 @@ const Helper = ()=> {
             )
             ))}
 
-            {loading && (
+            {loadingMore && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems:'center', p: 4, gap:'1rem' }}>
                 {/* <CircularProgress /> */}
                 <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
                 <Typography color='grey' variant='body2'>Loading posts...</Typography>
               </Box>
+            )}
+            {!hasMore && posts.length > 0 && (
+              <Typography textAlign="center" sx={{ p: 2, color: 'text.secondary' }}>
+                You've reached the end of posts in your area with in distance range {distanceRange} km
+              </Typography>
             )}
           </Box>
 
