@@ -101,8 +101,13 @@ export const fetchUserPosts = () => {
 };
 
 // export const fetchPosts = () => API.get('/api/posts');
-export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null) => {
-  const params = { skip, limit };
+export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}) => {
+  const params = { skip, limit,
+    categories: filters.categories,
+    gender: filters.gender,
+    postStatus: filters.postStatus,
+    price: `${filters.priceRange[0]}-${filters.priceRange[1]}`
+  };
   
   // Add location parameters if provided
   if (userLocation && distanceRange) {

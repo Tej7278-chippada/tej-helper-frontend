@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, Grid, IconButton, LinearProgress, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 import FilterListIcon from "@mui/icons-material/FilterList";
@@ -72,6 +72,57 @@ const Helper = ()=> {
   }, [loading, hasMore, loadingMore]);
   const userId = localStorage.getItem('userId');
   // const [totalPosts, setTotalPosts] = useState(0);
+  const [filters, setFilters] = useState({
+    categories: '',
+    gender: '',
+    postStatus: '',
+    priceRange: [0, 100000] // Default price range
+  });
+
+  // State for temporary filters before applying
+  const [localFilters, setLocalFilters] = useState(filters);
+  // Handle filter changes
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setLocalFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle price range changes
+  const handlePriceChange = (e, type) => {
+    const value = Number(e.target.value);
+    setLocalFilters(prev => ({
+      ...prev,
+      priceRange: type === 'min' 
+        ? [value, prev.priceRange[1]] 
+        : [prev.priceRange[0], value]
+    }));
+  };
+
+  // Apply filters
+  const handleApplyFilters = () => {
+    if (localFilters.priceRange[0] > localFilters.priceRange[1]) {
+      // alert("Min price cannot be greater than max price");
+      setSnackbar({ open: true, message: 'Min price cannot be greater than max price', severity: 'warning' });
+      return;
+    }
+    setFilters(localFilters);
+    setSkip(0); // Reset pagination when filters change
+    // setPosts([]); // Clear existing posts
+  };
+
+  // Reset filters
+  const handleResetFilters = () => {
+    const defaultFilters = {
+      categories: '',
+      gender: '',
+      postStatus: '',
+      priceRange: [0, 100000]
+    };
+    setLocalFilters(defaultFilters);
+    setFilters(defaultFilters);
+    setSkip(0);
+    setPosts([]);
+  };
 
   // Custom marker icon
   // const userLocationIcon = new L.Icon({
@@ -227,7 +278,7 @@ const Helper = ()=> {
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
         try {
           setLoading(true);
-          const response = await fetchPosts(0, 12, userLocation, distanceRange);
+          const response = await fetchPosts(0, 12, userLocation, distanceRange, filters);
           setPosts(response.data.posts || []);
           // setTotalPosts(response.data.totalCount || 0);
           setSkip(12); // Set skip to 24 after initial load
@@ -244,7 +295,7 @@ const Helper = ()=> {
     if (userLocation && distanceRange) {
       fetchData();
     }
-  }, [userLocation, distanceRange]); // Add distanceRange as dependency
+  }, [userLocation, distanceRange, filters]); // Add distanceRange as dependency
 
   // Load more posts function
   const loadMorePosts = async () => {
@@ -252,7 +303,7 @@ const Helper = ()=> {
     
     try {
       setLoadingMore(true);
-      const response = await fetchPosts(skip, 12, userLocation, distanceRange);
+      const response = await fetchPosts(skip, 12, userLocation, distanceRange, filters);
       const newPosts = response.data.posts || [];
       
       if (newPosts.length > 0) {
@@ -623,43 +674,117 @@ const Helper = ()=> {
               // maxWidth: '400px',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px',
               boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-              backgroundColor: '#fff', '& .MuiCardContent-root': {padding: '10px' },  }}
+              backgroundColor: '#f5f5f5', '& .MuiCardContent-root': {padding: '10px' },  }}
           >
-            <Box
-              style={{
-                padding: isMobile ? '15px' : '10px',
-                display: "flex",
-                flexDirection: isMobile ? "column" : "column",
-                alignItems: 'flex-start',
-                // minWidth: isMobile ? "60px" : "250px", borderRadius:'10px'
-              }}
-            >
-              {/* Selected Distance Label */}
-              <Box sx={{display: isMobile ? 'inline': 'flex', justifyContent: isMobile ? 'normal' : 'unset'}}>
-              <Typography
-                sx={{
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  // marginBottom: isMobile ? "20px" : "10px",
-                  textAlign: "center",
-                }}
-              >
-                Distance Range: 
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  marginBottom: isMobile ? "20px" : "10px", marginLeft:'10px',
-                  textAlign: "center",
-                }}
-              >
-                {distanceRange} km
-              </Typography>
-              {!isMobile && (
-                <Box sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
+            <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'row-reverse' : 'column', gap: 1 }}>
+              <Box sx={{ m: 0, bgcolor: 'white', borderRadius:'8px'}}>
+                <Box
+                  sx={{
+                    px: isMobile ? '8px' : '10px', py: '12px',
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "column",
+                    alignItems: 'flex-start',
+                    // minWidth: isMobile ? "60px" : "250px", borderRadius:'10px'
+                  }}
+                >
+                  {/* Selected Distance Label */}
+                  <Box sx={{display: isMobile ? 'inline': 'flex', justifyContent: isMobile ? 'normal' : 'unset'}}>
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      // marginBottom: isMobile ? "20px" : "10px",
+                      textAlign: "center",
+                    }}
+                  >
+                    Distance Range: 
+                  </Typography>
+                  <Typography
+                    sx={{
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      marginBottom: isMobile ? "20px" : "10px", marginLeft:'10px',
+                      textAlign: "center",
+                    }}
+                  >
+                    {distanceRange} km
+                  </Typography>
+                  {!isMobile && (
+                    <Box sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
+                      <TextField
+                        label="custom input (km)"
+                        type="number"
+                        value={distanceRange}
+                        onChange={(e) => {
+                          let value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numeric values
+                      
+                          if (value === '') {
+                            setDistanceRange('');
+                            // localStorage.removeItem("distanceRange"); // Clear storage when empty
+                            return;
+                          }
+                      
+                          const numericValue = Number(value);
+                          
+                          if (numericValue >= 1 && numericValue <= 1000) {
+                            setDistanceRange(numericValue);
+                            localStorage.setItem("distanceRange", numericValue);
+                            
+                            if (mapRef.current && userLocation) {
+                              mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(numericValue));
+                            }
+                          }
+                        }}
+                        fullWidth={isMobile}
+                        sx={{
+                          width: isMobile ? "80px" : "80px", marginRight:'4px',
+                          "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 12px', scrollbarWidth: 'none',  },
+                          
+                        }}
+                        inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
+                        InputLabelProps={{
+                          sx: {
+                            // fontSize: "14px", // Custom label font size
+                            // fontWeight: "bold", // Make label bold
+                            color: "primary.main", // Apply theme color
+                          },
+                          shrink: true, // Keep label always visible
+                        }}
+                      />
+                      <IconButton
+                        onClick={() => setShowDistanceRanges(false)}
+                        variant="text"
+                      >
+                        <CloseIcon/>
+                      </IconButton>
+                    </Box>
+                  )}
+                  </Box>
+                  {/* Distance Slider */}
+                  <Slider
+                    orientation={isMobile ? "vertical" : "horizontal"}
+                    value={distanceValues.indexOf(distanceRange)} // Map actual distance to index
+                    onChange={handleDistanceRangeChange}
+                    aria-labelledby="distance-slider"
+                    // valueLabelDisplay="auto"
+                    step={1}
+                    marks={marks}
+                    min={0}
+                    max={distanceValues.length - 1}
+                    sx={{
+                      ...(isMobile
+                        ? { height: "300px", margin: "0 auto" }
+                        : { width: "400px", mx: "10px" }),
+                      color: "#1976d2",
+                    }}
+                  />
+
+                  
+                </Box>
+                {isMobile && (
+                <Box sx={{ padding: '4px 8px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                   <TextField
-                    label="custom input (km)"
+                    label="custom range (km)"
                     type="number"
                     value={distanceRange}
                     onChange={(e) => {
@@ -682,11 +807,9 @@ const Helper = ()=> {
                         }
                       }
                     }}
-                    fullWidth={isMobile}
                     sx={{
-                      width: isMobile ? "80px" : "80px", marginRight:'4px',
-                      "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 12px', scrollbarWidth: 'none',  },
-                      
+                      width: "80px",
+                      "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
                     }}
                     inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
                     InputLabelProps={{
@@ -700,95 +823,131 @@ const Helper = ()=> {
                   />
                   <IconButton
                     onClick={() => setShowDistanceRanges(false)}
-                    variant="text"
+                    variant="text" 
                   >
                     <CloseIcon/>
                   </IconButton>
+                  {/* <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
+                    Close
+                  </Button> */}
                 </Box>
-              )}
+                )}
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    margin: '4px 10px', 
+                    color: 'grey', 
+                    whiteSpace: isMobile ? 'pre-line' : 'nowrap', 
+                    textAlign: isMobile ? 'center' : 'inherit'
+                  }}
+                >
+                  *Distance range {isMobile ? '\n' : ' '} upto 1000km
+                </Typography>
               </Box>
-              {/* Distance Slider */}
-              <Slider
-                orientation={isMobile ? "vertical" : "horizontal"}
-                value={distanceValues.indexOf(distanceRange)} // Map actual distance to index
-                onChange={handleDistanceRangeChange}
-                aria-labelledby="distance-slider"
-                // valueLabelDisplay="auto"
-                step={1}
-                marks={marks}
-                min={0}
-                max={distanceValues.length - 1}
-                sx={{
-                  ...(isMobile
-                    ? { height: "300px", margin: "0 auto" }
-                    : { width: "400px", mx: "10px" }),
-                  color: "#1976d2",
-                }}
-              />
-              
-            </Box>
-            {isMobile && (
-            <Box sx={{ padding: '4px 8px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-              <TextField
-                label="custom range (km)"
-                type="number"
-                value={distanceRange}
-                onChange={(e) => {
-                  let value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numeric values
-              
-                  if (value === '') {
-                    setDistanceRange('');
-                    // localStorage.removeItem("distanceRange"); // Clear storage when empty
-                    return;
-                  }
-              
-                  const numericValue = Number(value);
-                  
-                  if (numericValue >= 1 && numericValue <= 1000) {
-                    setDistanceRange(numericValue);
-                    localStorage.setItem("distanceRange", numericValue);
+
+              <Box>
+                {/* Filter Card */}
+                <Card sx={{
+                  m: 0,
+                  // bgcolor: '#f5f5f5',
+                  borderRadius: '8px',
+                  boxShadow: 3,
+                }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Filters
+                    </Typography>
                     
-                    if (mapRef.current && userLocation) {
-                      mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(numericValue));
-                    }
-                  }
-                }}
-                sx={{
-                  width: "80px",
-                  "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
-                }}
-                inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
-                InputLabelProps={{
-                  sx: {
-                    // fontSize: "14px", // Custom label font size
-                    // fontWeight: "bold", // Make label bold
-                    color: "primary.main", // Apply theme color
-                  },
-                  shrink: true, // Keep label always visible
-                }}
-              />
-              <IconButton
-                onClick={() => setShowDistanceRanges(false)}
-                variant="text" 
-              >
-                <CloseIcon/>
-              </IconButton>
-              {/* <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
-                Close
-              </Button> */}
+                    <Box display="flex" gap={2} flexWrap="wrap">
+                      {/* Category Filter */}
+                      <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
+                        <InputLabel>Category</InputLabel>
+                        <Select
+                          name="categories"
+                          value={localFilters.categories}
+                          onChange={handleFilterChange}
+                          label="Category"
+                        >
+                          <MenuItem value="">All</MenuItem>
+                          <MenuItem value="Paid">Paid</MenuItem>
+                          <MenuItem value="UnPaid">UnPaid</MenuItem>
+                          <MenuItem value="Emergency">Emergency</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Gender Filter */}
+                      <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
+                        <InputLabel>Gender</InputLabel>
+                        <Select
+                          name="gender"
+                          value={localFilters.gender}
+                          onChange={handleFilterChange}
+                          label="Gender"
+                        >
+                          <MenuItem value="">All</MenuItem>
+                          <MenuItem value="Male">Male</MenuItem>
+                          <MenuItem value="Female">Female</MenuItem>
+                          <MenuItem value="Kids">Kids</MenuItem>
+                          <MenuItem value="Everyone">Everyone</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Status Filter */}
+                      <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          name="postStatus"
+                          value={localFilters.postStatus}
+                          onChange={handleFilterChange}
+                          label="Status"
+                        >
+                          <MenuItem value="">All</MenuItem>
+                          <MenuItem value="Active">Active</MenuItem>
+                          <MenuItem value="InActive">InActive</MenuItem>
+                          <MenuItem value="Closed">Closed</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Price Range */}
+                      <Box display="flex" gap={2} flex="1 1 auto">
+                        <TextField
+                          label="Min Price"
+                          type="number"
+                          value={localFilters.priceRange[0]}
+                          onChange={(e) => handlePriceChange(e, 'min')}
+                          fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
+                        />
+                        <TextField
+                          label="Max Price"
+                          type="number"
+                          value={localFilters.priceRange[1]}
+                          onChange={(e) => handlePriceChange(e, 'max')}
+                          fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
+                        />
+                      </Box>
+                    </Box>
+
+                    {/* Action Buttons */}
+                    <Box gap={2} mt={2}>
+                      <Button
+                        variant="outlined"
+                        onClick={handleResetFilters}
+                        fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem', borderRadius:'8px' }}
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={handleApplyFilters}
+                        fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem' , borderRadius:'8px'}}
+                      >
+                        Apply Filters
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Box>
             </Box>
-            )}
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                margin: '4px 10px', 
-                color: 'grey', 
-                whiteSpace: isMobile ? 'pre-line' : 'nowrap', 
-                textAlign: isMobile ? 'center' : 'inherit'
-              }}
-            >
-              *Distance range {isMobile ? '\n' : ' '} upto 1000km
-            </Typography>
           </Card>
           )}
           <Button
