@@ -1154,7 +1154,7 @@ function PostService() {
                         required
                       />
                       <Box display="flex" justifyContent="center" alignItems="center" flexDirection="row" m={1} gap={1}>
-                        <Typography variant="body2" color="grey" >You can generate images related to Title of the post.</Typography>
+                        <Typography variant="body2" color="grey" >*You can generate images related to Title of the post.</Typography>
                         <Button variant="text" sx={{ borderRadius:'8px', bgcolor:'rgba(24, 170, 248, 0.07)', px: isMobile ? '24px' : 'null'}} onClick={() => fetchUnsplashImages(formData.title)} disabled={loadingGeneration}>Generate</Button>
                       </Box>
                       {/* Floating Card for Generated Images */}

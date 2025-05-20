@@ -425,13 +425,6 @@ function RouteMapDialog({ open, onClose, post }) {
                   </Button> */}
 
             </Box>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', padding:'10px 0px',  alignItems: 'center', alignContent: 'center' }}>
-              {distance && (
-                <Typography variant="body1" color='grey' style={{ fontWeight: 500 }}>
-                  Distance to post location: {distance}
-                </Typography>
-              )}
-            </Box>
 
             {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: '1rem' }}>
                   <Button variant="contained" color="primary" onClick={calculateDistance}>
@@ -449,6 +442,25 @@ function RouteMapDialog({ open, onClose, post }) {
           </Box>
 
         </Box>
+        {distance && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', margin: '4px 10px', alignItems: 'center', alignContent: 'center' }}>
+            <Typography variant="body1"  style={{ fontWeight: 500 }}>
+              Distance to post location: <strong>{distance}</strong>
+            </Typography>
+          </Box>
+        )}
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            margin: '4px 10px', 
+            color: 'grey', 
+            whiteSpace: 'pre-line', 
+            textAlign: 'inherit'
+          }}
+        >
+          *Click on <strong>Locate Me</strong> button to see your current location. {'\n'}
+          *Click on <strong>Show Route</strong> button to see the distance between your location and Post location.
+        </Typography>
         {/* <Box mt={1}>
           {locationDetails && (
             <Box sx={{ margin: '1rem' }}>
