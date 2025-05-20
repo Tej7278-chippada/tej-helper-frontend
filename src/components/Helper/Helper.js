@@ -108,6 +108,7 @@ const Helper = ()=> {
     setFilters(localFilters);
     setSkip(0); // Reset pagination when filters change
     // setPosts([]); // Clear existing posts
+    setShowDistanceRanges(false);
   };
 
   // Reset filters
@@ -686,7 +687,7 @@ const Helper = ()=> {
               boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
               backgroundColor: '#f5f5f5', '& .MuiCardContent-root': {padding: '10px' },  }}
           >
-            <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'row-reverse' : 'column', gap: 1 }}>
+            <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>
               <Box sx={{ m: 0, bgcolor: 'white', borderRadius:'8px'}}>
                 <Box
                   sx={{
@@ -698,7 +699,7 @@ const Helper = ()=> {
                   }}
                 >
                   {/* Selected Distance Label */}
-                  <Box sx={{display: isMobile ? 'inline': 'flex', justifyContent: isMobile ? 'normal' : 'unset'}}>
+                  <Box sx={{mb: 1, display: isMobile ? 'inline': 'flex', justifyContent: isMobile ? 'normal' : 'unset'}}>
                   <Typography
                     sx={{
                       fontSize: "16px",
@@ -707,9 +708,9 @@ const Helper = ()=> {
                       textAlign: "center",
                     }}
                   >
-                    Distance Range: 
+                    Distance Range: {distanceRange} km
                   </Typography>
-                  <Typography
+                  {/* <Typography
                     sx={{
                       fontSize: "16px",
                       fontWeight: "bold",
@@ -718,10 +719,10 @@ const Helper = ()=> {
                     }}
                   >
                     {distanceRange} km
-                  </Typography>
-                  {!isMobile && (
-                    <Box sx={{ position: 'absolute', top: '5%', right: '1%', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
-                      <TextField
+                  </Typography> */}
+                  {/* {!isMobile && ( */}
+                    <Box sx={{ position: 'absolute', top: '10px', right: '10px', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
+                      {/* <TextField
                         label="custom input (km)"
                         type="number"
                         value={distanceRange}
@@ -760,7 +761,7 @@ const Helper = ()=> {
                           },
                           shrink: true, // Keep label always visible
                         }}
-                      />
+                      /> */}
                       <IconButton
                         onClick={() => setShowDistanceRanges(false)}
                         variant="text"
@@ -768,11 +769,11 @@ const Helper = ()=> {
                         <CloseIcon/>
                       </IconButton>
                     </Box>
-                  )}
+                  {/* )} */}
                   </Box>
                   {/* Distance Slider */}
                   <Slider
-                    orientation={isMobile ? "vertical" : "horizontal"}
+                    orientation="horizontal" //{isMobile ? "vertical" : "horizontal"}
                     value={distanceValues.indexOf(distanceRange)} // Map actual distance to index
                     onChange={handleDistanceRangeChange}
                     aria-labelledby="distance-slider"
@@ -783,7 +784,7 @@ const Helper = ()=> {
                     max={distanceValues.length - 1}
                     sx={{
                       ...(isMobile
-                        ? { height: "300px", margin: "0 auto" }
+                        ? { height: "4px", margin: "0 auto" } //height: "300px"
                         : { width: "400px", mx: "10px" }),
                       color: "#1976d2",
                     }}
@@ -791,8 +792,19 @@ const Helper = ()=> {
 
                   
                 </Box>
-                {isMobile && (
-                <Box sx={{ padding: '4px 8px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                {/* {isMobile && ( */}
+                <Box sx={{ padding: '4px 8px', mt: isMobile ? 2 : 1, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      margin: '4px 10px', 
+                      color: 'grey', 
+                      // whiteSpace: isMobile ? 'pre-line' : 'nowrap', 
+                      textAlign: isMobile ? 'center' : 'inherit'
+                    }}
+                  >
+                    *Distance range {isMobile ? '\n' : ' '} upto 1000km
+                  </Typography>
                   <TextField
                     label="custom range (km)"
                     type="number"
@@ -831,18 +843,18 @@ const Helper = ()=> {
                       shrink: true, // Keep label always visible
                     }}
                   />
-                  <IconButton
+                  {/* <IconButton
                     onClick={() => setShowDistanceRanges(false)}
                     variant="text" 
                   >
                     <CloseIcon/>
-                  </IconButton>
+                  </IconButton> */}
                   {/* <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
                     Close
                   </Button> */}
                 </Box>
-                )}
-                <Typography 
+                {/* )} */}
+                {/* <Typography 
                   variant="body2" 
                   sx={{ 
                     margin: '4px 10px', 
@@ -852,16 +864,16 @@ const Helper = ()=> {
                   }}
                 >
                   *Distance range {isMobile ? '\n' : ' '} upto 1000km
-                </Typography>
+                </Typography> */}
               </Box>
 
-              <Box>
+              <Box sx={{maxWidth: '450px'}}>
                 {/* Filter Card */}
                 <Card sx={{
                   m: 0,
                   // bgcolor: '#f5f5f5',
                   borderRadius: '8px',
-                  boxShadow: 3,
+                  // boxShadow: 3,
                 }}>
                   <CardContent>
                     <Typography variant="h6" gutterBottom>
