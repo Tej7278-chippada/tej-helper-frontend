@@ -25,6 +25,22 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { io } from 'socket.io-client';
 
+// Create a cache outside the component to persist between mounts
+const globalCache = {
+  data: {},
+  lastCacheKey: null,
+  lastScrollPosition: 0,
+  lastViewedPostId: null,
+  lastFilters: null
+};
+
+// Default filter values
+const DEFAULT_FILTERS = {
+  categories: '',
+  gender: '',
+  postStatus: '',
+  priceRange: [0, 100000]
+};
 
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -72,15 +88,21 @@ const Helper = ()=> {
   }, [loading, hasMore, loadingMore]);
   const userId = localStorage.getItem('userId');
   // const [totalPosts, setTotalPosts] = useState(0);
-  const [filters, setFilters] = useState({
-    categories: '',
-    gender: '',
-    postStatus: '',
-    priceRange: [0, 100000] // Default price range
+  const [filters, setFilters] = useState(() => {
+  const savedFilters = localStorage.getItem('helperFilters');
+  return savedFilters ? JSON.parse(savedFilters) : DEFAULT_FILTERS;
   });
 
   // State for temporary filters before applying
   const [localFilters, setLocalFilters] = useState(filters);
+  // Add a ref to track if we've restored scroll position
+  const hasRestoredScroll = useRef(false);
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('helperFilters', JSON.stringify(filters));
+    globalCache.lastFilters = filters;
+  }, [filters]);
+
   // Handle filter changes
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -105,24 +127,26 @@ const Helper = ()=> {
       setSnackbar({ open: true, message: 'Min price cannot be greater than max price', severity: 'warning' });
       return;
     }
-    setFilters(localFilters);
-    setSkip(0); // Reset pagination when filters change
-    // setPosts([]); // Clear existing posts
+    // Only update if filters actually changed
+    if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
+      setFilters(localFilters);
+      setSkip(0); // Reset pagination when filters change
+      // setPosts([]); // Clear existing posts
+      // Clear cache for the old filter combination
+      globalCache.lastCacheKey = null;
+    }
     setShowDistanceRanges(false);
   };
 
   // Reset filters
   const handleResetFilters = () => {
-    const defaultFilters = {
-      categories: '',
-      gender: '',
-      postStatus: '',
-      priceRange: [0, 100000]
-    };
-    setLocalFilters(defaultFilters);
-    setFilters(defaultFilters);
+    setLocalFilters(DEFAULT_FILTERS);
+    setFilters(DEFAULT_FILTERS);
     setSkip(0);
     setPosts([]);
+    // Clear cache for the old filter combination
+    globalCache.lastCacheKey = null;
+    localStorage.removeItem('helperFilters');
   };
 
   // Custom marker icon
@@ -268,23 +292,68 @@ const Helper = ()=> {
     }
   }, [fetchUserLocation]);
 
+  // Generate a cache key based on current filters/location
+  const generateCacheKey = useCallback(() => {
+    return JSON.stringify({
+      lat: userLocation?.latitude,
+      lng: userLocation?.longitude,
+      distance: distanceRange,
+      ...filters
+    });
+  }, [userLocation, distanceRange, filters]);
+
   // Fetch posts data
   useEffect(() => {
-    if (!distanceRange) {
+    if (!distanceRange || !userLocation) {
       setPosts([]);
       return;
     };
+    const currentCacheKey = generateCacheKey();
     const fetchData = async () => {
         // setLoading(true);
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
         try {
           setLoading(true);
+          // Check if we have valid cached data
+          if (globalCache.data[currentCacheKey] && 
+            globalCache.lastCacheKey === currentCacheKey &&
+            JSON.stringify(globalCache.lastFilters) === JSON.stringify(filters)) {
+              const { posts: cachedPosts, skip: cachedSkip, hasMore: cachedHasMore } = globalCache.data[currentCacheKey];
+          
+              setPosts(cachedPosts);
+              setSkip(cachedSkip);
+              setHasMore(cachedHasMore);
+              setLoading(false);
+              
+              // Reset scroll restoration flag
+              hasRestoredScroll.current = false;
+              
+              return;
+            }
+          // No valid cache - fetch fresh data
           const response = await fetchPosts(0, 12, userLocation, distanceRange, filters);
-          setPosts(response.data.posts || []);
+          const newPosts = response.data.posts || [];
+          // Update global cache
+          globalCache.data[currentCacheKey] = {
+            posts: newPosts,
+            skip: 12,
+            hasMore: newPosts.length > 0 && response.data.totalCount > 12,
+            timestamp: Date.now()
+          };
+          globalCache.lastCacheKey = currentCacheKey;
+          globalCache.lastFilters = {...filters};
+          
+          // Clean up old cache entries (older than 1 hour)
+          Object.keys(globalCache.data).forEach(key => {
+            if (Date.now() - globalCache.data[key].timestamp > 3600000) {
+              delete globalCache.data[key];
+            }
+          });
+          setPosts(newPosts);
           // setTotalPosts(response.data.totalCount || 0);
           setSkip(12); // Set skip to 24 after initial load
           // Check if there are more posts to load
-          setHasMore(response.data.posts.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
+          setHasMore(newPosts.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
           console.log(`posts fetched in range ${distanceRange} and initial count ${response.data.posts.length} and total count ${response.data.totalCount}`)
         } catch (error) {
           console.error("Error fetching posts:", error);
@@ -296,7 +365,7 @@ const Helper = ()=> {
     if (userLocation && distanceRange) {
       fetchData();
     }
-  }, [userLocation, distanceRange, filters]); // Add distanceRange as dependency
+  }, [userLocation, distanceRange, filters, generateCacheKey]); // Add distanceRange as dependency
 
   // Load more posts function
   const loadMorePosts = async () => {
@@ -308,10 +377,22 @@ const Helper = ()=> {
       const newPosts = response.data.posts || [];
       
       if (newPosts.length > 0) {
-        setPosts(prevPosts => [...prevPosts, ...newPosts]);
+        const updatedPosts = [...posts, ...newPosts];
+        const currentCacheKey = generateCacheKey();
+        
+        // Update global cache
+        if (globalCache.data[currentCacheKey]) {
+          globalCache.data[currentCacheKey] = {
+            ...globalCache.data[currentCacheKey],
+            posts: updatedPosts,
+            skip: skip + newPosts.length,
+            hasMore: updatedPosts.length < response.data.totalCount
+          };
+        }
+        setPosts(updatedPosts);
         setSkip(prevSkip => prevSkip + newPosts.length);
         // Update hasMore based on whether we've reached the total count
-        setHasMore(posts.length + newPosts.length < response.data.totalCount);
+        setHasMore(updatedPosts.length < response.data.totalCount);
         console.log(`Fetched ${newPosts.length} new posts (skip: ${skip}, total: ${response.data.totalCount})`);
       } else {
         setHasMore(false);
@@ -320,7 +401,7 @@ const Helper = ()=> {
       // setHasMore(newPosts.length === 12); // If we got less than 24, we've reached the end
     } catch (error) {
       console.error("Error fetching more posts:", error);
-      setSnackbar({ open: true, message: 'Failed to fetch more posts.', severity: 'error' });
+      // setSnackbar({ open: true, message: 'Failed to fetch more posts.', severity: 'error' });
     } finally {
       setLoadingMore(false);
     }
@@ -433,13 +514,60 @@ const Helper = ()=> {
   //   }
   // }, [userLocation, posts, distanceRange]);
 
-  
+  // Effect to handle scroll restoration and post focus
+  useEffect(() => {
+    if (posts.length > 0 && globalCache.lastViewedPostId && !hasRestoredScroll.current) {
+      const timer = setTimeout(() => {
+        // First restore scroll position
+        window.scrollTo(0, globalCache.lastScrollPosition);
+        
+        // Then try to find and focus the post
+        const postElement = document.getElementById(`post-${globalCache.lastViewedPostId}`);
+        if (postElement) {
+          postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // // Add temporary highlight
+          // postElement.style.boxShadow = '0 0 0 2px rgba(25, 118, 210, 0.5)';
+          // setTimeout(() => {
+          //   postElement.style.boxShadow = '';
+          // }, 2000);
+        }
+        
+        hasRestoredScroll.current = true;
+        globalCache.lastViewedPostId = null; // Clear after handling
+      }, 100); // Slight delay to ensure posts are rendered
+
+      return () => clearTimeout(timer);
+    }
+  }, [posts]); // Run when posts change
 
 
+  // Store navigation info before leaving
   const openPostDetail = (post) => {
-    // setSelectedProduct(product);
+    // Save both to global cache and localStorage as backup
+    globalCache.lastViewedPostId = post._id;
+    globalCache.lastScrollPosition = window.scrollY;
+    localStorage.setItem('lastHelperScroll', window.scrollY);
+    localStorage.setItem('lastViewedPostId', post._id);
     navigate(`/post/${post._id}`);
   };
+
+  // Initialize scroll position and post ID from localStorage if needed
+  useEffect(() => {
+    const savedScroll = localStorage.getItem('lastHelperScroll');
+    const savedPostId = localStorage.getItem('lastViewedPostId');
+    
+    if (savedScroll && savedPostId && !globalCache.lastScrollPosition) {
+      globalCache.lastScrollPosition = Number(savedScroll);
+      globalCache.lastViewedPostId = savedPostId;
+    }
+
+    // Cleanup localStorage on unmount
+    return () => {
+      localStorage.removeItem('lastHelperScroll');
+      localStorage.removeItem('lastViewedPostId');
+    };
+  }, []);
 
   // // Handle opening and closing the filter card
   // const handleFilterToggle = () => {
@@ -1029,7 +1157,7 @@ const Helper = ()=> {
             ( posts.length > 0 ? (
               <Grid container spacing={isMobile ? 1.5 : 1.5}>
                 {posts.map((post, index) => (
-                  <Grid item xs={12} sm={6} md={4} key={`${post._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null}>
+                  <Grid item xs={12} sm={6} md={4} key={`${post._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${post._id}`}>
                     <Card style={{
                       margin: '0rem 0',  // spacing between up and down cards
                       cursor: 'pointer',

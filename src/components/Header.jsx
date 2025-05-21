@@ -89,6 +89,7 @@ const Header = ({ username }) => {
     localStorage.removeItem('userLocation'); 
     localStorage.removeItem('distanceRange');
     localStorage.removeItem('tokenProfilePic');
+    localStorage.clear();
     navigate('/login');
   };
   
