@@ -77,6 +77,7 @@ function PostDetailsById({ onClose, user }) {
 
   
   useEffect(() => {
+    window.scrollTo(0, 0);
     const fetchProductDetails = async () => {
       setLoading(true);
       try {
