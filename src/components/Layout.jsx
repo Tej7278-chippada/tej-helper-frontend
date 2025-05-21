@@ -3,10 +3,16 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 // import Footer from './Footer';
 import MenuBar from './MenuBar';
+import { useLocation } from 'react-router-dom';
 
 const Layout = ({ children, username }) => {
   const [showMenu, setShowMenu] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  // ❗️ Hide MenuBar on login and register pages
+  const location = useLocation();
+  const hideMenuBarRoutes = ['/login', '/register'];
+  const shouldShowMenuBar = !hideMenuBarRoutes.includes(location.pathname);
+
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -38,9 +44,11 @@ const Layout = ({ children, username }) => {
       <div style={{ flex: 1, paddingBottom: '56px' }}> {/* Make space for menu */}
         {children}
       </div>
-      <MenuBar visible={showMenu} 
-        // onLogout={handleLogout} 
-      />
+      {shouldShowMenuBar && (
+        <MenuBar visible={showMenu} 
+          // onLogout={handleLogout} 
+        />
+      )}
       {/* <Footer /> */}
     </div>
     // <Box display="flex" flexDirection="column" height="100vh">
