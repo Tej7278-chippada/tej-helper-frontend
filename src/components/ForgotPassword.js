@@ -73,6 +73,7 @@ const ForgotPassword = () => {
         ? "Entered Email or phone number doesn't match to the user's data"
         : errorMessage);
       setSuccess('');
+      console.log('Error requesting otp', error);
     } finally {
       setLoading(false);
     }

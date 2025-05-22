@@ -231,7 +231,7 @@ const WishList = () => {
                     </Grid>
                   ))
                 ) : (
-                  <Box textAlign="center" sx={{ margin: 2 }}>
+                  <Box textAlign="center" sx={{ margin: 2, flex: 1 }}>
                     <Typography textAlign="center" color="grey"  variant="body1" >
                       Your wishlist is empty...
                     </Typography>

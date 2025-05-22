@@ -821,8 +821,8 @@ function PostService() {
             </Grid>
           ))
         ) : (
-          <Box sx={{ textAlign: 'center' }}>
-            <Typography color='grey' padding="1rem" variant="body1">
+          <Box sx={{ textAlign: 'center', flex: 1 }}>
+            <Typography color='grey' padding="2rem" variant="body1">
               You don't have any posts...
             </Typography>
           </Box>
@@ -1230,7 +1230,7 @@ function PostService() {
                       {/* </Card> */}
                     </Box>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                    <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
+                    <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}} required>
                         <InputLabel>Categories</InputLabel>
                         <Select
                             value={formData.categories}
@@ -1284,7 +1284,7 @@ function PostService() {
                             required
                         />
                     )}
-                        <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}>
+                        <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}} required>
                             <InputLabel>Required Gender to service</InputLabel>
                             <Select
                                 value={formData.gender}

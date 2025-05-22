@@ -334,7 +334,7 @@ const UserProfile = () => {
                     {userData.email}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={12}>
+                {/* <Grid item xs={12} sm={12}>
                   <Typography variant="body1" style={{ fontWeight: 500 }}>
                     Address:
                   </Typography>
@@ -343,7 +343,7 @@ const UserProfile = () => {
                   {`${userData.address.street}, ${userData.address.area}, ${userData.address.city}, ${userData.address.state} - ${userData.address.pincode}`}
                   </Typography>
                   )}
-                </Grid>
+                </Grid> */}
               </Grid>
             </Box>
             
@@ -404,7 +404,7 @@ const UserProfile = () => {
             <Card
               sx={{
                 position: 'absolute',
-                top: isMobile ? '150px' : '50px',
+                top: isMobile ? '150px' : '100px',
                 left: isMobile ? '2%' : null,
                 right : isMobile ? null : '2%',
                 width: '95%', 
