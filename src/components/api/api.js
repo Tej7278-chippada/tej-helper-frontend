@@ -226,6 +226,15 @@ export const fetchNotifications = async () => {
   });
 };
 
+export const fetchUnreadNotificationsCount = async () => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.get('/api/notifications/unread-count', {
+    headers: {
+      Authorization: `Bearer ${authToken}`
+    }
+  });
+};
+
 export const markNotificationAsRead = async (notificationId) => {
   const authToken = localStorage.getItem('authToken');
   return await API.put(`/api/notifications/${notificationId}/read`, {}, {

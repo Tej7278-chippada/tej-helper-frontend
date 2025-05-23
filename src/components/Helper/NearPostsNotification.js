@@ -119,7 +119,7 @@ export default function NearPostsNotification() {
           severity="info"
           variant="filled"
           sx={{
-            backgroundColor: "rgba(20, 88, 222, 0.54)",
+            backgroundColor: "rgba(195, 20, 222, 0.75)", //backgroundColor: "rgba(20, 88, 222, 0.54)",
             color: "#fff",
             borderRadius: "10px",
             fontSize: "12px",

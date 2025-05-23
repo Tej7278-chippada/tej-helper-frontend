@@ -122,6 +122,10 @@ function NotificationsPage() {
         setNotifications(notifications.map(n => 
           n._id === notification._id ? { ...n, isRead: true } : n
         ));
+        // Emit event to update badge count
+        // if (socket) {
+        //   socket.emit('notificationRead', userId);
+        // }
       } catch (error) {
         console.error('Error marking notification as read:', error);
       } finally {
@@ -220,6 +224,10 @@ function NotificationsPage() {
     try {
       await clearAllNotifications();
       setNotifications([]);
+      // Emit event to update badge count
+      // if (socket) {
+      //   socket.emit('allNotificationsRead', userId);
+      // }
       setSnackbar({
         open: true,
         message: 'All notifications cleared!',

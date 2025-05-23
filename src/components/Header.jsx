@@ -1,7 +1,7 @@
 // Header.js
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, TextField, List, ListItem, ListItemText, Box, CircularProgress, Paper, useMediaQuery, IconButton, Menu, MenuItem, Dialog, ListItemIcon, Avatar, Divider, } from '@mui/material';
+import { AppBar, Toolbar, Typography, TextField, List, ListItem, ListItemText, Box, CircularProgress, Paper, useMediaQuery, IconButton, Menu, MenuItem, Dialog, ListItemIcon, Avatar, Divider, Badge, } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
@@ -9,11 +9,13 @@ import { useTheme } from '@mui/material/styles';
 // import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { userData } from '../utils/userData';
 import PersonIcon from '@mui/icons-material/Person';
-import PostAddIcon from '@mui/icons-material/PostAdd';
-import ChatIcon from '@mui/icons-material/Chat';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+// import PostAddIcon from '@mui/icons-material/PostAdd';
+// import ChatIcon from '@mui/icons-material/Chat';
+// import FavoriteIcon from '@mui/icons-material/Favorite';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { fetchUnreadNotificationsCount } from './api/api';
+// import { io } from 'socket.io-client';
 
 const Header = ({ username }) => {
   const location = useLocation();
@@ -32,7 +34,9 @@ const Header = ({ username }) => {
   // Only show search bar when user is logged in and on chat page
   // const showSearchBar = location.pathname.includes('/productList') && username;
   const userProfilePic = localStorage.getItem('tokenProfilePic');
-
+  const [unreadCount, setUnreadCount] = useState(0);
+  // const [socket, setSocket] = useState(null);
+  
 
 
   // Load logged-in users from localStorage
@@ -50,10 +54,54 @@ const Header = ({ username }) => {
         localStorage.setItem('authToken', activeToken); // Ensure the correct token is set
       }
       setCurrentUsername(activeUser);
+      // Set up socket.io listener for real-time updates
+      // const newSocket = io(`${process.env.REACT_APP_API_URL}`);
+      // setSocket(newSocket);
       console.log('logged user:', currentUsername);
     }
    
   }, [username]);
+
+  // Add this useEffect to fetch notifications count
+// useEffect(() => {
+//   if (socket && userId) {
+//     socket.emit('joinRoom', userId);
+    
+    const fetchNotificationCount = async () => {
+      if (currentUsername) {
+        try {
+          const response = await fetchUnreadNotificationsCount();
+          const unread = response.data.count;
+          setUnreadCount(unread);
+          // console.log('notification count fetched');
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      }
+    };
+
+//     fetchNotificationCount();
+
+//     // Set up socket.io listener for real-time updates
+//     // const socket = io(`${process.env.REACT_APP_API_URL}`);
+//     // Listen for notification updates
+//     socket.on('notificationUpdate', ({ userId }) => {
+//       if (userId === localStorage.getItem('userId')) {
+//         fetchNotificationCount();
+//       }
+//     });
+
+//     // Listen for new notifications
+//     socket.on('newNotification', () => {
+//       fetchNotificationCount();
+//       console.log('new notification');
+//     });
+
+//     return () => {
+//       socket.disconnect();
+//     };
+//   }
+// }, [currentUsername, socket]);
 
   // useEffect(() => {
   //   // Add current user to the list if not already present
@@ -65,6 +113,7 @@ const Header = ({ username }) => {
   // }, [username, loggedInUsers]);
 
   const handleProfileClick = (event) => {
+    fetchNotificationCount();
     setAnchorEl(event.currentTarget);
   };
 
@@ -166,9 +215,9 @@ const Header = ({ username }) => {
     navigate(`/user/${userId}`); //, { replace: true }
   };
 
-  const toUserPosts = () => {
-    navigate('/userposts'); //, { replace: true }
-  };
+  // const toUserPosts = () => {
+  //   navigate('/userposts'); //, { replace: true }
+  // };
   
   return (
     <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem' }}>
@@ -247,6 +296,7 @@ const Header = ({ username }) => {
                 size="small"
                 sx={{ borderRadius: 6, px: 0.5, py: 0.5, '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
               >
+                {/* <Badge variant="dot" color="error" invisible={unreadCount === 0} sx={{ '& .MuiBadge-dot': { height: 8, minWidth: 8 } }}> */}
                 <Avatar
                   src={
                     (userProfilePic === null )
@@ -256,6 +306,7 @@ const Header = ({ username }) => {
                   // alt={currentUsername[0]}
                   sx={{ width: 32, height: 32, mr: 0, color:'inherit', bgcolor:'rgba(255, 255, 255, 0.27)', borderRadius: '50%', fontSize: 12, border: `2px solid rgba(255, 255, 255, 0.3)`, }}
                 />
+                {/* </Badge> */}
                 {/* <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
                   {currentUsername.charAt(0).toUpperCase()}
                 </Avatar> */}
@@ -305,7 +356,11 @@ const Header = ({ username }) => {
                   Wishlist
                 </MenuItem> */}
                 <MenuItem onClick={() => { navigate('/notifications'); handleClose(); }}>
-                  <ListItemIcon><NotificationsIcon fontSize="small" /></ListItemIcon>
+                  <ListItemIcon>
+                    <Badge badgeContent={unreadCount} color="error" max={99}>
+                      <NotificationsIcon fontSize="small" />
+                    </Badge>
+                  </ListItemIcon>
                   Notifications
                 </MenuItem>
                 <Divider />
