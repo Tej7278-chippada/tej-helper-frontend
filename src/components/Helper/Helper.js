@@ -88,6 +88,7 @@ const Helper = ()=> {
   }, [loading, hasMore, loadingMore]);
   const userId = localStorage.getItem('userId');
   // const [totalPosts, setTotalPosts] = useState(0);
+  const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(() => {
   const savedFilters = localStorage.getItem('helperFilters');
   return savedFilters ? JSON.parse(savedFilters) : DEFAULT_FILTERS;
@@ -808,7 +809,7 @@ const Helper = ()=> {
             // onClose={handleDistanceMenuClose}
             sx={{ position: 'absolute',
               top: '50px',
-              right: '2%',
+              right: '2%', ml: '4px',
               // width: '90%',
               // maxWidth: '400px',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px',
@@ -1003,98 +1004,108 @@ const Helper = ()=> {
                   borderRadius: '8px',
                   // boxShadow: 3,
                 }}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      Filters
-                    </Typography>
-                    
-                    <Box display="flex" gap={2} flexWrap="wrap">
-                      {/* Category Filter */}
-                      <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
-                        <InputLabel>Category</InputLabel>
-                        <Select
-                          name="categories"
-                          value={localFilters.categories}
-                          onChange={handleFilterChange}
-                          label="Category"
-                        >
-                          <MenuItem value="">All</MenuItem>
-                          <MenuItem value="Paid">Paid</MenuItem>
-                          <MenuItem value="UnPaid">UnPaid</MenuItem>
-                          <MenuItem value="Emergency">Emergency</MenuItem>
-                        </Select>
-                      </FormControl>
+                   <Box sx={{ display: 'flex', flexGrow: 1, float: 'inline-end', margin:1 }}>
+                    <Button
+                      variant="outlined" size="small" sx={{borderRadius: '8px'}}
+                      onClick={() => setIsExtraFiltersOpen((prev) => !prev)}
+                    >
+                      {isExtraFiltersOpen ? 'Close Extra Filters' : 'Show Extra Filters'}
+                    </Button>
+                  </Box>
+                  {isExtraFiltersOpen && 
+                    <CardContent>
+                      <Typography variant="h6" gutterBottom >
+                        Filters
+                      </Typography>
+                      
+                      <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
+                        {/* Category Filter */}
+                        <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px', } }}>
+                          <InputLabel>Category</InputLabel>
+                          <Select
+                            name="categories"
+                            value={localFilters.categories}
+                            onChange={handleFilterChange}
+                            label="Category"
+                          >
+                            <MenuItem value="">All</MenuItem>
+                            <MenuItem value="Paid">Paid</MenuItem>
+                            <MenuItem value="UnPaid">UnPaid</MenuItem>
+                            <MenuItem value="Emergency">Emergency</MenuItem>
+                          </Select>
+                        </FormControl>
 
-                      {/* Gender Filter */}
-                      <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
-                        <InputLabel>Gender</InputLabel>
-                        <Select
-                          name="gender"
-                          value={localFilters.gender}
-                          onChange={handleFilterChange}
-                          label="Gender"
-                        >
-                          <MenuItem value="">All</MenuItem>
-                          <MenuItem value="Male">Male</MenuItem>
-                          <MenuItem value="Female">Female</MenuItem>
-                          <MenuItem value="Kids">Kids</MenuItem>
-                          <MenuItem value="Everyone">Everyone</MenuItem>
-                        </Select>
-                      </FormControl>
+                        {/* Gender Filter */}
+                        <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                          <InputLabel>Gender</InputLabel>
+                          <Select
+                            name="gender"
+                            value={localFilters.gender}
+                            onChange={handleFilterChange}
+                            label="Gender"
+                          >
+                            <MenuItem value="">All</MenuItem>
+                            <MenuItem value="Male">Male</MenuItem>
+                            <MenuItem value="Female">Female</MenuItem>
+                            <MenuItem value="Kids">Kids</MenuItem>
+                            <MenuItem value="Everyone">Everyone</MenuItem>
+                          </Select>
+                        </FormControl>
 
-                      {/* Status Filter */}
-                      <FormControl sx={{ flex: '1 1 200px', '& .MuiOutlinedInput-root': { borderRadius: '1rem',} }}>
-                        <InputLabel>Status</InputLabel>
-                        <Select
-                          name="postStatus"
-                          value={localFilters.postStatus}
-                          onChange={handleFilterChange}
-                          label="Status"
-                        >
-                          <MenuItem value="">All</MenuItem>
-                          <MenuItem value="Active">Active</MenuItem>
-                          <MenuItem value="InActive">InActive</MenuItem>
-                          <MenuItem value="Closed">Closed</MenuItem>
-                        </Select>
-                      </FormControl>
+                        {/* Status Filter */}
+                        <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                          <InputLabel>Status</InputLabel>
+                          <Select
+                            name="postStatus"
+                            value={localFilters.postStatus}
+                            onChange={handleFilterChange}
+                            label="Status"
+                          >
+                            <MenuItem value="">All</MenuItem>
+                            <MenuItem value="Active">Active</MenuItem>
+                            <MenuItem value="InActive">InActive</MenuItem>
+                            <MenuItem value="Closed">Closed</MenuItem>
+                          </Select>
+                        </FormControl>
 
-                      {/* Price Range */}
-                      <Box display="flex" gap={2} flex="1 1 auto">
-                        <TextField
-                          label="Min Price"
-                          type="number"
-                          value={localFilters.priceRange[0]}
-                          onChange={(e) => handlePriceChange(e, 'min')}
-                          fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
-                        />
-                        <TextField
-                          label="Max Price"
-                          type="number"
-                          value={localFilters.priceRange[1]}
-                          onChange={(e) => handlePriceChange(e, 'max')}
-                          fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '1rem',}}}
-                        />
+                        {/* Price Range */}
+                        <Box display="flex" gap={2} flex="1 1 auto">
+                          <TextField
+                            label="Min Price"
+                            type="number" size='small'
+                            value={localFilters.priceRange[0]}
+                            onChange={(e) => handlePriceChange(e, 'min')}
+                            fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
+                          />
+                          <TextField
+                            label="Max Price"
+                            type="number" size='small'
+                            value={localFilters.priceRange[1]}
+                            onChange={(e) => handlePriceChange(e, 'max')}
+                            fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
+                          />
+                        </Box>
                       </Box>
-                    </Box>
 
-                    {/* Action Buttons */}
-                    <Box gap={2} mt={2}>
-                      <Button
-                        variant="outlined"
-                        onClick={handleResetFilters}
-                        fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem', borderRadius:'8px' }}
-                      >
-                        Reset
-                      </Button>
-                      <Button
-                        variant="contained"
-                        onClick={handleApplyFilters}
-                        fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem' , borderRadius:'8px'}}
-                      >
-                        Apply Filters
-                      </Button>
-                    </Box>
-                  </CardContent>
+                      {/* Action Buttons */}
+                      <Box gap={2} mt={2}>
+                        <Button
+                          variant="outlined" size="small"
+                          onClick={handleResetFilters}
+                          fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem', borderRadius:'8px' }}
+                        >
+                          Reset
+                        </Button>
+                        <Button
+                          variant="contained" size="small"
+                          onClick={handleApplyFilters}
+                          fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '12px' , borderRadius:'8px'}}
+                        >
+                          Apply Filters
+                        </Button>
+                      </Box>
+                    </CardContent>
+                  }
                 </Card>
               </Box>
             </Box>
