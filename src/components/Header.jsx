@@ -45,13 +45,14 @@ const Header = ({ username }) => {
     const activeUser = (loggedUserData?.userName || '');
     if (activeUser) {
       const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-    const activeToken = tokens[username];
-    if (activeToken) {
-      localStorage.setItem('authToken', activeToken); // Ensure the correct token is set
-    }
+      const activeToken = tokens[username];
+      if (activeToken) {
+        localStorage.setItem('authToken', activeToken); // Ensure the correct token is set
+      }
       setCurrentUsername(activeUser);
+      console.log('logged user:', currentUsername);
     }
-    console.log('logged user:', currentUsername);
+   
   }, [username]);
 
   // useEffect(() => {

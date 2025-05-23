@@ -50,7 +50,7 @@ const Register = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State to toggle password visibility
   // const [pincodeValidation, setPincodeValidation] = useState('');
   // const [address, setAddress] = useState({ street: '', area: '', city: '', state: '', pincode: '' });
-  const [ loadingImg, setLoadingImg ] = useState(false);
+  // const [ loadingImg, setLoadingImg ] = useState(false);
   const [ finalPic, setFinalPic ] = useState(null);
 
   const handleCropComplete = async (_, croppedAreaPixels) => {
@@ -271,15 +271,15 @@ const Register = () => {
     setCropDialog(false);
   };
 
-  const handleCancelImg = () => {
-    setProfilePic(null); 
-    setCropDialog(false);
-  };
+  // const handleCancelImg = () => {
+  //   setProfilePic(null); 
+  //   setCropDialog(false);
+  // };
 
-  const handleChangeImg = () => {
-    setProfilePic(null); 
-    setCroppedImage(null);
-  };
+  // const handleChangeImg = () => {
+  //   setProfilePic(null); 
+  //   setCroppedImage(null);
+  // };
 
   const handleDeleteImg = () => {
     setProfilePic(null); 
@@ -360,7 +360,7 @@ const Register = () => {
             <Dialog open={cropDialog} onClose={() => setCropDialog(false)} maxWidth="md" fullWidth fullScreen={isMobile ? true : false} sx={{ margin: '1rem',
               '& .MuiPaper-root': { // Target the dialog paper
                 borderRadius: '16px', // Apply border radius
-              }, }}
+                minHeight: '500px'},  }}
             >
               <DialogTitle>Add Profile Pic
                 <IconButton
@@ -400,9 +400,28 @@ const Register = () => {
                     crop={crop}
                     zoom={zoom}
                     aspect={1}
+                    cropShape="round" // or 'rect'
+                    showGrid={false} // disable grid if desired
+                    // objectFit="cover" // or 'contain'
                     onCropChange={setCrop}
                     onZoomChange={setZoom}
                     onCropComplete={handleCropComplete}
+                    style={{
+                      containerStyle: {
+                        // border: '2px solid #4caf50',
+                        borderRadius: '20px',
+                        overflow: 'hidden',
+                        marginTop: '7rem', marginBottom:'4rem',
+                      },
+                      mediaStyle: {
+                        filter: 'brightness(1.05) contrast(1.1)',
+                        borderRadius: '16px',
+                      },
+                      cropAreaStyle: {
+                        border: '2px dashed #2196f3',
+                        borderRadius: '50%',
+                      },
+                    }}
                   />
                 ) : (
                   <Typography variant="body2" color="grey" textAlign="center" m="24px 6px">
@@ -420,19 +439,19 @@ const Register = () => {
                       Delete
                     </Button>
                   }
-                  {profilePic && croppedImage && (
+                  {/* {profilePic && croppedImage && (
                     <Button color="secondary" onClick={handleChangeImg} sx={{borderRadius: '12px'}}>
                       Change
                     </Button>
-                  )}
+                  )} */}
                 </Box>
                 <Box sx={{display: 'flex', gap: '4px'}}>
-                  <Button onClick={handleCancelImg} sx={{borderRadius: '12px'}}>Cancel</Button>
+                  {/* <Button onClick={handleCancelImg} sx={{borderRadius: '12px'}}>Cancel</Button> */}
                   <Button variant="contained"
                     onClick={handleSaveImg}
                     disabled={!profilePic} sx={{borderRadius: '12px'}}
                   >
-                    {loadingImg ? <CircularProgress size={24}/> : 'Save' }
+                    Save
                   </Button>
                 </Box>
               </DialogActions>
