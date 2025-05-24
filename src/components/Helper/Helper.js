@@ -468,6 +468,51 @@ const Helper = ()=> {
 
   const distanceValues = [2, 5, 10, 20, 50, 70, 100, 150, 200];
 
+  const lastPlayedRef = useRef(null);
+  const timeoutRef = useRef(null);
+
+  // Sound effect with cleanup
+  const playSound = () => {
+    try {
+      // Don't play if we just played a sound recently
+      if (lastPlayedRef.current && Date.now() - lastPlayedRef.current < 100) return;
+      
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      oscillator.type = 'sine';
+      oscillator.frequency.value = isMobile ? 600 : 800;
+      gainNode.gain.value = isMobile ? 0.05 : 0.1;
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      oscillator.start();
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      oscillator.stop(audioCtx.currentTime + 0.1);
+      
+      lastPlayedRef.current = Date.now();
+    } catch (e) {
+      console.warn('Audio not supported', e);
+    }
+  };
+
+  // Vibration effect
+  const vibrate = () => {
+    if ('vibrate' in navigator) {
+      // Different vibration patterns for mobile vs desktop (if desktop supports it)
+      const pattern = isMobile ? [20] : [10];
+      navigator.vibrate(pattern);
+    }
+  };
+
+  // Combined feedback
+  const provideFeedback = () => {
+    vibrate();
+    playSound();
+  };
+
   // Normalize distances into equal positions (0 to distanceValues.length - 1)
   const marks = distanceValues.map((value, index) => ({
     value: index,
@@ -481,7 +526,25 @@ const Helper = ()=> {
     if (mapRef.current && userLocation) {
       mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(selectedDistance));
     }
+    // Clear any pending feedback
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    // Schedule feedback after a short delay (when sliding stops)
+    timeoutRef.current = setTimeout(() => {
+      provideFeedback();
+    }, 150);
   };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate distance between two coordinates using Haversine formula
   // const calculateDistance = (lat1, lon1, lat2, lon2) => {
