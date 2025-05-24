@@ -913,7 +913,7 @@ const Helper = ()=> {
                     max={distanceValues.length - 1}
                     sx={{
                       ...(isMobile
-                        ? { height: "4px", margin: "0 auto" } //height: "300px"
+                        ? { height: "4px", margin: "0 auto", minWidth: '300px' } //height: "300px"
                         : { width: "400px", mx: "10px" }),
                       color: "#1976d2",
                     }}
