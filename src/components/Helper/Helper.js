@@ -1,5 +1,5 @@
 // components/Helper/Helper.js
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Slider, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
@@ -23,7 +23,6 @@ import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
 import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { io } from 'socket.io-client';
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -87,7 +86,7 @@ const Helper = ()=> {
     if (node) observer.current.observe(node);
   }, [loading, hasMore, loadingMore]);
   const userId = localStorage.getItem('userId');
-  // const [totalPosts, setTotalPosts] = useState(0);
+  const [totalPosts, setTotalPosts] = useState(0);
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(() => {
   const savedFilters = localStorage.getItem('helperFilters');
@@ -96,6 +95,9 @@ const Helper = ()=> {
 
   // State for temporary filters before applying
   const [localFilters, setLocalFilters] = useState(filters);
+  const isDefaultFilters = useMemo(() => {
+    return JSON.stringify(localFilters) === JSON.stringify(DEFAULT_FILTERS);
+  }, [localFilters]);
   // Add a ref to track if we've restored scroll position
   const hasRestoredScroll = useRef(false);
   // Save filters to localStorage whenever they change
@@ -334,6 +336,7 @@ const Helper = ()=> {
           // No valid cache - fetch fresh data
           const response = await fetchPosts(0, 12, userLocation, distanceRange, filters);
           const newPosts = response.data.posts || [];
+          setTotalPosts(response.data.totalCount);
           // Update global cache
           globalCache.data[currentCacheKey] = {
             posts: newPosts,
@@ -1092,6 +1095,7 @@ const Helper = ()=> {
                         <Button
                           variant="outlined" size="small"
                           onClick={handleResetFilters}
+                          disabled={isDefaultFilters}
                           fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem', borderRadius:'8px' }}
                         >
                           Reset
@@ -1099,6 +1103,7 @@ const Helper = ()=> {
                         <Button
                           variant="contained" size="small"
                           onClick={handleApplyFilters}
+                          disabled={isDefaultFilters}
                           fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '12px' , borderRadius:'8px'}}
                         >
                           Apply Filters
@@ -1325,7 +1330,7 @@ const Helper = ()=> {
             )}
             {!hasMore && posts.length > 0 && (
               <Typography textAlign="center" sx={{ p: 2, color: 'text.secondary' }}>
-                You've reached the end of posts in your area with in distance range {distanceRange} km
+                You've reached the end of <strong>{totalPosts} posts</strong> in your area with in distance range {distanceRange} km...
               </Typography>
             )}
           </Box>
