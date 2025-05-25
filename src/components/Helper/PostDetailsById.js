@@ -78,19 +78,19 @@ function PostDetailsById({ onClose, user }) {
   
   useEffect(() => {
     window.scrollTo(0, 0);
-    const fetchProductDetails = async () => {
+    const fetchPostDetails = async () => {
       setLoading(true);
       try {
         const likesCount = await fetchLikesCount(id);
         const authToken = localStorage.getItem('authToken');
         setIsAuthenticated(!!authToken); // Check if user is authenticated
   
-        // Fetch product details
+        // Fetch post details
         const response = await fetchPostById(id);
   
         let likedByUser = false; // Default to false for unauthenticated users
         if (authToken) {
-          // Only check if the product is liked by the user if the user is authenticated
+          // Only check if the post is liked by the user if the user is authenticated
           likedByUser = await checkIfLiked(id);
         }
   
@@ -102,13 +102,14 @@ function PostDetailsById({ onClose, user }) {
         // setStockCountId(response.data.stockCount); // Set initial stock count
 
       } catch (error) {
-        console.error('Error fetching product details:', error);
+        setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
+        console.error('Error fetching post details:', error);
       } finally {
         setLoading(false);
       }
     };
   
-    fetchProductDetails();
+    fetchPostDetails();
   }, [id]);
   
 
