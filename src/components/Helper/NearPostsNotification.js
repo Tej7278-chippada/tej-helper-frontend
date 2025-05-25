@@ -71,7 +71,7 @@ export default function NearPostsNotification() {
               //     </Button>
               //   )
               // });
-              setNearPostView({ ...nearPostView, open: true })
+              setNearPostView({ ...nearPostView, open: true });
             });
           }
         } catch (error) {

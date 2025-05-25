@@ -29,7 +29,7 @@ const RECOMMENDED_MESSAGES = [
 
 // const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage, setSnackbar }) => {
+const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage, setSnackbar, chatData }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
   const userId = localStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken');
@@ -274,6 +274,18 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     // setLoading(true);
 
     try {
+      // Emit the message via socket first
+      socket.emit('sendMessage', {
+        postId: post._id, // or postId in ChatHistory.js
+        senderId: userId,
+        receiverId: otherUserId, // post.user.id in ChatDialog.js or chatData.id in ChatHistory.js
+        text: messageToSend,
+        // chatId: chatData.chatId, // You might need to get this from your chat state
+        postOwnerId: post.user.id,
+        postTitle: post.title,
+        senderName: post.user.username
+      });
+
       await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
         postId: post._id,
         sellerId: post.user.id,

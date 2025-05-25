@@ -23,7 +23,7 @@ const socket = io(process.env.REACT_APP_API_URL);
 
 const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) => {
+const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthenticated }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
   const userId = localStorage.getItem('userId');
@@ -223,6 +223,17 @@ const ChatHistory = ({ chatData, postId, handleCloseDialog, isAuthenticated }) =
     setTimeout(() => inputRef.current?.focus(), 50);
 
     try {
+      // Emit the message via socket first
+      socket.emit('sendMessage', {
+        postId: postId, // or postId in ChatHistory.js
+        senderId: userId,
+        receiverId: otherUserId, // post.user.id in ChatDialog.js or chatData.id in ChatHistory.js
+        text: message,
+        // chatId: chat._id // You might need to get this from your chat state
+        postOwnerId: userId,
+        postTitle: postTitle,
+        senderName: chatData.username
+      });
       // const response = 
       await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/sendMessage`, {
         // method: 'POST',

@@ -306,7 +306,7 @@ const ChatsOfPosts = () => {
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatData={chatDetailsById} postId={postId} isAuthenticated={isAuthenticated}/>  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} isAuthenticated={isAuthenticated}/>  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
@@ -337,7 +337,7 @@ const ChatsOfPosts = () => {
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatHistory chatData={chatDetailsById} postId={postId} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated}/>
+            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated}/>
           )}
         {/* </DialogContent> */}
       </Dialog>
