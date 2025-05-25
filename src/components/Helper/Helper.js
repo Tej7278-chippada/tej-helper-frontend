@@ -31,7 +31,8 @@ const globalCache = {
   lastCacheKey: null,
   lastScrollPosition: 0,
   lastViewedPostId: null,
-  lastFilters: null
+  lastFilters: null,
+  totalPostsCount: 0
 };
 
 // Default filter values
@@ -327,6 +328,7 @@ const Helper = ()=> {
               setPosts(cachedPosts);
               setSkip(cachedSkip);
               setHasMore(cachedHasMore);
+              setTotalPosts(globalCache.totalPostsCount);
               setLoading(false);
               
               // Reset scroll restoration flag
@@ -338,6 +340,7 @@ const Helper = ()=> {
           const response = await fetchPosts(0, 12, userLocation, distanceRange, filters);
           const newPosts = response.data.posts || [];
           setTotalPosts(response.data.totalCount);
+          globalCache.totalPostsCount = (response.data.totalCount);
           // Update global cache
           globalCache.data[currentCacheKey] = {
             posts: newPosts,
