@@ -1,6 +1,6 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, } from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
@@ -10,7 +10,7 @@ import LazyImage from './LazyImage';
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import { useNavigate } from 'react-router-dom';
 // import { MapContainer, Marker, Popup } from 'react-leaflet';
-import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, Popup, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 // import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -28,6 +28,7 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import TaskAltRoundedIcon from '@mui/icons-material/TaskAltRounded';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
@@ -43,6 +44,14 @@ const customIcon = new L.Icon({
 
 const userLocationIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+const userPrivacyLocationIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
@@ -116,6 +125,8 @@ function PostService() {
   const [addedImages, setAddedImages] = useState([]); // Store successfully added image URLs
   const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
   const tokenUsername = localStorage.getItem('tokenUsername');
+  const [protectLocation, setProtectLocation] = useState(false);
+  const [fakeAddress, setFakeAddress] = useState('');
 
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
@@ -370,6 +381,78 @@ function PostService() {
         console.error("Error fetching address:", error);
       }
     };
+
+    // const toggleLocationProvacy = (e) => {
+    //   setProtectLocation(e.target.checked);
+    //   fetchFakeAddress(finalLocation.latitude, finalLocation.longitude);
+    // };
+
+    const toggleLocationPrivacy = (e) => {
+      const isChecked = e.target.checked;
+      setProtectLocation(isChecked);
+      if (isChecked) {
+        fetchFakeAddress(finalLocation.latitude, finalLocation.longitude);
+      } else {
+        setFakeAddress(null);
+      }
+    };
+
+    const fetchFakeAddress = async (lat, lng) => {
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+        const data = await response.json();
+        setFakeAddress(data.display_name);
+      } catch (error) {
+        console.error("Error fetching address:", error);
+      }
+    };
+
+    const offsetCoordinates = (lat, lng, distanceMeters) => {
+      // Earth's radius in meters
+      const earthRadius = 6378137;
+      
+      // Convert distance to radians
+      const offset = distanceMeters / earthRadius;
+      
+      // Convert latitude and longitude to radians
+      const latRad = lat * (Math.PI / 180);
+      const lngRad = lng * (Math.PI / 180);
+      
+      // Random bearing (0 to 2π)
+      const bearing = Math.random() * 2 * Math.PI;
+      
+      // Calculate new latitude
+      const newLat = Math.asin(
+        Math.sin(latRad) * Math.cos(offset) + 
+        Math.cos(latRad) * Math.sin(offset) * Math.cos(bearing)
+      );
+      
+      // Calculate new longitude
+      const newLng = lngRad + Math.atan2(
+        Math.sin(bearing) * Math.sin(offset) * Math.cos(latRad),
+        Math.cos(offset) - Math.sin(latRad) * Math.sin(newLat)
+      );
+      
+      // Convert back to degrees
+      return {
+        latitude: newLat * (180 / Math.PI),
+        longitude: newLng * (180 / Math.PI)
+      };
+    };
+
+    // Apply location offset if privacy protection is enabled
+    let finalLocation = {
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude
+    };
+
+    if (protectLocation) {
+      finalLocation = offsetCoordinates(
+        currentLocation.latitude,
+        currentLocation.longitude,
+        500 // 500 meters
+      );
+    }
     
       const handleSubmit = async (e) => {
         e.preventDefault();
@@ -391,18 +474,19 @@ function PostService() {
 
         // Append location data
         data.append('location', JSON.stringify({
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
+          latitude: finalLocation.latitude,
+          longitude: finalLocation.longitude,
           accuracy: locationDetails.accuracy,
-          street: locationDetails.street,
-          area: locationDetails.area,
-          city: locationDetails.city,
-          state: locationDetails.state,
-          nation: locationDetails.nation,
-          pincode: locationDetails.pincode,
-          address: currentAddress,
-          coordinates: [currentLocation.longitude, currentLocation.latitude],
+          // street: locationDetails.street,
+          // area: locationDetails.area,
+          // city: locationDetails.city,
+          // state: locationDetails.state,
+          // nation: locationDetails.nation,
+          // pincode: locationDetails.pincode,
+          address: fakeAddress ? fakeAddress : currentAddress,
+          coordinates: [finalLocation.longitude, finalLocation.latitude],
           type: 'Point',
+          isProtected: protectLocation,
         }));
 
         // Append date and time data
@@ -595,6 +679,8 @@ function PostService() {
         setTimeTo(null);
         setGeneratedImages([]);
         setNoImagesFound(false); // Reset no images found state
+        setProtectLocation(false);
+        setFakeAddress('');
     };
 
     const openPostDetail = (post) => {
@@ -856,7 +942,7 @@ function PostService() {
                 </IconButton>
                 </DialogTitle>
                 <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '0rem' }}>
-                <Box sx={{paddingBottom:'4rem',marginBottom:'0rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+                <Box sx={{paddingBottom: isMobile ? '9rem' : '8rem', marginBottom:'0rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
                 {/* {locationDetails && (
                     <Box sx={{ margin: '1rem' }}>
                       <Typography variant="h6" gutterBottom>
@@ -963,16 +1049,24 @@ function PostService() {
                       <strong>Your current address :</strong> {currentAddress || "Fetching location..."}
                     </Typography>
                   </Box>
+                  {fakeAddress && 
+                    <Box display="flex" justifyContent="start" mb={2} mt={1} marginInline="4px">
+                      <LocationOnIcon sx={{color:'rgba(174, 11, 11, 0.95)'}}/>
+                      <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
+                        <strong>Protected address :</strong> {fakeAddress || "Fetching location..."}
+                      </Typography>
+                    </Box>
+                  }
                   <Box sx={{ height: '300px', marginTop: '1rem', paddingInline:'6px' }}>
                     <MapContainer
-                      center={formData.latitude ? [formData.latitude, formData.longitude] : [currentLocation.latitude, currentLocation.longitude] }
+                      center={formData.latitude ? [formData.latitude, formData.longitude] : protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude] }
                       zoom={13}
                       style={{ height: '100%', width: '100%', borderRadius:'8px', }}
                       attributionControl={false}  // Disables the watermark
                       maxBounds={worldBounds} // Restrict the map to the world bounds
                       maxBoundsViscosity={1.0} // Prevents the map from being dragged outside the bounds
                     >
-                      <ChangeView center={formData.latitude ? [formData.latitude, formData.longitude] : [currentLocation.latitude, currentLocation.longitude] } />
+                      <ChangeView center={formData.latitude ? [formData.latitude, formData.longitude] : protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude] } />
                       <TileLayer
                         url={mapMode === 'normal'
                           ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -996,9 +1090,56 @@ function PostService() {
                           <Popup>Post Previous Location</Popup>
                         </Marker>
                       )}
+                      <>
                         <Marker position={[currentLocation.latitude, currentLocation.longitude]} icon={userLocationIcon}>
-                          <Popup>Your Current Location</Popup>
+                          {/* <Popup>Your Current Location</Popup> */}
+                          <Popup>
+                            {protectLocation 
+                              ? "Your exact location (hidden from others)" 
+                              : "Your exact location"}
+                          </Popup>
                         </Marker>
+                        {protectLocation && 
+                          <Circle
+                            center={[currentLocation.latitude, currentLocation.longitude]}
+                            radius={500}
+                            color="#ff0000"
+                            fillColor="#ff0000"
+                            fillOpacity={0.2}
+                          />
+                        }
+                      </>
+                        {/* Show both locations if privacy is enabled */}
+                        {/* {protectLocation && (
+                          <>
+                            <Marker 
+                              position={[currentLocation.latitude, currentLocation.longitude]} 
+                              icon={userLocationIcon}
+                            >
+                              <Popup>Your exact location (hidden from others)</Popup>
+                            </Marker>
+                            <Circle
+                              center={[currentLocation.latitude, currentLocation.longitude]}
+                              radius={500}
+                              color="#ff0000"
+                              fillColor="#ff0000"
+                              fillOpacity={0.2}
+                            />
+                          </>
+                        )} */}
+                      {/* Show the post location (either exact or protected) */}
+                      {protectLocation && 
+                        <Marker 
+                          position={[finalLocation.latitude, finalLocation.longitude]} 
+                          icon={userPrivacyLocationIcon}
+                        >
+                          <Popup>
+                            {protectLocation 
+                              ? "Protected location (within 500m radius)" 
+                              : "Exact post location"}
+                          </Popup>
+                        </Marker>
+                      }
                       {/* )} */}
                     </MapContainer>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', marginBottom:'1rem' }}>
@@ -1021,7 +1162,7 @@ function PostService() {
                           Save Location
                         </Button>
                       )} */}
-                      {locationDetails && (
+                      {locationDetails.accuracy && (
                         <Box sx={{mx:'10px'}}>
                           <Typography variant="body1" style={{ fontWeight: 500 }}>
                             Accuracy (meters):
@@ -1043,6 +1184,28 @@ function PostService() {
                           <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
                         </Tooltip>
                       </IconButton>
+                    </Box>
+                    <Box display="flex" alignItems="center" justifyContent="center" mb={2}>
+                      <Tooltip title="When enabled, your exact location will be hidden and shown as an approximate area">
+                        <InfoOutlinedIcon fontSize="small" color="action"/>
+                      </Tooltip>
+                      <Typography variant="body2" sx={{ mr: '8px', ml: '2px'}}>
+                        Protect my location privacy (will show approximate location within 500m radius)
+                      </Typography>
+                      {/* <FormControlLabel
+                        control={ */}
+                          <Switch
+                            checked={protectLocation}
+                            onChange={toggleLocationPrivacy}
+                            color="primary"
+                          />
+                        {/* }
+                        label={
+                          <Typography variant="body2">
+                            Protect my location privacy (will show approximate location within 500m radius)
+                          </Typography>
+                        }
+                      /> */}
                     </Box>
                   </Box>
                 </Box>
