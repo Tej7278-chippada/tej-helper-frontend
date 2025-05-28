@@ -392,8 +392,10 @@ function PostService() {
       setProtectLocation(isChecked);
       if (isChecked) {
         fetchFakeAddress(finalLocation.latitude, finalLocation.longitude);
+        setSnackbar({ open: true, message: 'Location privacy turned on (will show approximate location within 500m radius)', severity: 'warning' });
       } else {
         setFakeAddress(null);
+        setSnackbar({ open: true, message: 'Location privacy turned off (your exact location posted as post location)', severity: 'warning' });
       }
     };
 
@@ -942,7 +944,7 @@ function PostService() {
                 </IconButton>
                 </DialogTitle>
                 <DialogContent style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '0rem' }}>
-                <Box sx={{paddingBottom: isMobile ? '9rem' : '8rem', marginBottom:'0rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
+                <Box sx={{paddingBottom: isMobile ? '8rem' : '8rem', marginBottom:'0rem', borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
                 {/* {locationDetails && (
                     <Box sx={{ margin: '1rem' }}>
                       <Typography variant="h6" gutterBottom>
@@ -1142,18 +1144,23 @@ function PostService() {
                       }
                       {/* )} */}
                     </MapContainer>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', marginBottom:'1rem' }}>
-                      <IconButton
-                        sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'}}
-                        onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
-                        // startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon/> : <MapRoundedIcon />}
-                      >
-                        <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
-                          <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
-                        </Tooltip>
-                      </IconButton>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', marginBottom:'6px' }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton
+                          sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'}}
+                          onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                          // startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon/> : <MapRoundedIcon />}
+                        >
+                          <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
+                            <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
+                          </Tooltip>
+                        </IconButton>
+                        <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                          {mapMode === 'normal' ? 'Normal' : 'Salellite'}
+                        </Typography>
+                      </Box>
                       {/* {currentLocation && (
                         <Button
                           variant="contained"
@@ -1163,34 +1170,39 @@ function PostService() {
                         </Button>
                       )} */}
                       {locationDetails?.accuracy && (
-                        <Box sx={{mx:'10px'}}>
-                          <Typography variant="body1" style={{ fontWeight: 500 }}>
-                            Accuracy (meters):
+                        <Box sx={{mx:'10px', alignContent: 'center'}}>
+                          <Typography variant="body2" style={{ fontWeight: 500 }}>
+                            Accuracy (meters): {locationDetails.accuracy}
                           </Typography>
-                          <Typography variant="body2" color="textSecondary">
+                          {/* <Typography variant="body2" color="textSecondary">
                             {locationDetails.accuracy}
-                          </Typography>
+                          </Typography> */}
                         </Box>
                       )}
-                      <IconButton
-                        sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'}}
-                        onClick={locateUser}
-                        // startIcon={<LocationOnIcon />}
-                        disabled={loadingLocation}
-                      >
-                       <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'} arrow placement="right">
-                          <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
-                        </Tooltip>
-                      </IconButton>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <IconButton
+                          sx={{fontWeight: '500', width: '60px', borderRadius: '10px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'}}
+                          onClick={locateUser}
+                          // startIcon={<LocationOnIcon />}
+                          disabled={loadingLocation}
+                        >
+                        <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'} arrow placement="right">
+                            <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
+                          </Tooltip>
+                        </IconButton>
+                        <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
+                          Locate Me
+                        </Typography>
+                      </Box>
                     </Box>
                     <Box display="flex" alignItems="center" justifyContent="center" mb={2}>
                       <Tooltip title="When enabled, your exact location will be hidden and shown as an approximate area">
                         <InfoOutlinedIcon fontSize="small" color="action"/>
                       </Tooltip>
-                      <Typography variant="body2" sx={{ mr: '8px', ml: '2px'}}>
-                        Protect my location privacy (will show approximate location within 500m radius)
+                      <Typography variant="body2" sx={{ mx: '6px' }}>
+                        Protect my location privacy {/* (will show approximate location within 500m radius) */}
                       </Typography>
                       {/* <FormControlLabel
                         control={ */}
