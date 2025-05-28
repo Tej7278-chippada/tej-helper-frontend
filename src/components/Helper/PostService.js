@@ -1221,7 +1221,7 @@ function PostService() {
                     </Box>
                   </Box>
                 </Box>
-                    <Card style={{ borderRadius: '1rem', marginInline:'2px' }}>
+                    <Card sx={{ borderRadius: 3, marginInline:'2px', bgcolor: '#f5f5f5' }}>
                         {/* Existing media with delete option */}
                         {existingMedia.length > 0 && (
                             <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
@@ -1239,7 +1239,7 @@ function PostService() {
                             </Box>
                         )}
                     </Card>
-                    <Card sx={{ borderRadius: '1rem', marginBottom: '0rem', mx:'2px' }}>
+                    <Card sx={{ borderRadius: 3, marginBottom: '0rem', mx:'2px', bgcolor: '#f5f5f5' }}>
                         <Box sx={{ mx: '6px', my:'4px' }}>
                             <Box sx={{mx:'6px' }}>
                               <Typography variant="subtitle1">Add Post Photos</Typography>
@@ -1285,7 +1285,7 @@ function PostService() {
                                 </Box>
                             )}
                         </Box>
-                      </Card>
+                    </Card>
                       <Box>
                           {/* <TextField
                             label="Post Title"
@@ -1304,12 +1304,12 @@ function PostService() {
                             ))}
                           </Box> */}
                       </Box>
-                      <Box>
+                    <Card sx={{bgcolor: '#f5f5f5', borderRadius: 3, px: '4px' , py: '4px', mx:'2px', pt: '12px', pb: isMobile ? '6px' : '6px'}}>
                       <TextField
                         label="Post Title"
                         fullWidth sx={{
                           '& .MuiOutlinedInput-root': {
-                            borderRadius: '1rem',
+                            borderRadius: '12px',
                             bgcolor: theme.palette.background.paper,
                           },
                           '& .MuiInputBase-input': {
@@ -1341,9 +1341,9 @@ function PostService() {
                         </Box>
                       ) : (
                       generatedImages.length > 0 ? (
-                        <Card sx={{ position: "relative", background: "#fff", padding: "10px", zIndex: 1000, mx:'2px' }}>
+                        <Box sx={{ position: "relative", padding: "0px", px: isMobile ? '0px' : '4px' , zIndex: 1000, mx:'2px' , borderRadius: 3}}>
                           <Typography variant="subtitle1">Select an Image</Typography>
-                          <Box style={{ display: "flex", gap: "4px", paddingBottom:'0px', overflowX: "auto", scrollbarWidth: 'none', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
+                          <Box style={{ display: "flex", gap: "4px", paddingBottom:'0px', overflowX: "auto", scrollbarWidth: isMobile ? 'none' : 'thin', scrollbarColor: 'rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0)' }}>
                             {generatedImages.map((img) => (
                             <Box key={img.id} sx={{ position: "relative", cursor: "pointer" }} onClick={() => handleSelectImage(img.urls.full)}>
                               <img
@@ -1395,7 +1395,7 @@ function PostService() {
                             </Box>
                             ))}
                           </Box>
-                        </Card>
+                        </Box>
                         ) : noImagesFound ? (
                           <Box sx={{ textAlign: 'center', my: 2 }}>
                             <Typography color="warning" sx={{ mb: 2 }}>Images doesn't found related to the title, please check the title.</Typography>
@@ -1403,7 +1403,7 @@ function PostService() {
                         ) : null
                       )}
                       {/* </Card> */}
-                    </Box>
+                    </Card>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                     <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}} required>
                         <InputLabel>Categories</InputLabel>
