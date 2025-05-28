@@ -68,19 +68,19 @@ const WishList = () => {
 
   return (
     <Layout username={tokenUsername}>
-      <Box p={'4px'} sx={{ margin: '0rem' }}>
-        <Typography variant="h6" align="left" mx="8px" marginTop="4px" gutterBottom>
+      <Box p={'0px'} sx={{ margin: '0rem' }}>
+        <Typography variant="h6" align="left" mx={isMobile ? "10px" : "16px"} marginTop="6px" gutterBottom>
           Wishlisted Posts
         </Typography>
 
         {/* <div style={{
           backgroundSize: 'cover', backgroundPosition: 'center', backdropFilter: 'blur(10px)'
         }}> */}
-          <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: isMobile ? '6px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+          <Box sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '6px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
             {loading ? (
               <SkeletonCards />
             ) : (
-              <Grid container spacing={1}>
+              <Grid container spacing={2}>
                 {wishlist.length > 0 ? (
                   wishlist.map((post) => (
                     <Grid item xs={12} sm={6} md={4} key={post._id}>

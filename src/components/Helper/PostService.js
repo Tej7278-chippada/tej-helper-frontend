@@ -757,7 +757,7 @@ function PostService() {
             </Button>
             
         </Toolbar>
-        <Box sx={{bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', paddingInline: '8px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
+        <Box sx={{bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: '8px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
         {loading ? (
           <SkeletonCards/>
         ) : (
