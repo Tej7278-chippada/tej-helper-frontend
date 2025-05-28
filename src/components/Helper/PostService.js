@@ -1162,7 +1162,7 @@ function PostService() {
                           Save Location
                         </Button>
                       )} */}
-                      {locationDetails.accuracy && (
+                      {locationDetails && (
                         <Box sx={{mx:'10px'}}>
                           <Typography variant="body1" style={{ fontWeight: 500 }}>
                             Accuracy (meters):
