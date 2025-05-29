@@ -51,6 +51,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
   const typingDebounceTimeout = useRef(null);
+  const senderUsername = localStorage.getItem('tokenUsername');
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -232,7 +233,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
         // chatId: chat._id // You might need to get this from your chat state
         postOwnerId: userId,
         postTitle: postTitle,
-        senderName: chatData.username
+        senderName: senderUsername
       });
       // const response = 
       await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/sendMessage`, {

@@ -52,6 +52,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
   const typingDebounceTimeout = useRef(null);
+  const senderUsername = localStorage.getItem('tokenUsername');
 
 //   useEffect(() => {
 //     // if (open) {
@@ -283,7 +284,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         // chatId: chatData.chatId, // You might need to get this from your chat state
         postOwnerId: post.user.id,
         postTitle: post.title,
-        senderName: post.user.username
+        senderName: senderUsername,
       });
 
       await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
