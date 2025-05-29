@@ -1,9 +1,9 @@
-import React from 'react';
+import React, {useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
-  // Card,
+  Card,
   Typography,
   keyframes,
   styled
@@ -47,19 +47,25 @@ const moveRight = keyframes`
 const HomeContainer = styled(Box)({
   position: 'relative',
   width: '100%',
-  height: '100vh',
+  height: '100%',
   overflow: 'hidden',
   background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'end',
+  justifyContent: 'center', //justifyContent: 'end',
   alignItems: 'center',
+
+  '@media (max-width: 768px)': {
+    // padding: '8px 0',
+    position: 'absolute',
+    justifyContent: 'end',
+  },
 });
 
 const RowContainer = styled(Box)(({ direction, speed }) => ({
   display: 'flex',
   width: '200%',
-  padding: '1.5rem 0',
+  padding: '12px 0',
   animation: `${direction === 'left' ? moveLeft : moveRight} ${speed} linear infinite`,
 
   '@media (max-width: 768px)': {
@@ -69,7 +75,7 @@ const RowContainer = styled(Box)(({ direction, speed }) => ({
 
 const ImageItem = styled(Box)({
   flexShrink: 0,
-  padding: '0 1.5rem',
+  padding: '0 12px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -79,8 +85,8 @@ const ImageItem = styled(Box)({
   },
 
   '& img': {
-    width: 240,
-    height: 160,
+    width: 320,
+    height: 240,
     objectFit: 'contain', // 'cover' for border radius borderRadius: '12px',
     filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
     opacity: 0.8,
@@ -98,23 +104,26 @@ const ImageItem = styled(Box)({
   },
 });
 
-// const FloatingBox = styled(Card)({
-//   position: 'relative',
-//   background: 'rgba(255, 255, 255, 0.9)',
-//   backdropFilter: 'blur(10px)',
-//   borderRadius: '20px',
-//   padding: '2.5rem',
-//   boxShadow: '0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07)',
-//   textAlign: 'center',
-//   maxWidth: 500,
-//   width: '90%',
-//   zIndex: 10,
-//   transition: 'transform 0.3s ease-out',
+const FloatingBox = styled(Card)({
+  position: 'absolute',
+  background: 'rgba(255, 255, 255, 0.8)',
+  backdropFilter: 'blur(1px)',
+  borderRadius: '20px',
+  padding: '2.5rem',
+  boxShadow: '0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07)',
+  textAlign: 'center',
+  maxWidth: 500,
+  width: '90%', 
+  height: '300px', justifyContent:'center', display: 'flex', alignContent: 'center', flexDirection:'column',
+  zIndex: 10,
+  transition: 'transform 0.3s ease-out',
 
-//   '@media (max-width: 768px)': {
-//     padding: '1.5rem',
-//   },
-// });
+  '@media (max-width: 768px)': {
+    position: 'relative',
+    padding: '1.5rem',
+    height:'250px', width:'80%'
+  },
+});
 
 const ButtonGroup = styled(Box)({
   display: 'flex',
@@ -168,60 +177,60 @@ const ImageRow = ({ direction, speed, images }) => {
 
 const HelperHome = () => {
   const navigate = useNavigate();
-  // const floatingBoxRef = useRef(null);
+  const floatingBoxRef = useRef(null);
   const tokenUsername = localStorage.getItem('tokenUsername');
 
   // Handle mouse move for parallax effect on floating box
-  // useEffect(() => {
-  //   const floatingBox = floatingBoxRef.current;
+  useEffect(() => {
+    const floatingBox = floatingBoxRef.current;
 
-  //   const handleMouseMove = (e) => {
-  //     const x = e.clientX / window.innerWidth;
-  //     const y = e.clientY / window.innerHeight;
+    const handleMouseMove = (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
 
-  //     floatingBox.style.transform = `translate(
-  //       ${x * 20 - 10}px, 
-  //       ${y * 20 - 10}px
-  //     )`;
-  //   };
+      floatingBox.style.transform = `translate(
+        ${x * 20 - 10}px, 
+        ${y * 20 - 10}px
+      )`;
+    };
 
-  //   window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
 
-  //   return () => {
-  //     window.removeEventListener('mousemove', handleMouseMove);
-  //   };
-  // }, []);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
 
   return (
     <Layout username={tokenUsername}>
     <HomeContainer>
       {/* Floating navigation box */}
-      {/* <FloatingBox ref={floatingBoxRef}>
+      <FloatingBox ref={floatingBoxRef}>
         <Typography variant="h4" gutterBottom sx={{ color: '#2d3748' }}>
           Welcome to Helper
         </Typography>
         <Typography variant="body1" sx={{ color: '#718096', mb: 3 }}>
-          Get started with our services
+          Post work requirements or Take works
         </Typography>
         <ButtonGroup>
           <NavButton
-            onClick={() => navigate('/services')}
+            onClick={() => navigate('/')}
             color="#4a6bff"
             variant="contained"
           >
-            Explore Services
+            Want to Help others
           </NavButton>
           <NavButton
-            onClick={() => navigate('/contact')}
+            onClick={() => navigate('/userPosts')}
             color="#ff6b6b"
             variant="contained"
           >
-            Contact Us
+            I want Help
           </NavButton>
         </ButtonGroup>
-      </FloatingBox> */}
+      </FloatingBox>
       {/* Animated rows */}
-      <Box sx={{  m: '2rem', }}>
+      {/* <Box sx={{  m: '2rem', }}>
       <Typography variant="h5" gutterBottom textAlign="center" sx={{ color: '#2d3748', m: 2, alignItems: 'center' }}>
         Welcome to Helper
       </Typography>
@@ -237,13 +246,13 @@ const HelperHome = () => {
         <NavButton
           onClick={() => navigate('/userPosts')}
           // color="#ff6b6b"
-          color="rgba(228, 132, 22, 0.74)"
+          color="rgba(228, 80, 22, 0.74)"
           variant="contained"
         >
           I want Help
         </NavButton>
       </ButtonGroup>
-      </Box>
+      </Box> */}
       <ImageRow direction="left" speed="40s" images={imageSet1} />
       <ImageRow direction="right" speed="50s" images={imageSet2} />
       <ImageRow direction="left" speed="60s" images={imageSet3} />
