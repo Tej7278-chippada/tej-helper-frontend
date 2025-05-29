@@ -102,8 +102,14 @@ function PostDetailsById({ onClose, user }) {
         // setStockCountId(response.data.stockCount); // Set initial stock count
 
       } catch (error) {
-        setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
-        console.error('Error fetching post details:', error);
+        if (error.response && error.response.status === 404) {
+          console.error('Post Unavailable.', error);
+          setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
+        } else if (error.response && error.response.status === 401) {
+          console.error('Error fetching post details:', error);
+        } else {
+          console.error('Error fetching post details:', error);
+        }
       } finally {
         setLoading(false);
       }
@@ -435,472 +441,480 @@ function PostDetailsById({ onClose, user }) {
   
 
 
-  if (loading || !post) {
-    return (
-      <Layout>
-        {/* <SkeletonCards /> */}
-        <Box sx={{margin: '8px' }}>
-          <SkeletonProductDetail />
-        </Box>
-      </Layout>
-    );
-  }
+  // if (loading || !post) {
+  //   return (
+  //     <Layout>
+  //       {/* <SkeletonCards /> */}
+  //       <Box sx={{margin: '8px' }}>
+  //         <SkeletonProductDetail />
+  //       </Box>
+  //     </Layout>
+  //   );
+  // }
 
   return (
     <Layout username={tokenUsername}>
       <Box>
+        {loading || !post ?
+          <Box sx={{margin: '8px' }}>
+            <SkeletonProductDetail/>
+          </Box> : 
+          <>
+          <Box sx={{
+            padding: '8px',
+            // position: 'relative',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '8px', scrollbarWidth: 'thin'
+          }}>
+            <Box
+              display="flex"
+              flexDirection={isMobile1 ? "column" : "row"}
+              gap={2} sx={{ bgcolor: '#f5f5f5', borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px' }}
+            >
+                <Box sx={{
+                  flex: 2,
+                  // height: '73vh', // Fixed height relative to viewport
+                  overflowY: 'auto',
+                  // bgcolor: 'transparent', // Card background color (customizable)
+                  borderRadius: isMobile ? '10px' : '12px', // Card border radius (customizable)
+                  // boxShadow: 3, // Shadow for a modern look
+                  scrollbarWidth: 'thin'
+                }}>
+                  <Box
+                    flex={isMobile ? "1" : "0 0 30%"}
+                    style={{ paddingRight: isMobile ? "0" : "0rem" }}
+                  >
 
-        <div style={{
-          padding: '8px',
-          // position: 'relative',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          borderRadius: '8px', scrollbarWidth: 'thin'
-        }}>
-          <Box
-            display="flex"
-            flexDirection={isMobile1 ? "column" : "row"}
-            gap={2} sx={{ bgcolor: '#f5f5f5', borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px' }}
-          >
-            <Box sx={{
-              flex: 2,
-              // height: '73vh', // Fixed height relative to viewport
-              overflowY: 'auto',
-              // bgcolor: 'transparent', // Card background color (customizable)
-              borderRadius: isMobile ? '10px' : '12px', // Card border radius (customizable)
-              // boxShadow: 3, // Shadow for a modern look
-              scrollbarWidth: 'thin'
-            }}>
-              <Box
-                flex={isMobile ? "1" : "0 0 30%"}
-                style={{ paddingRight: isMobile ? "0" : "0rem" }}
-              >
-
-                {/* Media section */}
-                {/* Media section with click to zoom */}
-                <CardMedia>
-                  <div style={{
-                    display: 'flex',
-                    overflowX: 'auto',
-                    scrollbarWidth: 'none',
-                    scrollbarColor: '#888 transparent',
-                    // borderRadius: '8px',
-                    gap: isMobile ? '3px' : '4px', height: isMobile1 ? '250px' : '300px',
-                  }}>
-                    {post.media && post.media.length > 0 ? (
-                      post.media.map((base64Image, index) => (
-                        <img
-                          key={index}
-                          src={`data:image/jpeg;base64,${base64Image}`}
-                          alt={`Post ${index}`}
-                          style={{
-                            // height: '200px',
-                            borderRadius: '6px',
-                            objectFit: 'cover',
-                            flexShrink: 0,
-                            cursor: 'pointer' // Make the image look clickable
-                          }}
-                          onClick={() => handleImageClick(base64Image)} // Open image in modal on click
-                        />
-                      ))
-                    ) : (
-                      // Show a placeholder image if no media is available
-                      <img
-                        // src="../assets/null-product-image.webp" // Replace with the path to your placeholder image
-                        src='https://placehold.co/56x56?text=No+Imag'
-                        alt="No media available"
-                        style={{
-                          // height: '200px',
-                          borderRadius: '8px',
-                          objectFit: 'cover',
-                          flexShrink: 0,
-                        }}
-                      />
-                    )}
-                  </div>
-                </CardMedia></Box></Box>
-
-            <Box sx={{
-              flex: 3,
-              // height: '73vh', // Fixed height relative to viewport
-              overflowY: 'auto',
-              bgcolor: 'white', // Card background color (customizable)
-              borderRadius: 3, // Card border radius (customizable)
-              // boxShadow: 3, // Shadow for a modern look
-              scrollbarWidth: 'thin', padding: '1rem',
-              position: 'relative', // To enable absolute positioning of the button
-            }}>
-              <Box flex={isMobile ? "1" : "0 0 70%"} mb={8}>
-
-                {/* Product Details */}
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <IconButton
-                      style={{
-                        // display: 'inline-block',
-                        float: 'right',
-                        fontWeight: '500',
-                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '10px'
-                      }}
-                      onClick={() => handleShare(post._id, post.title)}
-                      aria-label="Share Post"
-                      title="Share Post"
-                    >
-                      <CustomTooltip  title="Share this post" arrow placement="right">
-                        <ShareIcon />
-                      </CustomTooltip >
-                    </IconButton>
-                    <IconButton
-                      style={{ display: 'inline-block', float: 'right', fontWeight: '500', backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
-                      onClick={() => handleWishlistToggle(post._id)}
-                      sx={{
-                        color: wishlist.has(post._id) ? 'red' : 'gray',
-                      }} disabled={wishLoading || wishStatusLoading} // Disable button while loading
-                    >
-                      <Tooltip
-                        title={wishlist.has(post._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                        arrow
-                        placement="right"
-                      >
-                        <span
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            height: '100%',
-                            position: 'relative',
-                            transition: 'transform 0.3s ease',
-                          }}
-                        >{wishLoading ? (
-                          <CircularProgress size={24} color="inherit" /> // Show spinner while loading
-                        ) : wishlist.has(post._id) ? (
-                          <FavoriteIcon />
+                    {/* Media section */}
+                    {/* Media section with click to zoom */}
+                    <CardMedia>
+                      <div style={{
+                        display: 'flex',
+                        overflowX: 'auto',
+                        scrollbarWidth: 'none',
+                        scrollbarColor: '#888 transparent',
+                        // borderRadius: '8px',
+                        gap: isMobile ? '3px' : '4px', height: isMobile1 ? '250px' : '330px',
+                      }}>
+                        {post.media && post.media.length > 0 ? (
+                          post.media.map((base64Image, index) => (
+                            <img
+                              key={index}
+                              src={`data:image/jpeg;base64,${base64Image}`}
+                              alt={`Post ${index}`}
+                              style={{
+                                // height: '200px',
+                                borderRadius: '6px',
+                                objectFit: 'cover',
+                                flexShrink: 0,
+                                cursor: 'pointer' // Make the image look clickable
+                              }}
+                              onClick={() => handleImageClick(base64Image)} // Open image in modal on click
+                            />
+                          ))
                         ) : (
-                          <FavoriteBorderIcon />
+                          // Show a placeholder image if no media is available
+                          <img
+                            // src="../assets/null-product-image.webp" // Replace with the path to your placeholder image
+                            src='https://placehold.co/56x56?text=No+Imag'
+                            alt="No media available"
+                            style={{
+                              // height: '200px',
+                              borderRadius: '8px',
+                              objectFit: 'cover',
+                              flexShrink: 0,
+                            }}
+                          />
                         )}
-                        </span>
-                      </Tooltip>
-                    </IconButton>
-                    <Typography variant="h5" style={{
-                      fontWeight: 'bold',
-                      marginBottom: '0.5rem',
-                      color: '#333'
-                    }}>
-                      {post.title}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Post Category:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {post.categories}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Post Status: 
-                    </Typography>
-                    {/* <Typography variant="body2" color="textSecondary">
-                      {post.gender}
-                    </Typography> */}
-                    <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                      {post.postStatus}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Price:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      ₹{post.price}
-                    </Typography>
-                  </Grid>
-                  {/* <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Post Status: 
-                    </Typography>
-                    <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                      {post.postStatus}
-                    </Typography>
-                  </Grid> */}
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      People Required: 
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {post.peopleCount} ({post.gender})
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={12}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Service Required on: 
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Date: {new Date(post.serviceDate).toLocaleDateString()}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Time: {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </Typography>
-                  </Grid>
-                  {/* <Grid item xs={12} sm={6}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Service required on time: 
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </Typography>
-                  </Grid> */}
-                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                    Date : {new Date(post.serviceDate).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                    Time from - To : {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </Typography> */}
-                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                    Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
-                  </Typography> */}
-                  {/* {!(post.createdAt === post.updatedAt) && ( */}
-                  {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
-                    Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
-                  </Typography> */}
-                  {/* )} */}
-                  <Grid item xs={12} sm={12}>
-                    <Typography variant="body2">Service required for {post.serviceDays} days</Typography>
-                    {post.serviceDays && (
-                      <Typography color='grey' variant="body2">
-                        {/* {`Product will be delivered by ${calculateDeliveryDate(product.deliveryDays)}`} */}
-                      </Typography>
-                    )}
-                  </Grid>
-                  
-                  {/* <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      IP address: 
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {post.ip}
-                    </Typography>
-                  </Grid> */}
-                  <Grid item xs={12} sm={12}>
-                    <Typography variant="body2" color='grey' style={{ fontWeight: 500 }}>
-                      See post location on other maps or search this link on Google
-                      <IconButton
-                        style={{
-                          // display: 'inline-block',
-                          // float: 'right',
-                          fontWeight: '500',
-                          backgroundColor: 'rgba(255, 255, 255, 0)',
-                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0)', marginLeft: '10px', padding:'0px'
-                        }}
-                        onClick={openPostLocation}
-                      >
-                      <CustomTooltip  title="open Post location" arrow placement="top">
-                        <LinkRoundedIcon />
-                      </CustomTooltip >
-                    </IconButton>
-                    </Typography>
-                    {/* <Typography variant="body2" color="textSecondary" onClick={shareLocation} sx={{cursor:'pointer'}}>
-                      {post.location.latitude}, {post.location.longitude}
-                    </Typography> */}
-                  </Grid>
-                </Grid>
-              </Box>
-              <Toolbar sx={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                // bgcolor: 'white', borderRadius:'16px',
-                // boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginTop: '0rem',
-              }}>
-                {/* <Box style={{ display: 'flex', flexGrow: 1, }}> */}
-                  {/* <Typography variant="body2" color={stockCountId > 0 ? "green" : "red"}>
-                    {stockCountId > 0 ? `In Stock (${stockCountId} available)` : "Out of Stock"}
-                  </Typography> */}
-                {/* </Box> */}
-                <Box >
-                  <Button
-                    variant="text"
-                    color="secondary"
-                    onClick={() => openRouteMapDialog(post)}
-                    // disabled={stockCountId === 0}
-                    style={{ margin: "0rem", borderRadius: '10px' }}
-                    startIcon={<RouteRoundedIcon />}
-                  >
-                    Route Map
-                  </Button>
-                </Box>
-                {!(post.user.id === userId) && 
-                <Box >
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    // onClick={() => openRouteMapDialog(post)}
-                    // disabled={stockCountId === 0}
-                    style={{ margin: "0rem", borderRadius: '8px' }}
-                    startIcon={<ForumRoundedIcon />}
-                    onClick={() => setChatDialogOpen(true)}
-                  >
-                    Chat
-                  </Button>
-                </Box>
-                }
-              </Toolbar>
-              
-              </Box>
-          </Box>
-
-          <Grid item xs={12} sx={{ paddingTop: '1rem' }}>
-            <Grid2 sx={{
-              bottom: '8px',
-              right: '0px', position: 'relative', display: 'inline-block', float: 'right',
-            }}>
-              <IconButton
-                onClick={handleLike} sx={{gap:'2px'}}
-                disabled={likeLoading} // Disable button while loading, sx={{ color: product.likedByUser ? 'blue' : 'gray' }} 
-              >
-                {likeLoading ? (
-                  <CircularProgress size={24} color="inherit" /> // Show spinner while loading
-                ) : post.likedByUser ? (
-                  <ThumbUpRoundedIcon />
-                ) : (
-                  <ThumbUpOutlinedIcon />
-                )}
-                {post.likes}
-              </IconButton>
-              <IconButton sx={{gap:'2px'}}
-                onClick={() => openComments(post)}
-              >
-                <ChatRoundedIcon /> {post.comments?.length || 0}
-              </IconButton>
-            </Grid2>
-            <Typography variant="body1" style={{ paddingLeft: '6px', fontWeight: 500 }}>
-              Post Description:
-            </Typography>
-            <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px'}}>
-              <Typography variant="body1" color="textSecondary" style={{
-                marginTop: '0.5rem',
-                lineHeight: '1.5',
-                // textAlign: 'justify',
-                whiteSpace: "pre-wrap", // Retain line breaks and tabs
-                wordWrap: "break-word", // Handle long words gracefully
-                // backgroundColor: "#f5f5f5",
-                padding: "1rem",
-                borderRadius: "8px",
-                // border: "1px solid #ddd",
-              }}>
-                {post.description}
-              </Typography>
-              
-            </Box>
-          </Grid>
-          <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px', my:1, padding:'1rem'}}>
-          <Grid item xs={6} sm={4} >
-            <Typography variant="body1" style={{ fontWeight: 500 }}>
-              Post Owner Details:
-            </Typography>
-            {/* <Typography variant="body2" color="textSecondary">
-              {post.user.id}
-            </Typography>
-            <Grid item xs={6} sm={4}>
-              <Typography variant="body1" style={{ fontWeight: 500 }}>
-                User Code:
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                {post.userCode}
-              </Typography>
-            </Grid> */}
-              <Box display="flex" alignItems="center" spacing={1} justifyContent="flex-end" sx={{display: 'inline-block', float: 'right',}}>
-                {/* Trust Level */}
-                <Grid item>
-                  <Box display="flex" >
-                    <Typography variant="body2" color="textSecondary" mr={1}>
-                      Trust Level
-                    </Typography>
-                    <StarRoundedIcon sx={{ color: 'gold', fontSize: 18, marginRight: 0.5 }} />
-                    <Typography variant="body2" color="textSecondary">
-                      {post.user.trustLevel || "N/A"}
-                    </Typography>
+                      </div>
+                    </CardMedia>
                   </Box>
-                </Grid>
-                {/* Rate User Button */}
-                <Grid item justifyContent="flex-end">
-                  <Button variant="text" size="small" onClick={handleOpenRateDialog}>
-                    Rate User
-                  </Button>
-                </Grid>
-              </Box>
-            <Grid item xs={12} sm={4} my={1} display="flex" alignItems="center" >
-              {/* {post.user?.profilePic && ( */}
-                <Avatar
-                  src={`data:image/png;base64,${post.user.profilePic}`}
-                  alt={post.user.username[0]}
-                  sx={{ width: 40, height: 40, borderRadius: '50%', marginRight: 1 }}
-                />
-              {/* )} */}
-              <Typography variant="body1" style={{ fontWeight: 500 }}>
-                {post.user?.username}
-              </Typography>
-             
-            </Grid>
-            
-          </Grid>
-          <Grid item xs={12} sm={12} pt={1}>
-            <Typography variant="body2" color="textSecondary" >
-              Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
-            </Typography>
-            {post.updatedAt&& (
-            <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
-              Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
-            </Typography>
-            )}
-          </Grid>
+                </Box>
 
+                <Box sx={{
+                  flex: 3,
+                  // height: '73vh', // Fixed height relative to viewport
+                  overflowY: 'auto',
+                  bgcolor: 'white', // Card background color (customizable)
+                  borderRadius: 3, // Card border radius (customizable)
+                  // boxShadow: 3, // Shadow for a modern look
+                  scrollbarWidth: 'thin', padding: '1rem',
+                  position: 'relative', // To enable absolute positioning of the button
+                }}>
+                  <Box flex={isMobile ? "1" : "0 0 70%"} mb={8}>
+
+                    {/* Product Details */}
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <IconButton
+                          style={{
+                            // display: 'inline-block',
+                            float: 'right',
+                            fontWeight: '500',
+                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '10px'
+                          }}
+                          onClick={() => handleShare(post._id, post.title)}
+                          aria-label="Share Post"
+                          title="Share Post"
+                        >
+                          <CustomTooltip title="Share this post" arrow placement="right">
+                            <ShareIcon />
+                          </CustomTooltip >
+                        </IconButton>
+                        <IconButton
+                          style={{ display: 'inline-block', float: 'right', fontWeight: '500', backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
+                          onClick={() => handleWishlistToggle(post._id)}
+                          sx={{
+                            color: wishlist.has(post._id) ? 'red' : 'gray',
+                          }} disabled={wishLoading || wishStatusLoading} // Disable button while loading
+                        >
+                          <Tooltip
+                            title={wishlist.has(post._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                            arrow
+                            placement="right"
+                          >
+                            <span
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: '100%',
+                                height: '100%',
+                                position: 'relative',
+                                transition: 'transform 0.3s ease',
+                              }}
+                            >{wishLoading ? (
+                              <CircularProgress size={24} color="inherit" /> // Show spinner while loading
+                            ) : wishlist.has(post._id) ? (
+                              <FavoriteIcon />
+                            ) : (
+                              <FavoriteBorderIcon />
+                            )}
+                            </span>
+                          </Tooltip>
+                        </IconButton>
+                        <Typography variant="h5" style={{
+                          fontWeight: 'bold',
+                          marginBottom: '0.5rem',
+                          color: '#333'
+                        }}>
+                          {post.title}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body1" style={{ fontWeight: 500 }}>
+                          Post Category:
+                        </Typography>
+                        <Typography variant="body2" color={post.categories !== 'Emergency' ? 'textSecondary' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                          {post.categories}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body1" style={{ fontWeight: 500 }}>
+                          Post Status:
+                        </Typography>
+                        {/* <Typography variant="body2" color="textSecondary">
+                        {post.gender}
+                      </Typography> */}
+                        <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                          {post.postStatus}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body1" style={{ fontWeight: 500 }}>
+                          Price:
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary" >
+                          ₹{post.price}
+                        </Typography>
+                      </Grid>
+                      {/* <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Post Status: 
+                      </Typography>
+                      <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                        {post.postStatus}
+                      </Typography>
+                    </Grid> */}
+                      <Grid item xs={12} sm={6}>
+                        <Typography variant="body1" style={{ fontWeight: 500 }}>
+                          Service Required on:
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Date: {new Date(post.serviceDate).toLocaleDateString()} (for {post.serviceDays} day's)
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          Time: {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body1" style={{ fontWeight: 500 }}>
+                          People Required:
+                        </Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          {post.peopleCount} ({post.gender})
+                        </Typography>
+                      </Grid>
+                      {/* <Grid item xs={12} sm={6}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Service required on time: 
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </Typography>
+                    </Grid> */}
+                      {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                      Date : {new Date(post.serviceDate).toLocaleDateString()}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                      Time from - To : {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </Typography> */}
+                      {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                      Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
+                    </Typography> */}
+                      {/* {!(post.createdAt === post.updatedAt) && ( */}
+                      {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                      Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+                    </Typography> */}
+                      {/* )} */}
+                      {/* <Grid item xs={12} sm={12}>
+                        <Typography variant="body2">Service required for {post.serviceDays} days</Typography>
+                        {post.serviceDays && (
+                          <Typography color='grey' variant="body2">
+                          </Typography>
+                        )}
+                      </Grid> */}
+
+                      {/* <Grid item xs={6} sm={4}>
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        IP address: 
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {post.ip}
+                      </Typography>
+                    </Grid> */}
+                      <Grid item xs={12} sm={12}>
+                        <Typography variant="body2" color='grey' style={{ fontWeight: 500 }}>
+                          See post location on other maps or search this link on Google
+                          <IconButton
+                            style={{
+                              // display: 'inline-block',
+                              // float: 'right',
+                              fontWeight: '500',
+                              backgroundColor: 'rgba(255, 255, 255, 0)',
+                              boxShadow: '0 2px 5px rgba(0, 0, 0, 0)', marginLeft: '10px', padding: '0px'
+                            }}
+                            onClick={openPostLocation}
+                          >
+                            <CustomTooltip title="open Post location" arrow placement="top">
+                              <LinkRoundedIcon />
+                            </CustomTooltip >
+                          </IconButton>
+                        </Typography>
+                        {/* <Typography variant="body2" color="textSecondary" onClick={shareLocation} sx={{cursor:'pointer'}}>
+                        {post.location.latitude}, {post.location.longitude}
+                      </Typography> */}
+                      </Grid>
+                    </Grid>
+                  </Box>
+                  <Toolbar sx={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    // bgcolor: 'white', borderRadius:'16px',
+                    // boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: '0rem',
+                  }}>
+                    {/* <Box style={{ display: 'flex', flexGrow: 1, }}> */}
+                    {/* <Typography variant="body2" color={stockCountId > 0 ? "green" : "red"}>
+                      {stockCountId > 0 ? `In Stock (${stockCountId} available)` : "Out of Stock"}
+                    </Typography> */}
+                    {/* </Box> */}
+                    <Box >
+                      <Button
+                        variant="text"
+                        color="secondary"
+                        onClick={() => openRouteMapDialog(post)}
+                        // disabled={stockCountId === 0}
+                        style={{ margin: "0rem", borderRadius: '10px' }}
+                        startIcon={<RouteRoundedIcon />}
+                      >
+                        Route Map
+                      </Button>
+                    </Box>
+                    {!(post.user.id === userId) &&
+                      <Box >
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          // onClick={() => openRouteMapDialog(post)}
+                          // disabled={stockCountId === 0}
+                          style={{ margin: "0rem", borderRadius: '8px' }}
+                          startIcon={<ForumRoundedIcon />}
+                          onClick={() => setChatDialogOpen(true)}
+                        >
+                          Chat
+                        </Button>
+                      </Box>
+                    }
+                  </Toolbar>
+
+                </Box>
+            </Box>
+
+            <Grid item xs={12} sx={{ paddingTop: '1rem' }}>
+              <Grid2 sx={{
+                bottom: '8px',
+                right: '0px', position: 'relative', display: 'inline-block', float: 'right',
+              }}>
+                <IconButton
+                  onClick={handleLike} sx={{gap:'2px'}}
+                  disabled={likeLoading} // Disable button while loading, sx={{ color: product.likedByUser ? 'blue' : 'gray' }} 
+                >
+                  {likeLoading ? (
+                    <CircularProgress size={24} color="inherit" /> // Show spinner while loading
+                  ) : post.likedByUser ? (
+                    <ThumbUpRoundedIcon />
+                  ) : (
+                    <ThumbUpOutlinedIcon />
+                  )}
+                  {post.likes}
+                </IconButton>
+                <IconButton sx={{gap:'2px'}}
+                  onClick={() => openComments(post)}
+                >
+                  <ChatRoundedIcon /> {post.comments?.length || 0}
+                </IconButton>
+              </Grid2>
+              <Typography variant="body1" style={{ paddingLeft: '6px', fontWeight: 500 }}>
+                Post Description:
+              </Typography>
+              <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px'}}>
+                <Typography variant="body1" color="textSecondary" style={{
+                  marginTop: '0.5rem',
+                  lineHeight: '1.5',
+                  // textAlign: 'justify',
+                  whiteSpace: "pre-wrap", // Retain line breaks and tabs
+                  wordWrap: "break-word", // Handle long words gracefully
+                  // backgroundColor: "#f5f5f5",
+                  padding: "1rem",
+                  borderRadius: "8px",
+                  // border: "1px solid #ddd",
+                }}>
+                  {post.description}
+                </Typography>
+                
+              </Box>
+            </Grid>
+            <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px', my:1, padding:'1rem'}}>
+            <Grid item xs={6} sm={4} >
+              <Typography variant="body1" style={{ fontWeight: 500 }}>
+                Post Owner Details:
+              </Typography>
+              {/* <Typography variant="body2" color="textSecondary">
+                {post.user.id}
+              </Typography>
+              <Grid item xs={6} sm={4}>
+                <Typography variant="body1" style={{ fontWeight: 500 }}>
+                  User Code:
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {post.userCode}
+                </Typography>
+              </Grid> */}
+                <Box display="flex" alignItems="center" spacing={1} justifyContent="flex-end" sx={{display: 'inline-block', float: 'right',}}>
+                  {/* Trust Level */}
+                  <Grid item>
+                    <Box display="flex" >
+                      <Typography variant="body2" color="textSecondary" mr={1}>
+                        Trust Level
+                      </Typography>
+                      <StarRoundedIcon sx={{ color: 'gold', fontSize: 18, marginRight: 0.5 }} />
+                      <Typography variant="body2" color="textSecondary">
+                        {post.user.trustLevel || "N/A"}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  {/* Rate User Button */}
+                  <Grid item justifyContent="flex-end">
+                    <Button variant="text" size="small" onClick={handleOpenRateDialog}>
+                      Rate User
+                    </Button>
+                  </Grid>
+                </Box>
+              <Grid item xs={12} sm={4} my={1} display="flex" alignItems="center" >
+                {/* {post.user?.profilePic && ( */}
+                  <Avatar
+                    src={`data:image/png;base64,${post.user.profilePic}`}
+                    alt={post.user.username[0]}
+                    sx={{ width: 40, height: 40, borderRadius: '50%', marginRight: 1 }}
+                  />
+                {/* )} */}
+                <Typography variant="body1" style={{ fontWeight: 500 }}>
+                  {post.user?.username}
+                </Typography>
+              
+              </Grid>
+              
+            </Grid>
+            <Grid item xs={12} sm={12} pt={1}>
+              <Typography variant="body2" color="textSecondary" >
+                Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
+              </Typography>
+              {post.updatedAt&& (
+              <Typography variant="body2" color="textSecondary" style={{ fontWeight: 500 }}>
+                Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+              </Typography>
+              )}
+            </Grid>
+
+
+            </Box>
+
+            
+
+
+            
 
           </Box>
-
-          
-
-
-          
-
-        </div>
-        {/* Large Image Dialog with Zoom */}
-        <ImageZoomDialog
-          selectedImage={selectedImage}
-          handleCloseImageModal={handleCloseImageModal}
-          images={post.media} // Pass the full media array
-        />
-        <CommentPopup
-          open={commentPopupOpen}
-          onClose={() => setCommentPopupOpen(false)}
-          post={post} // Pass the current product
-          onCommentAdded={onCommentAdded}  // Passing the comment added handler
-          setLoginMessage={setLoginMessage} 
-        />
-        <RouteMapDialog
-          open={routeMapDialogOpen}
-          onClose={() => setRouteMapDialogOpen(false)}
-          post={post} // Pass the current product
-          // onCommentAdded={onCommentAdded}  // Passing the comment added handler
-        />
-        <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
-          isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
-        />
-        {/* Rating Dialog */}
-        <RateUserDialog
-          userId={post.user.id}
-          open={isRateDialogOpen}
-          onClose={handleCloseRateDialog}
-          post={post}
-          isMobile={isMobile}
-          isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
-        />
+        
+          {/* Large Image Dialog with Zoom */}
+          <ImageZoomDialog
+            selectedImage={selectedImage}
+            handleCloseImageModal={handleCloseImageModal}
+            images={post.media} // Pass the full media array
+          />
+          <CommentPopup
+            open={commentPopupOpen}
+            onClose={() => setCommentPopupOpen(false)}
+            post={post} // Pass the current product
+            onCommentAdded={onCommentAdded}  // Passing the comment added handler
+            setLoginMessage={setLoginMessage} 
+          />
+          <RouteMapDialog
+            open={routeMapDialogOpen}
+            onClose={() => setRouteMapDialogOpen(false)}
+            post={post} // Pass the current product
+            // onCommentAdded={onCommentAdded}  // Passing the comment added handler
+          />
+          <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
+            isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+          />
+          {/* Rating Dialog */}
+          <RateUserDialog
+            userId={post.user.id}
+            open={isRateDialogOpen}
+            onClose={handleCloseRateDialog}
+            post={post}
+            isMobile={isMobile}
+            isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+          />
+          </>
+        }
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
