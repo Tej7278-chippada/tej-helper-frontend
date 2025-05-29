@@ -19,6 +19,7 @@ import ChatHistoryPage from './components/Chat/ChatHistoryPage';
 import NotFound from './components/NotFound'; // Import 404 Page
 import NotificationsPage from './components/Helper/NotificationsPage';
 import NearPostsNotification from './components/Helper/NearPostsNotification';
+import HelperHome from './components/Helper/HelperHome';
 
 const theme = createTheme({
   breakpoints: {
@@ -95,6 +96,11 @@ function App() {
           <Route path="/chatsOfUser" element={
             <PrivateRoute>
               <ChatsOfUser />
+            </PrivateRoute>
+          } />
+          <Route path="/helperHome" element={
+            <PrivateRoute>
+              <HelperHome />
             </PrivateRoute>
           } />
         </Routes>

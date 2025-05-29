@@ -1,0 +1,27 @@
+/* Add these styles if you're not using CSS-in-JS exclusively */
+
+/* Smooth scrolling behavior */
+html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Responsive base font size */
+  html {
+    font-size: 16px;
+  }
+  
+  @media (max-width: 768px) {
+    html {
+      font-size: 14px;
+    }
+  }
+  
+  /* Prevent horizontal overflow */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Touch feedback for buttons */
+  button:active {
+    opacity: 0.8;
+  }
