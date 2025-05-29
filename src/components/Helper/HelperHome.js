@@ -52,7 +52,7 @@ const HomeContainer = styled(Box)({
   background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%)',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
+  justifyContent: 'end',
   alignItems: 'center',
 });
 
@@ -63,7 +63,7 @@ const RowContainer = styled(Box)(({ direction, speed }) => ({
   animation: `${direction === 'left' ? moveLeft : moveRight} ${speed} linear infinite`,
 
   '@media (max-width: 768px)': {
-    padding: '1rem 0',
+    padding: '8px 0',
   },
 }));
 
@@ -73,6 +73,10 @@ const ImageItem = styled(Box)({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+
+  '@media (max-width: 768px)': {
+    padding: '0 8px',
+  },
 
   '& img': {
     width: 240,
@@ -217,25 +221,29 @@ const HelperHome = () => {
         </ButtonGroup>
       </FloatingBox> */}
       {/* Animated rows */}
-      <Typography variant="h5" gutterBottom sx={{ color: '#2d3748' }}>
+      <Box sx={{  m: '2rem', }}>
+      <Typography variant="h5" gutterBottom textAlign="center" sx={{ color: '#2d3748', m: 2, alignItems: 'center' }}>
         Welcome to Helper
       </Typography>
-      <ButtonGroup>
+      <ButtonGroup sx={{m: 1}}>
         <NavButton
           onClick={() => navigate('/')}
-          color="#4a6bff"
+          // color="#4a6bff"
+          color="rgba(9, 97, 239, 0.75)"
           variant="contained"
         >
           Want to Help others
         </NavButton>
         <NavButton
           onClick={() => navigate('/userPosts')}
-          color="#ff6b6b"
+          // color="#ff6b6b"
+          color="rgba(228, 132, 22, 0.74)"
           variant="contained"
         >
           I want Help
         </NavButton>
       </ButtonGroup>
+      </Box>
       <ImageRow direction="left" speed="40s" images={imageSet1} />
       <ImageRow direction="right" speed="50s" images={imageSet2} />
       <ImageRow direction="left" speed="60s" images={imageSet3} />
