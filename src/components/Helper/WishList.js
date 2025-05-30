@@ -199,6 +199,11 @@ const WishList = () => {
                           </IconButton>
                         </CardMedia>
                         <CardContent style={{ padding: '10px' }}>
+                          {post.isFullTime && 
+                            <Typography sx={{ px: 2, py: 0.5, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>
+                              Full Time
+                            </Typography>
+                          }
                           <Tooltip title={post.title} placement="top" arrow>
                             <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                               {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}

@@ -594,6 +594,11 @@ function PostDetailsById({ onClose, user }) {
                             </span>
                           </Tooltip>
                         </IconButton>
+                        {post.isFullTime && 
+                          <Typography sx={{ px: 2, py: 0.5, mx: 1, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>
+                            Full Time
+                          </Typography>
+                        }
                         <Typography variant="h5" style={{
                           fontWeight: 'bold',
                           marginBottom: '0.5rem',

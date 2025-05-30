@@ -89,6 +89,7 @@ function PostService() {
     serviceDays: '',
     description: '',
     media: null,
+    isFullTime: false,
   });
   const [editingProduct, setEditingProduct] = useState(null);
   const [existingMedia, setExistingMedia] = useState([]);
@@ -382,6 +383,14 @@ function PostService() {
       }
     };
 
+    const toggleIsFullTime = (e) => {
+      const isChecked = e.target.checked;
+      setFormData((prev) => ({
+        ...prev,
+        isFullTime: isChecked
+      }));
+    };
+
     // const toggleLocationProvacy = (e) => {
     //   setProtectLocation(e.target.checked);
     //   fetchFakeAddress(finalLocation.latitude, finalLocation.longitude);
@@ -535,6 +544,7 @@ function PostService() {
           peopleCount: post.peopleCount,
           serviceDays: post.serviceDays,
           description: post.description,
+          isFullTime: post.isFullTime,
           latitude: post.location.latitude,
           longitude: post.location.longitude,
           coordinates: [post.location.longitude, post.location.latitude],
@@ -658,6 +668,7 @@ function PostService() {
             peopleCount: '',
             serviceDays: '',
             description: '',
+            isFullTime: false,
             media: null,
         });
         setEditingProduct(null); // Ensure it's not in editing mode
@@ -675,7 +686,7 @@ function PostService() {
         setOpenDialog(false);
         setMediaError('');
         setSubmitError(''); // Clear submission error when dialog is closed
-        setFormData({ title: '', price: '', categories: '', gender: '', postStatus: '', peopleCount: '', serviceDays: '', description: '', media: null });
+        setFormData({ title: '', price: '', categories: '', gender: '', postStatus: '', peopleCount: '', serviceDays: '', description: '', isFullTime: false, media: null });
         setSelectedDate(null);
         setTimeFrom(null);
         setTimeTo(null);
@@ -845,6 +856,11 @@ function PostService() {
                   )}
                 </CardMedia>
                 <CardContent style={{ padding: '10px' }}>
+                  {post.isFullTime && 
+                    <Typography sx={{ px: 2, py: 0.5, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>
+                      Full Time
+                    </Typography>
+                  }
                   <Tooltip title={post.title} placement="top" arrow>
                     <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
@@ -1404,6 +1420,7 @@ function PostService() {
                       )}
                       {/* </Card> */}
                     </Card>
+                    <Box>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                     <FormControl fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem',}}} required>
                         <InputLabel>Categories</InputLabel>
@@ -1434,6 +1451,21 @@ function PostService() {
                       </FormControl>
                     )}
                     </div>
+                    {formData.categories === 'Paid' && 
+                    <Box display="flex" alignItems="center" justifyContent="center" >
+                      <Tooltip title="When enabled, your exact location will be hidden and shown as an approximate area">
+                        <InfoOutlinedIcon fontSize="small" color="action"/>
+                      </Tooltip>
+                      <Typography variant="body2" sx={{ mx: '6px' }}>
+                        Is this work Full Time 
+                      </Typography>
+                          <Switch
+                            checked={formData.isFullTime}
+                            onChange={toggleIsFullTime}
+                            color="primary"
+                          />
+                    </Box>}
+                    </Box>
                     <div style={{ display: 'flex', gap: '1rem' }}>
                     {!(formData.categories === 'UnPaid') && (
                         <TextField
