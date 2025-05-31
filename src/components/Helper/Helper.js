@@ -621,7 +621,7 @@ const Helper = ()=> {
                 top: '50px',
                 left: '2%',
                 width: '95%',
-                maxWidth: '400px',
+                maxWidth: isMobile ? '400px' : '600px',
                 zIndex: 1000,
                 borderRadius: '10px',
                 boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
