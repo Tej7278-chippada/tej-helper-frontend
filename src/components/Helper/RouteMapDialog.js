@@ -242,7 +242,7 @@ function RouteMapDialog({ open, onClose, post }) {
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile ? true : true} sx={{
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile ? true : false} sx={{
       margin: isMobile ? '10px' : '10px', '& .MuiPaper-root': { // Target the dialog paper
         borderRadius: '14px', // Apply border radius
       },
