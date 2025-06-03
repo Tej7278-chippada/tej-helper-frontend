@@ -625,8 +625,8 @@ const Helper = ()=> {
             <Card
               sx={{
                 position: 'absolute',
-                top: '50px',
-                left: '2%',
+                top: isMobile ? '70px' : '80px',
+                left: '1px',
                 width: '95%',
                 maxWidth: isMobile ? '400px' : '600px',
                 zIndex: 1000,
@@ -813,8 +813,8 @@ const Helper = ()=> {
             // open={Boolean(anchorEl)}
             // onClose={handleDistanceMenuClose}
             sx={{ position: 'absolute',
-              top: '50px',
-              right: '2%', ml: '4px',
+              top: isMobile ? '70px' : '80px',
+              right: '1px', ml: '4px',
               // width: '90%',
               // maxWidth: '400px',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px', backdropFilter: 'blur(10px)',
