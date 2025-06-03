@@ -24,6 +24,8 @@ import MapRoundedIcon from '@mui/icons-material/MapRounded';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import DistanceSlider from './DistanceSlider';
+import LazyBackgroundImage from './LazyBackgroundImage';
+import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -589,7 +591,12 @@ const Helper = ()=> {
   return (
     <Layout username={tokenUsername}>
       <Box>
-      <Toolbar sx={{display:'flex', justifyContent:'space-between'}}> 
+      <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
+          padding: isMobile ? '4px 12px' : '6px 16px',  margin: '8px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1100}}> 
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
@@ -623,7 +630,7 @@ const Helper = ()=> {
                 width: '95%',
                 maxWidth: isMobile ? '400px' : '600px',
                 zIndex: 1000,
-                borderRadius: '10px',
+                borderRadius: '12px',
                 boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
                 backgroundColor: '#fff', '& .MuiCardContent-root': {padding: '10px' },
               }}
@@ -778,17 +785,22 @@ const Helper = ()=> {
             variant="contained"
             // onClick={handleDistanceMenuOpen}
             onClick={() => setShowDistanceRanges(true)}
+            startIcon={<ShareLocationRoundedIcon />}
             sx={{
-              backgroundColor: "#1976d2",
-              color: "#fff",
-              padding: "8px 12px",
-              borderRadius: "24px",
-              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-              "&:hover": { backgroundColor: "#1565c0" },
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
+              // backgroundColor: "#1976d2",
+              // color: "#fff",
+              // padding: "8px 12px",
+              borderRadius: "12px",
+              // boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+              // "&:hover": { backgroundColor: "#1565c0" },
+              // display: "flex",
+              // alignItems: "center",
+              // gap: "8px",
               // marginRight: "6px",
+              boxShadow: '0 2px 8px rgba(67, 97, 238, 0.2)',
+              '&:hover': { 
+                boxShadow: '0 4px 12px rgba(67, 97, 238, 0.3)',
+              }
             }}
           >
             {distanceRange} km
@@ -805,9 +817,10 @@ const Helper = ()=> {
               right: '2%', ml: '4px',
               // width: '90%',
               // maxWidth: '400px',
-              zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px',
-              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-              backgroundColor: '#f5f5f5', '& .MuiCardContent-root': {padding: '10px' },  }}
+              zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px', backdropFilter: 'blur(10px)',
+              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+              background: 'rgba(255, 255, 255, 0.9)',
+              '& .MuiCardContent-root': {padding: '10px' },  }}
           >
             <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>
               <Box sx={{ m: 0, bgcolor: 'white', borderRadius:'8px'}}>
@@ -909,10 +922,10 @@ const Helper = ()=> {
                       textAlign: isMobile ? 'center' : 'inherit'
                     }}
                   >
-                    *Distance range {isMobile ? '\n' : ' '} upto 1000km
+                    *Custom range (1-1000km)
                   </Typography>
                   <TextField
-                    label="custom range (km)"
+                    // label="custom range (km)"
                     type="number"
                     value={distanceRange}
                     onChange={(e) => {
@@ -936,7 +949,7 @@ const Helper = ()=> {
                       }
                     }}
                     sx={{
-                      width: "80px",
+                      width: "100px",
                       "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
                     }}
                     inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
@@ -1065,22 +1078,22 @@ const Helper = ()=> {
                       </Box>
 
                       {/* Action Buttons */}
-                      <Box gap={2} mt={2}>
+                      <Box gap={2} mt={3} sx={{display:'flex'}}>
                         <Button
-                          variant="outlined" size="small"
+                          variant="outlined"
                           onClick={handleResetFilters}
                           disabled={isDefaultFilters}
-                          fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '1rem', marginRight: '1rem', borderRadius:'8px' }}
+                          fullWidth sx={{ borderRadius:'8px' }}
                         >
                           Reset
                         </Button>
                         <Button
-                          variant="contained" size="small"
+                          variant="contained" 
                           onClick={handleApplyFilters}
                           disabled={isDefaultFilters}
-                          fullWidth sx={{ alignSelf: 'flex-end', float: 'center', marginTop: '12px' , borderRadius:'8px'}}
+                          fullWidth sx={{ borderRadius:'8px'}}
                         >
-                          Apply Filters
+                          Apply
                         </Button>
                       </Box>
                     </CardContent>
@@ -1135,27 +1148,31 @@ const Helper = ()=> {
         </Toolbar>
 
         <Box mb={1} sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
-            {loadingLocation ? (
-              // renderSkeletonCards()
-              <SkeletonCards />
-              // <Box display="flex" justifyContent="center" alignItems="center" sx={{ height: "50vh" }}>
-              //   <CircularProgress />
-              // </Box>
-            ) : ( loading ? (
+          {loadingLocation || loading ? (
               <SkeletonCards/>
             ) : 
             ( posts.length > 0 ? (
               <Grid container spacing={isMobile ? 1.5 : 1.5}>
                 {posts.map((post, index) => (
                   <Grid item xs={12} sm={6} md={4} key={`${post._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${post._id}`}>
-                    <Card style={{
+                    <Card sx={{
                       margin: '0rem 0',  // spacing between up and down cards
                       cursor: 'pointer',
-                      backdropFilter: 'none',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      backdropFilter: 'blur(5px)',
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                      // backgroundColor: 'rgba(255, 255, 255, 0.8)',
                       borderRadius: '8px',
-                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow
-                      transition: 'transform 0.1s ease, box-shadow 0.1s ease', // Smooth transition for hover
+                      // border: '1px solid rgba(255,255,255,0.2)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                      // '&:hover': {
+                      //   transform: 'translateY(-4px)',
+                      //   boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                      // },
+                      // transition: 'transform 0.1s ease, box-shadow 0.1s ease', // Smooth transition for hover
+                      position: 'relative',
+                      height: isMobile ? '240px' : '280px', // Fixed height for consistency
+                      overflow: 'hidden',
                     }}
                       onClick={() => openPostDetail(post)}
                       onMouseEnter={(e) => {
@@ -1185,7 +1202,7 @@ const Helper = ()=> {
                       // }}
                       >
                       {/* CardMedia for Images with Scroll */}
-                      <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
+                      {/* <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                         <div style={{
                           display: 'flex',
                           overflowX: 'auto', overflowY: 'hidden',
@@ -1227,30 +1244,52 @@ const Helper = ()=> {
                             Media exceeds its maximum count
                           </Typography>
                         )}
-                      </CardMedia>
-                      <CardContent style={{ padding: '10px' }}>
+                      </CardMedia> */}
+                      {/* Background Image */}
+                      <LazyBackgroundImage
+                        base64Image={post.media?.[0]} 
+                        alt={post.title}
+                      >
+                      
+                      {/* Gradient Overlay */}
+                      <div style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '60%',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
+                      }} />
+                      <CardContent style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: '16px',
+                        color: 'white'
+                      }}>
                         {post.isFullTime && 
                           <Typography sx={{ px: 2, py: 0.5, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>
                             Full Time
                           </Typography>
                         }
                         <Tooltip title={post.title} placement="top" arrow>
-                          <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
                             {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                           </Typography>
                         </Tooltip>
-                        <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block', float: 'right', fontWeight: '500' }}>
+                        <Typography variant="body1" style={{ display: 'inline-block', float: 'right', fontWeight: '500', color: 'white' }}>
                           Price: ₹{post.price}
                         </Typography>
-                        <Typography variant="body2" color={post.categories === 'Emergency' ? 'rgba(194, 28, 28, 0.89)' : 'textSecondary'} style={{ marginBottom: '0.5rem' }}>
+                        <Typography variant="body2" color={post.categories === 'Emergency' ? '#ffa5a5' : 'rgba(255, 255, 255, 0.9)'} style={{ marginBottom: '0.5rem' }}>
                           Category: {post.categories}
                         </Typography>
                         {/* {post.stockStatus === 'In Stock' && ( */}
-                        <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                        <Typography variant="body2" style={{ display: 'inline-block', marginBottom: '0.5rem',  color: 'rgba(255, 255, 255, 0.9)' }}>
                           People Required: {post.peopleCount} ({post.gender})
                         </Typography>
                         {/* )} */}
-                        <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
+                        <Typography variant="body2" style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem', color: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5' }}>
                           Status: {post.postStatus}
                         </Typography>
                         {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
@@ -1274,9 +1313,10 @@ const Helper = ()=> {
                           variant="body2"
                           color="textSecondary"
                           style={{
-                            marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
-                            maxHeight: '4.5rem',  // This keeps the text within three lines based on the line height.
-                            lineHeight: '1.5rem'  // Adjust to control exact line spacing.
+                            marginBottom: '0rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
+                            maxHeight: '3rem',  // This keeps the text within three lines based on the line height.
+                            lineHeight: '1.5rem',  // Adjust to control exact line spacing.
+                            color: 'rgba(255, 255, 255, 0.9)'
                           }}>
                           Description: {post.description}
                         </Typography>
@@ -1289,6 +1329,7 @@ const Helper = ()=> {
                           </Typography>
                         </Grid> */}
                       </CardContent>
+                      </LazyBackgroundImage>
                     </Card>
 
                   </Grid>
@@ -1296,9 +1337,32 @@ const Helper = ()=> {
 
               </Grid>
             ) : ( 
-              <Typography color='error' textAlign="center" sx={{ m: 2 }}>No posts found within {distanceRange} km of your location...</Typography>
+              <Box sx={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '50vh',
+                textAlign: 'center',
+              }}>
+                <img 
+                  src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
+                  alt="No posts found" 
+                  style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
+                />
+                <Typography variant="body1" color="text.secondary">
+                  No posts found within {distanceRange} km of your location...
+                </Typography>
+                <Button 
+                  variant="text" disabled={distanceRange >= 100}
+                  sx={{ mt: 2, borderRadius: '12px' }}
+                  onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
+                >
+                  Increase Search Radius
+                </Button>
+              </Box>
             )
-            ))}
+            )}
 
             {loadingMore && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems:'center', p: 4, gap:'1rem' }}>
@@ -1308,9 +1372,20 @@ const Helper = ()=> {
               </Box>
             )}
             {!hasMore && posts.length > 0 && (
-              <Typography textAlign="center" sx={{ p: 2, color: 'text.secondary' }}>
-                You've reached the end of <strong>{totalPosts} posts</strong> in your area with in distance range {distanceRange} km...
-              </Typography>
+              <Box sx={{ 
+                textAlign: 'center', 
+                p: 3,
+                backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                borderRadius: '12px',
+                mt: 2
+              }}>
+                <Typography color="text.secondary">
+                  You've reached the end of <strong>{totalPosts} posts</strong> in your area
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  Current search range: {distanceRange} km
+                </Typography>
+              </Box>
             )}
           </Box>
 

@@ -22,6 +22,94 @@ import NearPostsNotification from './components/Helper/NearPostsNotification';
 import HelperHome from './components/Helper/HelperHome';
 
 const theme = createTheme({
+  // palette: {
+  //   primary: {
+  //     main: '#4361ee', // Vibrant blue
+  //     contrastText: '#ffffff',
+  //   },
+  //   secondary: {
+  //     main: '#3f37c9', // Deep blue
+  //   },
+  //   background: {
+  //     default: '#f8f9fa', // Light gray
+  //     paper: '#ffffff',
+  //   },
+  //   text: {
+  //     primary: '#212529', // Dark gray
+  //     secondary: '#6c757d', // Medium gray
+  //   },
+  //   success: {
+  //     main: '#4cc9f0', // Light blue
+  //   },
+  //   error: {
+  //     main: '#f72585', // Pink
+  //   },
+  //   warning: {
+  //     main: '#f8961e', // Orange
+  //   },
+  //   info: {
+  //     main: '#4895ef', // Blue
+  //   },
+  // },
+  // typography: {
+  //   fontFamily: [
+  //     'Inter',
+  //     '-apple-system',
+  //     'BlinkMacSystemFont',
+  //     '"Segoe UI"',
+  //     'Roboto',
+  //     '"Helvetica Neue"',
+  //     'Arial',
+  //     'sans-serif',
+  //     '"Apple Color Emoji"',
+  //     '"Segoe UI Emoji"',
+  //     '"Segoe UI Symbol"',
+  //   ].join(','),
+  //   h5: {
+  //     fontWeight: 600,
+  //   },
+  // },
+  // components: {
+  //   MuiButton: {
+  //     styleOverrides: {
+  //       root: {
+  //         borderRadius: '8px',
+  //         textTransform: 'none',
+  //         fontWeight: 500,
+  //         padding: '8px 16px',
+  //         boxShadow: 'none',
+  //         '&:hover': {
+  //           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+  //         },
+  //       },
+  //       contained: {
+  //         boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  //       },
+  //     },
+  //   },
+    // MuiCard: {
+    //   styleOverrides: {
+    //     root: {
+    //       borderRadius: '12px',
+    //       boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+    //       transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    //       '&:hover': {
+    //         transform: 'translateY(-2px)',
+    //         boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+    //       },
+    //     },
+    //   },
+    // },
+    // MuiTextField: {
+    //   styleOverrides: {
+    //     root: {
+    //       '& .MuiOutlinedInput-root': {
+    //         borderRadius: '8px',
+    //       },
+    //     },
+    //   },
+    // },
+  // },
   breakpoints: {
     values: {
       xs: 0,
