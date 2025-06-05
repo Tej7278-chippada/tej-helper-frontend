@@ -29,6 +29,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import TaskAltRoundedIcon from '@mui/icons-material/TaskAltRounded';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import LazyBackgroundImage from './LazyBackgroundImage';
+import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
+import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
+import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
@@ -739,7 +743,12 @@ function PostService() {
     return (
         <Layout username={tokenUsername}>
         <Box>
-        <Toolbar > {/* style={{ display: 'flex', marginTop: '5rem', marginBottom: '-3rem' }} */}
+        <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255, 255, 255, 0.62)',  backdropFilter: 'blur(10px)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
+          padding: isMobile ? '2px 12px' : '2px 12px',  margin: '4px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1100}}> {/* style={{ display: 'flex', marginTop: '5rem', marginBottom: '-3rem' }} */}
             <Typography variant="h6" style={{ flexGrow: 1 }}>
             User Posts
             </Typography>
@@ -749,24 +758,25 @@ function PostService() {
             <Button
               variant="contained"
               onClick={() => handleOpenDialog()}
+              size="small"
               sx={{
                 backgroundColor: '#1976d2', // Primary blue
                 color: '#fff',
-                padding: '8px 16px',
-                borderRadius: '24px',
+                padding: '4px 12px',
+                borderRadius: '12px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                 '&:hover': {
                   backgroundColor: '#1565c0', // Darker shade on hover
                 },
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px', marginRight: '10px'
+                gap: '8px', marginRight: '0px'
               }}
               aria-label="Add New Post"
               title="Add New Post"
             >
               <PostAddRoundedIcon sx={{ fontSize: '20px' }} />
-              {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Product</span> */}
+              <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Post</span>
             </Button>
             
         </Toolbar>
@@ -774,16 +784,18 @@ function PostService() {
         {loading ? (
           <SkeletonCards/>
         ) : (
-      <Grid container spacing={2}>
+      <Grid container spacing={1.5}>
         {posts.length > 0 ? (
           posts.map((post) => (
             <Grid item xs={12} sm={6} md={4} key={post._id}>
               {/* <ProductCard product={product} /> */}
-              <Card style={{
-                margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', background: 'rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', // Default shadow boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+              <Card sx={{
+                margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', backdropFilter: 'blur(5px)',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
-                cursor:'pointer'
+                cursor:'pointer', position: 'relative',
+                height: isMobile ? '280px' : '320px',
               }} onClick={() => openPostDetail(post)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
@@ -812,7 +824,7 @@ function PostService() {
                 // }}
               >
                 {/* CardMedia for Images with Scroll */}
-                <CardMedia style={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
+                {/* <CardMedia style={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                   <div style={{
                     display: 'flex',
                     overflowX: 'auto', overflowY: 'hidden',
@@ -854,29 +866,49 @@ function PostService() {
                       Media exceeds its maximum count
                     </Typography>
                   )}
-                </CardMedia>
-                <CardContent style={{ padding: '10px' }}>
+                </CardMedia> */}
+                 {/* Background Image */}
+                <LazyBackgroundImage
+                  base64Image={post.media?.[0]} 
+                  alt={post.title}
+                >
+                
+                {/* Gradient Overlay */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '60%',
+                  background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
+                }} />
+                <CardContent sx={{ position: 'absolute',
+                        bottom: 30,
+                        left: 0,
+                        right: 0,
+                        padding: '16px',
+                        color: 'white' }}>
                   {post.isFullTime && 
                     <Typography sx={{ px: 2, py: 0.5, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>
                       Full Time
                     </Typography>
                   }
                   <Tooltip title={post.title} placement="top" arrow>
-                    <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
                       {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                     </Typography>
                   </Tooltip>
-                  <Typography variant="body1" color="textSecondary" style={{ display: 'inline-block', float: 'right', fontWeight: '500' }}>
+                  <Typography variant="body1" style={{ display: 'inline-block', float: 'right', fontWeight: '500', color: 'white' }}>
                     Price: ₹{post.price}
                   </Typography>
-                  <Typography variant="body2" color={post.categories === 'Emergency' ? 'rgba(194, 28, 28, 0.89)' : 'textSecondary'} style={{ marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" color={post.categories === 'Emergency' ? '#ffa5a5' : 'rgba(255, 255, 255, 0.9)'} style={{ marginBottom: '0.5rem' }}>
                     Category: {post.categories}
                   </Typography>
-                  <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem', color: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5'  }}>
                     Post Status: {post.postStatus}
                   </Typography>
                   {/* {post.stockStatus === 'In Stock' && ( */}
-                  <Typography variant="body2" color="textSecondary" style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" style={{ display: 'inline-block', marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.9)' }}>
                     People Count: {post.peopleCount} ({post.gender})
                   </Typography>
                   {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
@@ -885,12 +917,12 @@ function PostService() {
                   <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                     Time from - To : {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </Typography> */}
-                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" style={{ marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.9)'  }}>
                     Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
                   </Typography>
                   {/* {!(post.createdAt === post.updatedAt) && ( */}
                   {post.updatedAt && (
-                  <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
+                  <Typography variant="body2" style={{ marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.9)'  }}>
                     Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
                   </Typography>
                   )}
@@ -904,23 +936,30 @@ function PostService() {
     </Typography> */}
                   <Typography
                     variant="body2"
-                    color="textSecondary"
+                    // color="textSecondary"
                     style={{
-                      marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
+                      marginBottom: '0rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
                       maxHeight: '4.5rem',  // This keeps the text within three lines based on the line height.
-                      lineHeight: '1.5rem'  // Adjust to control exact line spacing.
+                      lineHeight: '1.5rem',  // Adjust to control exact line spacing.
+                      color: 'rgba(255, 255, 255, 0.9)' 
                     }}>
                     Description: {post.description}
                   </Typography>
                 </CardContent>
-                <CardActions style={{ justifyContent: 'space-between', padding: '8px 1rem' }}>
+                <CardActions style={{ justifyContent: 'space-between', padding: '12px 1rem', position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        // padding: '16px',
+                        color: 'white'  }}>
                   <Box>
-                    <Button color="primary" sx={{ marginRight: '10px', borderRadius:'8px' }} onClick={(event) => {event.stopPropagation(); // Prevent triggering the parent onClick
+                    <Button color="primary" size="small" variant="outlined" startIcon={<EditNoteRoundedIcon />} sx={{ marginRight: '10px', borderRadius:'8px' }} onClick={(event) => {event.stopPropagation(); // Prevent triggering the parent onClick
                       handleEdit(post);}}>Edit</Button>
-                    <Button color="secondary" key={post._id} sx={{borderRadius:'8px'}} onClick={(event) => {event.stopPropagation(); handleDeleteClick(post);}}>Delete</Button>
+                    <Button color="secondary" size="small" variant="outlined" startIcon={<DeleteSweepRoundedIcon />} key={post._id} sx={{borderRadius:'8px'}} onClick={(event) => {event.stopPropagation(); handleDeleteClick(post);}}>Delete</Button>
                   </Box>
-                  <Button color="primary" variant="contained" sx={{ borderRadius: '8px' }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}>Chats</Button>
+                  <Button color="primary" variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px' }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}>Chats</Button>
                 </CardActions>
+                </LazyBackgroundImage>
               </Card>
             </Grid>
           ))
@@ -931,7 +970,24 @@ function PostService() {
             </Typography>
           </Box>
         )}
+         
       </Grid>)}
+      { posts.length > 0 && (
+        <Box sx={{ 
+          textAlign: 'center', 
+          p: 3,
+          backgroundColor: 'rgba(25, 118, 210, 0.05)',
+          borderRadius: '12px',
+          mt: 2
+        }}>
+          <Typography color="text.secondary">
+            No more posts of yous...
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            {/* Current search range: {distanceRange} km */}
+          </Typography>
+        </Box>
+      )}
       </Box>
 
 

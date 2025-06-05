@@ -593,7 +593,7 @@ const Helper = ()=> {
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
-          padding: isMobile ? '4px 12px' : '6px 16px',  margin: '8px',
+          padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
           position: 'sticky',
           top: 0,
           zIndex: 1100}}> 
@@ -778,7 +778,7 @@ const Helper = ()=> {
             </Card>
           )}
           </Box>
-          <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-10px'}}>
+          <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-6px'}}>
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
           <Button
@@ -1171,7 +1171,7 @@ const Helper = ()=> {
                       // },
                       // transition: 'transform 0.1s ease, box-shadow 0.1s ease', // Smooth transition for hover
                       position: 'relative',
-                      height: isMobile ? '240px' : '280px', // Fixed height for consistency
+                      height: isMobile ? '240px' : '320px', // Fixed height for consistency
                       overflow: 'hidden',
                     }}
                       onClick={() => openPostDetail(post)}
@@ -1366,8 +1366,8 @@ const Helper = ()=> {
 
             {loadingMore && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems:'center', p: 4, gap:'1rem' }}>
-                {/* <CircularProgress /> */}
-                <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
+                <CircularProgress size={24} />
+                {/* <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/> */}
                 <Typography color='grey' variant='body2'>Loading posts...</Typography>
               </Box>
             )}
