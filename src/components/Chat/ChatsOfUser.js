@@ -47,6 +47,7 @@ const ChatsOfUser = () => {
   }, [navigate]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const authToken = localStorage.getItem('authToken');
     setIsAuthenticated(!!authToken);
     if (!authToken) {

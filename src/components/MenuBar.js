@@ -24,6 +24,7 @@ const MenuBar = ({ visible, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (!visible) return null;
 
@@ -34,9 +35,11 @@ const MenuBar = ({ visible, onLogout }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 1200, 
+        zIndex: 1200, background: 'rgba(255,255,255,0.4)',  backdropFilter: 'blur(10px)',
         // backgroundColor: '#fff',
         // borderTop: '1px solid #ddd',
+        borderTopLeftRadius: '16px', // Rounded top-left corner
+        borderTopRightRadius: '16px', // Rounded top-right corner
         transition: 'transform 0.3s ease, opacity 0.3s ease',
         transform: visible ? 'translateY(0)' : 'translateY(100%)',
         opacity: visible ? 1 : 0,
@@ -49,13 +52,23 @@ const MenuBar = ({ visible, onLogout }) => {
         sx={{
           '& .Mui-selected': {
             color: theme.palette.primary.main,
-          },
+          }, background: 'rgba(255,255,255,0.1)',  backdropFilter: 'blur(10px)',
+          borderTopLeftRadius: '16px', // Match parent's border radius
+          borderTopRightRadius: '16px', // Match parent's border radius
+          overflow: 'hidden', // Ensure children don't overflow rounded corners
         }}
       >
         {navItems.map((item) => (
-          <BottomNavigationAction sx={{padding:'2px'}}
+          <BottomNavigationAction sx={{
+            minWidth: 'auto',
+            padding: isMobile ? '6px 0' : '6px 8px',
+            '&:hover': {
+              backgroundColor: theme.palette.action.hover,
+              borderRadius:'12px',
+            },
+          }}
             key={item.label}
-            label={item.label}
+            label={isMobile ? null : item.label}
             icon={item.icon}
             value={item.path}
             onClick={() => navigate(item.path)}

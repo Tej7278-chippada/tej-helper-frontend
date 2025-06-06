@@ -24,6 +24,7 @@ const WishList = () => {
   const tokenUsername = localStorage.getItem('tokenUsername');
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const loadWishlist = async () => {
       setLoading(true);
       try {

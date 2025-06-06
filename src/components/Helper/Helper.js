@@ -1147,7 +1147,7 @@ const Helper = ()=> {
           
         </Toolbar>
 
-        <Box mb={1} sx={{ bgcolor: '#f5f5f5', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        <Box mb={1} sx={{ background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
               <SkeletonCards/>
             ) : 
@@ -1171,7 +1171,7 @@ const Helper = ()=> {
                       // },
                       // transition: 'transform 0.1s ease, box-shadow 0.1s ease', // Smooth transition for hover
                       position: 'relative',
-                      height: isMobile ? '240px' : '320px', // Fixed height for consistency
+                      height: isMobile ? '260px' : '300px', // Fixed height for consistency
                       overflow: 'hidden',
                     }}
                       onClick={() => openPostDetail(post)}
