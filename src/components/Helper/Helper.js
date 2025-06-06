@@ -625,14 +625,15 @@ const Helper = ()=> {
             <Card
               sx={{
                 position: 'absolute',
-                top: isMobile ? '70px' : '80px',
+                top: isMobile ? '62px' : '72px',
                 left: '1px',
                 width: '95%',
                 maxWidth: isMobile ? '400px' : '600px',
                 zIndex: 1000,
                 borderRadius: '12px',
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-                backgroundColor: '#fff', '& .MuiCardContent-root': {padding: '10px' },
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
+                // backgroundColor: '#fff', 
+                '& .MuiCardContent-root': {padding: '10px' },
               }}
             >
               <CardContent>
@@ -813,13 +814,14 @@ const Helper = ()=> {
             // open={Boolean(anchorEl)}
             // onClose={handleDistanceMenuClose}
             sx={{ position: 'absolute',
-              top: isMobile ? '70px' : '80px',
+              top: isMobile ? '62px' : '72px',
               right: '1px', ml: '4px',
               // width: '90%',
               // maxWidth: '400px',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px', backdropFilter: 'blur(10px)',
               boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-              background: 'rgba(255, 255, 255, 0.9)',
+              // background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
               '& .MuiCardContent-root': {padding: '10px' },  }}
           >
             <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>
@@ -1147,7 +1149,7 @@ const Helper = ()=> {
           
         </Toolbar>
 
-        <Box mb={1} sx={{ background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        <Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
               <SkeletonCards/>
             ) : 

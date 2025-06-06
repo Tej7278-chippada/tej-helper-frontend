@@ -121,6 +121,17 @@ const theme = createTheme({
   },
 });
 
+const FloatingBackgroundBalls = () => {
+  return (
+    <>
+      <div className="color-ball color-ball-1"></div>
+      <div className="color-ball color-ball-2"></div>
+      <div className="color-ball color-ball-3"></div>
+    </>
+  );
+};
+
+
 function App() {
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
@@ -137,6 +148,7 @@ function App() {
   }, []);
   return (
     <ThemeProvider theme={theme}>
+      <FloatingBackgroundBalls/>
       <Router>
         <NearPostsNotification/>
         <Routes>

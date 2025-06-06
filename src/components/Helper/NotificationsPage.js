@@ -261,6 +261,7 @@ function NotificationsPage() {
             sx={{ 
               mr: 2,
               color: 'text.secondary',
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
               '&:hover': { 
                 color: 'error.main',
                 backgroundColor: 'rgba(211, 47, 47, 0.08)' 

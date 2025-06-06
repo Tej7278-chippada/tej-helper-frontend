@@ -743,7 +743,7 @@ function PostService() {
     return (
         <Layout username={tokenUsername}>
         <Box>
-        <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255, 255, 255, 0.62)',  backdropFilter: 'blur(10px)',
+        <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255, 255, 255, 0.8)',  backdropFilter: 'blur(10px)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 12px',  margin: '4px',
           position: 'sticky',
@@ -780,7 +780,7 @@ function PostService() {
             </Button>
             
         </Toolbar>
-        <Box sx={{background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: '8px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
+        <Box sx={{background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: '8px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
         {loading ? (
           <SkeletonCards/>
         ) : (

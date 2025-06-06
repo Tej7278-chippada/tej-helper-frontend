@@ -49,8 +49,108 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8f9fa;
+  /* background-color: #f8f9fa; */
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
+  background: #12121800;
+  /* color: rgba(255, 255, 255, 0.9); */
 }
+/* Floating color balls background */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(135deg, hsl(210, 20%, 98%) 0%, #e9ecef24 100%);
+}
+
+.color-ball {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.color-ball-1 {
+  width: 300px;
+  height: 300px;
+  background: #4361ee;
+  top: 20%;
+  left: 10%;
+  animation: float 15s ease-in-out infinite;
+}
+
+.color-ball-2 {
+  width: 400px;
+  height: 400px;
+  background: #3f37c9;
+  top: 60%;
+  left: 70%;
+  animation: float 18s ease-in-out infinite reverse;
+}
+
+.color-ball-3 {
+  width: 250px;
+  height: 250px;
+  background: #4cc9f0;
+  bottom: 10%;
+  left: 30%;
+  animation: float 12s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(20px, 30px);
+  }
+}
+
+/* Dark floating color balls */
+/* .color-ball {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  z-index: -1;
+}
+
+.color-ball-1 {
+  width: 400px;
+  height: 400px;
+  background: #4361ee;
+  top: 10%;
+  left: 5%;
+  animation: float 18s ease-in-out infinite;
+}
+
+.color-ball-2 {
+  width: 500px;
+  height: 500px;
+  background: #3f37c9;
+  top: 70%;
+  left: 80%;
+  animation: float 22s ease-in-out infinite reverse;
+}
+
+.color-ball-3 {
+  width: 300px;
+  height: 300px;
+  background: #4cc9f0;
+  bottom: 5%;
+  left: 25%;
+  animation: float 15s ease-in-out infinite;
+} */
+
+
+
+
 
 /* Custom scrollbar */
 /* ::-webkit-scrollbar {
