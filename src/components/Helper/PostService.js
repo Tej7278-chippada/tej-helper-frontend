@@ -966,8 +966,16 @@ function PostService() {
         ) : (
           <Box sx={{ textAlign: 'center', flex: 1 }}>
             <Typography color='grey' padding="2rem" variant="body1">
-              You don't have any posts...
+            You don't have any posts yet...
             </Typography>
+            <Button 
+              variant="outlined" 
+              sx={{ mt: 2, borderRadius: '12px' }}
+              onClick={() => handleOpenDialog()}
+            >
+              <PostAddRoundedIcon sx={{ fontSize: '20px', mr: '8px'}} />
+              Add your first post
+            </Button>
           </Box>
         )}
          

@@ -175,10 +175,15 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
       messageIds.forEach(messageId => {
         socket.emit('messageSeen', { room, messageId });
       });
+
+      // Emit real-time seen status to update the chat list
+      socket.emit('messagesSeen', { 
+        chatId: chatData.chatId 
+      });
     } catch (error) {
       console.error('Error marking messages as seen:', error);
     }
-  }, [postId, chatData.id , userId, authToken]); // Adjust dependencies for ChatHistory.js
+  }, [postId, chatData.id , userId, authToken, chatData?.chatId]); // Adjust dependencies for ChatHistory.js
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -230,7 +235,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
         senderId: userId,
         receiverId: otherUserId, // post.user.id in ChatDialog.js or chatData.id in ChatHistory.js
         text: message,
-        // chatId: chat._id // You might need to get this from your chat state
+        // chatId: chatData.chatId, // You might need to get this from your chat state
         postOwnerId: userId,
         postTitle: postTitle,
         senderName: senderUsername

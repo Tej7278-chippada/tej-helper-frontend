@@ -170,10 +170,16 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       messageIds.forEach(messageId => {
         socket.emit('messageSeen', { room, messageId });
       });
+
+      // Emit real-time seen status to update the chat list
+      socket.emit('messagesSeen', { 
+        chatId: chatData.chatId 
+      });
+
     } catch (error) {
       console.error('Error marking messages as seen:', error);
     }
-  }, [post._id, userId, post.user.id, authToken]); // Adjust dependencies for ChatHistory.js
+  }, [post._id, userId, post.user.id, authToken, chatData?.chatId]); // Adjust dependencies for ChatHistory.js
 
   useEffect(() => {
     if (!open || messages.length === 0) return;

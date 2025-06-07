@@ -11,6 +11,8 @@ import ChatHistory from './ChatHistory';
 // import CloseIcon from '@mui/icons-material/Close';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import RateUserDialog from '../Helper/RateUserDialog';
+import { format } from 'date-fns';
+import { io } from 'socket.io-client';
 
 
 const ChatsOfPosts = () => {
@@ -30,6 +32,7 @@ const ChatsOfPosts = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [loadingSelectedChat, setLoadingSelectedChat] = useState(false);
+  const userId = localStorage.getItem('userId');
 
 
   const fetchChatsOfPost = useCallback(async () => {
@@ -58,14 +61,50 @@ const ChatsOfPosts = () => {
   }, [navigate, postId]); // ✅ Add 'navigate' as dependency
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     const authToken = localStorage.getItem('authToken');
     setIsAuthenticated(!!authToken); // Check if user is authenticated
     if (!authToken) {
       navigate('/login');
     } else {
       fetchChatsOfPost(); // ✅ Fetch chats on component mount
+      const socket = io(process.env.REACT_APP_API_URL, {
+        auth: { token: authToken }
+      });
+    
+      // Listen for new messages to update unread counts
+      socket.on('newMessageReceived', ({ postId, buyerId, senderId }) => {
+        if (senderId !== userId) { // Only update if message is from other user
+          setBuyers(prevBuyers => 
+            prevBuyers.map(buyer => 
+              buyer.id === buyerId 
+                ? { ...buyer, unreadMessagesCount: (buyer.unreadMessagesCount || 0) + 1 }
+                : buyer
+            )
+          );
+        }
+      });
+    
+      // Listen for messages being marked as seen
+      socket.on('messagesSeen', ({ postId, buyerId }) => {
+        if (postId === postId) { // Only update for current post
+          setBuyers(prevBuyers => 
+            prevBuyers.map(buyer => 
+              buyer.id === buyerId 
+                ? { ...buyer, unreadMessagesCount: 0 }
+                : buyer
+            )
+          );
+        }
+      });
+    
+      return () => {
+        socket.off('newMessageReceived');
+        socket.off('messagesSeen');
+        socket.disconnect();
+      };
     }
-  }, [fetchChatsOfPost, navigate]); // ✅ Add 'fetchChatsOfPost' and 'navigate' in dependencies
+  }, [fetchChatsOfPost, navigate, postId, userId]); // ✅ Add 'fetchChatsOfPost' and 'navigate' in dependencies
 
   const handleChatClick = (chat) => {
     setLoadingSelectedChat(true);
@@ -233,7 +272,11 @@ const ChatsOfPosts = () => {
                             transform: 'scale(1.03)',
                             boxShadow: '0 6px 14px rgba(0, 0, 0, 0.2)',
                             borderRadius: '14px'
-                          }
+                          },
+                          borderLeft: chat.unreadMessagesCount > 0 
+                            ? `4px solid ${theme.palette.primary.main}`
+                            : '4px solid transparent',
+                          transition: 'border-left 0.3s ease'
                         }}
                         // onClick={() => handleChatClick({ _id: buyer.id })}
                         onClick={() => handleChatClick(chat)}
@@ -273,20 +316,90 @@ const ChatsOfPosts = () => {
                           alt={chat.username}
                           sx={{ width: 50, height: 50, mx: 1 }}
                         />
-                        <Typography variant="h6" m={1} sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis', fontWeight:400, fontFamily:'sans-serif'}}>
-                          {chat.username}
-                          {/* {chat.id} */}
-                        </Typography>
-                        <IconButton
-                          aria-label="View post details"
-                          onClick={(event) => { event.stopPropagation(); // Prevent triggering the parent onClick
-                           handleOpenRateDialog({userID : chat.id}); }}
-                          // onClick={handleOpenRateDialog}
-                          variant="text"
-                          sx={{marginLeft:'auto'}}
-                        >
-                          <AssignmentIndRoundedIcon/>
-                        </IconButton>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="h6" m={0} sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis', fontWeight:400, fontFamily:'sans-serif'}}>
+                            {chat.username}
+                            {/* {chat.id} */}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            last seen on {chat.lastMessageAt ? format(new Date(chat.lastMessageAt), 'hh:mm:ss a') : ''}
+                          </Typography>
+                        </Box>
+                        <Box sx={{marginLeft:'auto', display: 'flex', alignItems: 'center', justifyContent: 'center',}}>
+                          {/* Badge for unread messages */}
+                          {chat.unreadMessagesCount > 0 && (
+                            <Box
+                              sx={{
+                                // position: 'absolute',
+                                // top: 0,
+                                // right: 0,
+                                backgroundColor: 'red',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                // transform: 'translate(25%, -25%)',
+                                marginRight: isMobile ? '4px' : '8px',
+                                // zIndex: 1,
+                                // animation: chat.unreadMessagesCount > 0 ? 'pulse 1.5s infinite' : 'none',
+                                // '@keyframes pulse': {
+                                //   '0%': { transform: 'translate(25%, -25%) scale(1)' },
+                                //   '50%': { transform: 'translate(25%, -25%) scale(1.2)' },
+                                //   '100%': { transform: 'translate(25%, -25%) scale(1)' }
+                                // }
+                              }}
+                            >
+                              {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
+                            </Box>
+                          )}
+                          <IconButton
+                            aria-label="View profile"
+                            onClick={(e) => { 
+                              e.stopPropagation();
+                              handleOpenRateDialog({ userID: chat.id });
+                            }}
+                            sx={{ 
+                              marginLeft: 'auto',
+                              position: 'relative' 
+                            }}
+                          >
+                            {/* {chat.unreadMessagesCount > 0 && (
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                top: 0,
+                                right: 0,
+                                backgroundColor: 'red',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                transform: 'translate(25%, -25%)',
+                                zIndex: 1,
+                                animation: chat.unreadMessagesCount > 0 ? 'pulse 1.5s infinite' : 'none',
+                                '@keyframes pulse': {
+                                  '0%': { transform: 'translate(25%, -25%) scale(1)' },
+                                  '50%': { transform: 'translate(25%, -25%) scale(1.2)' },
+                                  '100%': { transform: 'translate(25%, -25%) scale(1)' }
+                                }
+                              }}
+                            >
+                              {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
+                            </Box>
+                            )} */}
+                            <AssignmentIndRoundedIcon />
+                          </IconButton>
+                        </Box>
                       </Box>
                     ))
                   )}

@@ -9,6 +9,7 @@ import apiClient from '../../utils/axiosConfig';
 import ChatDialog from './ChatDialog';
 import { fetchPostById } from '../api/api';
 import ArtTrackRoundedIcon from '@mui/icons-material/ArtTrackRounded';
+import { io } from 'socket.io-client';
 
 const ChatsOfUser = () => {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -25,6 +26,7 @@ const ChatsOfUser = () => {
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
   const [loadingSelectedChat, setLoadingSelectedChat] = useState(false);
+  const userId = localStorage.getItem('userId');
 
   const fetchChatsOfUser = useCallback(async () => {
     setLoading(true);
@@ -32,7 +34,7 @@ const ChatsOfUser = () => {
       const response = await apiClient.get('/api/chats/chatsOfUser', {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
       });
-      setChats(response.data.chats.reverse() || []);
+      setChats(response.data.chats || []); //.reverse()
       // setPosts(response.data.posts);
     } catch (error) {
       if (error.response && error.response.status === 401) {
@@ -54,8 +56,42 @@ const ChatsOfUser = () => {
       navigate('/login');
     } else {
       fetchChatsOfUser();
+      // Socket.IO connection for real-time updates
+      const socket = io(process.env.REACT_APP_API_URL, {
+        auth: { token: authToken }
+      });
+
+      // Listen for new messages to update unread counts
+      socket.on('newMessageReceived', ({ chatId, senderId }) => {
+        if (senderId !== userId) { // Only update if message is from other user
+          setChats(prevChats => 
+            prevChats.map(chat => 
+              chat.chatId === chatId 
+                ? { ...chat, unreadMessagesCount: chat.unreadMessagesCount + 1 }
+                : chat
+            )
+          );
+        }
+      });
+
+      // Listen for messages being marked as seen
+      socket.on('messagesSeen', ({ chatId }) => {
+        setChats(prevChats => 
+          prevChats.map(chat => 
+            chat.chatId === chatId 
+              ? { ...chat, unreadMessagesCount: 0 }
+              : chat
+          )
+        );
+      });
+
+      return () => {
+        socket.off('newMessageReceived');
+        socket.off('messagesSeen');
+        socket.disconnect();
+      };
     }
-  }, [fetchChatsOfUser, navigate]);
+  }, [fetchChatsOfUser, navigate, userId]);
 
   const handleChatClick = async (chat) => {
     setLoadingSelectedChat(true);
@@ -203,7 +239,11 @@ const ChatsOfUser = () => {
                             transform: 'scale(1.03)',
                             boxShadow: '0 6px 14px rgba(0, 0, 0, 0.2)',
                             borderRadius: '14px'
-                          }
+                          },
+                          borderLeft: chat.unreadMessagesCount > 0 
+                            ? `4px solid ${theme.palette.primary.main}`
+                            : '4px solid transparent',
+                          transition: 'border-left 0.3s ease'
                         }}
                         // onClick={() => handleChatClick({ _id: buyer.id })}
                         onClick={() => handleChatClick(chat)}
@@ -266,14 +306,79 @@ const ChatsOfUser = () => {
                           {chat.posts.postTitle}
                           {/* {chat.posts.postId} */}
                         </Typography>
-                        <IconButton
-                          aria-label="View post details"
-                          onClick={() => openPostDetail({postId : chat.posts.postId})}
-                          variant="text"
-                          sx={{marginLeft:'auto'}}
-                        >
-                          <ArtTrackRoundedIcon/>
-                        </IconButton>
+                        <Box sx={{marginLeft:'auto', display: 'flex', alignItems: 'center', justifyContent: 'center',}}>
+                          {/* Badge for unread messages */}
+                          {chat.unreadMessagesCount > 0 && (
+                            <Box
+                              sx={{
+                                // position: 'absolute',
+                                // top: 0,
+                                // right: 0,
+                                backgroundColor: 'red',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: '20px',
+                                height: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                                // transform: 'translate(25%, -25%)',
+                                marginRight: isMobile ? '4px' : '8px',
+                                // zIndex: 1,
+                                // animation: chat.unreadMessagesCount > 0 ? 'pulse 1.5s infinite' : 'none',
+                                // '@keyframes pulse': {
+                                //   '0%': { transform: 'translate(25%, -25%) scale(1)' },
+                                //   '50%': { transform: 'translate(25%, -25%) scale(1.2)' },
+                                //   '100%': { transform: 'translate(25%, -25%) scale(1)' }
+                                // }
+                              }}
+                            >
+                              {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
+                            </Box>
+                          )}
+                          <IconButton
+                            aria-label="View post details"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openPostDetail({postId: chat.posts.postId});
+                            }}
+                            variant="text"
+                            sx={{marginLeft:'auto', position: 'relative'}}
+                          >
+                            {/* {chat.unreadMessagesCount > 0 && (
+                              <Box
+                                sx={{
+                                  position: 'absolute',
+                                  top: 0,
+                                  right: 0,
+                                  backgroundColor: theme.palette.error.main,
+                                  color: theme.palette.error.contrastText,
+                                  borderRadius: '50%',
+                                  minWidth: '20px',
+                                  height: '20px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 'bold',
+                                  transform: 'translate(25%, -25%)',
+                                  zIndex: 1,
+                                  animation: 'pulse 1.5s infinite',
+                                  '@keyframes pulse': {
+                                    '0%': { transform: 'translate(25%, -25%) scale(1)' },
+                                    '50%': { transform: 'translate(25%, -25%) scale(1.1)' },
+                                    '100%': { transform: 'translate(25%, -25%) scale(1)' }
+                                  }
+                                }}
+                              >
+                                {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
+                              </Box>
+                            )} */}
+                            <ArtTrackRoundedIcon/>
+                          </IconButton>
+                        </Box>
                       </Box>
                     ))
                   )}
