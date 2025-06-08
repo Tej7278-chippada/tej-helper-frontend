@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton } from '@mui/material';
 import API from '../api/api';
 import { userData } from '../../utils/userData';
+import CloseIcon from '@mui/icons-material/Close';
 
 const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar }) => {
   const [rating, setRating] = useState(3);
@@ -12,6 +13,8 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   const [isFetching, setIsFetching] = useState(true);
   const [ratings, setRatings] = useState([]);
   const loggedUserData = userData();
+  const [isRateUserOpen, setIsRateUserOpen] = useState(false);
+  const [isRatingExisted, setIsRatingExisted] = useState(false);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -39,6 +42,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       if (existingRating) {
         setRating(existingRating.rating);
         setComment(existingRating.comment);
+        setIsRatingExisted(true);
       } else {
         setRating(0); // Reset to default if not found
         setComment('');
@@ -86,6 +90,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       fetchUserRating();
 
       setLoading(false);
+      setIsRateUserOpen(false);
       // onClose(); // Close dialog after submitting
       setSnackbar({ open: true, message: "Rating added successfully.", severity: "success" });
       // Add the new comment to the top of the list
@@ -107,21 +112,32 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         {/* Rate this User */}
         {/* Show existing rating */}
         <Box display="flex" alignItems="center" gap={1}>
-          
             <Box sx={{display: isMobile? 'flex' : 'flex', justifyContent:'space-between', gap:'10px'}}>
-              <Typography variant="body1">Profile Trust Level:</Typography>
-              <Box marginLeft="auto" sx={{display: isMobile? 'unset' : 'flex',float:'inline-end', gap: isMobile ? '4px' : '10px', alignItems:'center' }}>
-                <Rating value={averageRating || 0} precision={0.5} readOnly />
-                <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
-                  {/* {isFetching ? (
-                  <CircularProgress size={20} />
-                    ) : ( */}
-                    <Typography variant="body2" color="textPrimary"> {averageRating || "N/A"} </Typography>
-                  {/* )} */}
-                  <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography>
-                </Box>
-              </Box>
+              <Typography variant="h6">Profile Trust Level</Typography>
+              <IconButton
+                onClick={onClose}
+                style={{
+                  position: 'absolute',
+                  top: '0.5rem',
+                  right: '1rem',
+                  // backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                  color: '#333'
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
             </Box>
+        </Box>
+        <Box sx={{display: 'flex',justifyContent:'center', gap: '20px', alignItems:'center', m: '10px 4px' }}>
+          <Rating value={averageRating || 0} precision={0.5} readOnly />
+          <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
+            {/* {isFetching ? (
+            <CircularProgress size={20} />
+              ) : ( */}
+              <Typography variant="body2" color="textPrimary"> {averageRating || "N/A"} </Typography>
+            {/* )} */}
+            <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography>
+          </Box>
         </Box>
         
       </DialogTitle>
@@ -210,17 +226,17 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
           
         </Box>
       </DialogContent>
-      <DialogActions sx={{gap: 1, m:'10px'}}>
-        {userId !== loggedUserData?.userId  && (
+      <DialogActions sx={{gap: 1, m:'10px', display: 'flow'}}>
+        {( userId !== loggedUserData?.userId ) && (isRateUserOpen ? (
         <Box width="100%">
             {/* User Rating Input */}
             <Box>
               <Box sx={{display:'flex', gap:'10px'}}>
-                <Typography variant="body2" color="textSecondary">
+                <Typography variant="body1" color="textSecondary">
                 Rate this User:
                 </Typography>
                 <Rating
-                value={rating}
+                value={rating} sx={{margin: '10px 10px'}}
                 onChange={(e, newValue) => setRating(newValue)}
                 />
                 </Box>
@@ -246,26 +262,35 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
                 />
             </Box>
             <Box mt={1} display="flex" justifyContent="flex-end">
-                <Button onClick={onClose} disabled={loading} style={{ margin: "0rem", borderRadius: '8px', marginRight:'10px' }}>
+                <Button onClick={() => setIsRateUserOpen((prev) => !prev)} disabled={loading} style={{ margin: "0rem", borderRadius: '8px', marginRight:'10px' }}>
                     Cancel
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
-                    disabled={loading}
-                    style={{ margin: "0rem", borderRadius: '8px' }}
+                    disabled={loading || rating === 0}
+                    sx={{ margin: "0rem", borderRadius: '12px' }}
                 >
                     { loading ? <CircularProgress size={20}/> : 'Submit' }
                 </Button>
             </Box>
         </Box>
-        )}
-        {userId === loggedUserData?.userId && (
+        ) : (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end'}}>
+            <Button
+              variant="outlined" sx={{borderRadius: '12px',}}
+              onClick={() => setIsRateUserOpen((prev) => !prev)}
+            >
+              {isRatingExisted ? 'Edit your Rating' : 'Rate the User'}
+            </Button>
+          </Box>
+        ))}
+        {/* {userId === loggedUserData?.userId && (
           <Button onClick={onClose} disabled={loading} style={{ margin: "0rem", borderRadius: '8px' }}>
             Close
           </Button>
-        )}
+        )} */}
       </DialogActions>
     </Dialog>
   );

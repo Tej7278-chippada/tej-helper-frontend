@@ -845,9 +845,9 @@ function PostDetailsById({ onClose, user }) {
                     </Box>
                   </Grid>
                   {/* Rate User Button */}
-                  <Grid item justifyContent="flex-end">
-                    <Button variant="text" size="small" onClick={handleOpenRateDialog}>
-                      Rate User
+                  <Grid item justifyContent="flex-end" mt={1}>
+                    <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px'}} onClick={handleOpenRateDialog}>
+                      User Ratings
                     </Button>
                   </Grid>
                 </Box>
