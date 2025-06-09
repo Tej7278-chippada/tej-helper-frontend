@@ -1,29 +1,17 @@
-// Header.js
+// src/components/Header.js
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Typography, TextField, List, ListItem, ListItemText, Box, CircularProgress, Paper, useMediaQuery, IconButton, Menu, MenuItem, Dialog, ListItemIcon, Avatar, Divider, Badge, } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import SearchIcon from '@mui/icons-material/Search';
-import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, List, ListItem, ListItemText, Box, useMediaQuery, IconButton, Menu, MenuItem, Dialog, ListItemIcon, Avatar, Divider, Badge, } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-// import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { userData } from '../utils/userData';
 import PersonIcon from '@mui/icons-material/Person';
-// import PostAddIcon from '@mui/icons-material/PostAdd';
-// import ChatIcon from '@mui/icons-material/Chat';
-// import FavoriteIcon from '@mui/icons-material/Favorite';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { fetchUnreadNotificationsCount } from './api/api';
-// import { io } from 'socket.io-client';
 
 const Header = ({ username }) => {
-  const location = useLocation();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [loading, setLoading] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Check if screen size is small
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); 
   const [anchorEl, setAnchorEl] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [loggedInUsers, setLoggedInUsers] = useState([]);
@@ -31,11 +19,8 @@ const Header = ({ username }) => {
   const [currentUsername, setCurrentUsername] = useState(username || '');
   const loggedUserData = userData();
   const userId = (loggedUserData?.userId || '');
-  // Only show search bar when user is logged in and on chat page
-  // const showSearchBar = location.pathname.includes('/productList') && username;
   const userProfilePic = localStorage.getItem('tokenProfilePic');
   const [unreadCount, setUnreadCount] = useState(0);
-  // const [socket, setSocket] = useState(null);
   
 
 
@@ -45,7 +30,6 @@ const Header = ({ username }) => {
     setLoggedInUsers(users);
 
     // Load the last active user from localStorage if available
-    // const activeUser = localStorage.getItem('activeUser');
     const activeUser = (loggedUserData?.userName || '');
     if (activeUser) {
       const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
@@ -54,18 +38,10 @@ const Header = ({ username }) => {
         localStorage.setItem('authToken', activeToken); // Ensure the correct token is set
       }
       setCurrentUsername(activeUser);
-      // Set up socket.io listener for real-time updates
-      // const newSocket = io(`${process.env.REACT_APP_API_URL}`);
-      // setSocket(newSocket);
       console.log('logged user:', currentUsername);
     }
    
   }, [username]);
-
-  // Add this useEffect to fetch notifications count
-// useEffect(() => {
-//   if (socket && userId) {
-//     socket.emit('joinRoom', userId);
     
     const fetchNotificationCount = async () => {
       if (currentUsername) {
@@ -73,44 +49,11 @@ const Header = ({ username }) => {
           const response = await fetchUnreadNotificationsCount();
           const unread = response.data.count;
           setUnreadCount(unread);
-          // console.log('notification count fetched');
         } catch (error) {
           console.error('Error fetching notifications:', error);
         }
       }
     };
-
-//     fetchNotificationCount();
-
-//     // Set up socket.io listener for real-time updates
-//     // const socket = io(`${process.env.REACT_APP_API_URL}`);
-//     // Listen for notification updates
-//     socket.on('notificationUpdate', ({ userId }) => {
-//       if (userId === localStorage.getItem('userId')) {
-//         fetchNotificationCount();
-//       }
-//     });
-
-//     // Listen for new notifications
-//     socket.on('newNotification', () => {
-//       fetchNotificationCount();
-//       console.log('new notification');
-//     });
-
-//     return () => {
-//       socket.disconnect();
-//     };
-//   }
-// }, [currentUsername, socket]);
-
-  // useEffect(() => {
-  //   // Add current user to the list if not already present
-  //   if (username && !loggedInUsers.includes(username)) {
-  //     const updatedUsers = [...loggedInUsers, username];
-  //     setLoggedInUsers(updatedUsers);
-  //     localStorage.setItem('loggedInUsers', JSON.stringify(updatedUsers));
-  //   }
-  // }, [username, loggedInUsers]);
 
   const handleProfileClick = (event) => {
     fetchNotificationCount();
@@ -142,11 +85,6 @@ const Header = ({ username }) => {
     localStorage.clear();
     navigate('/login');
   };
-  
-  // const handleSwitchProfile = () => {
-  //   setOpenDialog(true);
-  //   setAnchorEl(null);
-  // };
 
   const handleSelectUser = (user) => {
     if (user === 'Login with another account') {
@@ -187,107 +125,19 @@ const Header = ({ username }) => {
     }
   }, [username]);
 
-  // Handle search input change
-  const handleSearchChange = async (event) => {
-    const value = event.target.value;
-    setSearchTerm(value);
-
-    if (value) {
-      setLoading(true);
-      try {                             // `https://tej-chat-app-8cd7e70052a5.herokuapp.com/api/users/search`
-        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/search`, {
-          params: { username: value }
-        });
-        setSearchResults(response.data);
-      } catch (error) {
-        console.error('Error searching usernames:', error);
-      } finally {
-        setLoading(false);
-      }
-    } else {
-      setSearchResults([]);
-    }
-  };
-
   const openUserProfile = () => {
-    // const userId = localStorage.getItem('userId'); 
-    // const userId = (loggedUserData?.userId || 'userId');
     navigate(`/user/${userId}`); //, { replace: true }
   };
-
-  // const toUserPosts = () => {
-  //   navigate('/userposts'); //, { replace: true }
-  // };
   
   return (
     <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem' }}>
-      <AppBar position="absolute"> {/* fixed */}
+      <AppBar position="absolute">
         <Toolbar>
         <Typography variant={isMobile ? "h6" : "h5"} component="div" sx={{ flexGrow: 1 }}>
           <Link to="/" style={{ color: 'inherit', textDecoration: 'none', display: 'inline-block' }}>
             Helper
           </Link>
         </Typography>
-        {/* <Link to="/admin" style={{ color: 'white', textDecoration: 'none', marginRight: '15px' }}>Admin Page</Link> */}
-        {/* Search Bar */}
-        {location.pathname.includes('/productList') && currentUsername && (
-            <Box display="flex" alignItems="center" mr={2}>
-              <TextField
-                variant="outlined"
-                size="small"
-                placeholder="Search usernames"
-                value={searchTerm}
-                onChange={handleSearchChange}
-                InputProps={{ endAdornment: <SearchIcon /> }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '20px',
-                    bgcolor: 'transparent', //theme.palette.background.paper
-                    // backgroundColor:'white'
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '10px 14px',
-                  },
-                  width: isMobile ? 130 : 200
-                }}
-              />
-              
-              {searchTerm && (
-                <Paper elevation={3} sx={{ position: 'absolute', top: '80%', mt: 1, zIndex: 10, maxWidth: isMobile ? 200 : 250 }}>
-                  <List style={{
-                    position: 'absolute', background: 'white', width: isMobile ? 200 : 250,
-                    boxShadow: '0 4px 8px rgba(0,0,0,0.2)', borderRadius: '4px'
-                  }}>
-                    {loading ? (
-                      <ListItem>
-                        <CircularProgress size={20} />
-                      </ListItem>
-                    ) : (
-                      searchResults.length > 0 ? (
-                        searchResults.map((user) => (
-                          <ListItem key={user.username}>
-                            <CheckCircleIcon style={{ color: 'green' }} />
-                            <ListItemText primary={user.username} />
-                          </ListItem>
-                        ))
-                      ) : (
-                        <ListItem>
-                          <ListItemText primary="Searched username doesn't match any existing username" />
-                        </ListItem>
-                      )
-                    )}
-                  </List>
-                </Paper>
-              )}
-            </Box>
-          )}
-          {/* {location.pathname === '/productList' && username && (
-            <Typography variant="body1" 
-            // sx={{ display: isMobile ? 'none' : 'block' }}
-            >
-              {username}
-            </Typography>
-          )} */}
           {currentUsername && (
             <>
               <IconButton
@@ -296,23 +146,14 @@ const Header = ({ username }) => {
                 size="small"
                 sx={{ borderRadius: 6, px: 0.5, py: 0.5, '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' } }}
               >
-                {/* <Badge variant="dot" color="error" invisible={unreadCount === 0} sx={{ '& .MuiBadge-dot': { height: 8, minWidth: 8 } }}> */}
                 <Avatar
                   src={
                     (userProfilePic === null )
                       ? 'https://placehold.co/56x56?text=No+Image'
                       : `data:image/jpeg;base64,${userProfilePic}`
                   }
-                  // alt={currentUsername[0]}
                   sx={{ width: 32, height: 32, mr: 0, color:'inherit', bgcolor:'rgba(255, 255, 255, 0.27)', borderRadius: '50%', fontSize: 12, border: `2px solid rgba(255, 255, 255, 0.3)`, }}
                 />
-                {/* </Badge> */}
-                {/* <Avatar sx={{ width: 32, height: 32, mr: 1 }}>
-                  {currentUsername.charAt(0).toUpperCase()}
-                </Avatar> */}
-                {/* <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                  {currentUsername}
-                </Typography> */}
               </IconButton>
 
               <Menu
@@ -343,18 +184,6 @@ const Header = ({ username }) => {
                   <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
                   My Profile
                 </MenuItem>
-                {/* <MenuItem onClick={() => { toUserPosts(); handleClose(); }}>
-                  <ListItemIcon><PostAddIcon fontSize="small" /></ListItemIcon>
-                  My Posts
-                </MenuItem>
-                <MenuItem onClick={() => { navigate('/chatsOfUser'); handleClose(); }}>
-                  <ListItemIcon><ChatIcon fontSize="small" /></ListItemIcon>
-                  Chats
-                </MenuItem>
-                <MenuItem onClick={() => { navigate('/wishlist'); handleClose(); }}>
-                  <ListItemIcon><FavoriteIcon fontSize="small" /></ListItemIcon>
-                  Wishlist
-                </MenuItem> */}
                 <MenuItem onClick={() => { navigate('/notifications'); handleClose(); }}>
                   <ListItemIcon>
                     <Badge badgeContent={unreadCount} color="error" max={99}>
