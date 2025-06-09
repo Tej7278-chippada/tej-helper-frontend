@@ -1,32 +1,81 @@
-// MenuBar.js
-import React from 'react';
-import { BottomNavigation, BottomNavigationAction, Paper, useMediaQuery } from '@mui/material';
+//src/components/MenuBar.js
+import React, { useEffect, useState } from 'react';
+import { Badge, BottomNavigation, BottomNavigationAction, Box, Paper, Tooltip, Typography, useMediaQuery, Zoom } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
-import PersonIcon from '@mui/icons-material/Person';
 import PostAddIcon from '@mui/icons-material/PostAdd';
 import ChatIcon from '@mui/icons-material/Chat';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-// import LogoutIcon from '@mui/icons-material/Logout';
 import HomeRoundedIcon from '@mui/icons-material/HomeRounded';
 
 const navItems = [
-    { label: 'Helper', icon: <HomeRoundedIcon />, path: `/` },
-    // { label: 'Profile', icon: <PersonIcon />, path: `/user/${localStorage.getItem('userId')}` },
-    { label: 'My Posts', icon: <PostAddIcon />, path: '/userposts' },
-    { label: 'Chats', icon: <ChatIcon />, path: '/chatsOfUser' },
-    { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist' },
-    // { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications' },
-  ];
+  {
+    label: 'Helper',
+    icon: <HomeRoundedIcon />,
+    path: `/`,
+    activeColor: '#4CAF50',
+    description: 'Go to home page'
+  },
+  {
+    label: 'My Posts',
+    icon: <PostAddIcon />,
+    path: '/userposts',
+    activeColor: '#2196F3',
+    description: 'View your posts',
+    badgeCount: 0 // Can be dynamically updated
+  },
+  {
+    label: 'Chats',
+    icon: <ChatIcon />,
+    path: '/chatsOfUser',
+    activeColor: '#FF5722',
+    description: 'Open chat messages',
+    badgeCount: 0 // For unread messages
+  },
+  {
+    label: 'Wishlist',
+    icon: <FavoriteIcon />,
+    path: '/wishlist',
+    activeColor: '#E91E63',
+    description: 'View saved items'
+  },
+];
 
-const MenuBar = ({ visible, onLogout }) => {
+const MenuBar = ({ visible, badgeCounts = {} }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  if (!visible) return null;
+  // Update active index based on current path
+  useEffect(() => {
+    const currentIndex = navItems.findIndex(item => item.path === location.pathname);
+    if (currentIndex !== -1) {
+      setActiveIndex(currentIndex);
+    }
+  }, [location.pathname]);
+
+  // Handle navigation with animation
+  const handleNavigation = (path, index) => {
+    if (path === location.pathname) return; // Don't navigate to same page
+
+    setIsAnimating(true);
+    setActiveIndex(index);
+
+    // Add haptic feedback for mobile devices
+    // if (navigator.vibrate) {
+    //   navigator.vibrate(30);
+    // }
+
+    setTimeout(() => {
+      navigate(path);
+      setIsAnimating(false);
+    }, 150);
+  };
+
+  if (!visible || !isMobile) return null;
 
   return (
     <Paper
@@ -35,51 +84,192 @@ const MenuBar = ({ visible, onLogout }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 1200, background: 'rgba(255,255,255,0.4)',  backdropFilter: 'blur(10px)',
-        // backgroundColor: '#fff',
-        // borderTop: '1px solid #ddd',
-        borderTopLeftRadius: '16px', // Rounded top-left corner
-        borderTopRightRadius: '16px', // Rounded top-right corner
-        transition: 'transform 0.3s ease, opacity 0.3s ease',
+        zIndex: 1200,
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+        borderTopLeftRadius: '20px',
+        borderTopRightRadius: '20px',
+        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: visible ? 'translateY(0)' : 'translateY(100%)',
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
+        boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.1)',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+        }
       }}
       elevation={3}
     >
-      <BottomNavigation showLabels 
+      {/* Active indicator */}
+      {/* <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: `${(activeIndex / navItems.length) * 100}%`,
+          width: `${100 / navItems.length}%`,
+          height: '3px',
+          background: `linear-gradient(90deg, ${navItems[activeIndex]?.activeColor || theme.palette.primary.main}, ${navItems[activeIndex]?.activeColor || theme.palette.primary.main}99)`,
+          borderRadius: '0 0 2px 2px',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          boxShadow: `0 2px 8px ${navItems[activeIndex]?.activeColor || theme.palette.primary.main}40`,
+        }}
+      /> */}
+      <BottomNavigation showLabels={!isMobile}
         value={location.pathname}
         sx={{
-          '& .Mui-selected': {
-            color: theme.palette.primary.main,
-          }, background: 'rgba(255,255,255,0.1)',  backdropFilter: 'blur(10px)',
-          borderTopLeftRadius: '16px', // Match parent's border radius
-          borderTopRightRadius: '16px', // Match parent's border radius
-          overflow: 'hidden', // Ensure children don't overflow rounded corners
+          background: 'transparent',
+          borderTopLeftRadius: '20px',
+          borderTopRightRadius: '20px',
+          overflow: 'hidden',
+          height: isMobile ? '64px' : '72px',
+          '& .MuiBottomNavigationAction-root': {
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            borderRadius: '12px',
+            margin: '4px 2px',
+            minWidth: isMobile ? '60px' : '80px',
+            position: 'relative',
+            '&:hover': {
+              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            },
+            '&.Mui-selected': {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              '& .MuiBottomNavigationAction-icon': {
+                transform: 'scale(1.1)',
+                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
+              },
+              '& .MuiBottomNavigationAction-label': {
+                fontWeight: 600,
+              }
+            },
+            '&:active': {
+              transform: 'translateY(0) scale(0.95)',
+            }
+          },
+          '& .MuiBottomNavigationAction-icon': {
+            fontSize: isMobile ? '24px' : '26px',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          },
+          '& .MuiBottomNavigationAction-label': {
+            fontSize: '11px',
+            fontWeight: 500,
+            transition: 'all 0.3s ease',
+            marginTop: '2px',
+            textTransform: 'capitalize',
+          }
         }}
       >
-        {navItems.map((item) => (
-          <BottomNavigationAction sx={{
-            minWidth: 'auto',
-            padding: isMobile ? '6px 0' : '6px 8px',
-            '&:hover': {
-              backgroundColor: theme.palette.action.hover,
-              borderRadius:'12px',
-            },
-          }}
-            key={item.label}
-            label={isMobile ? null : item.label}
-            icon={item.icon}
-            value={item.path}
-            onClick={() => navigate(item.path)}
-          />
-        ))}
-        {/* <BottomNavigationAction
-          label="Logout"
-          icon={<LogoutIcon />}
-          onClick={onLogout}
-        /> */}
+        {navItems.map((item, index) => {
+          const isActive = location.pathname === item.path;
+          const badgeCount = badgeCounts[item.label.toLowerCase()] || item.badgeCount || 0;
+
+          const NavigationIcon = (
+            <Badge
+              badgeContent={badgeCount > 0 ? badgeCount : null}
+              color="error"
+              sx={{
+                '& .MuiBadge-badge': {
+                  fontSize: '10px',
+                  height: '18px',
+                  minWidth: '18px',
+                  backgroundColor: '#FF4444',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  animation: badgeCount > 0 ? 'pulse 2s infinite' : 'none',
+                  '@keyframes pulse': {
+                    '0%': {
+                      transform: 'scale(1)',
+                      opacity: 1,
+                    },
+                    '50%': {
+                      transform: 'scale(1.1)',
+                      opacity: 0.8,
+                    },
+                    '100%': {
+                      transform: 'scale(1)',
+                      opacity: 1,
+                    },
+                  }
+                }
+              }}
+            >
+              <Box
+                sx={{
+                  color: isActive ? (item.activeColor || theme.palette.primary.main) : 'rgba(0, 0, 0, 0.6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {item.icon}
+              </Box>
+            </Badge>
+          );
+
+          return (
+            <Tooltip
+              key={item.label}
+              title={
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {item.label}
+                  </Typography>
+                  <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                    {item.description}
+                  </Typography>
+                </Box>
+              }
+              arrow
+              placement="top"
+              TransitionComponent={Zoom}
+              enterDelay={300}
+              sx={{
+                '& .MuiTooltip-tooltip': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                }
+              }}
+            >
+              <BottomNavigationAction
+                label={item.label}
+                icon={NavigationIcon}
+                value={item.path}
+                onClick={() => handleNavigation(item.path, index)}
+                sx={{
+                  opacity: isAnimating && index !== activeIndex ? 0.5 : 1,
+                  pointerEvents: isAnimating ? 'none' : 'auto',
+                }}
+              />
+            </Tooltip>
+          );
+        })}
       </BottomNavigation>
+      {/* Decorative elements */}
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '40px',
+          height: '4px',
+          backgroundColor: 'rgba(0, 0, 0, 0.1)',
+          borderRadius: '2px 2px 0 0',
+          opacity: 0.6,
+        }}
+      />
     </Paper>
   );
 };

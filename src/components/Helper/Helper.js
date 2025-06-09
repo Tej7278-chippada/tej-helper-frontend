@@ -594,9 +594,10 @@ const Helper = ()=> {
       <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
-          position: 'sticky',
+          position: 'relative', //sticky
           top: 0,
-          zIndex: 1100}}> 
+          // zIndex: 1100
+          }}> 
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
