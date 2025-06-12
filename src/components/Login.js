@@ -25,6 +25,14 @@ const theme = createTheme({
   },
 });
 
+// Custom glassmorphism styling
+// const getGlassmorphismStyle = (theme) => ({
+//   background: 'rgba(255, 255, 255, 0.15)',
+//   backdropFilter: 'blur(20px)',
+//   border: '1px solid rgba(255, 255, 255, 0.2)',
+//   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+// });
+
 const Login = () => {
   // const [username, setUsername] = useState('');
   const [identifier, setIdentifier] = useState(''); // Can be email or username
@@ -185,11 +193,24 @@ const Login = () => {
     <Layout>
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh"
     padding={isMobile ? 2 : 4} // Adjust padding for mobile
+    // sx={{...getGlassmorphismStyle(theme),}}
     >
-      <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+      {/* <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
+        Login
+      </Typography> */}
+      <Typography 
+        variant={isMobile ? "h5" : "h4"} gutterBottom
+        fontWeight={700}
+        sx={{
+          background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', //background: '#4361ee', // 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}
+      >
         Login
       </Typography>
-      <form onSubmit={handleLogin} style={{ maxWidth: '400px', width: '100%' }}>
+      <form onSubmit={handleLogin} style={{ maxWidth: isMobile ? '300px' : '400px', width: '100%',  }}> {/* ...getGlassmorphismStyle(theme), padding:'12px', borderRadius:isMobile ? '12px' : '18px' */}
       {location.state?.message && <div>{location.state.message}</div>}
         <TextField
           label="Username or Email"
@@ -224,8 +245,8 @@ const Login = () => {
         />
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
-        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ marginTop: '1rem', borderRadius:'12px' }} disabled={loading}>
-        {loading ? <CircularProgress size={24} /> : 'Login'}
+        <Button type="submit" variant="contained"  fullWidth sx={{ marginTop: '1rem', borderRadius:'12px',   background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }} disabled={loading}>
+        {loading ? <CircularProgress size={24} color="inherit"/> : 'Login'}
         </Button>
         <Button variant="text" color="primary" fullWidth onClick={handleForgotPassword} sx={{ marginTop: '10px', borderRadius:'12px' }}>
           Forgot Password?
@@ -236,7 +257,7 @@ const Login = () => {
             Register  Can be used only site deployed on custom domain, cant use on static domain of netlify
           </Button> */}
           <Link to="/register" sx={{ color: 'inherit', textDecoration: 'none', display: 'inline-block', borderRadius: '12px' }}>
-            <Button variant="text">
+            <Button variant="text" sx={{borderRadius: '12px', ml:'4px'}}>
               Register
             </Button>
           </Link>

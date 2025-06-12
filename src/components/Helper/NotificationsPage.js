@@ -14,7 +14,10 @@ import {
   Paper,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  styled,
+  alpha,
+  Card
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import API, { clearAllNotifications, fetchNotifications, markNotificationAsRead } from '../api/api';
@@ -24,6 +27,25 @@ import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-
 import { io } from 'socket.io-client';
 import ClearAllRoundedIcon from '@mui/icons-material/ClearAllRounded';
 import { urlBase64ToUint8Array } from '../../utils/pushNotifications';
+import SkeletonChats from '../Chat/SkeletonChats';
+
+// Enhanced styled components
+const NotificationsContainer = styled(Card)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
+  borderRadius: '16px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  overflow: 'hidden',
+  backgroundClip: 'padding-box', // border vertices radius exact match
+}));
+
+// Enhanced glassmorphism styles
+const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
+  background: `rgba(255, 255, 255, ${opacity})`,
+  backdropFilter: `blur(${blur}px)`,
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
 
 function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -251,7 +273,9 @@ function NotificationsPage() {
     <Layout username={tokenUsername}>
       <Box sx={{ p: isMobile ? '6px' : '10px', maxWidth: '800px', mx: 'auto' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-          <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={600}>
+          <Typography variant={isMobile ? 'h6' : 'h6'} fontWeight={600} sx={{background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'}}>
             Notifications ({notifications.filter(n => !n.isRead).length})
           </Typography>
           <Box>
@@ -291,9 +315,9 @@ function NotificationsPage() {
           </Box>
         </Toolbar>
 
-        <Paper sx={{ bgcolor: '#f5f5f5', p: '10px 12px', borderRadius: 3 }} elevation={3}>
+        <NotificationsContainer sx={{ p: '10px 12px', borderRadius: 3 }} elevation={3}> {/* Paper bgcolor: '#f5f5f5', */}
           {loading ? (
-            <SkeletonCards />
+            <SkeletonChats />
           ) : (
             <List>
               {notifications.length === 0 ? (
@@ -308,12 +332,28 @@ function NotificationsPage() {
                       onClick={() => handleNotificationClick(notification)}
                       sx={{
                         // bgcolor: !notification.isRead ? 'primary.light' : 'background.paper',
-                        bgcolor: !notification.isRead ? 'background.paper' : 'grey.200',
+                        // bgcolor: !notification.isRead ? 'background.paper' : 'grey.200',
+                        ...getGlassmorphismStyle(!notification.isRead ? 0.1 : 0.01, !notification.isRead ? 10 : 1),
                         borderRadius: 2,
                         mb: 1,
-                        p: '10px 16px',
-                        transition: '0.3s', cursor:'pointer',
-                        '&:hover': { bgcolor: 'grey.100' }
+                        p: '10px 16px', cursor:'pointer',
+                        '&:hover': { bgcolor: 'grey.100' },
+                        // borderRadius: '8px',
+                          transition: 'transform 0.2s, box-shadow 0.2s, border-radius 0.2s',
+                          WebkitTapHighlightColor: 'transparent', // Removes the default tap highlight
+                          '&:hover': {
+                            transform: 'scale(1.01)',
+                            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
+                          },
+                          '&:active': {
+                            transform: 'scale(1.03)',
+                            boxShadow: '0 6px 14px rgba(0, 0, 0, 0.2)',
+                            borderRadius: '14px'
+                          },
+                          borderLeft: !notification.isRead 
+                            ? `4px solid ${theme.palette.primary.main}`
+                            : '4px solid transparent',
+                          transition: 'border-left 0.3s ease'
                       }}
                     >
                       <ListItemText
@@ -333,7 +373,7 @@ function NotificationsPage() {
               )}
             </List>
           )}
-        </Paper>
+        </NotificationsContainer>
       </Box>
       <Snackbar
         open={snackbar.open}

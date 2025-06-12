@@ -45,6 +45,14 @@ const DEFAULT_FILTERS = {
   priceRange: [0, 100000]
 };
 
+// Enhanced glassmorphism styles
+// const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
+//   background: `rgba(255, 255, 255, ${opacity})`,
+//   backdropFilter: `blur(${blur}px)`,
+//   border: '1px solid rgba(255, 255, 255, 0.2)',
+//   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+// });
+
 const Helper = ()=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
   // const [loading, setLoading] = useState(false);
@@ -591,20 +599,39 @@ const Helper = ()=> {
   return (
     <Layout username={tokenUsername}>
       <Box>
-      <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
+      <Toolbar sx={{display:'flex', justifyContent:'space-between',
+      //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
+          // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
+          borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
           position: 'relative', //sticky
           top: 0,
-          // zIndex: 1100
+          zIndex: 1000, 
+          // ...getGlassmorphismStyle(0.1, 10),
           }}> 
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
           <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '6px', marginLeft: isMobile ? '-12px' : '-14px'}}>
-          <IconButton color="primary" onClick={() => setShowMap(true)} sx={{borderRadius: 6, px: 0.5, py: 0.5,  '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' }}}>
-            <LocationOnIcon />
-            <Typography variant="body1" sx={{marginLeft:'0px' }}>
+          <IconButton  onClick={() => setShowMap(true)}sx={{
+              borderRadius: '12px',
+              padding: '8px 12px',
+              // background: 'rgba(67, 97, 238, 0.1)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'rgba(67, 97, 238, 0.1)',
+                transform: 'translateY(-2px)',
+              }
+            }}>
+            <LocationOnIcon sx={{ color: '#4361ee' }} />
+            <Typography variant="body1" sx={{ 
+                color: '#4361ee',
+                fontWeight: 600,
+                maxWidth: isMobile ? '120px' : '200px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}>
               {/* {currentAddress || "Fetching location..."} */}
               {(currentAddress.split(" ").length > (isMobile ? 2 : 3) ? `${currentAddress.split(" ").slice(0, (isMobile ? 2 : 3)).join(" ")}...` : currentAddress) || "Fetching location..."}
             </Typography>
@@ -801,8 +828,12 @@ const Helper = ()=> {
               // marginRight: "6px",
               boxShadow: '0 2px 8px rgba(67, 97, 238, 0.2)',
               '&:hover': { 
-                boxShadow: '0 4px 12px rgba(67, 97, 238, 0.3)',
-              }
+                boxShadow: '0 6px 20px rgba(67, 97, 238, 0.4)',
+                transform: 'translateY(-2px)',
+              },
+              background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+              textTransform: 'none',
+              fontWeight: 600,
             }}
           >
             {distanceRange} km

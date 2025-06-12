@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfUser.js
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled, Backdrop, CircularProgress } from '@mui/material';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled, Backdrop, CircularProgress, alpha, Chip, TextField, InputAdornment, } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -9,7 +9,73 @@ import apiClient from '../../utils/axiosConfig';
 import ChatDialog from './ChatDialog';
 import { fetchPostById } from '../api/api';
 import ArtTrackRoundedIcon from '@mui/icons-material/ArtTrackRounded';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SearchIcon from '@mui/icons-material/Search';
+import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
+import FilterListOffRoundedIcon from '@mui/icons-material/FilterListOffRounded';
+// import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+// import AccessTimeIcon from '@mui/icons-material/AccessTime';
+// import PersonIcon from '@mui/icons-material/Person';
+// import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ClearIcon from '@mui/icons-material/Clear';
 import { io } from 'socket.io-client';
+
+// Enhanced glassmorphism styles
+const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
+  background: `rgba(255, 255, 255, ${opacity})`,
+  backdropFilter: `blur(${blur}px)`,
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
+// Enhanced styled components
+const ChatContainer = styled(Card)(({ theme }) => ({
+  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
+  borderRadius: '16px',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  overflow: 'hidden',
+  backgroundClip: 'padding-box', // border vertices radius exact match
+}));
+
+const SearchContainer = styled(Box)(({ theme }) => ({
+  display: 'flex', 
+  justifyContent: 'flex-end',
+  transition: 'all 0.3s ease',
+}));
+
+const SearchTextField = styled(TextField)(({ theme, expanded }) => ({
+  transition: 'all 0.3s ease',
+  width: expanded ? '100%' : '40px',
+  overflow: 'hidden',
+  // ...getGlassmorphismStyle(),
+  background:'rgba(0,0,0,0)',
+  '& .MuiInputBase-root': {
+    height: '40px',
+    borderRadius: '20px',
+    '& .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+    },
+    '&.Mui-focused': {
+      // ...getGlassmorphismStyle(0.25, 20),
+      background:'rgba(0,0,0,0)',
+    },
+  },
+  '& .MuiInputBase-input': {
+    opacity: expanded ? 1 : 0,
+    transition: 'opacity 0.2s ease',
+    padding: expanded ? '6px 12px 6px 0' : '6px 0',
+    cursor: expanded ? 'text' : 'pointer',
+  },
+}));
+
+// const SearchContainer = styled(Box)(({ theme }) => ({
+//   background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
+//   borderRadius: '12px',
+//   padding: '16px',
+//   marginBottom: '16px',
+//   border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+// }));
 
 const ChatsOfUser = () => {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -27,6 +93,28 @@ const ChatsOfUser = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
   const [loadingSelectedChat, setLoadingSelectedChat] = useState(false);
   const userId = localStorage.getItem('userId');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterBy, setFilterBy] = useState('all'); // 'all', 'unread', 'recent'
+  const [filteredChats, setFilteredChats] = useState([]);
+  const [expanded, setExpanded] = useState(false);
+  const inputRef = useRef(null);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+
+  const handleSearchClick = () => {
+    setExpanded(true);
+    setTimeout(() => inputRef.current?.focus(), 100); // Small delay for smooth expansion
+  };
+
+  const handleClearClick = () => {
+    setSearchQuery('');
+    inputRef.current?.focus();
+  };
+
+  const handleBlur = () => {
+    if (!searchQuery) {
+      setExpanded(false);
+    }
+  };
 
   const fetchChatsOfUser = useCallback(async () => {
     setLoading(true);
@@ -34,19 +122,53 @@ const ChatsOfUser = () => {
       const response = await apiClient.get('/api/chats/chatsOfUser', {
         headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` },
       });
-      setChats(response.data.chats || []); //.reverse()
+      const chatsData = response.data.chats || [];
+      setChats(chatsData); //.reverse()
       // setPosts(response.data.posts);
+      setFilteredChats(chatsData);
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.error('Unauthorized user, redirecting to login');
         navigate('/login');
       } else {
         console.error('Error fetching chats:', error);
+        setSnackbar({
+          open: true,
+          message: 'Failed to load chats. Please try again.',
+          severity: 'error'
+        });
       }
     } finally {
       setLoading(false);
     }
   }, [navigate]);
+
+  // Enhanced filtering logic
+  useEffect(() => {
+    let filtered = chats;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(chat =>
+        chat.posts?.postTitle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        chat.seller?.username?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Category filter
+    switch (filterBy) {
+      case 'unread':
+        filtered = filtered.filter(chat => chat.unreadMessagesCount > 0);
+        break;
+      case 'recent':
+        filtered = filtered.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+        break;
+      default:
+        break;
+    }
+
+    setFilteredChats(filtered);
+  }, [chats, searchQuery, filterBy]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -130,39 +252,63 @@ const ChatsOfUser = () => {
     fontSize: 12,
   }));
 
+  const totalUnreadCount = chats.reduce((sum, chat) => sum + chat.unreadMessagesCount, 0);
+
   return (
     <Layout username={tokenUsername}>
       <Box mt={isMobile ? '2px' : '4px'} mb={isMobile ? '4px' : '8px'} sx={{ maxWidth: '800px', mx: 'auto'}}>
-        <Box
+        {/* <Box
           display="flex"
           flexDirection={isMobile ? "column" : "row"}
           gap={1}
           p={isMobile ? '4px' : 1}
           sx={{  borderRadius: '10px' }} // bgcolor: '#f5f5f5',
-        >
-          <Card sx={{
+        > */}
+          <ChatContainer sx={{
             flex: 1.5,
             height: '80vh',
             overflowY: 'auto',
-            bgcolor: 'white',
-            borderRadius: 2,
+            // bgcolor: 'rgba(0,0,0,0)',
+            // borderRadius: 2,
             scrollbarWidth: 'none'
           }}>
-            <Box height={isMobile ? "85vh" : "auto"} sx={{ padding: '0px' }}>
+            <Box height={ "auto"} sx={{ padding: '0px' }}>
               <Box
                 position="sticky"
                 top={0}
                 left={0}
                 right={0}
                 zIndex={10}
-                sx={{
-                  bgcolor: 'white',
-                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                sx={{ ...getGlassmorphismStyle(0.1, 10),
+                  // bgcolor: 'white',
+                  // boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
                   padding: '8px 16px',
                 }}
               >
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography position="relative" variant="h5" color='grey'
+                <Box display="flex" position="sticky" justifyContent="space-between" alignItems="center">
+                  <Box sx={{display: 'flex', gap: '4px'}}>
+                  {/* <ChatBubbleOutlineIcon 
+                    sx={{ 
+                      fontSize: '2rem', 
+                      color: 'primary.main',
+                      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                    }} 
+                  /> */}
+                  <Typography 
+                    variant={isMobile ? "h6" : "h5" }
+                    sx={{ 
+                      fontWeight: 700,
+                      background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    Chats
+                  </Typography>
+                  </Box>
+                  {/* <Typography position="relative" variant="h5" color='grey'
                     style={{
                       marginBottom: '0.0rem',
                       display: '-webkit-box',
@@ -175,10 +321,85 @@ const ChatsOfUser = () => {
                     }}
                   >
                     Chats
-                  </Typography>
+                  </Typography> */}
+                  <Box sx={{display: 'flow' , gap: '14px', justifyContent: 'center', alignContent: 'center'}}>
+                    <SearchContainer>
+                      <Box>
+                      <SearchTextField
+                        variant="outlined"
+                        placeholder={expanded ? "Search chats..." : ""}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={() => setExpanded(true)}
+                        onBlur={handleBlur}
+                        inputRef={inputRef}
+                        expanded={expanded}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <IconButton 
+                                onClick={!expanded ? handleSearchClick : undefined}
+                                sx={{
+                                  minWidth: '40px',
+                                  minHeight: '40px',
+                                  marginLeft: expanded ? '8px' : '0px',
+                                }}
+                              >
+                                <SearchIcon color="action" />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                          endAdornment: expanded && searchQuery && (
+                            <InputAdornment position="end">
+                              <IconButton 
+                                onClick={handleClearClick}
+                                size="small"
+                                sx={{ ml: 1 }}
+                              >
+                                <ClearIcon color="action" fontSize="small" />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                          sx: {
+                            padding: 0,
+                          }
+                        }}
+                      />
+                      
+                      </Box>
+                      <IconButton 
+                        onClick={() => setIsFiltersOpen((prev) => !prev)}
+                      >
+                        {isFiltersOpen ? <FilterListOffRoundedIcon/> :  <FilterListRoundedIcon color="action" />}
+                      </IconButton>
+                    </SearchContainer>
+                    {isFiltersOpen  && ( // && (totalUnreadCount > 0)
+                      <Box sx={{display: 'flex' , gap: '8px', justifyContent: 'flex-end'}}>
+                        {['all', 'unread'].map((filter) => (
+                        <Chip
+                          icon={filter === 'all' ? 'none' : <NotificationsIcon />}
+                          label={filter === 'all' ? 'All' : `${totalUnreadCount} Unread`}
+                          color={filterBy === filter ? 'primary' : 'default'}
+                          variant={filterBy === filter ? 'filled' : 'outlined'}
+                          onClick={() => setFilterBy(filter)}
+                          sx={{
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                            // animation: 'pulse 2s infinite',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              transform: 'scale(1.05)',
+                            },
+                            // mx:'4px'
+                          }}
+                        />))}
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
               </Box>
-              <Box bgcolor="#f5f5f5"
+              <Box 
+              // bgcolor="#f5f5f5"
                 sx={{
                   overflowY: 'auto',
                   paddingInline: isMobile ? '4px' : '6px',
@@ -188,7 +409,7 @@ const ChatsOfUser = () => {
               >
                 <Backdrop
                   sx={{
-                    color: '#fff',
+                    // color: '#fff',
                     zIndex: (theme) => theme.zIndex.drawer + 1,
                     backgroundColor: 'rgba(0, 0, 0, 0.5)',
                   }}
@@ -196,10 +417,11 @@ const ChatsOfUser = () => {
                 >
                   <CircularProgress color="inherit" />
                 </Backdrop>
+                {/* Chat List */}
                 <Box style={{ paddingTop: '8px', paddingBottom: '1rem' }}>
                   {loading ? (
                     <SkeletonChats />
-                  ) : chats.length === 0 ? (
+                  ) : filteredChats.length === 0 ? (
                     <Box
                       sx={{
                         display: 'flex',
@@ -211,22 +433,39 @@ const ChatsOfUser = () => {
                         padding: '16px',
                       }}
                     >
-                      <Typography variant="h6" color="textSecondary" gutterBottom>
+                      {/* <Typography variant="h6" color="textSecondary" gutterBottom>
                         You don't have any Chats as a Helper...
+                      </Typography> */}
+                      <img 
+                        src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
+                        alt="No Chats found" 
+                        style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
+                      />
+                      <Typography variant="h5" color="text.secondary" gutterBottom>
+                        {searchQuery || filterBy !== 'all' 
+                          ? 'No chats found'
+                          : "You don't have any chats yet"
+                        }
                       </Typography>
-                      <Box mt={2}></Box>
+                      <Typography variant="body1" color="text.secondary" sx={{ maxWidth: '300px' }}>
+                        {searchQuery || filterBy !== 'all'
+                          ? 'Try adjusting your search or filter criteria'
+                          : 'Start helping others to begin chatting'
+                        }
+                      </Typography>
+                      {/* <Box mt={2}></Box> */}
                     </Box>
                   ) : (
-                    chats.map((chat) => (
+                    filteredChats.map((chat) => (
                       <Box
                         key={chat.chatId}
                         sx={{
-                          mb: '4px',
+                          mb: '4px', ...getGlassmorphismStyle(0.1, 10),
                           p: 1,
                           display: 'flex',
                           alignItems: 'center',
-                          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-                          backgroundColor: 'white',
+                          // boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                          // backgroundColor: 'white',
                           cursor: 'pointer',
                           borderRadius: '8px',
                           transition: 'transform 0.2s, box-shadow 0.2s, border-radius 0.2s',
@@ -302,10 +541,18 @@ const ChatsOfUser = () => {
                           alt={chat.posts.postTitle || 'Post Image'}
                           sx={{ width: 50, height: 50, mx: 1 }}
                         /> */}
-                        <Typography variant="h6" m={1} sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis', fontWeight:400, fontFamily:'sans-serif'}}>
+                        <Box sx={{mx:1}}>
+                        <Typography variant="h6" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis', fontWeight:400, fontFamily:'sans-serif'}}>
                           {chat.posts.postTitle}
                           {/* {chat.posts.postId} */}
                         </Typography>
+                        <Box display="flex" alignItems="center" gap={1} >
+                          {/* <PersonIcon sx={{ fontSize: '1rem', color: 'text.secondary' }} /> */}
+                          <Typography variant="body2" color="text.secondary">
+                            {chat.seller?.username}
+                          </Typography>
+                        </Box>
+                        </Box>
                         <Box sx={{marginLeft:'auto', display: 'flex', alignItems: 'center', justifyContent: 'center',}}>
                           {/* Badge for unread messages */}
                           {chat.unreadMessagesCount > 0 && (
@@ -385,7 +632,7 @@ const ChatsOfUser = () => {
                 </Box>
               </Box>
             </Box>
-          </Card>
+          </ChatContainer>
 
           {/* {!isMobile && (<Card sx={{
             flex: 3, padding: '0rem',
@@ -407,7 +654,7 @@ const ChatsOfUser = () => {
             )}
           </Card>)} */}
 
-        </Box>
+        {/* </Box> */}
       </Box>
       {/* <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={postId} user={user} /> */}
       {/* Dialog for Mobile View */}

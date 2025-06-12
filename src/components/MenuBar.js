@@ -128,7 +128,7 @@ const MenuBar = ({ visible, badgeCounts = {} }) => {
           borderTopLeftRadius: '20px',
           borderTopRightRadius: '20px',
           overflow: 'hidden',
-          height: isMobile ? '64px' : '72px',
+          height: isMobile ? '54px' : '72px',
           '& .MuiBottomNavigationAction-root': {
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             borderRadius: '12px',

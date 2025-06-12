@@ -2,6 +2,14 @@
 import React from 'react';
 import { Box, Skeleton, Card, } from '@mui/material';
 
+// Enhanced glassmorphism styles
+const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
+  background: `rgba(255, 255, 255, ${opacity})`,
+  backdropFilter: `blur(${blur}px)`,
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
 function SkeletonChats() {
   return (
     <Box sx={{ padding: '0px' }}>
@@ -31,15 +39,15 @@ function SkeletonChats() {
                   borderRadius: 1,
                 }}
               >
-                <Card sx={{
+                <Card sx={{ ...getGlassmorphismStyle(0.1, 10),
               height: '100%', // Matches the Groups section height
               borderRadius: '8px',
             //   boxShadow: 3,
               padding: '8px',
               overflowY: 'auto', scrollbarWidth:'none', width:'100%'
             }}>
-                <Skeleton variant="circular" width={50} height={50} sx={{ marginRight: 3 , float:'inline-start', display: 'inline-block'}} />
-                <Skeleton variant="text" width="60%" height={35} sx={{float:'left',}} />
+                <Skeleton variant="circular" animation="wave" width={50} height={50} sx={{ marginRight: 3 , float:'inline-start', display: 'inline-block'}} />
+                <Skeleton variant="text" width="60%" height={35} animation="wave" sx={{float:'left',}} />
                 </Card>
               </Box>
             ))}

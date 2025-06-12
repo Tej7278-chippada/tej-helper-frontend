@@ -81,6 +81,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+// Enhanced glassmorphism styles
+// const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
+//   background: `rgba(255, 255, 255, ${opacity})`,
+//   backdropFilter: `blur(${blur}px)`,
+//   border: '1px solid rgba(255, 255, 255, 0.2)',
+//   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+// });
+
 function PostService() {
   const [openDialog, setOpenDialog] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -132,6 +140,8 @@ function PostService() {
   const tokenUsername = localStorage.getItem('tokenUsername');
   const [protectLocation, setProtectLocation] = useState(false);
   const [fakeAddress, setFakeAddress] = useState('');
+  // const [loadingMedia, setLoadingMedia] = useState(false);
+  // const [postMedia, setPostMedia] = useState([]);
 
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
@@ -536,8 +546,29 @@ function PostService() {
           setLoading(false); // Stop loading state
         }
       };
+
+      // const fetchPostMedia = async (postId) => {
+      //   setLoadingMedia(true);
+      //   try {
+      //     const response = await fetchPostMediaById(postId);
+      //     setPostMedia(response.data || []);
+      //     console.log('media fetched',response.data);
+      //   } catch (error) {
+      //     if (error.response && error.response.status === 404) {
+      //       console.error('Post Unavailable.', error);
+      //       setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
+      //     } else if (error.response && error.response.status === 401) {
+      //       console.error('Error fetching post details:', error);
+      //     } else {
+      //       console.error('Error fetching post details:', error);
+      //     }
+      //   } finally {
+      //     setLoadingMedia(false);
+      //   }
+      // };
     
       const handleEdit = (post) => {
+        // fetchPostMedia(post._id);
         setEditingProduct(post);
         setFormData({
           title: post.title,
@@ -567,6 +598,7 @@ function PostService() {
           setTimeTo(new Date(post.timeTo));
         }
         setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
+        // setExistingMedia(postMedia.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
         setOpenDialog(true);
       };
     
@@ -743,15 +775,30 @@ function PostService() {
     return (
         <Layout username={tokenUsername}>
         <Box>
-        <Toolbar sx={{display:'flex', justifyContent:'space-between', background: 'rgba(255, 255, 255, 0.8)',  backdropFilter: 'blur(10px)',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.05)', borderRadius: '12px', 
+        <Toolbar sx={{display:'flex', justifyContent:'space-between', 
+        // ...getGlassmorphismStyle(0.1, 10),
+          // background: 'rgba(255, 255, 255, 0.8)',  backdropFilter: 'blur(10px)',
+          // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
+          borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 12px',  margin: '4px',
           position: 'relative', //sticky
           top: 0,
           // zIndex: 1100
           }}> {/* style={{ display: 'flex', marginTop: '5rem', marginBottom: '-3rem' }} */}
-            <Typography variant="h6" style={{ flexGrow: 1 }}>
+            {/* <Typography variant="h6" style={{ flexGrow: 1 }}>
             User Posts
+            </Typography> */}
+            <Typography 
+              variant="h6" 
+              fontWeight={600}
+              sx={{
+                background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', //background: '#4361ee',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              My Posts
             </Typography>
 
 
@@ -761,17 +808,22 @@ function PostService() {
               onClick={() => handleOpenDialog()}
               size="small"
               sx={{
-                backgroundColor: '#1976d2', // Primary blue
+                // backgroundColor: '#1976d2', // Primary blue
+                background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
                 color: '#fff',
-                padding: '4px 12px',
+                // padding: '4px 12px',
                 borderRadius: '12px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                 '&:hover': {
-                  backgroundColor: '#1565c0', // Darker shade on hover
+                  // backgroundColor: '#1565c0', // Darker shade on hover
+                  boxShadow: '0 6px 20px rgba(67, 97, 238, 0.4)',
+                  transform: 'translateY(-2px)',
                 },
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px', marginRight: '0px'
+                gap: '8px', marginRight: '0px',
+                textTransform: 'none',
+                fontWeight: 600,
               }}
               aria-label="Add New Post"
               title="Add New Post"
@@ -958,7 +1010,10 @@ function PostService() {
                       handleEdit(post);}}>Edit</Button>
                     <Button color="secondary" size="small" variant="outlined" startIcon={<DeleteSweepRoundedIcon />} key={post._id} sx={{borderRadius:'8px'}} onClick={(event) => {event.stopPropagation(); handleDeleteClick(post);}}>Delete</Button>
                   </Box>
-                  <Button color="primary" variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px' }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}>Chats</Button>
+                  <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', '&:hover': {
+                    background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
+                    transform: 'translateY(-2px)' }, transition: 'all 0.3s ease', }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}
+                  >Chats</Button>
                 </CardActions>
                 </LazyBackgroundImage>
               </Card>

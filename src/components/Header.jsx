@@ -149,10 +149,11 @@ const Header = ({ username }) => {
 
   // Navigation items for mobile menu
   const navigationItems = [
-    { label: 'Home', icon: <HomeIcon />, path: '/' },
-    { label: 'My Posts', icon: <PostAddIcon />, path: '/userPosts' },
-    { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist' },
-    { label: 'Chats', icon: <ChatIcon />, path: '/chatsOfUser' },
+    { label: 'Home', icon: <HomeIcon />, path: '/', activeColor: '#4CAF50', bgColor: 'rgba(76, 175, 80, 0.1)' },
+    { label: 'My Posts', icon: <PostAddIcon />, path: '/userPosts', activeColor: '#2196F3', bgColor:'rgba(33, 150, 243, 0.1)' },
+    { label: 'Chats', icon: <ChatIcon />, path: '/chatsOfUser', activeColor: '#FF5722', bgColor: 'rgba(255, 87, 34, 0.1)' },
+    { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist', activeColor: '#E91E63', bgColor: 'rgba(233, 30, 99, 0.1)' },
+    // { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications', activeColor: '#9C27B0', bgColor: 'rgba(156, 39, 176, 0.1)' },
   ];
 
   const currentPath = location.pathname;
@@ -191,7 +192,7 @@ const Header = ({ username }) => {
                 component="div"
                 sx={{
                   fontWeight: 700,
-                  background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`, // 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -227,13 +228,13 @@ const Header = ({ username }) => {
                     <IconButton
                       component={Link}
                       to={item.path}
-                      sx={{
-                        color: currentPath === item.path ? '#4361ee' : 'rgba(0, 0, 0, 0.6)',
-                        backgroundColor: currentPath === item.path ? 'rgba(67, 97, 238, 0.1)' : 'transparent',
+                      sx={{                                 // '#4361ee'
+                        color: currentPath === item.path ? item.activeColor : 'rgba(0, 0, 0, 0.6)',
+                        backgroundColor: currentPath === item.path ? item.bgColor : 'transparent', //'rgba(67, 97, 238, 0.1)'
                         borderRadius: 2,
                         transition: 'all 0.3s ease',
                         '&:hover': {
-                          backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                          backgroundColor: item.bgColor, //'rgba(67, 97, 238, 0.1)'
                           transform: 'translateY(-2px)',
                         }
                       }}

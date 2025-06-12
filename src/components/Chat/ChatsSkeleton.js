@@ -2,6 +2,14 @@ import React from 'react';
 import { Box, Grid, Card, Skeleton } from '@mui/material';
 // import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoubleArrowDownRounded';
 
+// Enhanced glassmorphism styles
+const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
+    background: `rgba(255, 255, 255, ${opacity})`,
+    backdropFilter: `blur(${blur}px)`,
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+  });
+
 const ChatsSkeleton = ({ isMobile }) => {
   // Number of skeleton items to display
   const skeletonCount = isMobile ? 6 : 8;
@@ -31,7 +39,7 @@ const ChatsSkeleton = ({ isMobile }) => {
                 }}
                 >
                 <Card
-                    sx={{
+                    sx={{ ...getGlassmorphismStyle(0.1, 10),
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -39,8 +47,8 @@ const ChatsSkeleton = ({ isMobile }) => {
                     p: 1,
                     mb: '8px', width:'300px',
                     maxWidth: isMobile ? '80%' : '50%',
-                    backgroundColor: '#e0e0e0', // Light gray background for skeleton
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                    // backgroundColor: '#e0e0e0', // Light gray background for skeleton
+                    // boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                     borderRadius: '10px',
                     opacity: 0.7,
                     transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
@@ -50,9 +58,9 @@ const ChatsSkeleton = ({ isMobile }) => {
                     {/* Skeleton Content */}
                     <Box sx={{ flexGrow: 1 }}>
                     {/* <Skeleton variant="text" width="40%" height={24} sx={{ float: 'right', marginLeft:'10px' }} /> */}
-                    <Skeleton variant="text" width="70%" height={25} sx={{marginRight:'10px'}} />
+                    <Skeleton variant="text" width="70%" height={25} animation="wave" sx={{marginRight:'10px'}} />
                     {/* <Skeleton variant="text" width="80%" height={16} /> */}
-                    <Skeleton variant="text" width="40%" height={14} sx={{float:'inline-end'}}  />
+                    <Skeleton variant="text" width="40%" height={14} animation="wave" sx={{float:'inline-end'}}  />
                     </Box>
                 </Card>
                 </Grid>
