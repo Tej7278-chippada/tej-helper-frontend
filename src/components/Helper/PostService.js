@@ -1,7 +1,7 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
 import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, } from '@mui/material';
-import API, { addUserPost, deleteUserPost, fetchUserPosts, updateUserPost } from '../api/api';
+import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
 import Layout from '../Layout';
@@ -140,8 +140,7 @@ function PostService() {
   const tokenUsername = localStorage.getItem('tokenUsername');
   const [protectLocation, setProtectLocation] = useState(false);
   const [fakeAddress, setFakeAddress] = useState('');
-  // const [loadingMedia, setLoadingMedia] = useState(false);
-  // const [postMedia, setPostMedia] = useState([]);
+  const [loadingMedia, setLoadingMedia] = useState(false);
 
   // Fetch images from Unsplash based on title
   const fetchUnsplashImages = async (query) => {
@@ -547,28 +546,27 @@ function PostService() {
         }
       };
 
-      // const fetchPostMedia = async (postId) => {
-      //   setLoadingMedia(true);
-      //   try {
-      //     const response = await fetchPostMediaById(postId);
-      //     setPostMedia(response.data || []);
-      //     console.log('media fetched',response.data);
-      //   } catch (error) {
-      //     if (error.response && error.response.status === 404) {
-      //       console.error('Post Unavailable.', error);
-      //       setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
-      //     } else if (error.response && error.response.status === 401) {
-      //       console.error('Error fetching post details:', error);
-      //     } else {
-      //       console.error('Error fetching post details:', error);
-      //     }
-      //   } finally {
-      //     setLoadingMedia(false);
-      //   }
-      // };
+      const fetchPostMedia = async (postId) => {
+        setLoadingMedia(true);
+        try {
+          const response = await fetchPostMediaById(postId);
+          setExistingMedia(response.data.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            console.error('Post Unavailable.', error);
+            setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
+          } else if (error.response && error.response.status === 401) {
+            console.error('Error fetching post details:', error);
+          } else {
+            console.error('Error fetching post details:', error);
+          }
+        } finally {
+          setLoadingMedia(false);
+        }
+      };
     
       const handleEdit = (post) => {
-        // fetchPostMedia(post._id);
+        fetchPostMedia(post._id); // to fetch the post's entire media
         setEditingProduct(post);
         setFormData({
           title: post.title,
@@ -597,8 +595,7 @@ function PostService() {
         if (post.timeTo) {
           setTimeTo(new Date(post.timeTo));
         }
-        setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
-        // setExistingMedia(postMedia.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
+        // setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
         setOpenDialog(true);
       };
     
@@ -1357,24 +1354,35 @@ function PostService() {
                     </Box>
                   </Box>
                 </Box>
+                  {editingProduct && 
                     <Card sx={{ borderRadius: 3, marginInline:'2px', bgcolor: '#f5f5f5' }}>
                         {/* Existing media with delete option */}
-                        {existingMedia.length > 0 && (
-                            <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
-                                <Typography ml={1} variant="subtitle1">Existing Images</Typography>
-                                <Box style={{ display: 'flex', gap: '4px', overflowX: 'scroll', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
-                                    {existingMedia.map((media) => (
-                                        !media.remove && (
-                                            <Box key={media._id} style={{ position: 'relative', display:'flex', alignItems:'flex-start', flexDirection:'column'  }}>
-                                                <img src={`data:image/jpeg;base64,${media.data}`} alt="Post Media" style={{ height: '160px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
-                                                <Button size="small" color="secondary" onClick={() => handleDeleteMedia(media._id)}>Remove</Button>
-                                            </Box>
-                                        )
-                                    ))}
-                                </Box>
-                            </Box>
-                        )}
+                        <Box style={{ marginBottom: '10px', marginInline: '6px' }}>
+                          <Typography ml={1} variant="subtitle1">Existing Images</Typography>
+                          <Box style={{ display: 'flex', gap: '4px', overflowX: 'scroll', scrollbarWidth: 'none', scrollbarColor: '#888 transparent' }}>
+                            {loadingMedia ?
+                              <Box display="flex" justifyContent="center" alignItems="center" flexDirection="row" m={2} gap={1} flex={1}>
+                                <CircularProgress size={24} />
+                                <Typography color='grey' variant='body2'>Loading Existing Post Images</Typography>
+                              </Box>
+                              :
+                              (existingMedia.length > 0)
+                                ? existingMedia.map((media) => (
+                                  !media.remove && (
+                                    <Box key={media._id} style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', flexDirection: 'column' }}>
+                                      <img src={`data:image/jpeg;base64,${media.data}`} alt="Post Media" style={{ height: '160px', borderRadius: '8px', objectFit: 'cover', flexShrink: 0, cursor: 'pointer' }} />
+                                      <Button size="small" color="secondary" onClick={() => handleDeleteMedia(media._id)}>Remove</Button>
+                                    </Box>
+                                  )))
+                                : (
+                                  <Box display="flex" justifyContent="center" alignItems="center" flexDirection="row" m={1} gap={1} flex={1}>
+                                    <Typography variant="body2" color="grey" >Post doesn't have existing images.</Typography>
+                                  </Box>
+                                )}
+                          </Box>
+                        </Box>
                     </Card>
+                  }
                     <Card sx={{ borderRadius: 3, marginBottom: '0rem', mx:'2px', bgcolor: '#f5f5f5' }}>
                         <Box sx={{ mx: '6px', my:'4px' }}>
                             <Box sx={{mx:'6px' }}>

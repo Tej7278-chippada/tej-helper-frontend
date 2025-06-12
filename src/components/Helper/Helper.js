@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, Box, Button, Card, CardContent, CardMedia, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Snackbar, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Snackbar, Stack, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -26,6 +26,10 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import DistanceSlider from './DistanceSlider';
 import LazyBackgroundImage from './LazyBackgroundImage';
 import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
+// import PersonIcon from '@mui/icons-material/Person';
+// import CategoryIcon from '@mui/icons-material/Category';
+// import PriceChangeIcon from '@mui/icons-material/PriceChange';
+// import WorkIcon from '@mui/icons-material/Work';
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -1294,6 +1298,37 @@ const Helper = ()=> {
                         height: '60%',
                         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
                       }} />
+                      {/* Status Badge */}
+                      {/* <Chip
+                        label={post.postStatus}
+                        size="small"
+                        sx={{
+                          position: 'absolute',
+                          top: 12,
+                          left: 12,
+                          backgroundColor: post.postStatus === 'Active' ? 'success.main' : 'error.main',
+                          color: 'white',
+                          fontWeight: 600,
+                          fontSize: '0.75rem'
+                        }}
+                      /> */}
+                      {/* Full Time Badge */}
+                      {/* {post.isFullTime && (
+                        <Chip
+                          icon={<WorkIcon sx={{ fontSize: 16 }} />}
+                          label="Full Time"
+                          size="small"
+                          sx={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            backgroundColor: 'info.main',
+                            color: 'white',
+                            fontWeight: 600,
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                      )} */}
                       <CardContent style={{
                         position: 'absolute',
                         bottom: 0,
@@ -1362,6 +1397,79 @@ const Helper = ()=> {
                             {product.sellerTitle}
                           </Typography>
                         </Grid> */}
+                       {/* <Stack spacing={1.5}>
+                          Title and Price Row
+                          <Box display="flex" justifyContent="space-between" alignItems="flex-start">
+                            <Tooltip title={post.title} placement="top">
+                              <Typography
+                                variant="h6"
+                                fontWeight={700}
+                                sx={{
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  whiteSpace: 'nowrap',
+                                  flex: 1,
+                                  mr: 1,
+                                  color: 'white'
+                                }}
+                              >
+                                {post.title}
+                              </Typography>
+                            </Tooltip>
+                            
+                            <Chip
+                              className="price-chip"
+                              icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
+                              label={`₹${post.price}`}
+                              variant="filled"
+                              sx={{
+                                backgroundColor: 'rgba(255, 255, 255, 0.77)',
+                                color: 'success.main',
+                                fontWeight: 700,
+                                fontSize: '0.875rem',
+                                transition: 'transform 0.2s ease', p:'2px 4px'
+                              }}
+                            />
+                          </Box>
+
+                          Category and People Count
+                          <Box display="flex" gap={1} flexWrap="wrap">
+                            <Chip
+                              icon={<CategoryIcon color="#f5f5f5" sx={{ fontSize: 14 }} />}
+                              label={post.categories}
+                              size="small"
+                              variant="outlined"
+                              sx={{
+                                borderColor: post.categories === 'Emergency' ? 'error.main' : 'white',
+                                color: post.categories === 'Emergency' ? 'error.main' : 'white',
+                                fontSize: '0.75rem'
+                              }}
+                            />
+                            
+                            <Chip
+                              icon={<PersonIcon color="#f5f5f5" sx={{ fontSize: 14 }} />}
+                              label={`${post.peopleCount} (${post.gender})`}
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontSize: '0.75rem', color: 'white' }}
+                            />
+                          </Box>
+
+                          Description
+                          <Typography
+                            variant="body2"
+                            color="white"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 1, // no of lines of description
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                              lineHeight: 1.4
+                            }}
+                          >
+                            {post.description}
+                          </Typography>
+                        </Stack> */}
                       </CardContent>
                       </LazyBackgroundImage>
                     </Card>

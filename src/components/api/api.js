@@ -126,12 +126,12 @@ export const fetchPostById = async (id) => {
   return await API.get(`/api/posts/${id}`, { headers });
 };
 
-// export const fetchPostMediaById = async (postId) => {
-//   const authToken = localStorage.getItem('authToken');
-//   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+export const fetchPostMediaById = async (postId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
 
-//   return await API.get(`/api/posts/postMedia/${postId}`, { headers });
-// };
+  return await API.get(`/api/posts/postMedia/${postId}`, { headers });
+};
 
 export const fetchWishlist = async () => {
   const authToken = localStorage.getItem('authToken');
