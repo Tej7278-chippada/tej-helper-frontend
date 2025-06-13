@@ -199,13 +199,13 @@ const Login = () => {
         Login
       </Typography> */}
       <Typography 
-        variant={isMobile ? "h5" : "h4"} gutterBottom
+        variant={isMobile ? "h5" : "h4"}
         fontWeight={700}
         sx={{
           background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', //background: '#4361ee', // 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
+          backgroundClip: 'text', mb:'2rem'
         }}
       >
         Login
