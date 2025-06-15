@@ -99,6 +99,7 @@ function PostService() {
   const [protectLocation, setProtectLocation] = useState(false);
   const [fakeAddress, setFakeAddress] = useState('');
   const [loadingMedia, setLoadingMedia] = useState(false);
+  const [activeStep, setActiveStep] = useState(0);
 
   
   // Fetch images from Unsplash based on title
@@ -246,6 +247,7 @@ function PostService() {
         setGeneratedImages([]);
         setNoImagesFound(false); // Reset no images found state
         setOpenDialog(true);
+        setActiveStep(0);
     };
     
     const handleCloseDialog = () => {
@@ -263,6 +265,7 @@ function PostService() {
         setNoImagesFound(false); // Reset no images found state
         setProtectLocation(false);
         setFakeAddress('');
+        setActiveStep(0);
     };
 
     const openPostDetail = (post) => {
@@ -569,6 +572,7 @@ function PostService() {
          formData={formData} setFormData={setFormData} generatedImages={generatedImages} loadingGeneration={loadingGeneration} loadingMedia={loadingMedia}
          selectedDate={selectedDate} setSelectedDate={setSelectedDate} timeFrom={timeFrom} setTimeFrom={setTimeFrom} timeTo={timeTo} setTimeTo={setTimeTo}
          protectLocation={protectLocation} setProtectLocation={setProtectLocation} fakeAddress={fakeAddress} setFakeAddress={setFakeAddress}
+         activeStep={activeStep} setActiveStep={setActiveStep}
         />
 
         {/* Snackbar for notifications */}
