@@ -16,6 +16,7 @@ import {
   PostAdd as PostAddIcon,
   // MoreVert as MoreVertIcon
 } from '@mui/icons-material';
+import { io } from 'socket.io-client';
 
 
 // Enhanced scrolling behavior
@@ -51,6 +52,46 @@ const Header = ({ username }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [socket, setSocket] = useState(null);
+
+  
+  // Initialize socket connection
+  useEffect(() => {
+    if (userId) {
+      const newSocket = io(process.env.REACT_APP_API_URL);
+      setSocket(newSocket);
+
+      // Join user's notification room
+      newSocket.emit('joinNotificationsRoom', userId);
+
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+  }, [userId]);
+
+ // Listen for notification updates
+ useEffect(() => {
+  if (socket) {
+    socket.on('notificationCountUpdate', (data) => {
+      if (data.userId === userId) {
+        setUnreadCount(data.unreadCount);
+      }
+    });
+
+    socket.on('newNotification', () => {
+      // Increment count when new notification arrives
+      setUnreadCount(prev => prev + 1);
+    });
+  }
+
+  return () => {
+    if (socket) {
+      socket.off('notificationCountUpdate');
+      socket.off('newNotification');
+    }
+  };
+}, [socket, userId]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -82,20 +123,49 @@ const Header = ({ username }) => {
 
   }, [username]);
 
-  const fetchNotificationCount = async () => {
-    if (currentUsername) {
-      try {
-        const response = await fetchUnreadNotificationsCount();
-        const unread = response.data.count;
-        setUnreadCount(unread);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
+  // Fetch initial notification count
+  useEffect(() => {
+    const fetchInitialCount = async () => {
+      if (currentUsername) {
+        try {
+          const response = await fetchUnreadNotificationsCount();
+          const unread = response.data.count;
+          setUnreadCount(unread);
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
       }
-    }
-  };
+    };
+
+    fetchInitialCount();
+  }, [currentUsername]);
+
+  // const fetchNotificationCount = async () => {
+  //   if (currentUsername) {
+  //     try {
+  //       const response = await fetchUnreadNotificationsCount();
+  //       const unread = response.data.count;
+  //       setUnreadCount(unread); 
+  //     } catch (error) {
+  //       console.error('Error fetching notifications:', error);
+  //     }
+  //   }
+  // };
+
+  // Fetch initial notification count
+  // useEffect(() => {
+  //   fetchNotificationCount();
+  //   console.log('count fetched on component mounting');
+    
+  //   // Set up interval to periodically check for new notifications
+  //   const interval = setInterval(fetchNotificationCount, 60000); // Check every minute
+   
+    
+  //   return () => clearInterval(interval);
+  // }, [currentUsername]);
 
   const handleProfileClick = (event) => {
-    fetchNotificationCount();
+    // fetchNotificationCount();
     setAnchorEl(event.currentTarget);
   };
 
@@ -272,7 +342,13 @@ const Header = ({ username }) => {
                           fontSize: '0.75rem',
                           minWidth: '20px',
                           height: '20px',
-                          borderRadius: '10px',
+                          borderRadius: '10px', transform: 'translate(25%, -25%)',
+                          animation: unreadCount > 0 ? 'pulse 1.5s ease' : 'none', // infinite , ease
+                          '@keyframes pulse': {
+                            '0%': { transform: 'translate(25%, -25%) scale(1)' },
+                            '50%': { transform: 'translate(25%, -25%) scale(1.2)' },
+                            '100%': { transform: 'translate(25%, -25%) scale(1)' }
+                          }
                         }
                       }}
                     >
