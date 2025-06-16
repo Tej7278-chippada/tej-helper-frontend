@@ -17,7 +17,6 @@ import {
   // MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 import { io } from 'socket.io-client';
-import InstallMobileIcon from '@mui/icons-material/InstallMobile';
 
 
 // Enhanced scrolling behavior
@@ -54,78 +53,6 @@ const Header = ({ username }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [socket, setSocket] = useState(null);
-
-  const [deferredPrompt, setDeferredPrompt] = useState(null); // Add state for install prompt
-  const [isInstallable, setIsInstallable] = useState(false); // Add state to track if app is installable
-
-  // Handle beforeinstallprompt event
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      setDeferredPrompt(e);
-      // Update UI to notify the user they can install the PWA
-      setIsInstallable(true);
-      
-      // Optionally, send analytics event that PWA is available
-      console.log('PWA install prompt available');
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  // Check if app is already installed
-  useEffect(() => {
-    const checkIfInstalled = () => {
-      // For iOS
-      if (window.navigator.standalone) {
-        setIsInstallable(false);
-        return;
-      }
-      
-      // For Android/other PWAs
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        setIsInstallable(false);
-      }
-    };
-
-    checkIfInstalled();
-    window.addEventListener('appinstalled', () => {
-      setIsInstallable(false);
-      console.log('PWA was installed');
-    });
-
-    return () => {
-      window.removeEventListener('appinstalled', () => {});
-    };
-  }, []);
-
-  // Handle install button click
-  const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    
-    // Show the install prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    // Optionally, send analytics about the user's choice
-    console.log(`User response to the install prompt: ${outcome}`);
-    
-    // We've used the prompt, and can't use it again, throw it away
-    setDeferredPrompt(null);
-    
-    // Hide the install button if the app was installed
-    if (outcome === 'accepted') {
-      setIsInstallable(false);
-    }
-  };
 
   
   // Initialize socket connection
@@ -392,24 +319,6 @@ const Header = ({ username }) => {
             {/* User Profile Section */}
             {currentUsername && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {/* Install App Button - Only shown if PWA is installable */}
-                {isInstallable && (
-                  <Tooltip title="Install App" arrow>
-                    <IconButton
-                      onClick={handleInstallClick}
-                      sx={{
-                        color: 'rgba(0, 0, 0, 0.6)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                          transform: 'translateY(-2px)',
-                        }
-                      }}
-                    >
-                      <InstallMobileIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
                 {/* Notifications Badge */}
                 <Tooltip title="Notifications" arrow>
                   <IconButton
