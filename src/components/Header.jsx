@@ -7,17 +7,16 @@ import { userData } from '../utils/userData';
 import PersonIcon from '@mui/icons-material/Person';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LogoutIcon from '@mui/icons-material/Logout';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import InstallMobileIcon from '@mui/icons-material/InstallMobile';
 import { fetchUnreadNotificationsCount } from './api/api';
 import {
-  // Menu as MenuIcon,
   Home as HomeIcon,
   Chat as ChatIcon,
   Favorite as FavoriteIcon,
   PostAdd as PostAddIcon,
-  // MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 import { io } from 'socket.io-client';
-import InstallMobileIcon from '@mui/icons-material/InstallMobile';
 
 
 // Enhanced scrolling behavior
@@ -54,79 +53,94 @@ const Header = ({ username }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [socket, setSocket] = useState(null);
+  
+  // PWA Install states
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
-  const [deferredPrompt, setDeferredPrompt] = useState(null); // Add state for install prompt
-  const [isInstallable, setIsInstallable] = useState(false); // Add state to track if app is installable
-
-  // Handle beforeinstallprompt event
+  // PWA Install Logic
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later
-      setDeferredPrompt(e);
-      // Update UI to notify the user they can install the PWA
-      setIsInstallable(true);
-      
-      // Optionally, send analytics event that PWA is available
-      console.log('PWA install prompt available');
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  // Check if app is already installed
-  useEffect(() => {
+    // Check if app is already installed
     const checkIfInstalled = () => {
-      // For iOS
-      if (window.navigator.standalone) {
-        setIsInstallable(false);
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        setIsInstalled(true);
         return;
       }
       
-      // For Android/other PWAs
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        setIsInstallable(false);
+      // Check for iOS Safari
+      if (window.navigator.standalone === true) {
+        setIsInstalled(true);
+        return;
+      }
+      
+      // Check for Chrome/Edge
+      if (document.referrer.startsWith('android-app://')) {
+        setIsInstalled(true);
+        return;
       }
     };
 
     checkIfInstalled();
-    window.addEventListener('appinstalled', () => {
+
+    // Listen for beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setIsInstallable(true);
+    };
+
+    // Listen for appinstalled event
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
       setIsInstallable(false);
+      setDeferredPrompt(null);
       console.log('PWA was installed');
-    });
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('appinstalled', () => {});
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
-  // Handle install button click
+  // Handle PWA installation
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    
-    // Show the install prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    // Optionally, send analytics about the user's choice
-    console.log(`User response to the install prompt: ${outcome}`);
-    
-    // We've used the prompt, and can't use it again, throw it away
-    setDeferredPrompt(null);
-    
-    // Hide the install button if the app was installed
-    if (outcome === 'accepted') {
+    if (!deferredPrompt) {
+      // For iOS Safari or other browsers
+      if (navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome')) {
+        alert('To install this app on iOS: tap the Share button and then "Add to Home Screen"');
+        return;
+      }
+      
+      // For other browsers that don't support install prompt
+      alert('To install this app, look for "Install" or "Add to Home Screen" option in your browser menu');
+      return;
+    }
+
+    try {
+      // Show the install prompt
+      deferredPrompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      
+      // Clear the deferredPrompt
+      setDeferredPrompt(null);
       setIsInstallable(false);
+    } catch (error) {
+      console.error('Error showing install prompt:', error);
     }
   };
-
   
   // Initialize socket connection
   useEffect(() => {
@@ -213,30 +227,6 @@ const Header = ({ username }) => {
     fetchInitialCount();
   }, [currentUsername]);
 
-  // const fetchNotificationCount = async () => {
-  //   if (currentUsername) {
-  //     try {
-  //       const response = await fetchUnreadNotificationsCount();
-  //       const unread = response.data.count;
-  //       setUnreadCount(unread); 
-  //     } catch (error) {
-  //       console.error('Error fetching notifications:', error);
-  //     }
-  //   }
-  // };
-
-  // Fetch initial notification count
-  // useEffect(() => {
-  //   fetchNotificationCount();
-  //   console.log('count fetched on component mounting');
-    
-  //   // Set up interval to periodically check for new notifications
-  //   const interval = setInterval(fetchNotificationCount, 60000); // Check every minute
-   
-    
-  //   return () => clearInterval(interval);
-  // }, [currentUsername]);
-
   const handleProfileClick = (event) => {
     // fetchNotificationCount();
     setAnchorEl(event.currentTarget);
@@ -295,9 +285,7 @@ const Header = ({ username }) => {
     { label: 'Home', icon: <HomeIcon />, path: '/', activeColor: '#4CAF50', bgColor: 'rgba(76, 175, 80, 0.1)' },
     { label: 'My Posts', icon: <PostAddIcon />, path: '/userPosts', activeColor: '#2196F3', bgColor:'rgba(33, 150, 243, 0.1)' },
     { label: 'Chats', icon: <ChatIcon />, path: '/chatsOfUser', activeColor: '#FF5722', bgColor: 'rgba(255, 87, 34, 0.1)' },
-    { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist', activeColor: '#E91E63', bgColor: 'rgba(233, 30, 99, 0.1)' },
-    // { label: 'Notifications', icon: <NotificationsIcon />, path: '/notifications', activeColor: '#9C27B0', bgColor: 'rgba(156, 39, 176, 0.1)' },
-  ];
+    { label: 'Wishlist', icon: <FavoriteIcon />, path: '/wishlist', activeColor: '#E91E63', bgColor: 'rgba(233, 30, 99, 0.1)' }, ];
 
   const currentPath = location.pathname;
 
@@ -392,24 +380,6 @@ const Header = ({ username }) => {
             {/* User Profile Section */}
             {currentUsername && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {/* Install App Button - Only shown if PWA is installable */}
-                {isInstallable && (
-                  <Tooltip title="Install App" arrow>
-                    <IconButton
-                      onClick={handleInstallClick}
-                      sx={{
-                        color: 'rgba(0, 0, 0, 0.6)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                          transform: 'translateY(-2px)',
-                        }
-                      }}
-                    >
-                      <InstallMobileIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
                 {/* Notifications Badge */}
                 <Tooltip title="Notifications" arrow>
                   <IconButton
@@ -448,6 +418,70 @@ const Header = ({ username }) => {
                   </IconButton>
                 </Tooltip>
 
+                {/* Install App Button */}
+                {(isInstallable || (!isInstalled && !isInstallable)) && (
+                  <Tooltip 
+                    title={isInstallable ? "Install App" : "Add to Home Screen"} 
+                    arrow
+                  >
+                    <IconButton
+                      onClick={handleInstallClick}
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        transition: 'all 0.3s ease',
+                        position: 'relative',
+                        '&:hover': {
+                          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                          transform: 'translateY(-2px)',
+                          color: '#4CAF50',
+                        },
+                        '&::after': isInstallable ? {
+                          content: '""',
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: '#4CAF50',
+                          animation: 'installPulse 2s infinite ease-in-out',
+                          '@keyframes installPulse': {
+                            '0%': { 
+                              transform: 'scale(0.8)',
+                              opacity: 1 
+                            },
+                            '50%': { 
+                              transform: 'scale(1.2)',
+                              opacity: 0.7 
+                            },
+                            '100%': { 
+                              transform: 'scale(0.8)',
+                              opacity: 1 
+                            }
+                          }
+                        } : {}
+                      }}
+                    >
+                      {isMobile ? <InstallMobileIcon /> : <GetAppIcon />}
+                    </IconButton>
+                  </Tooltip>
+                )}
+
+                {/* App Installed Indicator */}
+                {isInstalled && (
+                  <Tooltip title="App Installed ✓" arrow>
+                    <IconButton
+                      disabled
+                      sx={{
+                        color: '#4CAF50',
+                        opacity: 0.7,
+                      }}
+                    >
+                      {isMobile ? <InstallMobileIcon /> : <GetAppIcon />}
+                    </IconButton>
+                  </Tooltip>
+                )}
+
                 {/* Profile Avatar */}
                 <Tooltip title={`${currentUsername}`} arrow>
                   <IconButton
@@ -482,19 +516,6 @@ const Header = ({ username }) => {
                     </Avatar>
                   </IconButton>
                 </Tooltip>
-
-                {/* Mobile Menu Button */}
-                {/* {isMobile && (
-                  <IconButton
-                    onClick={() => setMobileMenuOpen(true)}
-                    sx={{
-                      color: 'rgba(0, 0, 0, 0.6)',
-                      ml: 1,
-                    }}
-                  >
-                    <MenuIcon />
-                  </IconButton>
-                )} */}
               </Box>
             )}
           </Toolbar>
@@ -559,6 +580,32 @@ const Header = ({ username }) => {
           </ListItemIcon>
           Notifications
         </MenuItem>
+
+        {/* Install App Menu Item */}
+        {(isInstallable || (!isInstalled && !isInstallable)) && (
+          <MenuItem onClick={() => { handleInstallClick(); handleClose(); }}>
+            <ListItemIcon>
+              {isMobile ? 
+                <InstallMobileIcon fontSize="small" sx={{ color: '#4CAF50' }} /> : 
+                <GetAppIcon fontSize="small" sx={{ color: '#4CAF50' }} />
+              }
+            </ListItemIcon>
+            {isInstallable ? 'Install App' : 'Add to Home Screen'}
+          </MenuItem>
+        )}
+
+        {/* App Installed Menu Item */}
+        {isInstalled && (
+          <MenuItem disabled>
+            <ListItemIcon>
+              {isMobile ? 
+                <InstallMobileIcon fontSize="small" sx={{ color: '#4CAF50' }} /> : 
+                <GetAppIcon fontSize="small" sx={{ color: '#4CAF50' }} />
+              }
+            </ListItemIcon>
+            App Installed ✓
+          </MenuItem>
+        )}
 
         <Divider sx={{ my: 1 }} />
 
