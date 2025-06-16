@@ -620,14 +620,14 @@ const Header = ({ username }) => {
           My Profile
         </MenuItem>
 
-        <MenuItem onClick={() => { navigate('/notifications'); handleClose(); }}>
+        {/* <MenuItem onClick={() => { navigate('/notifications'); handleClose(); }}>
           <ListItemIcon>
             <Badge badgeContent={unreadCount} color="error" max={99}>
               <NotificationsIcon fontSize="small" sx={{ color: '#4361ee' }} />
             </Badge>
           </ListItemIcon>
           Notifications
-        </MenuItem>
+        </MenuItem> */}
 
         {/* Install App Menu Item */}
         {(isInstallable || (!isInstalled && !isInstallable)) && (
