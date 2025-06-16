@@ -17,6 +17,7 @@ import {
   // MoreVert as MoreVertIcon
 } from '@mui/icons-material';
 import { io } from 'socket.io-client';
+import { Helmet } from 'react-helmet';
 
 
 // Enhanced scrolling behavior
@@ -229,7 +230,18 @@ const Header = ({ username }) => {
   const currentPath = location.pathname;
 
   return (
-    <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem' }}>
+    <>
+    {/* Dynamic status bar color based on scroll */}
+    <Helmet>
+      <meta 
+        name="theme-color" 
+        content={isScrolled ? '#1976d2' : '#ffffff'} 
+        key="theme-color" 
+      />
+    </Helmet>
+    <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem', // Safe area padding for iOS
+      paddingTop: 'env(safe-area-inset-top)',
+      paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <ElevationScroll>
         <AppBar position="fixed" sx={{
           ...getGlassmorphismStyle(theme),
@@ -535,6 +547,7 @@ const Header = ({ username }) => {
         </Box>
       </Dialog>
     </Box>
+    </>
   );
 };
 
