@@ -5,55 +5,284 @@
     <link rel="icon" href="favicon.ico" />
     <meta name="google-adsense-account" content="ca-pub-2260023886932060">
     <meta name="fast2sms" content="6Y0LXMe02x1dqhjERyZd0Tjt2jsN2jfW">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
     
-    <!-- Modern status bar theme colors -->
-    <meta name="theme-color" content="#1976d2" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0d47a1" media="(prefers-color-scheme: dark)" />
+    <!-- Enhanced Theme Colors for Different Platforms -->
+    <meta name="theme-color" content="#4361ee" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#4361ee" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#3f37c9" />
     
-    <!-- Modern web app capable tags -->
+    <!-- Modern Mobile Web App Configuration -->
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    
-    <!-- Splash screen meta for PWA -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Tej Helper" />
+    
+    <!-- Enhanced Status Bar Styling -->
+    <meta name="msapplication-navbutton-color" content="#4361ee" />
+    <meta name="msapplication-TileColor" content="#4361ee" />
+    
+    <!-- Fullscreen and Orientation -->
+    <meta name="screen-orientation" content="portrait" />
+    <meta name="format-detection" content="telephone=no" />
     
     <meta
       name="description"
       content="Help others with their needs and get paid for your services."
     />
+    
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="manifest.json" />
     
-    <!-- Preconnect to important origins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <!-- Preload important resources -->
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" />
-    
     <title>Tej Helper</title>
     
-    <!-- Add to homescreen script -->
-    <script>
-      if ('standalone' in window.navigator && window.navigator.standalone) {
-        document.documentElement.classList.add('pwa-standalone');
-      }
-    </script>
-    
     <style>
-      /* Status bar padding for iOS PWAs */
-      @supports (padding-top: env(safe-area-inset-top)) {
-        body.pwa-standalone {
-          padding-top: env(safe-area-inset-top);
-          padding-bottom: env(safe-area-inset-bottom);
+      /* Enhanced Status Bar and Safe Area Styling */
+      :root {
+        --primary-color: #4361ee;
+        --primary-dark: #3f37c9;
+        --safe-area-inset-top: env(safe-area-inset-top);
+        --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        --safe-area-inset-left: env(safe-area-inset-left);
+        --safe-area-inset-right: env(safe-area-inset-right);
+      }
+      
+      html {
+        /* Prevent bounce scrolling on mobile */
+        overscroll-behavior: none;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+          'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+          sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        
+        /* Enhanced mobile styling */
+        background: linear-gradient(135deg, 
+          rgba(67, 97, 238, 0.05) 0%, 
+          rgba(63, 55, 201, 0.05) 100%);
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        
+        /* Safe area handling */
+        padding-top: var(--safe-area-inset-top);
+        padding-bottom: var(--safe-area-inset-bottom);
+        padding-left: var(--safe-area-inset-left);
+        padding-right: var(--safe-area-inset-right);
+      }
+      
+      #root {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        position: relative;
+      }
+      
+      /* Enhanced Mobile Status Bar Styles */
+      @media screen and (max-width: 768px) {
+        body {
+          /* Prevent pull-to-refresh */
+          overscroll-behavior-y: contain;
+          /* Smooth scrolling */
+          scroll-behavior: smooth;
+        }
+        
+        /* Status bar overlay for immersive experience */
+        body::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: var(--safe-area-inset-top, 20px);
+          background: linear-gradient(135deg, 
+            rgba(67, 97, 238, 0.9) 0%, 
+            rgba(63, 55, 201, 0.9) 100%);
+          backdrop-filter: blur(20px);
+          z-index: 9999;
+          pointer-events: none;
+        }
+      }
+      
+      /* Enhanced PWA Styles */
+      @media (display-mode: standalone) {
+        body {
+          background: linear-gradient(135deg, 
+            rgba(67, 97, 238, 0.08) 0%, 
+            rgba(63, 55, 201, 0.08) 100%);
+        }
+        
+        body::before {
+          background: linear-gradient(135deg, 
+            var(--primary-color) 0%, 
+            var(--primary-dark) 100%);
+          opacity: 0.95;
+        }
+      }
+      
+      /* Landscape orientation adjustments */
+      @media screen and (orientation: landscape) and (max-height: 500px) {
+        body::before {
+          height: calc(var(--safe-area-inset-top, 0px) + 10px);
+        }
+      }
+      
+      /* High resolution displays */
+      @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+        body {
+          background-attachment: fixed;
+        }
+      }
+      
+      /* Dark mode support */
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: linear-gradient(135deg, 
+            rgba(63, 55, 201, 0.1) 0%, 
+            rgba(67, 97, 238, 0.1) 100%);
+        }
+        
+        body::before {
+          background: linear-gradient(135deg, 
+            rgba(63, 55, 201, 0.95) 0%, 
+            rgba(67, 97, 238, 0.95) 100%);
+        }
+      }
+      
+      /* Loading state enhancement */
+      .app-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, 
+          var(--primary-color) 0%, 
+          var(--primary-dark) 100%);
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+      }
+      
+      /* Accessibility improvements */
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+        
+        body {
+          scroll-behavior: auto;
         }
       }
     </style>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <noscript>
+      <div class="app-loading">
+        You need to enable JavaScript to run this app.
+      </div>
+    </noscript>
+    <div id="root">
+      <!-- Enhanced loading state -->
+      <div class="app-loading" id="initial-loader">
+        <div>Loading Tej Helper...</div>
+      </div>
+    </div>
+    
+    <script>
+      // Enhanced status bar and viewport handling
+      (function() {
+        // Remove loader once React app mounts
+        const removeLoader = () => {
+          const loader = document.getElementById('initial-loader');
+          if (loader) {
+            loader.style.opacity = '0';
+            loader.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => loader.remove(), 300);
+          }
+        };
+        
+        // Enhanced viewport height handling for mobile
+        const setViewportHeight = () => {
+          const vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--vh', `${vh}px`);
+        };
+        
+        // Update on resize and orientation change
+        window.addEventListener('resize', setViewportHeight);
+        window.addEventListener('orientationchange', () => {
+          setTimeout(setViewportHeight, 100);
+        });
+        
+        // Initial setup
+        setViewportHeight();
+        
+        // Remove loader when page is fully loaded
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', removeLoader);
+        } else {
+          removeLoader();
+        }
+        
+        // Enhanced status bar color management
+        const updateStatusBarColor = () => {
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const themeColor = isDark ? '#3f37c9' : '#4361ee';
+          
+          let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+          if (metaThemeColor) {
+            metaThemeColor.setAttribute('content', themeColor);
+          }
+          
+          // Update Apple status bar style based on background
+          let appleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+          if (appleStatusBar) {
+            appleStatusBar.setAttribute('content', isDark ? 'black-translucent' : 'default');
+          }
+        };
+        
+        // Listen for color scheme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateStatusBarColor);
+        updateStatusBarColor();
+        
+        // PWA installation prompt enhancement
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          
+          // You can show a custom install button here
+          console.log('PWA install prompt available');
+        });
+        
+        // Handle PWA installation
+        window.addEventListener('appinstalled', () => {
+          console.log('PWA was installed');
+          deferredPrompt = null;
+        });
+        
+        // Enhanced touch handling for mobile
+        let touchStartY = 0;
+        
+        document.addEventListener('touchstart', (e) => {
+          touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchmove', (e) => {
+          const touchY = e.touches[0].clientY;
+          const touchDiff = touchY - touchStartY;
+          
+          // Prevent pull-to-refresh when at top of page
+          if (touchDiff > 0 && window.scrollY === 0) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+      })();
+    </script>
   </body>
 </html>
