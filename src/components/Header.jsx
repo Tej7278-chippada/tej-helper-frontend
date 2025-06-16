@@ -637,7 +637,7 @@ const Header = ({ username }) => {
                 <GetAppIcon fontSize="small" sx={{ color: '#4CAF50' }} />
               }
             </ListItemIcon>
-            {isInstallable ? 'Install App' : 'Install App'} {/* Add to Home Screen */}
+            {isInstallable ? 'Install App' : 'Add to Home Screen'}
           </MenuItem>
         )}
 

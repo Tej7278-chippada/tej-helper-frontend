@@ -33,7 +33,8 @@ const LazyBackgroundImage = ({ base64Image, alt, children }) => {
 
   const imageSrc = base64Image 
     ? `data:image/jpeg;base64,${base64Image}` 
-    : 'https://placehold.co/600x400?text=No+Image';
+    // : 'https://placehold.co/600x400?text=No+Image';
+    : 'null';
 
     {!isLoaded && (
         <div style={{
