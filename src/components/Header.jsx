@@ -485,10 +485,18 @@ const Header = ({ username }) => {
                     component={Link}
                     to="/notifications"
                     sx={{
-                      color: 'rgba(0, 0, 0, 0.6)',
+                      // color: 'rgba(0, 0, 0, 0.6)',
+                      // transition: 'all 0.3s ease',
+                      // '&:hover': {
+                      //   backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                      //   transform: 'translateY(-2px)',
+                      // },
+                      color: currentPath === '/notifications' ? '#9C27B0' : 'rgba(0, 0, 0, 0.6)',
+                      backgroundColor: currentPath === '/notifications' ? 'rgba(156, 39, 176, 0.1)' : 'transparent', //'rgba(67, 97, 238, 0.1)'
+                      borderRadius: 2,
                       transition: 'all 0.3s ease',
                       '&:hover': {
-                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        backgroundColor: 'rgba(156, 39, 176, 0.1)', //'rgba(67, 97, 238, 0.1)'
                         transform: 'translateY(-2px)',
                       }
                     }}
@@ -500,8 +508,8 @@ const Header = ({ username }) => {
                       sx={{
                         '& .MuiBadge-badge': {
                           fontSize: '0.75rem',
-                          minWidth: '20px',
-                          height: '20px',
+                          minWidth: '20px', border: `1px solid rgba(255, 255, 255, 0.8)`,
+                          height: '20px', right: -3, top: -4,
                           borderRadius: '10px', transform: 'translate(25%, -25%)',
                           animation: unreadCount > 0 ? 'pulse 1.5s ease' : 'none', // infinite , ease
                           '@keyframes pulse': {

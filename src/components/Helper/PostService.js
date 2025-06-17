@@ -1,6 +1,6 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, } from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, Badge, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
@@ -126,7 +126,7 @@ function PostService() {
         setLoading(true);
         try {
           const response = await fetchUserPosts();
-          setPosts(response.data.reverse() || []); // Set products returned by the API
+          setPosts(response.data || []); // Set products returned by the API .reverse()
         } catch (error) {
           console.error('Error fetching your posts:', error);
           // setNotification({ open: true, message: 'Failed to fetch products.', type: 'error' });
@@ -523,10 +523,24 @@ function PostService() {
                       handleEdit(post);}}>Edit</Button>
                     <Button color="secondary" size="small" variant="outlined" startIcon={<DeleteSweepRoundedIcon />} key={post._id} sx={{borderRadius:'8px'}} onClick={(event) => {event.stopPropagation(); handleDeleteClick(post);}}>Delete</Button>
                   </Box>
-                  <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', '&:hover': {
-                    background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
-                    transform: 'translateY(-2px)' }, transition: 'all 0.3s ease', }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}
-                  >Chats</Button>
+                  <Badge
+                    badgeContent={post.unreadMessages || 0} 
+                    color="error" 
+                    overlap="circular"
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        right: 3,
+                        top: 3,
+                        border: `2px solid rgba(255, 255, 255, 0.8)`,
+                        padding: '0 4px', 
+                      }
+                    }}
+                  >
+                    <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', '&:hover': {
+                      background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
+                      transform: 'translateY(-2px)' }, transition: 'all 0.3s ease', }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}
+                    >Chats</Button>
+                  </Badge>
                 </CardActions>
                 </LazyBackgroundImage>
               </Card>
