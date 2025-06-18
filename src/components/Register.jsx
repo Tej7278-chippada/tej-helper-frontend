@@ -30,7 +30,7 @@ const theme = createTheme({
 //   "Delhi", "Lakshadweep", "Puducherry"
 // ];
 
-const Register = () => {
+const Register = ({ darkMode }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -313,7 +313,7 @@ const Register = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Layout>
+      <Layout darkMode={darkMode} >
         <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh" padding={isMobile ? 2 : 4} >
           <Typography variant={isMobile ? "h5" : "h5"} gutterBottom>
             Create New Account

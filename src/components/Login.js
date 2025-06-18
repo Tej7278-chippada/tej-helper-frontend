@@ -33,7 +33,7 @@ const theme = createTheme({
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-const Login = () => {
+const Login = ({darkMode}) => {
   // const [username, setUsername] = useState('');
   const [identifier, setIdentifier] = useState(''); // Can be email or username
   const [password, setPassword] = useState('');
@@ -190,7 +190,7 @@ const Login = () => {
 
   return (
     <ThemeProvider theme={theme}>
-    <Layout>
+    <Layout darkMode={darkMode}>
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh"
     padding={isMobile ? 2 : 4} // Adjust padding for mobile
     // sx={{...getGlassmorphismStyle(theme),}}

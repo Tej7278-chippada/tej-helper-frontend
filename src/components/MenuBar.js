@@ -41,7 +41,20 @@ const navItems = [
   },
 ];
 
-const MenuBar = ({ visible, badgeCounts = {} }) => {
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
+const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -84,9 +97,9 @@ const MenuBar = ({ visible, badgeCounts = {} }) => {
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: 1200,
-        background: 'rgba(255, 255, 255, 0.85)',
-        backdropFilter: 'blur(20px)',
+        zIndex: 1200, ...getGlassmorphismStyle(theme, darkMode),
+        // background: 'rgba(255, 255, 255, 0.85)',
+        // backdropFilter: 'blur(20px)',
         borderTop: '1px solid rgba(255, 255, 255, 0.2)',
         borderTopLeftRadius: '20px',
         borderTopRightRadius: '20px',
@@ -94,7 +107,7 @@ const MenuBar = ({ visible, badgeCounts = {} }) => {
         transform: visible ? 'translateY(0)' : 'translateY(100%)',
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
-        boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.1)',
+        // boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.1)',
         '&::before': {
           content: '""',
           position: 'absolute',
@@ -102,7 +115,7 @@ const MenuBar = ({ visible, badgeCounts = {} }) => {
           left: 0,
           right: 0,
           height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+          background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0), transparent)',
         }
       }}
       elevation={3}
@@ -205,7 +218,7 @@ const MenuBar = ({ visible, badgeCounts = {} }) => {
             >
               <Box
                 sx={{
-                  color: isActive ? (item.activeColor || theme.palette.primary.main) : 'rgba(0, 0, 0, 0.6)',
+                  color: isActive ? (item.activeColor || theme.palette.primary.main) : darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',

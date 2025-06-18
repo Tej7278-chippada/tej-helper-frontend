@@ -32,6 +32,15 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>Tej Helper</title>
+    <script>
+      // Check for dark mode preference before React loads
+      const savedMode = localStorage.getItem('darkMode');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: light)').matches; // by default on webpage loads takes as light mode (for dark mode use dark instead of light)
+      if (savedMode === 'true' || (savedMode === null && prefersDark)) {
+        document.documentElement.classList.add('dark-mode');
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#121212');
+      }
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

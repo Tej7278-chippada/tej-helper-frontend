@@ -28,6 +28,20 @@ const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
+// Custom glassmorphism styling
+const getGlassmorphismStyle1 = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(205, 201, 201, 0.15)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
 // Enhanced styled components
 const ChatContainer = styled(Card)(({ theme }) => ({
   background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
@@ -77,7 +91,7 @@ const SearchTextField = styled(TextField)(({ theme, expanded }) => ({
 //   border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
 // }));
 
-const ChatsOfUser = () => {
+const ChatsOfUser = ({darkMode, toggleDarkMode}) => {
   const tokenUsername = localStorage.getItem('tokenUsername');
   const navigate = useNavigate();
   const theme = useTheme();
@@ -255,7 +269,7 @@ const ChatsOfUser = () => {
   const totalUnreadCount = chats.reduce((sum, chat) => sum + chat.unreadMessagesCount, 0);
 
   return (
-    <Layout username={tokenUsername}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
       <Box mt={isMobile ? '2px' : '4px'} mb={isMobile ? '4px' : '8px'} sx={{ maxWidth: '800px', mx: 'auto'}}>
         {/* <Box
           display="flex"
@@ -282,7 +296,7 @@ const ChatsOfUser = () => {
                 sx={{ ...getGlassmorphismStyle(0.1, 10),
                   // bgcolor: 'white',
                   // boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-                  padding: '8px 16px',
+                  padding: '8px 16px', borderTopRightRadius: '16px', borderTopLeftRadius: '16px',
                 }}
               >
                 <Box display="flex" position="sticky" justifyContent="space-between" alignItems="center">

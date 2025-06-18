@@ -57,7 +57,7 @@ const DEFAULT_FILTERS = {
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-const Helper = ()=> {
+const Helper = ({ darkMode, toggleDarkMode})=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
   // const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -601,7 +601,7 @@ const Helper = ()=> {
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
   return (
-    <Layout username={tokenUsername}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
@@ -861,7 +861,7 @@ const Helper = ()=> {
               '& .MuiCardContent-root': {padding: '10px' },  }}
           >
             <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>
-              <Box sx={{ m: 0, bgcolor: 'white', borderRadius:'8px'}}>
+              <Box sx={{ m: 0, borderRadius:'8px'}}>
                 <Box
                   sx={{
                     px: isMobile ? '8px' : '10px', py: '12px',

@@ -47,7 +47,7 @@ import EnhancedPostServiceDialog from './EnhancedPostServiceDialog';
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-function PostService() {
+function PostService({darkMode, toggleDarkMode}) {
   const [openDialog, setOpenDialog] = useState(false);
   const [posts, setPosts] = useState([]);
   const [formData, setFormData] = useState({
@@ -286,7 +286,7 @@ function PostService() {
 
 
     return (
-        <Layout username={tokenUsername}>
+        <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
         <Box>
         <Toolbar sx={{display:'flex', justifyContent:'space-between', 
         // ...getGlassmorphismStyle(0.1, 10),
@@ -586,7 +586,7 @@ function PostService() {
          formData={formData} setFormData={setFormData} generatedImages={generatedImages} loadingGeneration={loadingGeneration} loadingMedia={loadingMedia}
          selectedDate={selectedDate} setSelectedDate={setSelectedDate} timeFrom={timeFrom} setTimeFrom={setTimeFrom} timeTo={timeTo} setTimeTo={setTimeTo}
          protectLocation={protectLocation} setProtectLocation={setProtectLocation} fakeAddress={fakeAddress} setFakeAddress={setFakeAddress}
-         activeStep={activeStep} setActiveStep={setActiveStep}
+         activeStep={activeStep} setActiveStep={setActiveStep} darkMode={darkMode}
         />
 
         {/* Snackbar for notifications */}

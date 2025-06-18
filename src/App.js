@@ -1,5 +1,5 @@
 // src/App.js
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
 import Login from './components/Login';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
@@ -21,8 +21,81 @@ import NotificationsPage from './components/Helper/NotificationsPage';
 import NearPostsNotification from './components/Helper/NearPostsNotification';
 import HelperHome from './components/Helper/HelperHome';
 
-const theme = createTheme({
-  // palette: {
+const getDesignTokens = (mode) => ({
+  palette: {
+    mode,
+    ...(mode === 'light'
+      ? {
+        // light mode palette
+        // primary: {
+        //   main: '#4361ee',
+        // },
+        // secondary: {
+        //   main: '#3f37c9',
+        // },
+        // background: {
+        //   default: '#f8f9fa',
+        //   paper: '#ffffff',
+        // },
+      }
+      : {
+        // dark mode palette
+        // primary: {
+        //   main: '#4cc9f0',
+        // },
+        // secondary: {
+        //   main: '#4361ee',
+        // },
+        // background: {
+        //   default: '#121212',
+        //   paper: '#1e1e1e',
+        // },
+        // text: {
+        //   primary: '#ffffff',
+        //   secondary: 'rgba(255, 255, 255, 0.7)',
+        // },
+        // primary: {
+        //   main: '#4361ee',
+        //   light: '#6b7fff',
+        //   dark: '#2940d3',
+        // },
+        // secondary: {
+        //   main: '#3f37c9',
+        //   light: '#6b5fff',
+        //   dark: '#2815a8',
+        // },
+        // background: {
+        //   default:  '#121212',
+        //   paper: '#1e1e1e' ,
+        // },
+        // text: {
+        //   primary: '#ffffff',
+        //   secondary:'rgba(255, 255, 255, 0.7)' ,
+        // },
+      }),
+  },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 960,
+      lg: 1280,
+      xl: 1920,
+    },
+  },
+});
+
+const FloatingBackgroundBalls = ({ darkMode }) => {
+  return (
+    <>
+      <div className={`color-ball color-ball-1 ${darkMode ? 'dark-mode' : ''}`}></div>
+      <div className={`color-ball color-ball-2 ${darkMode ? 'dark-mode' : ''}`}></div>
+      <div className={`color-ball color-ball-3 ${darkMode ? 'dark-mode' : ''}`}></div>
+    </>
+  );
+};
+
+// palette: {
   //   primary: {
   //     main: '#4361ee', // Vibrant blue
   //     contrastText: '#ffffff',
@@ -110,29 +183,24 @@ const theme = createTheme({
     //   },
     // },
   // },
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 960,
-      lg: 1280,
-      xl: 1920,
-    },
-  },
-});
-
-const FloatingBackgroundBalls = () => {
-  return (
-    <>
-      <div className="color-ball color-ball-1"></div>
-      <div className="color-ball color-ball-2"></div>
-      <div className="color-ball color-ball-3"></div>
-    </>
-  );
-};
 
 
 function App() {
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : false;
+  });
+
+  const theme = createTheme(getDesignTokens(darkMode ? 'dark' : 'light'));
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    localStorage.setItem('darkMode', JSON.stringify(newMode));
+    document.documentElement.classList.toggle('dark-mode', newMode);
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', newMode ? '#121212' : '#1976d2');
+  };
+
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
       async function registerServiceWorker() {
@@ -145,62 +213,67 @@ function App() {
       }
       registerServiceWorker();
     }
-  }, []);
+
+    // Apply dark mode class on initial load
+    if (darkMode) {
+      document.documentElement.classList.add('dark-mode');
+    }
+  }, [darkMode]);
   return (
     <ThemeProvider theme={theme}>
-      <FloatingBackgroundBalls/>
+      <FloatingBackgroundBalls darkMode={darkMode}/>
       <Router>
-        <NearPostsNotification/>
+        <NearPostsNotification darkMode={darkMode}/>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login darkMode={darkMode} />} />
+          <Route path="/register" element={<Register darkMode={darkMode} />} />
           <Route path="/" element={
             <PrivateRoute>
-              <Helper />
+              <Helper darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
           <Route path="/userPosts" element={
             <PrivateRoute>
-              <PostService />
+              <PostService darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/forgot-password" element={<ForgotPassword darkMode={darkMode} />} />
           <Route path="/user/:id" element={
             <PrivateRoute>
-              <UserProfile />
+              <UserProfile darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>}
           />
-          <Route path="/post/:id" element={<PostDetailsById />} />
+          <Route path="/post/:id" element={<PostDetailsById darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
           <Route path="/wishlist" element={
             <PrivateRoute>
-              <WishList />
+              <WishList darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
           <Route path="/chatsOfPost/:postId" element={
             <PrivateRoute>
-              <ChatsOfPosts />
+              <ChatsOfPosts darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
           <Route path="/chat/:chatId" element={
             <PrivateRoute>
-              <ChatHistoryPage />
+              <ChatHistoryPage darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
           {/* 404 Not Found Page */}
           <Route path="*" element={<NotFound />} />
           <Route path="/notifications" element={
             <PrivateRoute>
-              <NotificationsPage />
+              <NotificationsPage darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
           <Route path="/chatsOfUser" element={
             <PrivateRoute>
-              <ChatsOfUser />
+              <ChatsOfUser darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             </PrivateRoute>
           } />
           <Route path="/helperHome" element={
             <PrivateRoute>
-              <HelperHome />
+              <HelperHome darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
             </PrivateRoute>
           } />
         </Routes>

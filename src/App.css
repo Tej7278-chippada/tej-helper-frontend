@@ -44,6 +44,17 @@
 }
 
 /* Updated App.css */
+
+.dark-mode { /* entire UI background colour on dark maode */
+  background-color: #121212 ; 
+  color: #ffffff;
+}
+
+.dark-mode .MuiPaper-root { 
+  background-color: #1e1e1e !important;
+  /* background: linear-gradient(135deg, #121212d7 0%, #1e1e1eba 100%); */
+}
+
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -65,7 +76,15 @@ body::before {
   width: 100%;
   height: 100%;
   z-index: -1;
-  background: linear-gradient(135deg, hsl(210, 20%, 98%) 0%, #e9ecef24 100%);
+  /* background: linear-gradient(135deg, hsl(210, 20%, 98%) 0%, #e9ecef24 100%); */
+}
+
+body.dark-mode {
+  background: #121212;
+}
+
+body.dark-mode::before {
+  background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
 }
 
 .color-ball {
@@ -101,6 +120,41 @@ body::before {
   bottom: 10%;
   left: 30%;
   animation: float 12s ease-in-out infinite;
+}
+
+.color-ball.dark-mode {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  z-index: -1;
+}
+
+.color-ball-1.dark-mode {
+  width: 400px;
+  height: 400px;
+  background: #4361ee;
+  top: 10%;
+  left: 5%;
+  animation: float 18s ease-in-out infinite;
+}
+
+.color-ball-2.dark-mode {
+  width: 500px;
+  height: 500px;
+  background: #3f37c9;
+  top: 70%;
+  left: 80%;
+  animation: float 22s ease-in-out infinite reverse;
+}
+
+.color-ball-3.dark-mode {
+  width: 300px;
+  height: 300px;
+  background: #4cc9f0;
+  bottom: 5%;
+  left: 25%;
+  animation: float 15s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -191,3 +245,24 @@ body::before {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
+
+
+
+/* Add these to your existing App.css */
+
+/* .color-ball.dark-mode {
+  opacity: 0.2;
+}
+
+.color-ball-1.dark-mode {
+  background: #4cc9f0;
+}
+
+.color-ball-2.dark-mode {
+  background: #4361ee;
+}
+
+.color-ball-3.dark-mode {
+  background: #3f37c9;
+} */
+

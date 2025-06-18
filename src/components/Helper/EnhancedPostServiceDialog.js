@@ -103,6 +103,20 @@ import {
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
 
+// Custom glassmorphism styling
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(205, 201, 201, 0.15)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
 // Set default icon manually
 const customIcon = new L.Icon({
   iconUrl:  'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', // markerIcon
@@ -150,7 +164,7 @@ L.Icon.Default.mergeOptions({
 const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMobile, fetchPostsData, generatedImages, loadingGeneration,
   noImagesFound, newMedia, setNewMedia, editingProduct, formData, setFormData, selectedDate, setSelectedDate, mediaError, setMediaError,
   timeFrom, setTimeFrom, timeTo, setTimeTo, existingMedia, setExistingMedia, fetchUnsplashImages, loadingMedia, loading, setLoading,
-  setSnackbar, submitError, protectLocation, setProtectLocation, fakeAddress, setFakeAddress, activeStep, setActiveStep, }) => {
+  setSnackbar, submitError, protectLocation, setProtectLocation, fakeAddress, setFakeAddress, activeStep, setActiveStep, darkMode }) => {
   //   const [openDialog, setOpenDialog] = useState(false);
   // const [activeStep, setActiveStep] = useState(0);
   //   const [editingProduct, setEditingProduct] = useState(false);
@@ -1642,9 +1656,10 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
       PaperProps={{
         sx: {
           borderRadius: isMobile ? 0 : 4,
-          background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
+          // background: darkMode ? 'null' : 'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
           // minHeight: isMobile ? '80vh' : '80vh', 
           // m: isMobile ? '14px' : '0px',
+          ...getGlassmorphismStyle(theme, darkMode),
         }
       }}
       sx={{'& .MuiDialogTitle-root': { padding: isMobile ? '1rem' : '1rem', },

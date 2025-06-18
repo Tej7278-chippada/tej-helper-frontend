@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import API from '../api/api';
 
 
-export default function NearPostsNotification() {
+export default function NearPostsNotification({darkMode}) {
   const navigate = useNavigate();
   const [nearPostView, setNearPostView] = useState({ open: false, message: "", severity: "info" });
   const [nearPostData, setNearPostData] = useState(null);

@@ -19,7 +19,8 @@ import {
 import { io } from 'socket.io-client';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import InstallMobileIcon from '@mui/icons-material/InstallMobile';
-import AppInstaller from './Helper/AppInstaller';
+import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
+import NightsStayRoundedIcon from '@mui/icons-material/NightsStayRounded';
 
 
 // Enhanced scrolling behavior
@@ -35,14 +36,20 @@ function ElevationScroll({ children }) {
 }
 
 // Custom glassmorphism styling
-const getGlassmorphismStyle = (theme) => ({
-  background: 'rgba(255, 255, 255, 0.15)',
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(205, 201, 201, 0.15)' 
+    : 'rgba(255, 255, 255, 0.15)',
   backdropFilter: 'blur(20px)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-const Header = ({ username }) => {
+const Header = ({ username , toggleDarkMode, darkMode}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = useState(null);
@@ -60,6 +67,9 @@ const Header = ({ username }) => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+
+  const getTextColor = () => darkMode ? '#ffffff' : '#000000';
+  const getSecondaryTextColor = () => darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)';
 
   // PWA Install Logic
   useEffect(() => {
@@ -351,7 +361,7 @@ const Header = ({ username }) => {
     localStorage.removeItem('userLocation');
     localStorage.removeItem('distanceRange');
     localStorage.removeItem('tokenProfilePic');
-    localStorage.clear();
+    // localStorage.clear();
     navigate('/login');
   };
 
@@ -392,10 +402,12 @@ const Header = ({ username }) => {
     <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem' }}>
       <ElevationScroll>
         <AppBar position="fixed" sx={{
-          ...getGlassmorphismStyle(theme),
+          ...getGlassmorphismStyle(theme, darkMode),
           transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          borderRadius: 0,
-          borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+          borderRadius: 0, border: 'none',
+          borderBottom: isScrolled 
+            ? `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.1)'}` 
+            : 'none',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -404,7 +416,9 @@ const Header = ({ username }) => {
             right: 0,
             bottom: 0,
             background: isScrolled
-              ? 'linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(63, 55, 201, 0.1) 100%)'
+              ? darkMode
+                ? 'linear-gradient(135deg, rgba(67, 97, 238, 0.2) 0%, rgba(63, 55, 201, 0.2) 100%)'
+                : 'linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(63, 55, 201, 0.1) 100%)'
               : 'transparent',
             transition: 'background 0.3s ease',
             zIndex: -1,
@@ -422,7 +436,7 @@ const Header = ({ username }) => {
                 component="div"
                 sx={{
                   fontWeight: 700,
-                  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`, // 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'
+                  background: darkMode ?  'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)' :  `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`, // 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'
                   backgroundClip: 'text',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -459,7 +473,7 @@ const Header = ({ username }) => {
                       component={Link}
                       to={item.path}
                       sx={{                                 // '#4361ee'
-                        color: currentPath === item.path ? item.activeColor : 'rgba(0, 0, 0, 0.6)',
+                        color: currentPath === item.path ? item.activeColor : darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
                         backgroundColor: currentPath === item.path ? item.bgColor : 'transparent', //'rgba(67, 97, 238, 0.1)'
                         borderRadius: 2,
                         transition: 'all 0.3s ease',
@@ -491,7 +505,7 @@ const Header = ({ username }) => {
                       //   backgroundColor: 'rgba(67, 97, 238, 0.1)',
                       //   transform: 'translateY(-2px)',
                       // },
-                      color: currentPath === '/notifications' ? '#9C27B0' : 'rgba(0, 0, 0, 0.6)',
+                      color: currentPath === '/notifications' ? '#9C27B0' : darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
                       backgroundColor: currentPath === '/notifications' ? 'rgba(156, 39, 176, 0.1)' : 'transparent', //'rgba(67, 97, 238, 0.1)'
                       borderRadius: 2,
                       transition: 'all 0.3s ease',
@@ -586,7 +600,7 @@ const Header = ({ username }) => {
         TransitionComponent={Fade}
         PaperProps={{
           sx: {
-            ...getGlassmorphismStyle(theme),
+            ...getGlassmorphismStyle(theme, darkMode),
             mt: 1,
             minWidth: 200,
             borderRadius: 3,
@@ -595,8 +609,9 @@ const Header = ({ username }) => {
               px: 2,
               py: 1.5,
               transition: 'all 0.2s ease',
+              color: darkMode ? 'rgba(255, 255, 255, 0.87)' : 'rgba(0, 0, 0, 0.87)',
               '&:hover': {
-                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                backgroundColor: darkMode ? 'rgba(67, 97, 238, 0.2)' : 'rgba(67, 97, 238, 0.1)',
                 transform: 'translateX(8px)',
               },
             },
@@ -612,11 +627,11 @@ const Header = ({ username }) => {
         }}
       >
         {/* User Info Header */}
-        <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid rgba(0, 0, 0, 0.1)' }}>
+        <Box sx={{ px: 2, py: 1.5, borderBottom: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}` }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#4361ee' }}>
             Welcome back!
           </Typography>
-          <Typography variant="body2" sx={{ color: 'rgba(0, 0, 0, 0.6)' }}>
+          <Typography variant="body2" sx={{ color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)' }}>
             {currentUsername}
           </Typography>
         </Box>
@@ -636,6 +651,17 @@ const Header = ({ username }) => {
           </ListItemIcon>
           Notifications
         </MenuItem> */}
+
+        {/* Dark Mode Toggle */}
+        <MenuItem onClick={() => { toggleDarkMode(); handleClose(); }}>
+          <ListItemIcon>
+            {darkMode ? 
+              <LightModeRoundedIcon fontSize="small" sx={{ color: '#FFA726' }} /> :
+              <NightsStayRoundedIcon fontSize="small" sx={{ color: '#424242' }} />
+            }
+          </ListItemIcon>
+          {darkMode ? 'Light Mode' : 'Dark Mode'}
+        </MenuItem>
 
         {/* Install App Menu Item */}
         {(isInstallable || (!isInstalled && !isInstallable)) && (
@@ -689,7 +715,7 @@ const Header = ({ username }) => {
         TransitionProps={{ direction: 'up' }}
         PaperProps={{
           sx: {
-            ...getGlassmorphismStyle(theme),
+            ...getGlassmorphismStyle(theme, darkMode),
             borderRadius: '20px 20px 0 0',
             maxWidth: '100%',
             width: '100%',
@@ -717,6 +743,8 @@ const Header = ({ username }) => {
                   py: 1.5,
                   borderRadius: 2,
                   textTransform: 'none',
+                  color: currentPath === item.path ? 'white' : getTextColor(),
+                  borderColor: darkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.3)',
                   ...(currentPath === item.path && {
                     background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
                   })

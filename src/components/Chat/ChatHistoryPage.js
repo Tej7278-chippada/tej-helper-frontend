@@ -11,7 +11,7 @@ import KeyboardDoubleArrowDownRoundedIcon from '@mui/icons-material/KeyboardDoub
 
 const socket = io(process.env.REACT_APP_API_URL);
 
-const ChatHistoryPage = () => {
+const ChatHistoryPage = ({darkMode, toggleDarkMode}) => {
   const { chatId } = useParams(); // Extract chatId from URL
   const [chat, setChat] = useState(null);
   const [message, setMessage] = useState("");
@@ -122,7 +122,7 @@ const ChatHistoryPage = () => {
   }
 
   return (
-    <Layout>
+    <Layout  darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
     <Box display="flex" flexDirection="column" height="91vh">
       {/* Header with Profile */}
       <Box display="flex" alignItems="center" p={1} bgcolor="#f5f5f5" boxShadow={1}>
