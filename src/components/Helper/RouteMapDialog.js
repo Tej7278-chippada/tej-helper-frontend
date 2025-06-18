@@ -1,6 +1,6 @@
 // src/components/Helper/RouteMapDialog.js
 import React, { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Tooltip, Alert, Snackbar } from '@mui/material';
+import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Tooltip, Alert, Snackbar, Switch } from '@mui/material';
 // import { addComment } from '../../api/api';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -79,6 +79,7 @@ function RouteMapDialog({ open, onClose, post }) {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
   const [currentAddress, setCurrentAddress] = useState('');
+  const [directionsCard, setDirectionsCard] = useState(false);
 
   // Automatically fetch location and show route when dialog opens
   useEffect(() => {
@@ -100,7 +101,7 @@ function RouteMapDialog({ open, onClose, post }) {
     if (currentLocation && open) {
       showDistanceAndRoute();
     }
-  }, [currentLocation, open]);
+  }, [currentLocation, open, directionsCard]);
 
   // Expose removeViaPoint to the window object
   useEffect(() => {
@@ -192,6 +193,11 @@ function RouteMapDialog({ open, onClose, post }) {
   //   }
   // }, [locateUser]);
 
+  const toggleDirectionDialog = (e) => {
+    const isChecked = e.target.checked;
+    setDirectionsCard(isChecked);
+  };
+
   const showDistanceAndRoute = () => {
     if (!mapRef.current || !mapRef.current._leaflet_id || !currentLocation || !post?.location) {
       return; // Map doesn't exist or is being destroyed
@@ -208,7 +214,8 @@ function RouteMapDialog({ open, onClose, post }) {
           L.latLng(post.location.latitude, post.location.longitude)
         ],
         routeWhileDragging: true,
-        show: true, // Ensure the directions panel is shown
+        // show: true, // Ensure the directions panel is shown
+        show : directionsCard,
         addWaypoints: false, // Disable adding waypoints by clicking on the map
         draggableWaypoints: false, // Make waypoints non-draggable
         fitSelectedRoutes: true,
@@ -451,9 +458,10 @@ function RouteMapDialog({ open, onClose, post }) {
                       Save Location
                     </Button>
                   )} */}
-              <Box m={1}>
+              <Box m={1} sx={{display: 'flex',  gap: '4px'}}>
 
                 {currentLocation && (
+                  <>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <IconButton
                       style={{
@@ -474,6 +482,32 @@ function RouteMapDialog({ open, onClose, post }) {
                       Show Route
                     </Typography>
                   </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
+                    {/* <IconButton
+                      style={{
+                        // display: 'inline-block',
+                        // float: 'right',
+                        fontWeight: '500', width: '60px', borderRadius: '10px',
+                        backgroundColor: 'rgba(255, 255, 255, 0.26)',
+                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                      }}
+                      onClick={showDistanceAndRoute}
+                      disabled={loadingLocation && routeCalculating} // Disable button while loading
+                    >
+                      <Tooltip title={routeCalculating ? 'Caliculating route...' : 'Show the route and distance'} arrow placement="right">
+                        <>{routeCalculating ? <CircularProgress size={24} /> : <RouteRoundedIcon />}</>
+                      </Tooltip>
+                    </IconButton> */}
+                    <Switch
+                      checked={directionsCard}
+                      onChange={toggleDirectionDialog}
+                      color="primary"
+                    /> 
+                    <Typography variant="caption" sx={{ m: 0.8, textAlign: 'center', color:'grey' }}>
+                      Directions : <strong>{directionsCard ? 'ON' : 'OFF'}</strong>
+                    </Typography>
+                  </Box>
+                  </>
                 )}
               </Box>
               {/* {currentLocation && (
