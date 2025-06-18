@@ -208,6 +208,10 @@ function RouteMapDialog({ open, onClose, post }) {
           L.latLng(post.location.latitude, post.location.longitude)
         ],
         routeWhileDragging: true,
+        show: true, // Ensure the directions panel is shown
+        addWaypoints: false, // Disable adding waypoints by clicking on the map
+        draggableWaypoints: false, // Make waypoints non-draggable
+        fitSelectedRoutes: true,
         createMarker: function (i, waypoint, n) {
           if (i === 0) {
             return L.marker(waypoint.latLng, { icon: userLocationIcon });
@@ -230,6 +234,8 @@ function RouteMapDialog({ open, onClose, post }) {
         setDistance(distance.toFixed(2) + ' km');
         // setRoute(routes[0]);
         setRouteCalculating(false); // Hide progress indicator after route calculation
+        // Add close button to the directions panel
+        addCloseButtonToDirectionsPanel();
       });
 
       routingControl.on('routingerror', function() {
@@ -238,6 +244,10 @@ function RouteMapDialog({ open, onClose, post }) {
         open: true,
         message: 'Failed to calculate route. Please try again.',
         severity: 'error'
+      });
+      // Add event listener for when the directions container is created
+      routingControl.on('routesadd', function() {
+        addCloseButtonToDirectionsPanel();
       });
     });
 
@@ -258,6 +268,44 @@ function RouteMapDialog({ open, onClose, post }) {
         };
         routingContainer.appendChild(closeButton);
       }
+    }
+  };
+
+  // Helper function to add close button to directions panel
+  const addCloseButtonToDirectionsPanel = () => {
+    const directionsContainer = document.querySelector('.leaflet-routing-container');
+    
+    if (directionsContainer && !directionsContainer.querySelector('.close-directions-btn')) {
+      const closeButton = document.createElement('div');
+      closeButton.className = 'close-directions-btn';
+      closeButton.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events: none;">
+          <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+        </svg>
+      `;
+      
+      closeButton.style.position = 'absolute';
+      closeButton.style.top = '10px';
+      closeButton.style.right = '10px';
+      closeButton.style.cursor = 'pointer';
+      closeButton.style.zIndex = '1000';
+      closeButton.style.padding = '4px';
+      closeButton.style.backgroundColor = 'rgba(255, 255, 255, 0.7)';
+      closeButton.style.borderRadius = '50%';
+      closeButton.style.display = 'flex';
+      closeButton.style.alignItems = 'center';
+      closeButton.style.justifyContent = 'center';
+      
+      closeButton.onclick = () => {
+        if (routingControlRef.current) {
+          mapRef.current.removeControl(routingControlRef.current);
+          routingControlRef.current = null;
+          setDistance(null);
+        }
+      };
+      
+      directionsContainer.style.position = 'relative';
+      directionsContainer.appendChild(closeButton);
     }
   };
 
