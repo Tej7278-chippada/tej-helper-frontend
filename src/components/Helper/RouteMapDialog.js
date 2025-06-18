@@ -325,6 +325,22 @@ function RouteMapDialog({ open, onClose, post }) {
     }
   };
 
+  const recenterPostLocation = () => {
+    if (mapRef.current && post?.location) {
+      mapRef.current.flyTo([post.location.latitude, post.location.longitude], 15, {
+        duration: 0.5
+      });
+    }
+  };
+
+  const recenterUserLocation = () => {
+    if (mapRef.current && currentLocation) {
+      mapRef.current.flyTo([currentLocation.lat, currentLocation.lng], 15, {
+        duration: 0.5
+      });
+    }
+  };
+
   // if (error) return <Alert severity="error">{error}</Alert>;
   if (!post || !post.location) return <Alert severity="error">Post location data is missing.</Alert>;
 
@@ -358,24 +374,47 @@ function RouteMapDialog({ open, onClose, post }) {
         <Box sx={{ paddingBottom: '5rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
           <Box display="flex" justifyContent="start" sx={{paddingTop: '1rem', marginInline:'4px'}}>
             <LocationOnIcon color='primary'/>
-            <Tooltip title="Post Address" arrow placement="top-start" 
-              enterTouchDelay={0}  // Show tooltip immediately on touch
-              leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
-              disableInteractive // Prevent tooltip from disappearing on accidental touches
+            <Tooltip title="Click to center on post location" arrow placement="top-start">
+              <Typography 
+                variant="body1" 
+                sx={{
+                  marginLeft:'4px', 
+                  color:'grey',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    color: theme.palette.primary.main
+                  }
+                }}
+                onClick={recenterPostLocation}
               >
-              <Typography variant="body1" sx={{marginLeft:'4px', color:'grey' }}>
-              <strong>Post address :</strong> {post.location.address || "Post Address doesn't found..."}
+                <strong>Post address :</strong> {post.location.address || "Post Address doesn't found..."}
                 {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
               </Typography>
             </Tooltip>
           </Box>
+
           {currentAddress && (
-          <Box display="flex" justifyContent="start" mb={1} mt={1} marginInline="4px">
-            <LocationOnIcon sx={{color:'rgba(52, 174, 11, 0.95)'}}/>
-            <Typography variant="body1" sx={{marginLeft:'4px', color:'grey' }}>
-              <strong>Your current address :</strong> {currentAddress || "Fetching location..."}
-            </Typography>
-          </Box>
+            <Box display="flex" justifyContent="start" mb={1} mt={1} marginInline="4px">
+              <LocationOnIcon sx={{color:'rgba(52, 174, 11, 0.95)'}}/>
+              <Tooltip title="Click to center on your location" arrow placement="top-start">
+                <Typography 
+                  variant="body1" 
+                  sx={{
+                    marginLeft:'4px', 
+                    color:'grey',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: theme.palette.success.main
+                    }
+                  }}
+                  onClick={recenterUserLocation}
+                >
+                  <strong>Your current address :</strong> {currentAddress || "Fetching location..."}
+                </Typography>
+              </Tooltip>
+            </Box>
           )}
 
           <Box sx={{ height: isMobile ? '350px' : '400px', padding: '10px' }}>
