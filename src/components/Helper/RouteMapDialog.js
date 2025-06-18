@@ -1,4 +1,4 @@
-// src/components/CommentPopup.js
+// src/components/Helper/RouteMapDialog.js
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Tooltip, Alert, Snackbar } from '@mui/material';
 // import { addComment } from '../../api/api';
@@ -80,6 +80,27 @@ function RouteMapDialog({ open, onClose, post }) {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
   const [currentAddress, setCurrentAddress] = useState('');
 
+  // Automatically fetch location and show route when dialog opens
+  useEffect(() => {
+    if (open) {
+      locateUser();
+    } else {
+      // Clean up when dialog closes
+      if (routingControlRef.current) {
+        routingControlRef.current.remove();
+        routingControlRef.current = null;
+      }
+      setCurrentLocation(null);
+      setDistance(null);
+    }
+  }, [open]);
+
+  // Show route automatically when currentLocation changes
+  useEffect(() => {
+    if (currentLocation && open) {
+      showDistanceAndRoute();
+    }
+  }, [currentLocation, open]);
 
   // Expose removeViaPoint to the window object
   useEffect(() => {
@@ -92,11 +113,15 @@ function RouteMapDialog({ open, onClose, post }) {
   useEffect(() => {
     const mapInstance = mapRef.current; // Capture ref value at the start
     return () => {
-      if (mapInstance) {
-        mapInstance.remove(); // Clean up the map instance
-      }
+      // Remove routing control first
       if (routingControlRef.current) {
         routingControlRef.current.remove(); // Clean up the routing control
+        routingControlRef.current = null;
+      }
+       // Then remove the map
+      if (mapInstance) {
+        mapInstance.remove(); // Clean up the map instance
+        mapInstance = null;
       }
     };
   }, []);
@@ -168,10 +193,13 @@ function RouteMapDialog({ open, onClose, post }) {
   // }, [locateUser]);
 
   const showDistanceAndRoute = () => {
+    if (!mapRef.current || !mapRef.current._leaflet_id || !currentLocation || !post?.location) {
+      return; // Map doesn't exist or is being destroyed
+    }
     if (currentLocation && post && mapRef.current) {
       setRouteCalculating(true); // Show progress indicator
       const map = mapRef.current;
-      if (routingControlRef.current) {
+      if (routingControlRef.current) {   // Remove existing routing control if any
         map.removeControl(routingControlRef.current);
       }
       const routingControl = L.Routing.control({
@@ -203,6 +231,15 @@ function RouteMapDialog({ open, onClose, post }) {
         // setRoute(routes[0]);
         setRouteCalculating(false); // Hide progress indicator after route calculation
       });
+
+      routingControl.on('routingerror', function() {
+      setRouteCalculating(false);
+      setSnackbar({
+        open: true,
+        message: 'Failed to calculate route. Please try again.',
+        severity: 'error'
+      });
+    });
 
 
 
@@ -287,7 +324,13 @@ function RouteMapDialog({ open, onClose, post }) {
           )}
 
           <Box sx={{ height: isMobile ? '350px' : '400px', padding: '10px' }}>
-            <MapContainer
+            <MapContainer  whenCreated={(map) => {
+                            mapRef.current = map;
+                            map.on('unload', () => {
+                              // Clean up references when map is unloaded
+                              mapRef.current = null;
+                            });
+                          }}
               center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]}
               zoom={13}
               style={{ height: '100%', width: '100%', borderRadius: '8px', }}
