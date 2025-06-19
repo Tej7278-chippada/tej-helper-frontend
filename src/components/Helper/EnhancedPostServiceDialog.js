@@ -107,11 +107,12 @@ import {
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
     ? 'rgba(205, 201, 201, 0.15)' 
-    : 'rgba(255, 255, 255, 0.15)',
+    // : 'rgba(255, 255, 255, 0.15)',
+    :'linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)',
   backdropFilter: 'blur(20px)',
   border: darkMode 
     ? '1px solid rgba(255, 255, 255, 0.1)' 
-    : '1px solid rgba(255, 255, 255, 0.2)',
+    : 'null', // '1px solid rgba(255, 255, 255, 0.2)'
   boxShadow: darkMode 
     ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
@@ -256,8 +257,23 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
   //   const [protectLocation, setProtectLocation] = useState(false);
   //   const [fakeAddress, setFakeAddress] = useState('');
   //   const [loadingMedia, setLoadingMedia] = useState(false);
+  const [lastScrollPosition, setLastScrollPosition] = useState(0);
 
 
+
+  // Add this useEffect hook to handle scroll events
+  useEffect(() => {
+    const dialogContent = document.querySelector('.MuiDialogContent-root');
+    if (!dialogContent) return;
+
+    const handleScroll = () => {
+      const currentScrollPosition = dialogContent.scrollTop;
+      setLastScrollPosition(currentScrollPosition);
+    };
+
+    dialogContent.addEventListener('scroll', handleScroll);
+    return () => dialogContent.removeEventListener('scroll', handleScroll);
+  }, [lastScrollPosition]);
 
 
   const resizeImage = (blob, maxSize) => {
@@ -701,10 +717,20 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
 
     const handleNext = () => {
       setActiveStep((prevStep) => prevStep + 1);
+      // Scroll to top when moving to next step
+      const dialogContent = document.querySelector('.MuiDialogContent-root');
+      if (dialogContent) {
+        dialogContent.scrollTo({ top: 0, behavior: 'auto' });
+      }
     };
 
     const handleBack = () => {
       setActiveStep((prevStep) => prevStep - 1);
+      // Scroll to top when going back
+      const dialogContent = document.querySelector('.MuiDialogContent-root');
+      if (dialogContent) {
+        dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     };
 
     const renderLocationStep = () => (
@@ -1705,34 +1731,35 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
         </IconButton>
       </DialogTitle>
 
-      <Box sx={{ px: isMobile ? 1 : 3, pt: 2, pb: 1 }}>
-        <Stepper activeStep={activeStep} alternativeLabel>
-          {steps.map((label) => (
-            <Step key={label}>
-              <StepLabel
-                StepIconProps={{
-                  sx: {
-                    '&.Mui-active': {
-                      color: 'primary.main'
-                    },
-                    '&.Mui-completed': {
-                      color: 'success.main'
-                    }
-                  }
-                }}
-              >
-                <Typography variant="caption" fontWeight={500}>
-                  {label}
-                </Typography>
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-
-      <Divider />
+      
 
       <DialogContent sx={{ px: 2, py: 3, minHeight: '200px' }}>
+        <Box sx={{ px: isMobile ? 1 : 3, pt: 2, pb: 1, mx: '-1rem' }}>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label) => (
+              <Step key={label}>
+                <StepLabel
+                  StepIconProps={{
+                    sx: {
+                      '&.Mui-active': {
+                        color: 'primary.main'
+                      },
+                      '&.Mui-completed': {
+                        color: 'success.main'
+                      }
+                    }
+                  }}
+                >
+                  <Typography variant="caption" fontWeight={500}>
+                    {label}
+                  </Typography>
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+        </Box>
+        <Divider sx={{mb:'2rem', mx: '-1rem'}}/>
+
         {getStepContent(activeStep)}
       </DialogContent>
 
