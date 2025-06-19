@@ -15,6 +15,10 @@ export default function NearPostsNotification({darkMode}) {
   const [socket, setSocket] = useState(null);
   const userId = localStorage.getItem('userId');
   // const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  const [chatNotificationView, setChatNotificationView] = useState({ open: false, message: "", severity: "info" });
+  const [chatNotificationData, setChatNotificationData] = useState(null);
+  const [chatNotificationDataMessage, setChatNotificationDataMessage] = useState(null);
+  const [chatNotificationPath, setChatNotificationPath] = useState(null);
 
   // Add this useEffect for socket connection
   useEffect(() => {
@@ -30,7 +34,7 @@ export default function NearPostsNotification({darkMode}) {
   useEffect(() => {
     if (socket && userId) {
       socket.emit('joinRoom', userId);
-
+      console.log('room joined');
       // Only listen for notifications if they're enabled
       const checkAndListen = async () => {
         try {
@@ -79,13 +83,22 @@ export default function NearPostsNotification({darkMode}) {
         }
       };
 
+      socket.on('chatNotification', (data) => {
+        setChatNotificationData(data);
+        setChatNotificationDataMessage(data.text);
+        setChatNotificationView({ ...chatNotificationView, open: true });
+        setChatNotificationPath((data.postOwnerId === data.receiverId) ? `/chatsOfPost/${data.postId}` : `/chatsOfUser`);
+        console.log('chat message emited', data.text);
+      });
+
       checkAndListen();
 
       return () => {
         socket.off('newNotification');
+        console.log('Room existed');
       };
     }
-  }, [socket, userId, navigate]);
+  }, [socket, userId ]); // , navigate
 
   // const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
@@ -153,6 +166,52 @@ export default function NearPostsNotification({darkMode}) {
           }
         >
           {nearPostDataMessage}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={chatNotificationView.open}
+        autoHideDuration={6000}
+        onClose={() => setChatNotificationView({ ...chatNotificationView, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity="info"
+          variant="filled"
+          sx={{
+            backgroundColor: "rgba(20, 88, 222, 0.54)", //backgroundColor: "rgba(20, 88, 222, 0.54)",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "12px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "300px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "8px",
+                // padding: "3px 8px",
+                // marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+              onClick={() => navigate(chatNotificationPath)}
+            >
+              View
+            </Button>
+          }
+        >
+          {chatNotificationDataMessage}
         </Alert>
       </Snackbar>
       {/* <Snackbar
