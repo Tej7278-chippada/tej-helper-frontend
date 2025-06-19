@@ -100,6 +100,7 @@ function PostService({darkMode, toggleDarkMode}) {
   const [fakeAddress, setFakeAddress] = useState('');
   const [loadingMedia, setLoadingMedia] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
+  const [validationErrors, setValidationErrors] = useState({});
 
   
   // Fetch images from Unsplash based on title
@@ -248,6 +249,7 @@ function PostService({darkMode, toggleDarkMode}) {
         setNoImagesFound(false); // Reset no images found state
         setOpenDialog(true);
         setActiveStep(0);
+        setValidationErrors({});
     };
     
     const handleCloseDialog = () => {
@@ -266,6 +268,7 @@ function PostService({darkMode, toggleDarkMode}) {
         setProtectLocation(false);
         setFakeAddress('');
         setActiveStep(0);
+        setValidationErrors({});
     };
 
     const openPostDetail = (post) => {
@@ -580,13 +583,13 @@ function PostService({darkMode, toggleDarkMode}) {
         </Box>
       )}
       </Box>
-        <EnhancedPostServiceDialog openDialog={openDialog} handleCloseDialog={handleCloseDialog} setSnackbar={setSnackbar} submitError={submitError} theme={theme}
+        <EnhancedPostServiceDialog openDialog={openDialog} handleCloseDialog={handleCloseDialog} setSnackbar={setSnackbar} submitError={submitError} setSubmitError={setSubmitError} theme={theme}
          isMobile={isMobile} fetchPostsData={fetchPostsData} fetchUnsplashImages={fetchUnsplashImages} noImagesFound={noImagesFound} loading={loading} setLoading={setLoading}
          newMedia={newMedia} setNewMedia={setNewMedia} mediaError={mediaError} setMediaError={setMediaError} editingProduct={editingProduct} existingMedia={existingMedia} setExistingMedia={setExistingMedia}
          formData={formData} setFormData={setFormData} generatedImages={generatedImages} loadingGeneration={loadingGeneration} loadingMedia={loadingMedia}
          selectedDate={selectedDate} setSelectedDate={setSelectedDate} timeFrom={timeFrom} setTimeFrom={setTimeFrom} timeTo={timeTo} setTimeTo={setTimeTo}
          protectLocation={protectLocation} setProtectLocation={setProtectLocation} fakeAddress={fakeAddress} setFakeAddress={setFakeAddress}
-         activeStep={activeStep} setActiveStep={setActiveStep} darkMode={darkMode}
+         activeStep={activeStep} setActiveStep={setActiveStep} darkMode={darkMode} setValidationErrors={setValidationErrors} validationErrors={validationErrors}
         />
 
         {/* Snackbar for notifications */}

@@ -29,7 +29,8 @@ import {
   Divider,
   Avatar,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  FormHelperText
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -165,7 +166,8 @@ L.Icon.Default.mergeOptions({
 const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMobile, fetchPostsData, generatedImages, loadingGeneration,
   noImagesFound, newMedia, setNewMedia, editingProduct, formData, setFormData, selectedDate, setSelectedDate, mediaError, setMediaError,
   timeFrom, setTimeFrom, timeTo, setTimeTo, existingMedia, setExistingMedia, fetchUnsplashImages, loadingMedia, loading, setLoading,
-  setSnackbar, submitError, protectLocation, setProtectLocation, fakeAddress, setFakeAddress, activeStep, setActiveStep, darkMode }) => {
+  setSnackbar, setSubmitError, submitError, protectLocation, setProtectLocation, fakeAddress, setFakeAddress, activeStep, setActiveStep,
+  darkMode, validationErrors, setValidationErrors, }) => {
   //   const [openDialog, setOpenDialog] = useState(false);
   // const [activeStep, setActiveStep] = useState(0);
   //   const [editingProduct, setEditingProduct] = useState(false);
@@ -258,8 +260,19 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
   //   const [fakeAddress, setFakeAddress] = useState('');
   //   const [loadingMedia, setLoadingMedia] = useState(false);
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
+  // const [validationErrors, setValidationErrors] = useState({});
+  const [stepsWithErrors, setStepsWithErrors] = useState([]);
 
 
+  // useEffect(() => {
+  //   if (submitError) {
+  //     const timer = setTimeout(() => {
+  //       setSubmitError(null);
+  //     }, 5000);
+
+  //     return () => clearTimeout(timer); // cleanup on unmount or error change
+  //   }
+  // }, [submitError]);
 
   // Add this useEffect hook to handle scroll events
   useEffect(() => {
@@ -479,6 +492,74 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
   //   fetchFakeAddress(finalLocation.latitude, finalLocation.longitude);
   // };
 
+  // const validateForm = () => {
+  //   const errors = {};
+  //   const errorSteps = new Set();
+
+  //   // Step 0: Location validation
+  //   if (!currentAddress && !fakeAddress) {
+  //     errors.location = 'Location is required';
+  //     errorSteps.add(0);
+  //   }
+
+  //   // Step 1: Media validation
+  //   if (!formData.title) {
+  //     errors.title = 'Title is required';
+  //     errorSteps.add(1);
+  //   }
+  //   if (newMedia.length === 0 && existingMedia.filter(m => !m.remove).length === 0) {
+  //     errors.media = 'At least one image is required';
+  //     errorSteps.add(1);
+  //   }
+
+  //   // Step 2: Service Details validation
+  //   if (!formData.categories) {
+  //     errors.categories = 'Category is required';
+  //     errorSteps.add(2);
+  //   }
+  //   if (!formData.gender) {
+  //     errors.gender = 'Preferred gender is required';
+  //     errorSteps.add(2);
+  //   }
+  //   if (!formData.peopleCount) {
+  //     errors.peopleCount = 'People count is required';
+  //     errorSteps.add(2);
+  //   }
+  //   if (!formData.serviceDays) {
+  //     errors.serviceDays = 'Service days is required';
+  //     errorSteps.add(2);
+  //   }
+  //   if (formData.categories !== 'UnPaid' && !formData.price) {
+  //     errors.price = 'Price is required for paid services';
+  //     errorSteps.add(2);
+  //   }
+  //   if (!selectedDate) {
+  //     errors.serviceDate = 'Service date is required';
+  //     errorSteps.add(2);
+  //   }
+  //   if (!timeFrom || !timeTo) {
+  //     errors.serviceTime = 'Service time range is required';
+  //     errorSteps.add(2);
+  //   }
+
+  //   // Step 3: Description validation
+    
+  //   if (!formData.description) {
+  //     errors.description = 'Description is required';
+  //     errorSteps.add(3);
+  //   }
+
+  //   setValidationErrors(errors);
+  //   setStepsWithErrors(Array.from(errorSteps));
+  //   return Object.keys(errors).length === 0;
+  // };
+
+  // Create a helper function to check if step has errors
+  const stepHasError = (stepIndex) => {
+    return stepsWithErrors.includes(stepIndex);
+  };
+
+
   const toggleLocationPrivacy = (e) => {
     const isChecked = e.target.checked;
     setProtectLocation(isChecked);
@@ -550,6 +631,22 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // // Validate before submitting
+    // if (!validateForm()) {
+    //   setSnackbar({ open: true, message: 'Please fill all required fields', severity: 'error' });
+    //   return;
+    // }
+    // Clear errors for the current step when moving forward
+    clearStepErrors(activeStep);
+    // Validate current step before proceeding
+    if (!validateCurrentStep()) {
+      const dialogContent = document.querySelector('.MuiDialogContent-root');
+      if (dialogContent) {
+        dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      setSnackbar({ open: true, message: 'Please fill all required fields', severity: 'error' });
+      return;
+    }
     setLoading(true); // Show loading state
     const data = new FormData();
 
@@ -716,6 +813,16 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
 
 
     const handleNext = () => {
+      // Clear errors for the current step when moving forward
+      clearStepErrors(activeStep);
+      // Validate current step before proceeding
+      if (!validateCurrentStep()) {
+        const dialogContent = document.querySelector('.MuiDialogContent-root');
+        if (dialogContent) {
+          dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      }
       setActiveStep((prevStep) => prevStep + 1);
       // Scroll to top when moving to next step
       const dialogContent = document.querySelector('.MuiDialogContent-root');
@@ -724,7 +831,116 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
       }
     };
 
+    // Add these helper functions
+    const validateCurrentStep = () => {
+      const errors = {};
+      const errorSteps = new Set(stepsWithErrors);
+
+      switch (activeStep) {
+        case 0: // Location step
+          if (!currentAddress && !fakeAddress) {
+            errors.location = 'Location is required';
+            errorSteps.add(0);
+          } else {
+            errorSteps.delete(0);
+          }
+          break;
+          
+        case 1: // Media step
+          if (!formData.title) {
+            errors.title = 'Post Title is required';
+            errorSteps.add(1);
+          } else {
+            errorSteps.delete(1);
+          }
+          if (newMedia.length === 0 && existingMedia.filter(m => !m.remove).length === 0) {
+            errors.media = 'At least one image is required';
+            errorSteps.add(1);
+          } else {
+            errorSteps.delete(1);
+          }
+          break;
+          
+        case 2: // Service Details step
+          if (!formData.categories) {
+            errors.categories = 'Category is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          if (formData.categories !== 'UnPaid' && !formData.price) {
+            errors.price = 'Price is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          if (!formData.gender) {
+            errors.gender = 'Preferred gender is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          if (!formData.peopleCount) {
+            errors.peopleCount = 'People count is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          if (!formData.serviceDays) {
+            errors.serviceDays = 'Service Days is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          // Add other field validations for step 2...
+          break;
+          
+        case 3: // Description step
+          
+          if (!formData.description) {
+            errors.description = 'Description is required';
+            errorSteps.add(3);
+          } else {
+            errorSteps.delete(3);
+          }
+          break;
+      }
+
+      setValidationErrors(prev => ({ ...prev, ...errors }));
+      setStepsWithErrors(Array.from(errorSteps));
+      
+      return Object.keys(errors).length === 0;
+    };
+
+    const clearStepErrors = (stepIndex) => {
+      const errorsToRemove = [];
+      
+      switch (stepIndex) {
+        case 0:
+          errorsToRemove.push('location');
+          break;
+        case 1:
+          errorsToRemove.push('title','media');
+          break;
+        case 2:
+          errorsToRemove.push('categories', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime');
+          break;
+        case 3:
+          errorsToRemove.push( 'description');
+          break;
+      }
+
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        errorsToRemove.forEach(error => delete newErrors[error]);
+        return newErrors;
+      });
+
+      setStepsWithErrors(prev => prev.filter(step => step !== stepIndex));
+    };
+
     const handleBack = () => {
+      clearStepErrors(activeStep);
       setActiveStep((prevStep) => prevStep - 1);
       // Scroll to top when going back
       const dialogContent = document.querySelector('.MuiDialogContent-root');
@@ -736,6 +952,11 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
     const renderLocationStep = () => (
       <Fade in timeout={300}>
         <Box>
+          {validationErrors.location && (
+            <Alert severity="error" sx={{ my: 1 }}>
+              {validationErrors.location}
+            </Alert>
+          )}
           {/* Map Placeholder */}
           <Card elevation={0} sx={{ borderRadius: 3, height: 360, bgcolor: 'grey.100', mb: 1 }}>
             {/* <Box 
@@ -1005,11 +1226,18 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
               <TextField
                 label="Post Title"
                 fullWidth
+                error={!!validationErrors.title}
+                helperText={validationErrors.title}
                 value={formData.title} required
                 onChange={(e) => {
                   const maxLength = 100; // Set character limit
                   if (e.target.value.length <= maxLength) {
                     setFormData({ ...formData, title: e.target.value });
+                    // Clear error when typing
+                    if (validationErrors.title) {
+                      setValidationErrors(prev => ({ ...prev, title: undefined }));
+                      setStepsWithErrors(prev => prev.filter(step => step !== 1));
+                    }
                   }
                 }}
                 inputProps={{ maxLength: 100 }} // Ensures no more than 100 characters can be typed
@@ -1150,6 +1378,12 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
             </CardContent>
           </Card>
 
+          {validationErrors.media && (
+            <Alert severity="error" sx={{ my: 1 }}>
+              {validationErrors.media}
+            </Alert>
+          )}
+
           {/* Photo Upload Section */}
           <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
             <CardContent>
@@ -1267,6 +1501,13 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
     const renderServiceDetailsStep = () => (
       <Fade in timeout={300}>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          {/* {Object.keys(validationErrors).some(key => 
+            ['categories', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime'].includes(key)
+          ) && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              Please fill all required fields marked with *
+            </Alert>
+          )} */}
           {/* Service Category */}
           <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
             <CardContent>
@@ -1285,7 +1526,19 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                   <Select
                     value={formData.categories}
                     required
-                    onChange={(e) => setFormData({ ...formData, categories: e.target.value })}
+                    error={!!validationErrors.categories}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      // Set form data
+                      setFormData({ ...formData, categories: value });
+
+                      // Clear validation error if any
+                      if (validationErrors.categories) {
+                        setValidationErrors(prev => ({ ...prev, categories: undefined }));
+                        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                      }
+                    }}
                     label="Category"
                     sx={{ borderRadius: 2 }}
                   >
@@ -1320,6 +1573,9 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                       </Box>
                     </MenuItem> */}
                   </Select>
+                  {validationErrors.categories && (
+                    <FormHelperText error>{validationErrors.categories}</FormHelperText>
+                  )}
                 </FormControl>
 
                 {editingProduct && (
@@ -1383,6 +1639,8 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                     label="Service Price (₹)"
                     type="number"
                     fullWidth
+                    error={!!validationErrors.price}
+                    helperText={validationErrors.price}
                     value={formData.price}
                     onChange={(e) => {
                       let value = e.target.value;
@@ -1398,6 +1656,11 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                           setFormData({ ...formData, price: value });
                         }
                       }
+                      // Clear error when typing
+                      if (validationErrors.price) {
+                        setValidationErrors(prev => ({ ...prev, price: undefined }));
+                        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                      }
                     }}
                     required
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
@@ -1411,7 +1674,19 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                   <InputLabel>Preferred gender for this position</InputLabel>
                   <Select
                     value={formData.gender}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    error={!!validationErrors.gender}
+                    onChange={(e) => {
+                      const value = e.target.value;
+
+                      // Set form data
+                      setFormData({ ...formData, gender: value });
+
+                      // Clear validation error if any
+                      if (validationErrors.gender) {
+                        setValidationErrors(prev => ({ ...prev, gender: undefined }));
+                        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                      }
+                    }}
                     label="Preferred gender for this position"
                     sx={{ borderRadius: 2 }} required
                   >
@@ -1440,6 +1715,9 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                       </Box>
                     </MenuItem>
                   </Select>
+                  {validationErrors.gender && (
+                    <FormHelperText error>{validationErrors.gender}</FormHelperText>
+                  )}
                 </FormControl>
               </Box>
 
@@ -1448,6 +1726,8 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                   label="People Count" required
                   type="number"
                   fullWidth
+                  error={!!validationErrors.peopleCount}
+                  helperText={validationErrors.peopleCount}
                   value={formData.peopleCount}
                   onChange={(e) => {
                     let value = e.target.value;
@@ -1459,6 +1739,13 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                     if (value === '' || (Number(value) <= 10000)) {
                       setFormData({ ...formData, peopleCount: value });
                     }
+
+                    // Clear error when typing
+                    if (validationErrors.peopleCount) {
+                      setValidationErrors(prev => ({ ...prev, peopleCount: undefined }));
+                      setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                    }
+
                   }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   InputProps={{
@@ -1470,6 +1757,8 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                   label="Service Days"
                   type="number"
                   fullWidth required
+                  error={!!validationErrors.serviceDays}
+                  helperText={validationErrors.serviceDays}
                   value={formData.serviceDays}
                   onChange={(e) => {
                     let value = e.target.value;
@@ -1480,6 +1769,11 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                     // Convert to a number if it's not empty
                     if (value === '' || (Number(value) <= 365)) {
                       setFormData({ ...formData, serviceDays: value });
+                    }
+                    // Clear error when typing
+                    if (validationErrors.serviceDays) {
+                      setValidationErrors(prev => ({ ...prev, serviceDays: undefined }));
+                      setStepsWithErrors(prev => prev.filter(step => step !== 2));
                     }
                   }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
@@ -1585,12 +1879,19 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                 multiline
                 rows={4}
                 fullWidth
+                error={!!validationErrors.description}
+                helperText={validationErrors.description}
                 label="Describe your service in detail"
                 value={formData.description}
                 onChange={(e) => {
                   const maxLength = 1000; // Set character limit
                   if (e.target.value.length <= maxLength) {
                     setFormData({ ...formData, description: e.target.value });
+                  }
+                  // Clear error when typing
+                  if (validationErrors.description) {
+                    setValidationErrors(prev => ({ ...prev, description: undefined }));
+                    setStepsWithErrors(prev => prev.filter(step => step !== 3));
                   }
                 }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
@@ -1736,8 +2037,8 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
       <DialogContent sx={{ px: 2, py: 3, minHeight: '200px' }}>
         <Box sx={{ px: isMobile ? 1 : 3, pt: 2, pb: 1, mx: '-1rem' }}>
           <Stepper activeStep={activeStep} alternativeLabel>
-            {steps.map((label) => (
-              <Step key={label}>
+            {steps.map((label, index) => (
+              <Step key={label} completed={activeStep > index} error={stepHasError(index)}>
                 <StepLabel
                   StepIconProps={{
                     sx: {
@@ -1745,7 +2046,10 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
                         color: 'primary.main'
                       },
                       '&.Mui-completed': {
-                        color: 'success.main'
+                        color: stepHasError(index) ? 'error.main' : 'success.main'
+                      },
+                      '&.Mui-error': {
+                        color: 'error.main'
                       }
                     }
                   }}
