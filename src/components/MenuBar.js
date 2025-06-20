@@ -14,7 +14,8 @@ const navItems = [
     icon: <HomeRoundedIcon />,
     path: `/`,
     activeColor: '#4CAF50',
-    description: 'Go to home page'
+    description: 'Go to home page',
+    bgColor: 'rgba(76, 175, 80, 0.1)'
   },
   {
     label: 'My Posts',
@@ -22,6 +23,7 @@ const navItems = [
     path: '/userposts',
     activeColor: '#2196F3',
     description: 'View your posts',
+    bgColor:'rgba(33, 150, 243, 0.1)' ,
     badgeCount: 0 // Can be dynamically updated
   },
   {
@@ -30,6 +32,7 @@ const navItems = [
     path: '/chatsOfUser',
     activeColor: '#FF5722',
     description: 'Open chat messages',
+    bgColor: 'rgba(255, 87, 34, 0.1)',
     badgeCount: 0 // For unread messages
   },
   {
@@ -37,7 +40,8 @@ const navItems = [
     icon: <FavoriteIcon />,
     path: '/wishlist',
     activeColor: '#E91E63',
-    description: 'View saved items'
+    description: 'View saved posts',
+    bgColor: 'rgba(233, 30, 99, 0.1)'
   },
 ];
 
@@ -59,33 +63,33 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  // const [activeIndex, setActiveIndex] = useState(0);
+  // const [isAnimating, setIsAnimating] = useState(false);
 
   // Update active index based on current path
-  useEffect(() => {
-    const currentIndex = navItems.findIndex(item => item.path === location.pathname);
-    if (currentIndex !== -1) {
-      setActiveIndex(currentIndex);
-    }
-  }, [location.pathname]);
+  // useEffect(() => {
+  //   const currentIndex = navItems.findIndex(item => item.path === location.pathname);
+  //   if (currentIndex !== -1) {
+  //     setActiveIndex(currentIndex);
+  //   }
+  // }, [location.pathname]);
 
   // Handle navigation with animation
   const handleNavigation = (path, index) => {
     if (path === location.pathname) return; // Don't navigate to same page
 
-    setIsAnimating(true);
-    setActiveIndex(index);
+    // setIsAnimating(true);
+    // setActiveIndex(index);
 
     // Add haptic feedback for mobile devices
     // if (navigator.vibrate) {
     //   navigator.vibrate(30);
     // }
 
-    setTimeout(() => {
+    // setTimeout(() => {
       navigate(path);
-      setIsAnimating(false);
-    }, 150);
+    //   setIsAnimating(false);
+    // }, 150);
   };
 
   if (!visible || !isMobile) return null;
@@ -100,7 +104,7 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
         zIndex: 1200, ...getGlassmorphismStyle(theme, darkMode),
         // background: 'rgba(255, 255, 255, 0.85)',
         // backdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+        // borderTop: '1px solid rgba(255, 255, 255, 0.2)',
         borderTopLeftRadius: '20px',
         borderTopRightRadius: '20px',
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -134,7 +138,7 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
           boxShadow: `0 2px 8px ${navItems[activeIndex]?.activeColor || theme.palette.primary.main}40`,
         }}
       /> */}
-      <BottomNavigation showLabels={!isMobile}
+      <BottomNavigation showLabels={isMobile}
         value={location.pathname}
         sx={{
           background: 'transparent',
@@ -149,12 +153,12 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
             minWidth: isMobile ? '60px' : '80px',
             position: 'relative',
             '&:hover': {
-              backgroundColor: 'rgba(255, 255, 255, 0.8)',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
               transform: 'translateY(-2px)',
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             },
             '&.Mui-selected': {
-              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
               transform: 'translateY(-1px)',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
               '& .MuiBottomNavigationAction-icon': {
@@ -261,8 +265,9 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
                 value={item.path}
                 onClick={() => handleNavigation(item.path, index)}
                 sx={{
-                  opacity: isAnimating && index !== activeIndex ? 0.5 : 1,
-                  pointerEvents: isAnimating ? 'none' : 'auto',
+                  // opacity: isAnimating && index !== activeIndex ? 0.5 : 1,
+                  // pointerEvents: isAnimating ? 'none' : 'auto',
+                  // background: isActive ? ( item.bgColor|| theme.palette.primary.main) : 'null',
                 }}
               />
             </Tooltip>
@@ -270,7 +275,7 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
         })}
       </BottomNavigation>
       {/* Decorative elements */}
-      <Box
+      {/* <Box
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -282,7 +287,7 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
           borderRadius: '2px 2px 0 0',
           opacity: 0.6,
         }}
-      />
+      /> */}
     </Paper>
   );
 };
