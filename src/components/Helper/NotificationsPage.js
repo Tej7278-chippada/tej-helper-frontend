@@ -352,14 +352,14 @@ function NotificationsPage({darkMode, toggleDarkMode}) {
                           },
                           borderLeft: !notification.isRead 
                             ? `4px solid ${theme.palette.primary.main}`
-                            : '4px solid transparent',
+                            : 'null', // 4px solid transparent
                           transition: 'border-left 0.3s ease'
                       }}
                     >
                       <ListItemText
                         primary={notification.message}
                         secondary={new Date(notification.createdAt).toLocaleString()}
-                        sx={{ color: !notification.isRead ? 'black' : 'text.secondary' }}
+                        sx={{ color: darkMode ? !notification.isRead ? '#ffffff' : 'text.secondary' : !notification.isRead ? 'black' : 'text.secondary' }}
                       />
                       {loadingView === notification._id ? (
                         <CircularProgress size={20} />

@@ -7,6 +7,7 @@ import API from '../api/api';
 import MarkUnreadChatAltRoundedIcon from '@mui/icons-material/MarkUnreadChatAltRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import EnhancedChatSnackbar from './EnhancedChatSnackbar';
 
 
 export default function NearPostsNotification({darkMode}) {
@@ -19,8 +20,7 @@ export default function NearPostsNotification({darkMode}) {
   const userId = localStorage.getItem('userId');
   // const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [chatNotificationView, setChatNotificationView] = useState({ open: false, message: "", severity: "null" });
-  const [chatNotificationData, setChatNotificationData] = useState(null);
-  const [chatNotificationDataMessage, setChatNotificationDataMessage] = useState(null);
+  const [chatNotificationData, setChatNotificationData] = useState({});
   const [chatNotificationPath, setChatNotificationPath] = useState(null);
 
   // Add this useEffect for socket connection
@@ -87,17 +87,17 @@ export default function NearPostsNotification({darkMode}) {
       };
 
       socket.on('chatNotification', (data) => {
-        setChatNotificationData(data.senderName);
-        setChatNotificationDataMessage(data.text);
+        setChatNotificationData(data);
         setChatNotificationView({ ...chatNotificationView, open: true });
         setChatNotificationPath((data.postOwnerId === data.receiverId) ? `/chatsOfPost/${data.postId}` : `/chatsOfUser`);
-        console.log('chat message emited', data.text);
+        // console.log('chat message emited', data.text);
       });
 
       checkAndListen();
 
       return () => {
         socket.off('newNotification');
+        socket.off('chatNotification');
         console.log('Room existed');
       };
     }
@@ -171,111 +171,15 @@ export default function NearPostsNotification({darkMode}) {
           {nearPostDataMessage}
         </Alert>
       </Snackbar>
-      <Snackbar
-        open={chatNotificationView.open}
-        autoHideDuration={6000}
-        onClose={() => setChatNotificationView({ ...chatNotificationView, open: false })}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        TransitionComponent={Fade} // Smoother transition
-        sx={{
-          '& .MuiSnackbar-root': {
-            top: '80px !important', // Better positioning
-          }
-        }}
-      >
-        <Alert
-          severity="info" // Changed from "null" to "info" for better semantics
-          variant="filled"
-          iconMapping={{
-            info: <MarkUnreadChatAltRoundedIcon fontSize="small" /> // Custom icon
-          }}
-          sx={{
-            backgroundColor: "rgba(20, 88, 222, 0.9)", // More opaque for better readability
-            color: "#fff",
-            borderRadius: "12px", // Slightly larger radius
-            fontSize: "14px", // Slightly larger font
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            maxWidth: "350px", // Slightly wider
-            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.25)", // Deeper shadow
-            backdropFilter: "blur(4px)", // Frosted glass effect
-            border: "1px solid rgba(255, 255, 255, 0.1)", // Subtle border
-            '& .MuiAlert-icon': {
-              alignItems: 'center',
-              paddingRight: '8px',
-            },
-            '& .MuiAlert-message': {
-              padding: '4px 0',
-              flexGrow: 1,
-            }
-          }}
-          action={
-            <Box display="flex" alignItems="center" gap={1}>
-              <IconButton
-                color="inherit"
-                size="small"
-                sx={{
-                  color: "rgba(255, 255, 255, 0.8)",
-                  '&:hover': {
-                    color: "#fff",
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  },
-                }}
-                onClick={() => setChatNotificationView({ ...chatNotificationView, open: false })}
-              >
-                <CloseRoundedIcon fontSize="small" />
-              </IconButton>
-              <Button
-                color="inherit"
-                size="small"
-                variant="outlined"
-                sx={{
-                  color: "#ffd700",
-                  fontWeight: "600",
-                  textTransform: "none",
-                  border: "1px solid rgba(255, 215, 0, 0.7)",
-                  borderRadius: "8px",
-                  padding: '4px 12px',
-                  fontSize: '13px',
-                  '&:hover': {
-                    backgroundColor: "rgba(255, 215, 0, 0.15)",
-                    border: "1px solid rgba(255, 215, 0, 0.9)",
-                  },
-                }}
-                onClick={() => navigate(chatNotificationPath)}
-                endIcon={<ArrowForwardIosRoundedIcon fontSize="small" />}
-              >
-                View
-              </Button>
-            </Box>
-          }
-        >
-          <Box 
-            display="flex" 
-            flexDirection="column"
-            sx={{
-              lineHeight: '1.4',
-            }}
-          >
-            <Box fontWeight="600" fontSize="15px">
-              New Message
-            </Box>
-            <Box display="flex" alignItems="center" gap={1}>
-              <Box component="span" fontWeight="500">
-                {chatNotificationData}
-              </Box>
-              <Box component="span" sx={{ opacity: 0.7 }}>
-                {/* {chatNotificationDataMessage.length > 30 
-                  ? `${chatNotificationDataMessage.substring(0, 30)}...`
-                  :  */}
-                  {chatNotificationDataMessage}
-                  
-              </Box>
-            </Box>
-          </Box>
-        </Alert>
-      </Snackbar>
+      
+      <EnhancedChatSnackbar
+        chatNotificationView={chatNotificationView}
+        setChatNotificationView={setChatNotificationView}
+        chatNotificationData={chatNotificationData}
+        chatNotificationPath={chatNotificationPath}
+        navigate={navigate}
+        darkMode={darkMode}
+      />
       {/* <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

@@ -51,8 +51,8 @@
 }
 
 .dark-mode .MuiPaper-root { 
-  background-color: #1e1e1e !important;
-  /* background: linear-gradient(135deg, #121212d7 0%, #1e1e1eba 100%); */
+  /* background-color: #1e1e1e !important; */
+  background: linear-gradient(135deg, #121212d7 0%, #1e1e1eba 100%);
 }
 
 body {
