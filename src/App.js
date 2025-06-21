@@ -20,6 +20,8 @@ import NotFound from './components/NotFound'; // Import 404 Page
 import NotificationsPage from './components/Helper/NotificationsPage';
 import NearPostsNotification from './components/Helper/NearPostsNotification';
 import HelperHome from './components/Helper/HelperHome';
+import { fetchUnreadNotificationsCount } from './components/api/api';
+import { io } from 'socket.io-client';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -186,6 +188,12 @@ const FloatingBackgroundBalls = ({ darkMode }) => {
 
 
 function App() {
+  const [socket, setSocket] = useState(null);
+  const username = localStorage.getItem('tokenUsername');
+  const [unreadCount, setUnreadCount] = useState(0);
+  const userId = localStorage.getItem('userId');
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  
   const [darkMode, setDarkMode] = useState(() => {
     const savedMode = localStorage.getItem('darkMode');
     return savedMode ? JSON.parse(savedMode) : false;
@@ -219,6 +227,73 @@ function App() {
       document.documentElement.classList.add('dark-mode');
     }
   }, [darkMode]);
+
+  // Fetch initial notification count
+  useEffect(() => {
+    const fetchInitialCount = async () => {
+      if (username) {
+        try {
+          const response = await fetchUnreadNotificationsCount();
+          const unread = response.data.count;
+          setUnreadCount(unread);
+          console.log('unreadcount fetched');
+        } catch (error) {
+          console.error('Error fetching notifications:', error);
+        }
+      }
+    };
+
+    fetchInitialCount();
+  }, [username]);
+
+  // Initialize socket connection
+  useEffect(() => {
+    if (userId) {
+      const newSocket = io(process.env.REACT_APP_API_URL);
+      setSocket(newSocket);
+
+      // Join user's notification room
+      newSocket.emit('joinNotificationsRoom', userId);
+      console.log('notifications room');
+      return () => {
+        newSocket.disconnect();
+      };
+    }
+  }, [userId]);
+
+   // Listen for notification updates
+  useEffect(() => {
+    if (socket) {
+      socket.on('notificationCountUpdate', (data) => {
+        if (data.userId === userId) {
+          // Set animation flag when new notification arrives
+          setShouldAnimate(true);
+          setUnreadCount(data.unreadCount);
+          // Remove animation after the duration (1.5s in this case)
+          const timer = setTimeout(() => {
+            setShouldAnimate(false);
+          }, 1500);
+          
+          return () => clearTimeout(timer);
+
+        }
+      });
+
+      // socket.on('newNotification', () => {
+      //   // Increment count when new notification arrives
+      //   setUnreadCount(prev => prev + 1);
+      //   console.log('count increased');
+      // });
+    }
+
+    return () => {
+      if (socket) {
+        socket.off('notificationCountUpdate');
+        socket.off('newNotification');
+      }
+    };
+  }, [socket, userId]);
+ 
   return (
     <ThemeProvider theme={theme}>
       <FloatingBackgroundBalls darkMode={darkMode}/>
@@ -229,51 +304,51 @@ function App() {
           <Route path="/register" element={<Register darkMode={darkMode} />} />
           <Route path="/" element={
             <PrivateRoute>
-              <Helper darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <Helper darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/userPosts" element={
             <PrivateRoute>
-              <PostService darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <PostService darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/forgot-password" element={<ForgotPassword darkMode={darkMode} />} />
           <Route path="/user/:id" element={
             <PrivateRoute>
-              <UserProfile darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <UserProfile darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>}
           />
-          <Route path="/post/:id" element={<PostDetailsById darkMode={darkMode} toggleDarkMode={toggleDarkMode} />} />
+          <Route path="/post/:id" element={<PostDetailsById darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>} />
           <Route path="/wishlist" element={
             <PrivateRoute>
-              <WishList darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <WishList darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/chatsOfPost/:postId" element={
             <PrivateRoute>
-              <ChatsOfPosts darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <ChatsOfPosts darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/chat/:chatId" element={
             <PrivateRoute>
-              <ChatHistoryPage darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <ChatHistoryPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           {/* 404 Not Found Page */}
           <Route path="*" element={<NotFound />} />
           <Route path="/notifications" element={
             <PrivateRoute>
-              <NotificationsPage darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <NotificationsPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/chatsOfUser" element={
             <PrivateRoute>
-              <ChatsOfUser darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+              <ChatsOfUser darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/helperHome" element={
             <PrivateRoute>
-              <HelperHome darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+              <HelperHome darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
         </Routes>

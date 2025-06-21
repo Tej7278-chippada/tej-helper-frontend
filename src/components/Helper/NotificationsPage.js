@@ -47,7 +47,7 @@ const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-function NotificationsPage({darkMode, toggleDarkMode}) {
+function NotificationsPage({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -270,7 +270,7 @@ function NotificationsPage({darkMode, toggleDarkMode}) {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box sx={{ p: isMobile ? '6px' : '10px', maxWidth: '800px', mx: 'auto' }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
           <Typography variant={isMobile ? 'h6' : 'h6'} fontWeight={600} sx={{background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', WebkitBackgroundClip: 'text',

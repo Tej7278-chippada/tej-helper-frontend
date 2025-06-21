@@ -44,7 +44,7 @@ const CustomTooltip = styled(({ className, ...props }) => (
 }));
 
 
-function PostDetailsById({ onClose, user, darkMode, toggleDarkMode }) {
+function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount, shouldAnimate }) {
   const [selectedImage, setSelectedImage] = useState(null);
   // const [products, setProducts] = useState([]);
   // const [selectedProduct, setSelectedProduct] = useState(null);
@@ -453,7 +453,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode }) {
   // }
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box>
         {loading || !post ?
           <Box sx={{margin: '8px' }}>

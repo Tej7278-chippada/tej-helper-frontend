@@ -57,7 +57,7 @@ const DEFAULT_FILTERS = {
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-const Helper = ({ darkMode, toggleDarkMode})=> {
+const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
   // const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState([]);
@@ -601,7 +601,7 @@ const Helper = ({ darkMode, toggleDarkMode})=> {
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',

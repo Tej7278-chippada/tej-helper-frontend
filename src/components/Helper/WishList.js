@@ -19,7 +19,7 @@ import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import WorkIcon from '@mui/icons-material/Work';
 // import EmptyStateIcon from '@mui/icons-material/BookmarkBorder';
 
-const WishList = ({darkMode, toggleDarkMode}) => {
+const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
   // const [error, setError] = useState(null);
@@ -77,7 +77,7 @@ const WishList = ({darkMode, toggleDarkMode}) => {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box p={'0px'} sx={{ margin: '0rem' }}>
         {/* <Typography variant="h6" align="left" mx={isMobile ? "10px" : "16px"} marginTop="6px" gutterBottom>
           Wishlisted Posts

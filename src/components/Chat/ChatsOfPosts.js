@@ -15,7 +15,7 @@ import { format } from 'date-fns';
 import { io } from 'socket.io-client';
 
 
-const ChatsOfPosts = ({darkMode, toggleDarkMode}) => {
+const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const tokenUsername = localStorage.getItem('tokenUsername');
   const navigate = useNavigate();
   const { postId } = useParams();
@@ -141,7 +141,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode}) => {
   };
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box mt={isMobile ? '2px' : '4px'} mb={isMobile ? '4px' : '8px'}>
 
         <Box

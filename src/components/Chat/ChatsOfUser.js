@@ -91,7 +91,7 @@ const SearchTextField = styled(TextField)(({ theme, expanded }) => ({
 //   border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
 // }));
 
-const ChatsOfUser = ({darkMode, toggleDarkMode}) => {
+const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const tokenUsername = localStorage.getItem('tokenUsername');
   const navigate = useNavigate();
   const theme = useTheme();
@@ -269,7 +269,7 @@ const ChatsOfUser = ({darkMode, toggleDarkMode}) => {
   const totalUnreadCount = chats.reduce((sum, chat) => sum + chat.unreadMessagesCount, 0);
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box mt={isMobile ? '2px' : '4px'} mb={isMobile ? '4px' : '8px'} sx={{ maxWidth: '800px', mx: 'auto'}}>
         {/* <Box
           display="flex"

@@ -49,7 +49,7 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-const Header = ({ username , toggleDarkMode, darkMode}) => {
+const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimate}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = useState(null);
@@ -59,10 +59,10 @@ const Header = ({ username , toggleDarkMode, darkMode}) => {
   const loggedUserData = userData();
   const userId = (loggedUserData?.userId || '');
   const userProfilePic = localStorage.getItem('tokenProfilePic');
-  const [unreadCount, setUnreadCount] = useState(0);
+  // const [unreadCount, setUnreadCount] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [socket, setSocket] = useState(null);
+  // const [socket, setSocket] = useState(null);
   // PWA Install states
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
@@ -225,43 +225,44 @@ const Header = ({ username , toggleDarkMode, darkMode}) => {
   };
 
   
-  // Initialize socket connection
-  useEffect(() => {
-    if (userId) {
-      const newSocket = io(process.env.REACT_APP_API_URL);
-      setSocket(newSocket);
+//   // Initialize socket connection
+//   useEffect(() => {
+//     if (userId) {
+//       const newSocket = io(process.env.REACT_APP_API_URL);
+//       setSocket(newSocket);
 
-      // Join user's notification room
-      newSocket.emit('joinNotificationsRoom', userId);
+//       // Join user's notification room
+//       newSocket.emit('joinNotificationsRoom', userId);
+// console.log('notifications room');
+//       return () => {
+//         newSocket.disconnect();
+//       };
+//     }
+//   }, [userId]);
 
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [userId]);
+//  // Listen for notification updates
+//  useEffect(() => {
+//   if (socket) {
+//     socket.on('notificationCountUpdate', (data) => {
+//       if (data.userId === userId) {
+//         setUnreadCount(data.unreadCount);
+//       }
+//     });
 
- // Listen for notification updates
- useEffect(() => {
-  if (socket) {
-    socket.on('notificationCountUpdate', (data) => {
-      if (data.userId === userId) {
-        setUnreadCount(data.unreadCount);
-      }
-    });
+//     socket.on('newNotification', () => {
+//       // Increment count when new notification arrives
+//       setUnreadCount(prev => prev + 1);
+//       console.log('count increased');
+//     });
+//   }
 
-    socket.on('newNotification', () => {
-      // Increment count when new notification arrives
-      setUnreadCount(prev => prev + 1);
-    });
-  }
-
-  return () => {
-    if (socket) {
-      socket.off('notificationCountUpdate');
-      socket.off('newNotification');
-    }
-  };
-}, [socket, userId]);
+//   return () => {
+//     if (socket) {
+//       socket.off('notificationCountUpdate');
+//       socket.off('newNotification');
+//     }
+//   };
+// }, [socket, userId]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -293,22 +294,23 @@ const Header = ({ username , toggleDarkMode, darkMode}) => {
 
   }, [username]);
 
-  // Fetch initial notification count
-  useEffect(() => {
-    const fetchInitialCount = async () => {
-      if (currentUsername) {
-        try {
-          const response = await fetchUnreadNotificationsCount();
-          const unread = response.data.count;
-          setUnreadCount(unread);
-        } catch (error) {
-          console.error('Error fetching notifications:', error);
-        }
-      }
-    };
+  // // Fetch initial notification count
+  // useEffect(() => {
+  //   const fetchInitialCount = async () => {
+  //     if (username) {
+  //       try {
+  //         const response = await fetchUnreadNotificationsCount();
+  //         const unread = response.data.count;
+  //         setUnreadCount(unread);
+  //         console.log('unreadcount fetched');
+  //       } catch (error) {
+  //         console.error('Error fetching notifications:', error);
+  //       }
+  //     }
+  //   };
 
-    fetchInitialCount();
-  }, [currentUsername]);
+  //   fetchInitialCount();
+  // }, [username]);
 
   // const fetchNotificationCount = async () => {
   //   if (currentUsername) {
@@ -525,7 +527,7 @@ const Header = ({ username , toggleDarkMode, darkMode}) => {
                           minWidth: '20px', border: `1px solid rgba(255, 255, 255, 0.8)`,
                           height: '20px', right: -3, top: -4,
                           borderRadius: '10px', transform: 'translate(25%, -25%)',
-                          animation: unreadCount > 0 ? 'pulse 1.5s ease' : 'none', // infinite , ease
+                          animation: shouldAnimate ? 'pulse 1.5s ease' : 'none', // infinite , ease // unreadCount > 0
                           '@keyframes pulse': {
                             '0%': { transform: 'translate(25%, -25%) scale(1)' },
                             '50%': { transform: 'translate(25%, -25%) scale(1.2)' },

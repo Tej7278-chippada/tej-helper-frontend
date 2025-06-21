@@ -5,7 +5,7 @@ import Header from './Header';
 import MenuBar from './MenuBar';
 import { useLocation } from 'react-router-dom';
 
-const Layout = ({ children, username, darkMode, toggleDarkMode }) => {
+const Layout = ({ children, username, darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
   const [showMenu, setShowMenu] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   // ❗️ Hide MenuBar on login and register pages
@@ -40,7 +40,7 @@ const Layout = ({ children, username, darkMode, toggleDarkMode }) => {
   
   return (
     <div style={{ display: 'flex', flexDirection: 'column'  }}> {/* minHeight: '100vh' */}
-      <Header username={username} darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+      <Header username={username} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
       <div style={{ flex: 1, paddingBottom: '56px' }}> {/* Make space for menu */}
         {children}
       </div>

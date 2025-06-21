@@ -47,7 +47,7 @@ import EnhancedPostServiceDialog from './EnhancedPostServiceDialog';
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-function PostService({darkMode, toggleDarkMode}) {
+function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [openDialog, setOpenDialog] = useState(false);
   const [posts, setPosts] = useState([]);
   const [formData, setFormData] = useState({
@@ -289,7 +289,7 @@ function PostService({darkMode, toggleDarkMode}) {
 
 
     return (
-        <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+        <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
         <Box>
         <Toolbar sx={{display:'flex', justifyContent:'space-between', 
         // ...getGlassmorphismStyle(0.1, 10),

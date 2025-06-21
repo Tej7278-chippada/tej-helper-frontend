@@ -175,7 +175,7 @@ const ImageRow = ({ direction, speed, images }) => {
   );
 };
 
-const HelperHome = ({darkMode, toggleDarkMode}) => {
+const HelperHome = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const navigate = useNavigate();
   const floatingBoxRef = useRef(null);
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -202,7 +202,7 @@ const HelperHome = ({darkMode, toggleDarkMode}) => {
   }, []);
 
   return (
-    <Layout username={tokenUsername}  darkMode={darkMode} toggleDarkMode={toggleDarkMode}>
+    <Layout username={tokenUsername}  darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
     <HomeContainer>
       {/* Floating navigation box */}
       <FloatingBox ref={floatingBoxRef}>

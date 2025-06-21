@@ -52,7 +52,7 @@ L.Icon.Default.mergeOptions({
 });
 
 
-const UserProfile = ({darkMode, toggleDarkMode}) => {
+const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const { id } = useParams(); // Extract sellerId from URL
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -234,7 +234,7 @@ const UserProfile = ({darkMode, toggleDarkMode}) => {
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
-    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} >
+    <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* <Snackbar
         open={!!successMessage}
         autoHideDuration={9000}
