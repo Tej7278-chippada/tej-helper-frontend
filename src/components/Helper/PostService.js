@@ -1,6 +1,6 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, Badge, } from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, Badge, alpha, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
@@ -359,10 +359,21 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             <Grid item xs={12} sm={6} md={4} key={post._id}>
               {/* <ProductCard product={product} /> */}
               <Card sx={{
-                margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', backdropFilter: 'blur(5px)',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Smooth transition for hover
+                margin: '0rem 0', borderRadius: 3, overflow: 'hidden',
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                // border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  // transform: 'translateY(-8px)',
+                  boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.15)}`,
+                  '& .card-actions': {
+                    opacity: 1,
+                    transform: 'translateY(0)'
+                  },
+                  '& .price-chip': {
+                    transform: 'scale(1.05)'
+                  }
+                },
                 cursor:'pointer', position: 'relative',
                 height: isMobile ? '280px' : '320px',
               }} onClick={() => openPostDetail(post)}

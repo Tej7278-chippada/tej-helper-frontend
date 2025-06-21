@@ -26,6 +26,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import DistanceSlider from './DistanceSlider';
 import LazyBackgroundImage from './LazyBackgroundImage';
 import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
+import DemoPosts from './DemoPosts';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -602,6 +603,77 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
+      {/* Demo Posts Banner Section */}
+      <Box sx={{                              // to top
+        background: isMobile ? 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)' : 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)',
+        color: 'white',
+        padding: isMobile ? '1.5rem 1rem' : '2rem', pt: '6rem',
+        textAlign: 'center',
+        borderRadius: '12px', mt: -8,
+        // margin: isMobile ? '0.5rem' : '1rem',
+        boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 70%)',
+          zIndex: 0
+        }
+      }}>
+        <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
+          fontWeight: 700,
+          mb: 1,
+          position: 'relative',
+          zIndex: 1,
+          textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+        }}>
+          Help Others, Earn Money
+        </Typography>
+        <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
+          maxWidth: '800px',
+          margin: '0 auto',
+          position: 'relative',
+          zIndex: 1,
+          opacity: 0.9,
+          lineHeight: 1.6
+        }}>
+          Help others with their needs and get paid for your services.
+           {/* Find opportunities in your area and make a difference while earning. */}
+        </Typography>
+        {/* <Box sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          mt: 2,
+          position: 'relative',
+          zIndex: 1
+        }}>
+          <Button 
+            variant="contained" 
+            color="secondary"
+            sx={{
+              borderRadius: '50px',
+              px: 3,
+              py: 1,
+              fontWeight: 600,
+              boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 15px rgba(0,0,0,0.3)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => setShowDistanceRanges(true)}
+          >
+            Explore Opportunities
+          </Button>
+        </Box> */}
+        <DemoPosts isMobile={isMobile}/>
+      </Box>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
