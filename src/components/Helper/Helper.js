@@ -672,7 +672,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             Explore Opportunities
           </Button>
         </Box> */}
-        <DemoPosts isMobile={isMobile}/>
+        <DemoPosts isMobile={isMobile} postId={'68566232dea9ae914bf3e887'}/>
       </Box>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',

@@ -34,6 +34,7 @@ import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import EnhancedPostServiceDialog from './EnhancedPostServiceDialog';
+import DemoPosts from './DemoPosts';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
@@ -290,6 +291,77 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
 
     return (
         <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
+        {/* Demo Posts Banner Section */}
+              <Box sx={{                              // to top
+                background: isMobile ? 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)' : 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)',
+                color: 'white',
+                padding: isMobile ? '1.5rem 1rem' : '2rem', pt: '6rem',
+                textAlign: 'center',
+                borderRadius: '0 0 16px 16px', mt: -8,
+                // margin: isMobile ? '0.5rem' : '1rem',
+                boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 70%)',
+                  zIndex: 0
+                }
+              }}>
+                <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
+                  fontWeight: 700,
+                  mb: 1,
+                  position: 'relative',
+                  zIndex: 1,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}>
+                  Need reliable help?
+                </Typography>
+                <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
+                  maxWidth: '800px',
+                  margin: '0 auto',
+                  position: 'relative',
+                  zIndex: 1,
+                  opacity: 0.9,
+                  lineHeight: 1.6
+                }}>
+                  Post your requirement on Helper—hire cleaners, tutors, delivery staff, or event volunteers in minutes.
+                   {/* Find opportunities in your area and make a difference while earning. */}
+                </Typography>
+                {/* <Box sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  mt: 2,
+                  position: 'relative',
+                  zIndex: 1
+                }}>
+                  <Button 
+                    variant="contained" 
+                    color="secondary"
+                    sx={{
+                      borderRadius: '50px',
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.3)'
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                    onClick={() => setShowDistanceRanges(true)}
+                  >
+                    Explore Opportunities
+                  </Button>
+                </Box> */}
+                <DemoPosts isMobile={isMobile} postId={'68567fffee9db8e3d705e1fe'}/>
+              </Box>
         <Box>
         <Toolbar sx={{display:'flex', justifyContent:'space-between', 
         // ...getGlassmorphismStyle(0.1, 10),

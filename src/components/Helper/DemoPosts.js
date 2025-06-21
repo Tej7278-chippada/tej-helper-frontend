@@ -19,7 +19,7 @@ import {
 } from "@mui/icons-material";
 import { fetchPostMediaById } from "../api/api";
 
-const DemoPosts = ({ isMobile }) => {
+const DemoPosts = ({ isMobile, postId}) => {
   const [offers, setOffers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -38,7 +38,7 @@ const DemoPosts = ({ isMobile }) => {
     const fetchPostMedia = async () => {
       try {
         setLoading(true);
-        const response = await fetchPostMediaById('683597f121dde4cabe495deb');
+        const response = await fetchPostMediaById(postId);
         const mediaData = response.data.media.map((media, index) => ({ 
           data: media.toString('base64'), 
           _id: index.toString(), 
