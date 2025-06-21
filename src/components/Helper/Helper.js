@@ -1268,13 +1268,26 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     <Card sx={{
                       margin: '0rem 0',  // spacing between up and down cards
                       cursor: 'pointer',
-                      backdropFilter: 'blur(5px)',
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                      // backdropFilter: 'blur(5px)',
+                      // background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
                       // backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      borderRadius: '8px',
+                      borderRadius: 3,
+                      backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        // transform: 'translateY(-8px)',
+                        boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.15)}`,
+                        '& .card-actions': {
+                          opacity: 1,
+                          transform: 'translateY(0)'
+                        },
+                        '& .price-chip': {
+                          transform: 'scale(1.05)'
+                        }
+                      },
                       // border: '1px solid rgba(255,255,255,0.2)',
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-                      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                      // boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                      // transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                       // '&:hover': {
                       //   transform: 'translateY(-4px)',
                       //   boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
