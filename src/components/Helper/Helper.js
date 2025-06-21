@@ -609,7 +609,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         color: 'white',
         padding: isMobile ? '1.5rem 1rem' : '2rem', pt: '6rem',
         textAlign: 'center',
-        borderRadius: '12px', mt: -8,
+        borderRadius: '0 0 16px 16px', mt: -8,
         // margin: isMobile ? '0.5rem' : '1rem',
         boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
         position: 'relative',

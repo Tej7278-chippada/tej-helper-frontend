@@ -1,108 +1,410 @@
 // /components/Helper/DemoPosts.js
-import React, { useEffect, useState } from "react";
-import { Box, Typography, Card, CardMedia, IconButton } from "@mui/material";
+import React, { useEffect, useState, useRef } from "react";
+import { 
+  Box, 
+  Typography, 
+  Card, 
+  CardMedia, 
+  IconButton, 
+  Skeleton,
+  Fade,
+  useMediaQuery
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { 
+  PlayArrow as PlayIcon, 
+  Pause as PauseIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon 
+} from "@mui/icons-material";
 import { fetchPostMediaById } from "../api/api";
 
-const DemoPosts = ({isMobile}) => {
+const DemoPosts = ({ isMobile }) => {
   const [offers, setOffers] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const intervalRef = useRef(null);
   const theme = useTheme();
+  const isXsScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  // Minimum swipe distance
+  const minSwipeDistance = 50;
 
   useEffect(() => {
-    // Fetch offers images from backend
-    // const fetchOffers = async () => {
-    //   try {
-    //     const response = await getOffers();
-    //     setOffers(response.data);
-    //   } catch (error) {
-    //     console.error("Error fetching offers:", error);
-    //   }
-    // };
-    // fetchOffers();
-    const fetchPostMedia = async (postId) => {
-        // setLoadingMedia(true);
-        try {
-          const response = await fetchPostMediaById('683597f121dde4cabe495deb');
-          setOffers(response.data.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
-        } catch (error) {
-          if (error.response && error.response.status === 404) {
-            console.error('Post Unavailable.', error);
-            setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
-          } else if (error.response && error.response.status === 401) {
-            console.error('Error fetching post details:', error);
-          } else {
-            console.error('Error fetching post details:', error);
-          }
-        // } finally {
-        //   setLoadingMedia(false);
-        }
-      };
-      fetchPostMedia();
+    const fetchPostMedia = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchPostMediaById('683597f121dde4cabe495deb');
+        const mediaData = response.data.media.map((media, index) => ({ 
+          data: media.toString('base64'), 
+          _id: index.toString(), 
+          remove: false,
+          title: `Demo Post ${index + 1}` // Added default titles
+        }));
+        setOffers(mediaData);
+      } catch (error) {
+        console.error('Error fetching post details:', error);
+        // Add some demo fallback data for better UX
+        setOffers([
+          { data: '', _id: '1', remove: false, title: 'Demo Post 1' },
+          { data: '', _id: '2', remove: false, title: 'Demo Post 2' }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPostMedia();
   }, []);
 
-  
-
+  // Auto-scroll functionality
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % offers.length);
-    }, 3000); // Auto-scroll every 3 seconds
-    return () => clearInterval(interval);
-  }, [offers]);
+    if (offers.length > 1 && isPlaying) {
+      intervalRef.current = setInterval(() => {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % offers.length);
+      }, 4000); // Slightly longer interval for better UX
+    }
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [offers.length, isPlaying]);
+
+  // Touch handlers for swipe functionality
+  const onTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      goToNext();
+    } else if (isRightSwipe) {
+      goToPrevious();
+    }
+  };
 
   const handleDotClick = (index) => {
     setCurrentIndex(index);
+    setImageLoaded(false);
   };
 
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % offers.length);
+    setImageLoaded(false);
+  };
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + offers.length) % offers.length);
+    setImageLoaded(false);
+  };
+
+  const togglePlayPause = () => {
+    setIsPlaying(!isPlaying);
+  };
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ width: "100%", maxWidth: "800px", margin: "auto", mt: 3 }}>
+        <Skeleton 
+          variant="rectangular" 
+          height={isMobile ? 200 : 300} 
+          sx={{ borderRadius: "16px" }}
+          animation="wave"
+        />
+      </Box>
+    );
+  }
+
+  if (offers.length === 0) {
+    return null;
+  }
+
   return (
-    <Box sx={{ width: "100%", maxWidth: "1200px", margin: "auto", mt: 2 }}>
-      {/* <Typography variant="h6" sx={{ textAlign: "center", mb: 2 }}>
-        Help others with their needs and get paid for your services.
-      </Typography> */}
-      {offers.length > 0 && (
-        <Card sx={{ position: "relative", borderRadius: "16px" }}>
-          {/* <CardMedia
-            component="img"
-            height="400"
-            image={`data:image/jpeg;base64,${offers[currentIndex]?.image}`}
-            alt={offers[currentIndex]?.title}
-            sx={{ borderRadius: "16px" }}
-          /> */}
-          <CardMedia
-            component="img"
-            height= {isMobile ? '200' : '400'}
-            image={`data:image/jpeg;base64,${offers[currentIndex]?.data}`}
-            alt={offers[currentIndex]?.title}
-            sx={{ borderRadius: isMobile ? 0 : '16px', cursor: "pointer" }}
-            onClick={() => window.open(offers[currentIndex]?.url, "_blank")} // Open URL in a new tab
-          />
-          {/* Dots Navigation */}
+    <Box sx={{ 
+      width: "100%", 
+      maxWidth: "800px", // 1200px
+      margin: "auto", 
+      mt: 3,
+      position: 'relative'
+    }}>
+      <Card sx={{ 
+        position: "relative", 
+        borderRadius: "16px",
+        overflow: 'hidden',
+        boxShadow: theme.shadows[8],
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        // border: '1px solid rgba(255, 255, 255, 0.2)',
+        // '&:hover': {
+        //   transform: 'translateY(-2px)',
+        //   transition: 'transform 0.3s ease-in-out',
+        //   boxShadow: theme.shadows[12],
+        // }
+      }}>
+        {/* Main Image Container */}
+        <Box
+          sx={{ position: 'relative', overflow: 'hidden' }}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
+          <Fade in={imageLoaded} timeout={500}>
+            <CardMedia
+              component="img"
+              height={isMobile ? 200 : 300}
+              image={`data:image/jpeg;base64,${offers[currentIndex]?.data}`}
+              alt={offers[currentIndex]?.title}
+              onLoad={handleImageLoad}
+              sx={{ 
+                borderRadius: 0,
+                cursor: "pointer",
+                transition: 'transform 0.3s ease-in-out',
+                // '&:hover': {
+                //   transform: 'scale(1.02)'
+                // }
+              }}
+              onClick={() => offers[currentIndex]?.url && window.open(offers[currentIndex].url, "_blank")}
+            />
+          </Fade>
+
+          {/* Loading overlay for image transitions */}
+          {!imageLoaded && (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(0, 0, 0, 0.1)',
+                zIndex: 2
+              }}
+            >
+              <Skeleton 
+                variant="rectangular" 
+                width="100%" 
+                height="100%" 
+                animation="wave"
+              />
+            </Box>
+          )}
+
+          {/* Navigation Arrows - Only show on hover for desktop */}
+          {offers.length > 1 && !isMobile && (
+            <>
+              <IconButton
+                onClick={goToPrevious}
+                sx={{
+                  position: 'absolute',
+                  left: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  color: 'white',
+                  opacity: 0,
+                  transition: 'opacity 0.3s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                  },
+                  '.MuiCard-root:hover &': {
+                    opacity: 1,
+                  },
+                  zIndex: 3
+                }}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+              
+              <IconButton
+                onClick={goToNext}
+                sx={{
+                  position: 'absolute',
+                  right: 16,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  color: 'white',
+                  opacity: 0,
+                  transition: 'opacity 0.3s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                  },
+                  '.MuiCard-root:hover &': {
+                    opacity: 1,
+                  },
+                  zIndex: 3
+                }}
+              >
+                <ChevronRightIcon />
+              </IconButton>
+            </>
+          )}
+
+          {/* Play/Pause Button */}
+          {offers.length > 1 && (
+            <IconButton
+              onClick={togglePlayPause}
+              sx={{
+                position: 'absolute',
+                top: 16,
+                right: 16,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                color: 'white',
+                opacity: 0,
+                transition: 'opacity 0.3s ease-in-out',
+                '&:hover': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                },
+                '.MuiCard-root:hover &': {
+                  opacity: 1,
+                },
+                zIndex: 3
+              }}
+            >
+              {isPlaying ? <PauseIcon /> : <PlayIcon />}
+            </IconButton>
+          )}
+
+          {/* Image Title Overlay */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.7))',
+              color: 'white',
+              p: 2,
+              zIndex: 2,
+              opacity: 0,
+                transition: 'opacity 0.3s ease-in-out',
+                // '&:hover': {
+                //   backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                // },
+                '.MuiCard-root:hover &': {
+                  opacity: 1,
+                },
+                // zIndex: 3
+            }}
+          >
+            <Typography 
+              variant={isMobile ? "body2" : "h6"} 
+              sx={{ 
+                fontWeight: 600,
+                textShadow: '0 1px 3px rgba(0,0,0,0.5)', textAlign: 'end'
+              }}
+            >
+              {offers[currentIndex]?.title || `Demo Post ${currentIndex + 1}`}
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Enhanced Dots Navigation */}
+        {offers.length > 1 && (
           <Box
             sx={{
               position: "absolute",
-              bottom: "16px",
+              bottom: "20px",
               width: "100%",
               display: "flex",
               justifyContent: "center",
-              gap: "8px",
+              gap: "6px",
+              zIndex: 4
             }}
           >
             {offers.map((_, index) => (
-              <IconButton
+              <Box
                 key={index}
                 onClick={() => handleDotClick(index)}
                 sx={{
-                  width: "10px",
-                  height: "10px",
-                  backgroundColor: index === currentIndex ? theme.palette.primary.main : "#ccc",
-                  borderRadius: "50%",
-                  transition: "background-color 0.3s",
+                  width: index === currentIndex ? "24px" : "8px",
+                  height: "8px",
+                  backgroundColor: index === currentIndex 
+                    ? 'rgba(255, 255, 255, 0.9)' 
+                    : 'rgba(255, 255, 255, 0.4)',
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    transform: 'scale(1.1)'
+                  }
                 }}
               />
             ))}
           </Box>
-        </Card>
-      )}
+        )}
+
+        {/* Progress Bar */}
+        {offers.length > 1 && isPlaying && (
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              height: '3px',
+              backgroundColor: theme.palette.primary.main,
+              borderRadius: '2px 2px 0 0',
+              animation: 'progressBar 4s linear infinite',
+              zIndex: 4,
+              opacity: 0,
+                transition: 'opacity 0.3s ease-in-out',
+                // '&:hover': {
+                //   backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                // },
+                '.MuiCard-root:hover &': {
+                  opacity: 1,
+                },
+              '@keyframes progressBar': {
+                '0%': { width: '0%' },
+                '100%': { width: '100%' }
+              }
+            }}
+          />
+        )}
+      </Card>
+
+      {/* Swipe Hint for Mobile */}
+      {/* {isMobile && offers.length > 1 && (
+        <Typography
+          variant="caption"
+          sx={{
+            display: 'block',
+            textAlign: 'center',
+            mt: 1,
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontSize: '0.75rem'
+          }}
+        >
+          Swipe left or right to navigate • {currentIndex + 1} of {offers.length}
+        </Typography>
+      )} */}
     </Box>
   );
 };
