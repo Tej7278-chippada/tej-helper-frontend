@@ -12,6 +12,7 @@ import ForgotPassword from './ForgotPassword';
 // import CloseIcon from '@mui/icons-material/Close';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
+import DemoPosts from './Helper/DemoPosts';
 
 const theme = createTheme({
   breakpoints: {
@@ -33,7 +34,7 @@ const theme = createTheme({
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-const Login = ({darkMode}) => {
+const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   // const [username, setUsername] = useState('');
   const [identifier, setIdentifier] = useState(''); // Can be email or username
   const [password, setPassword] = useState('');
@@ -44,7 +45,7 @@ const Login = ({darkMode}) => {
   // const [resetMessage, setResetMessage] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm')); // Media query for small screens
+  const isMobile = useMediaQuery(theme => theme.breakpoints.down('md')); // Media query for small screens
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   
@@ -190,8 +191,52 @@ const Login = ({darkMode}) => {
 
   return (
     <ThemeProvider theme={theme}>
-    <Layout darkMode={darkMode}>
-    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh"
+    <Layout darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
+      <Box sx={{display: isMobile ? 'flow' : 'flex'}}>
+        {/* Demo Posts Banner Section */}
+        <Box sx={{                              // to top
+          background: isMobile ? 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)' : 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)',
+          color: 'white', height: isMobile ? 'auto' : '80vh', minWidth : isMobile ? 'auto' : '400px',
+          padding: isMobile ? '1.5rem 1rem' : '2rem', pt: '6rem',
+          textAlign: 'center', backdropFilter: 'blur(20px)',
+          borderRadius: isMobile ? '0 0 16px 16px' : '0 0 16px 0', mt: -8,
+          // margin: isMobile ? '0.5rem' : '1rem',
+          boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0, backdropFilter: 'blur(20px)',
+            background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 70%)',
+            zIndex: 0
+          }
+        }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
+            fontWeight: 700,
+            mb: 1,
+            position: 'relative',
+            zIndex: 1,
+            textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          }}>
+            Help Others, Earn Money
+          </Typography>
+          <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
+            maxWidth: '800px',
+            margin: '0 auto',
+            position: 'relative',
+            zIndex: 1,
+            opacity: 0.9,
+            lineHeight: 1.6
+          }}>
+           "Helper is a community-driven platform connecting people who need help with those willing to offer it—whether for paid work, volunteering, or emergencies."
+          </Typography>
+         {!isMobile && <DemoPosts isMobile={isMobile} postId={'68566232dea9ae914bf3e887'}/> }
+        </Box>
+    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh" width= {isMobile ? "auto" : "100%"}
     padding={isMobile ? 2 : 4} // Adjust padding for mobile
     // sx={{...getGlassmorphismStyle(theme),}}
     >
@@ -264,7 +309,7 @@ const Login = ({darkMode}) => {
         </Typography>
       </form>
       <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth fullScreen={isMobile ? true : false}
-        sx={{ margin: '1rem', '& .MuiPaper-root': { borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },'& .MuiDialogContent-root': { padding: isMobile ? '1rem' : '1rem', },}}>
+        sx={{ margin: '1rem', '& .MuiPaper-root': { backdropFilter: 'blur(20px)',borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },'& .MuiDialogContent-root': { padding: isMobile ? '1rem' : '1rem', },}}>
         <DialogContent sx={{scrollbarWidth:'thin'}}>
         {/* Close button */}
         {/* <IconButton
@@ -285,8 +330,9 @@ const Login = ({darkMode}) => {
           <Button sx={{borderRadius:'12px'}} onClick={() => setForgotPasswordOpen(false)} color="secondary">Close</Button>
         </DialogActions>
       </Dialog>
+       {isMobile && <DemoPosts isMobile={isMobile} postId={'68566232dea9ae914bf3e887'}/> }
     </Box>
-
+</Box>
     {/* Forgot Password Dialog */}
     {/* <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)}>
           <DialogTitle>Reset Password</DialogTitle>

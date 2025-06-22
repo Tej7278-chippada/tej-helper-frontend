@@ -41,7 +41,7 @@ const Layout = ({ children, username, darkMode, toggleDarkMode, unreadCount, sho
   return (
     <div style={{ display: 'flex', flexDirection: 'column'  }}> {/* minHeight: '100vh' */}
       <Header username={username} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
-      <div style={{ flex: 1, paddingBottom: '56px' }}> {/* Make space for menu */}
+      <div style={{ flex: 1,  }}> {/* Make space for menu */} {/* paddingBottom: '56px' */}
         {children}
       </div>
       {shouldShowMenuBar && (

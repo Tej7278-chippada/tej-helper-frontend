@@ -620,7 +620,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           top: 0,
           left: 0,
           right: 0,
-          bottom: 0,
+          bottom: 0, backdropFilter: 'blur(20px)',
           background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.2) 0%, transparent 70%)',
           zIndex: 0
         }

@@ -300,8 +300,8 @@ function App() {
       <Router>
         <NearPostsNotification darkMode={darkMode}/>
         <Routes>
-          <Route path="/login" element={<Login darkMode={darkMode} />} />
-          <Route path="/register" element={<Register darkMode={darkMode} />} />
+          <Route path="/login" element={<Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>} />
+          <Route path="/register" element={<Register darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>} />
           <Route path="/" element={
             <PrivateRoute>
               <Helper darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
