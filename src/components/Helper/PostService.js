@@ -91,11 +91,11 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [timeFrom, setTimeFrom] = useState(null);
   const [timeTo, setTimeTo] = useState(null);
   // Initialize socket connection (add this near your other state declarations)
-  const [generatedImages, setGeneratedImages] = useState([]);
-  const [loadingGeneration, setLoadingGeneration] = useState(false);
+  // const [generatedImages, setGeneratedImages] = useState([]);
+  // const [loadingGeneration, setLoadingGeneration] = useState(false);
   // const [loadingImage, setLoadingImage] = useState(null); // Track which image is loading
   // const [addedImages, setAddedImages] = useState([]); // Store successfully added image URLs
-  const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
+  // const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
   const tokenUsername = localStorage.getItem('tokenUsername');
   const [protectLocation, setProtectLocation] = useState(false);
   const [fakeAddress, setFakeAddress] = useState('');
@@ -104,23 +104,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [validationErrors, setValidationErrors] = useState({});
 
   
-  // Fetch images from Unsplash based on title
-  const fetchUnsplashImages = async (query) => {
-    try {
-      setLoadingGeneration(true);
-      setNoImagesFound(false); // Reset no images found state
-      const response = await API.get(`/api/posts/generate-images?query=${query}`);
-      if (response.data.results.length === 0) {
-        setNoImagesFound(true); // Set no images found state
-      }
-      setGeneratedImages(response.data.results);
-    } catch (error) {
-      console.error("Error fetching images:", error);
-      setNoImagesFound(true); // Also set the state if API fails
-    } finally {
-      setLoadingGeneration(false);
-    }
-  };
+ 
 
 
 
@@ -162,33 +146,33 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
       const handleEdit = (post) => {
         fetchPostMedia(post._id); // to fetch the post's entire media
         setEditingProduct(post);
-        setFormData({
-          title: post.title,
-          price: post.price,
-          categories: post.categories,
-          gender: post.gender,
-          postStatus: post.postStatus,
-          peopleCount: post.peopleCount,
-          serviceDays: post.serviceDays,
-          description: post.description,
-          isFullTime: post.isFullTime,
-          latitude: post.location.latitude,
-          longitude: post.location.longitude,
-          coordinates: [post.location.longitude, post.location.latitude],
-          type: 'Point',
-          address: post.location.address,
-          // media: null, // Reset images to avoid re-uploading
-        });
-        // Set the date and time fields if they exist in the post
-        if (post.serviceDate) {
-          setSelectedDate(new Date(post.serviceDate));
-        }
-        if (post.timeFrom) {
-          setTimeFrom(new Date(post.timeFrom));
-        }
-        if (post.timeTo) {
-          setTimeTo(new Date(post.timeTo));
-        }
+        // setFormData({
+        //   title: post.title,
+        //   price: post.price,
+        //   categories: post.categories,
+        //   gender: post.gender,
+        //   postStatus: post.postStatus,
+        //   peopleCount: post.peopleCount,
+        //   serviceDays: post.serviceDays,
+        //   description: post.description,
+        //   isFullTime: post.isFullTime,
+        //   latitude: post.location.latitude,
+        //   longitude: post.location.longitude,
+        //   coordinates: [post.location.longitude, post.location.latitude],
+        //   type: 'Point',
+        //   address: post.location.address,
+        //   // media: null, // Reset images to avoid re-uploading
+        // });
+        // // Set the date and time fields if they exist in the post
+        // if (post.serviceDate) {
+        //   setSelectedDate(new Date(post.serviceDate));
+        // }
+        // if (post.timeFrom) {
+        //   setTimeFrom(new Date(post.timeFrom));
+        // }
+        // if (post.timeTo) {
+        //   setTimeTo(new Date(post.timeTo));
+        // }
         // setExistingMedia(post.media.map((media, index) => ({ data: media.toString('base64'), _id: index.toString(), remove: false })));
         setOpenDialog(true);
       };
@@ -231,45 +215,45 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
 
     const handleOpenDialog = () => {
         // Reset form data to empty
-        setFormData({
-            title: '',
-            price: '',
-            categories: '',
-            gender: '',
-            postStatus: '',
-            peopleCount: '',
-            serviceDays: '',
-            description: '',
-            isFullTime: false,
-            media: null,
-        });
+        // setFormData({
+        //     title: '',
+        //     price: '',
+        //     categories: '',
+        //     gender: '',
+        //     postStatus: '',
+        //     peopleCount: '',
+        //     serviceDays: '',
+        //     description: '',
+        //     isFullTime: false,
+        //     media: null,
+        // });
         setEditingProduct(null); // Ensure it's not in editing mode
-        setExistingMedia([]); // Clear any existing media
-        setNewMedia([]); // Clear new media files
-        setGeneratedImages([]);
-        setNoImagesFound(false); // Reset no images found state
+        // setExistingMedia([]); // Clear any existing media
+        // setNewMedia([]); // Clear new media files
+        // setGeneratedImages([]);
+        // setNoImagesFound(false); // Reset no images found state
         setOpenDialog(true);
-        setActiveStep(0);
-        setValidationErrors({});
+        // setActiveStep(0);
+        // setValidationErrors({});
     };
     
     const handleCloseDialog = () => {
         setEditingProduct(null);
-        setExistingMedia([]);
-        setNewMedia([]);
+        // setExistingMedia([]);
+        // setNewMedia([]);
         setOpenDialog(false);
-        setMediaError('');
-        setSubmitError(''); // Clear submission error when dialog is closed
-        setFormData({ title: '', price: '', categories: '', gender: '', postStatus: '', peopleCount: '', serviceDays: '', description: '', isFullTime: false, media: null });
-        setSelectedDate(null);
-        setTimeFrom(null);
-        setTimeTo(null);
-        setGeneratedImages([]);
-        setNoImagesFound(false); // Reset no images found state
-        setProtectLocation(false);
-        setFakeAddress('');
-        setActiveStep(0);
-        setValidationErrors({});
+        // setMediaError('');
+        // setSubmitError(''); // Clear submission error when dialog is closed
+        // setFormData({ title: '', price: '', categories: '', gender: '', postStatus: '', peopleCount: '', serviceDays: '', description: '', isFullTime: false, media: null });
+        // setSelectedDate(null);
+        // setTimeFrom(null);
+        // setTimeTo(null);
+        // setGeneratedImages([]);
+        // setNoImagesFound(false); // Reset no images found state
+        // setProtectLocation(false);
+        // setFakeAddress('');
+        // setActiveStep(0);
+        // setValidationErrors({});
     };
 
     const openPostDetail = (post) => {
@@ -666,10 +650,10 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
         </Box>
       )}
       </Box>
-        <EnhancedPostServiceDialog openDialog={openDialog} handleCloseDialog={handleCloseDialog} setSnackbar={setSnackbar} submitError={submitError} setSubmitError={setSubmitError} theme={theme}
-         isMobile={isMobile} fetchPostsData={fetchPostsData} fetchUnsplashImages={fetchUnsplashImages} noImagesFound={noImagesFound} loading={loading} setLoading={setLoading}
+        <EnhancedPostServiceDialog openDialog={openDialog} onCloseDialog={handleCloseDialog} setSnackbar={setSnackbar} submitError={submitError} setSubmitError={setSubmitError} theme={theme}
+         isMobile={isMobile} fetchPostsData={fetchPostsData} /* fetchUnsplashImages={fetchUnsplashImages} noImagesFound={noImagesFound} */ loading={loading} setLoading={setLoading}
          newMedia={newMedia} setNewMedia={setNewMedia} mediaError={mediaError} setMediaError={setMediaError} editingProduct={editingProduct} existingMedia={existingMedia} setExistingMedia={setExistingMedia}
-         formData={formData} setFormData={setFormData} generatedImages={generatedImages} loadingGeneration={loadingGeneration} loadingMedia={loadingMedia}
+         /* formData={formData} setFormData={setFormData} */ /* generatedImages={generatedImages} loadingGeneration={loadingGeneration} */ loadingMedia={loadingMedia}
          selectedDate={selectedDate} setSelectedDate={setSelectedDate} timeFrom={timeFrom} setTimeFrom={setTimeFrom} timeTo={timeTo} setTimeTo={setTimeTo}
          protectLocation={protectLocation} setProtectLocation={setProtectLocation} fakeAddress={fakeAddress} setFakeAddress={setFakeAddress}
          activeStep={activeStep} setActiveStep={setActiveStep} darkMode={darkMode} setValidationErrors={setValidationErrors} validationErrors={validationErrors}

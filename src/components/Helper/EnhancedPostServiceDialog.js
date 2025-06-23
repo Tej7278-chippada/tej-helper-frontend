@@ -163,9 +163,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
-const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMobile, fetchPostsData, generatedImages, loadingGeneration,
-  noImagesFound, newMedia, setNewMedia, editingProduct, formData, setFormData, selectedDate, setSelectedDate, mediaError, setMediaError,
-  timeFrom, setTimeFrom, timeTo, setTimeTo, existingMedia, setExistingMedia, fetchUnsplashImages, loadingMedia, loading, setLoading,
+const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile, fetchPostsData, /* generatedImages, loadingGeneration,
+  noImagesFound, */ newMedia, setNewMedia, editingProduct, /* formData, setFormData, */ selectedDate, setSelectedDate, mediaError, setMediaError,
+  timeFrom, setTimeFrom, timeTo, setTimeTo, existingMedia, setExistingMedia, /* fetchUnsplashImages, */ loadingMedia, loading, setLoading,
   setSnackbar, setSubmitError, submitError, protectLocation, setProtectLocation, fakeAddress, setFakeAddress, activeStep, setActiveStep,
   darkMode, validationErrors, setValidationErrors, }) => {
   //   const [openDialog, setOpenDialog] = useState(false);
@@ -262,7 +262,121 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
   const [lastScrollPosition, setLastScrollPosition] = useState(0);
   // const [validationErrors, setValidationErrors] = useState({});
   const [stepsWithErrors, setStepsWithErrors] = useState([]);
+  // Add formData state inside the component
+  const [formData, setFormData] = useState({
+    title: '',
+    price: '',
+    postStatus: '',
+    peopleCount: '',
+    gender: '',
+    serviceDays: '',
+    description: '',
+    media: null,
+    isFullTime: false,
+  });
+  const [generatedImages, setGeneratedImages] = useState([]);
+  const [loadingGeneration, setLoadingGeneration] = useState(false);
+  const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
 
+
+  // Fetch images from Unsplash based on title
+  const fetchUnsplashImages = async (query) => {
+    try {
+      setLoadingGeneration(true);
+      setNoImagesFound(false); // Reset no images found state
+      const response = await API.get(`/api/posts/generate-images?query=${query}`);
+      if (response.data.results.length === 0) {
+        setNoImagesFound(true); // Set no images found state
+      }
+      setGeneratedImages(response.data.results);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      setNoImagesFound(true); // Also set the state if API fails
+    } finally {
+      setLoadingGeneration(false);
+    }
+  };
+
+  // Initialize form data when editingProduct changes
+  useEffect(() => {
+    if (editingProduct) {
+      setFormData({
+        title: editingProduct.title,
+        price: editingProduct.price,
+        categories: editingProduct.categories,
+        gender: editingProduct.gender,
+        postStatus: editingProduct.postStatus,
+        peopleCount: editingProduct.peopleCount,
+        serviceDays: editingProduct.serviceDays,
+        description: editingProduct.description,
+        isFullTime: editingProduct.isFullTime,
+        latitude: editingProduct.location.latitude,
+        longitude: editingProduct.location.longitude,
+        coordinates: [editingProduct.location.longitude, editingProduct.location.latitude],
+        type: 'Point',
+        address: editingProduct.location.address,
+      });
+      
+      // Set date and time fields if they exist
+      if (editingProduct.serviceDate) {
+        setSelectedDate(new Date(editingProduct.serviceDate));
+      }
+      if (editingProduct.timeFrom) {
+        setTimeFrom(new Date(editingProduct.timeFrom));
+      }
+      if (editingProduct.timeTo) {
+        setTimeTo(new Date(editingProduct.timeTo));
+      }
+    } else {
+      // Reset form when creating new post
+      setFormData({
+        title: '',
+        price: '',
+        categories: '',
+        gender: '',
+        postStatus: '',
+        peopleCount: '',
+        serviceDays: '',
+        description: '',
+        isFullTime: false,
+        media: null,
+      });
+      setSelectedDate(null);
+      setTimeFrom(null);
+      setTimeTo(null);
+    }
+  }, [editingProduct]);
+
+  const handleCloseDialog = () => {
+    // Reset all form states
+    setFormData({
+      title: '',
+      price: '',
+      categories: '',
+      gender: '',
+      postStatus: '',
+      peopleCount: '',
+      serviceDays: '',
+      description: '',
+      isFullTime: false,
+      media: null,
+    });
+    setExistingMedia([]);
+    setNewMedia([]);
+    setGeneratedImages([]);
+    setSelectedDate(null);
+    setTimeFrom(null);
+    setTimeTo(null);
+    setProtectLocation(false);
+    setFakeAddress('');
+    setActiveStep(0);
+    setValidationErrors({});
+    setMediaError('');
+    setSubmitError('');
+    
+    // Call parent's close handler
+    onCloseDialog();  // Changed from handleCloseDialog to onCloseDialog
+  };
 
   // useEffect(() => {
   //   if (submitError) {
@@ -701,6 +815,29 @@ const EnhancedPostServiceDialog = ({ openDialog, handleCloseDialog, theme, isMob
         // showNotification(`New Post "${formData.title}" is added successfully.`, 'success');
         setSnackbar({ open: true, message: `New Post "${formData.title}" is added successfully.`, severity: 'success' });
       }
+      // Reset form after successful submission
+      setFormData({
+        title: '',
+        price: '',
+        categories: '',
+        gender: '',
+        postStatus: '',
+        peopleCount: '',
+        serviceDays: '',
+        description: '',
+        isFullTime: false,
+        media: null,
+      });
+      setExistingMedia([]);
+      setNewMedia([]);
+      setGeneratedImages([]);
+      setSelectedDate(null);
+      setTimeFrom(null);
+      setTimeTo(null);
+      setProtectLocation(false);
+      setFakeAddress('');
+      setActiveStep(0);
+      setValidationErrors({});
       await fetchPostsData(); // Refresh products list
       handleCloseDialog();       // Close dialog
     } catch (error) {
