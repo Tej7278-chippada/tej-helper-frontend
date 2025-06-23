@@ -56,47 +56,47 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   //   return emailRegex.test(input);
   // };
 
-  useEffect(() => {
-    const extendSession = async () => {
-      const authToken = localStorage.getItem('authToken');
-      if (authToken) {
-        try {
-          const response = await axios.post(
-          `${process.env.REACT_APP_API_URL}/api/auth/refresh-token`,
-          {},
-          { headers: { Authorization: `Bearer ${authToken}` } }
-          );
-          const newToken  = response.data.authToken;
-          const tokenUsername = localStorage.getItem('tokenUsername');
-          const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-          tokens[tokenUsername] = newToken ;
-          localStorage.setItem('authTokens', JSON.stringify(tokens));
-          localStorage.setItem('authToken', newToken );
-          console.log('authToken refreshed..! :', newToken);
-        } catch (error) {
-          console.error('Failed to extend session:', error);
-          localStorage.removeItem('authToken');
-          localStorage.removeItem('authTokens');
-          localStorage.removeItem('tokenUsername');
-          localStorage.removeItem('userId');
-          localStorage.setItem('tokenProfilePic', tokenPic);
-          navigate('/login', { replace: true });
-          console.log('Refresh token failed. Token expired or invalid.');
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const extendSession = async () => {
+  //     const authToken = localStorage.getItem('authToken');
+  //     if (authToken) {
+  //       try {
+  //         const response = await axios.post(
+  //         `${process.env.REACT_APP_API_URL}/api/auth/refresh-token`,
+  //         {},
+  //         { headers: { Authorization: `Bearer ${authToken}` } }
+  //         );
+  //         const newToken  = response.data.authToken;
+  //         const tokenUsername = localStorage.getItem('tokenUsername');
+  //         const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
+  //         tokens[tokenUsername] = newToken ;
+  //         localStorage.setItem('authTokens', JSON.stringify(tokens));
+  //         localStorage.setItem('authToken', newToken );
+  //         console.log('authToken refreshed..! :', newToken);
+  //       } catch (error) {
+  //         console.error('Failed to extend session:', error);
+  //         localStorage.removeItem('authToken');
+  //         localStorage.removeItem('authTokens');
+  //         localStorage.removeItem('tokenUsername');
+  //         localStorage.removeItem('userId');
+  //         localStorage.setItem('tokenProfilePic', tokenPic);
+  //         navigate('/login', { replace: true });
+  //         console.log('Refresh token failed. Token expired or invalid.');
+  //       }
+  //     }
+  //   };
 
-    const activityEvents = ['mousemove', 'keydown', 'scroll', 'click'];
-    activityEvents.forEach((event) =>
-      window.addEventListener(event, extendSession)
-    );
+  //   const activityEvents = ['mousemove', 'keydown', 'scroll', 'click'];
+  //   activityEvents.forEach((event) =>
+  //     window.addEventListener(event, extendSession)
+  //   );
 
-    return () => {
-      activityEvents.forEach((event) =>
-        window.removeEventListener(event, extendSession)
-      );
-    };
-  }, [navigate]);
+  //   return () => {
+  //     activityEvents.forEach((event) =>
+  //       window.removeEventListener(event, extendSession)
+  //     );
+  //   };
+  // }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
