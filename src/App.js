@@ -22,6 +22,7 @@ import NearPostsNotification from './components/Helper/NearPostsNotification';
 import HelperHome from './components/Helper/HelperHome';
 import { fetchUnreadNotificationsCount } from './components/api/api';
 import { io } from 'socket.io-client';
+import Banner from './components/Banners/Banner';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -351,6 +352,11 @@ function App() {
           <Route path="/helperHome" element={
             <PrivateRoute>
               <HelperHome darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
+            </PrivateRoute>
+          } />
+          <Route path="/adminBanners" element={
+            <PrivateRoute>
+              <Banner darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
         </Routes>

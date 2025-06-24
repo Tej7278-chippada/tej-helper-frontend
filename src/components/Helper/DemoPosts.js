@@ -17,7 +17,7 @@ import {
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon 
 } from "@mui/icons-material";
-import { fetchPostMediaById } from "../api/api";
+import { fetchBannerMediaById } from "../api/adminApi";
 
 const DemoPosts = ({ isMobile, postId}) => {
   const [offers, setOffers] = useState([]);
@@ -38,7 +38,7 @@ const DemoPosts = ({ isMobile, postId}) => {
     const fetchPostMedia = async () => {
       try {
         setLoading(true);
-        const response = await fetchPostMediaById(postId);
+        const response = await fetchBannerMediaById(postId);
         const mediaData = response.data.media.map((media, index) => ({ 
           data: media.toString('base64'), 
           _id: index.toString(), 

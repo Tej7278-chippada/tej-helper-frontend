@@ -234,7 +234,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           }}>
            "Helper is a community-driven platform connecting people who need help with those willing to offer it—whether for paid work, volunteering, or emergencies."
           </Typography>
-         {!isMobile && <DemoPosts isMobile={isMobile} postId={'68566232dea9ae914bf3e887'}/> }
+         {!isMobile && <DemoPosts isMobile={isMobile} postId={'685ac2ef1a2841fae5ba564d'} /> }
         </Box>
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh" width= {isMobile ? "auto" : "100%"}
     padding={isMobile ? 2 : 4} // Adjust padding for mobile
@@ -330,7 +330,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           <Button sx={{borderRadius:'12px'}} onClick={() => setForgotPasswordOpen(false)} color="secondary">Close</Button>
         </DialogActions>
       </Dialog>
-       {isMobile && <DemoPosts isMobile={isMobile} postId={'68566232dea9ae914bf3e887'}/> }
+       {isMobile && <DemoPosts isMobile={isMobile} postId={'685ac2ef1a2841fae5ba564d'}/> }
     </Box>
 </Box>
     {/* Forgot Password Dialog */}
