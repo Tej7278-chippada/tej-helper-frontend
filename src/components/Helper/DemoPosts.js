@@ -50,8 +50,9 @@ const DemoPosts = ({ isMobile, postId}) => {
         console.error('Error fetching post details:', error);
         // Add some demo fallback data for better UX
         setOffers([
-          { data: '', _id: '1', remove: false, title: 'Demo Post 1' },
-          { data: '', _id: '2', remove: false, title: 'Demo Post 2' }
+          { data: '/images/p8.png', _id: '1', remove: false, title: 'Demo Paid Post' },
+          { data: '/images/u9.png', _id: '2', remove: false, title: 'Demo UnPaid Post' },
+          { data: '/images/e3.png', _id: '3', remove: false, title: 'Demo Emergency Post' }
         ]);
       } finally {
         setLoading(false);
@@ -173,7 +174,10 @@ const DemoPosts = ({ isMobile, postId}) => {
             <CardMedia
               component="img"
               height={isMobile ? 200 : 300}
-              image={`data:image/jpeg;base64,${offers[currentIndex]?.data}`}
+              image={ offers[currentIndex]?.data.startsWith('/image') 
+                    ? `${process.env.PUBLIC_URL}${offers[currentIndex]?.data}`
+                    : `data:image/jpeg;base64,${offers[currentIndex]?.data}`
+              }
               alt={offers[currentIndex]?.title}
               onLoad={handleImageLoad}
               sx={{ 
