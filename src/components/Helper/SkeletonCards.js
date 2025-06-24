@@ -13,7 +13,7 @@ const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
 
 const SkeletonCards = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   return (
     <Grid container spacing={1.5}>
@@ -32,6 +32,7 @@ const SkeletonCards = () => {
         </Grid>
       ))}
     </Grid>
-  )};
+  );
+};
 
 export default SkeletonCards;

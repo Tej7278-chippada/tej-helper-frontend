@@ -337,11 +337,12 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, shouldAnimate
                         borderRadius: 2,
                         mb: 1,
                         p: '10px 16px', cursor:'pointer',
-                        '&:hover': { bgcolor: 'grey.100' },
+                        // '&:hover': { bgcolor: 'grey.100' },
                         // borderRadius: '8px',
                           transition: 'transform 0.2s, box-shadow 0.2s, border-radius 0.2s',
                           WebkitTapHighlightColor: 'transparent', // Removes the default tap highlight
                           '&:hover': {
+                            bgcolor: 'grey.100',
                             transform: 'scale(1.01)',
                             boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
                           },
@@ -353,7 +354,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, shouldAnimate
                           borderLeft: !notification.isRead 
                             ? `4px solid ${theme.palette.primary.main}`
                             : 'null', // 4px solid transparent
-                          transition: 'border-left 0.3s ease'
+                          // transition: 'border-left 0.3s ease'
                       }}
                     >
                       <ListItemText

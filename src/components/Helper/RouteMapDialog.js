@@ -122,7 +122,7 @@ function RouteMapDialog({ open, onClose, post }) {
        // Then remove the map
       if (mapInstance) {
         mapInstance.remove(); // Clean up the map instance
-        mapInstance = null;
+        // mapInstance = null;
       }
     };
   }, []);

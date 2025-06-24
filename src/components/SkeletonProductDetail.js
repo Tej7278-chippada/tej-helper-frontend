@@ -13,7 +13,7 @@ const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
 
 const SkeletonProductDetail = () => {
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     return (
         <Box sx={{ padding: '0rem' }}>
             <Grid container spacing={2}>
@@ -66,7 +66,7 @@ const SkeletonProductDetail = () => {
 
             </Grid>
         </Box>
-    )
+    );
 };
 
 export default SkeletonProductDetail;

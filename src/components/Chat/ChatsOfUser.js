@@ -496,7 +496,7 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                           borderLeft: chat.unreadMessagesCount > 0 
                             ? `4px solid ${theme.palette.primary.main}`
                             : '4px solid transparent',
-                          transition: 'border-left 0.3s ease'
+                          // transition: 'border-left 0.3s ease'
                         }}
                         // onClick={() => handleChatClick({ _id: buyer.id })}
                         onClick={() => handleChatClick(chat)}

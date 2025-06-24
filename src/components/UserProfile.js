@@ -19,7 +19,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import CloseIcon from '@mui/icons-material/Close'
+import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 
 

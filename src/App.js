@@ -211,15 +211,17 @@ function App() {
 
   useEffect(() => {
     if ('serviceWorker' in navigator && 'PushManager' in window) {
-      async function registerServiceWorker() {
+      (async () => {
         try {
-          const registration = await navigator.serviceWorker.register('/service-worker.js');
+          // const registration = 
+          await navigator.serviceWorker.register('/service-worker.js');
           console.log('ServiceWorker registration successful');
+          // console.log('Scope is:', registration.scope);
         } catch (err) {
           console.error('ServiceWorker registration failed:', err);
         }
-      }
-      registerServiceWorker();
+      })();
+      // registerServiceWorker();
     }
 
     // Apply dark mode class on initial load

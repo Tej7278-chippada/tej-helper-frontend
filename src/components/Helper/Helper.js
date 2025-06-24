@@ -12,7 +12,7 @@ import { useTheme } from '@emotion/react';
 import API, { fetchPosts } from '../api/api';
 import { useNavigate } from 'react-router-dom';
 // import FilterPosts from './FilterPosts';
-import CloseIcon from '@mui/icons-material/Close'
+import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 // import RefreshIcon from '@mui/icons-material/Refresh';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
@@ -327,7 +327,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     if (!distanceRange || !userLocation) {
       setPosts([]);
       return;
-    };
+    }
     const currentCacheKey = generateCacheKey();
     const fetchData = async () => {
         // setLoading(true);
@@ -377,7 +377,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           setSkip(12); // Set skip to 24 after initial load
           // Check if there are more posts to load
           setHasMore(newPosts.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
-          console.log(`posts fetched in range ${distanceRange} and initial count ${response.data.posts.length} and total count ${response.data.totalCount}`)
+          console.log(`posts fetched in range ${distanceRange} and initial count ${response.data.posts.length} and total count ${response.data.totalCount}`);
         } catch (error) {
           console.error("Error fetching posts:", error);
           setSnackbar({ open: true, message: 'Failed to fetch the posts within your distance radius.', severity: 'error' });
@@ -927,9 +927,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               // width: '90%',
               // maxWidth: '400px',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px', backdropFilter: 'blur(10px)',
-              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+              /* boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', */  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
               // background: 'rgba(255, 255, 255, 0.9)',
-              background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
+              background: 'rgba(255, 255, 255, 0.95)',
               '& .MuiCardContent-root': {padding: '10px' },  }}
           >
             <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>

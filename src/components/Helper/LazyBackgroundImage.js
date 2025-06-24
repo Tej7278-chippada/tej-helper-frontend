@@ -45,7 +45,8 @@ const LazyBackgroundImage = ({ base64Image, alt, children }) => {
           backgroundColor: '#e0e0e0',
           animation: 'pulse 1.5s infinite',
         }} />
-      )}
+      );
+    }
 
   return (
     <div 

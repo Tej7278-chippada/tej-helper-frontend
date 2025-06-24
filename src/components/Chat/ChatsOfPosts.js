@@ -271,12 +271,12 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                           '&:active': {
                             transform: 'scale(1.03)',
                             boxShadow: '0 6px 14px rgba(0, 0, 0, 0.2)',
-                            borderRadius: '14px'
+                            borderRadius: '8px'
                           },
                           borderLeft: chat.unreadMessagesCount > 0 
                             ? `4px solid ${theme.palette.primary.main}`
                             : '4px solid transparent',
-                          transition: 'border-left 0.3s ease'
+                          // transition: 'border-left 0.3s ease'
                         }}
                         // onClick={() => handleChatClick({ _id: buyer.id })}
                         onClick={() => handleChatClick(chat)}
