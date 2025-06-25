@@ -12,7 +12,7 @@ import ForgotPassword from './ForgotPassword';
 // import CloseIcon from '@mui/icons-material/Close';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
-import DemoPosts from './Helper/DemoPosts';
+import DemoPosts from './Banners/DemoPosts';
 
 const theme = createTheme({
   breakpoints: {
@@ -234,7 +234,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           }}>
            "Helper is a community-driven platform connecting people who need help with those willing to offer it—whether for paid work, volunteering, or emergencies."
           </Typography>
-         {!isMobile && <DemoPosts isMobile={isMobile} postId={'685ac2ef1a2841fae5ba564d'} /> }
+         {!isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'} /> }
         </Box>
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh" width= {isMobile ? "auto" : "100%"}
     padding={isMobile ? 2 : 4} // Adjust padding for mobile
@@ -330,7 +330,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           <Button sx={{borderRadius:'12px'}} onClick={() => setForgotPasswordOpen(false)} color="secondary">Close</Button>
         </DialogActions>
       </Dialog>
-       {isMobile && <DemoPosts isMobile={isMobile} postId={'685ac2ef1a2841fae5ba564d'}/> }
+       {isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'}/> }
     </Box>
 </Box>
     {/* Forgot Password Dialog */}

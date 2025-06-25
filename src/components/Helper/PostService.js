@@ -34,7 +34,7 @@ import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import EditNoteRoundedIcon from '@mui/icons-material/EditNoteRounded';
 import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 import EnhancedPostServiceDialog from './EnhancedPostServiceDialog';
-import DemoPosts from './DemoPosts';
+import DemoPosts from '../Banners/DemoPosts';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
 // const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
@@ -344,7 +344,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                     Explore Opportunities
                   </Button>
                 </Box> */}
-                <DemoPosts isMobile={isMobile} postId={'685ac2ef1a2841fae5ba564d'} />
+                <DemoPosts isMobile={isMobile} postId={'685beee058f2f12cad780020'} />
               </Box>
         <Box>
         <Toolbar sx={{display:'flex', justifyContent:'space-between', 

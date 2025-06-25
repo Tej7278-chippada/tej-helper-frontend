@@ -319,7 +319,7 @@ const DemoPosts = ({ isMobile, postId}) => {
               variant={isMobile ? "body2" : "h6"} 
               sx={{ 
                 fontWeight: 600,
-                textShadow: '0 1px 3px rgba(0,0,0,0.5)', textAlign: 'end'
+                textShadow: '0 1px 3px rgba(0,0,0,0.5)', textAlign: 'left'
               }}
             >
               {offers[currentIndex]?.title || `Demo Post ${currentIndex + 1}`}
@@ -335,9 +335,9 @@ const DemoPosts = ({ isMobile, postId}) => {
               bottom: "20px",
               width: "100%",
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "right", right: 16,
               gap: "6px",
-              zIndex: 4
+              zIndex: 4,
             }}
           >
             {offers.map((_, index) => (

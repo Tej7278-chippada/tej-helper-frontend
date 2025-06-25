@@ -26,7 +26,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import DistanceSlider from './DistanceSlider';
 import LazyBackgroundImage from './LazyBackgroundImage';
 import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
-import DemoPosts from './DemoPosts';
+import DemoPosts from '../Banners/DemoPosts';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -672,7 +672,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             Explore Opportunities
           </Button>
         </Box> */}
-        <DemoPosts isMobile={isMobile} postId={'685ac2ef1a2841fae5ba564d'} />
+        <DemoPosts isMobile={isMobile} postId={'685bee5458f2f12cad780008'} />
       </Box>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
