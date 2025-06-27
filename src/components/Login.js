@@ -260,7 +260,51 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
         <TextField
           label="Username or Email"
           variant="outlined"
-          fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
+          fullWidth sx={{ 
+            '& .MuiOutlinedInput-root': { 
+              borderRadius: '12px',
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+              '& fieldset': {
+                borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                transition: 'border-color 0.3s ease',
+              },
+              '&:hover fieldset': {
+                borderColor: '#4361ee',
+                borderWidth: '1px',
+                // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#4361ee',
+                borderWidth: '2px',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+              '&.Mui-focused': {
+                color: '#4361ee',
+              },
+            },
+            '& .MuiInputBase-input': {
+              color: darkMode ? '#ffffff' : '#000000',
+              '&::placeholder': {
+                color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                opacity: 1,
+              },
+            },
+            // Fix for autofill background
+            '& input:-webkit-autofill': {
+              WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+              WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+              caretColor: darkMode ? '#ffffff' : '#000000',
+              // borderRadius: '12px',
+              // opacity: 1,
+            },
+            // '& input:-webkit-autofill:focus': {
+            //   WebkitBoxShadow: darkMode 
+            //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+            //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+            // },
+          }}
           margin="normal"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
@@ -269,18 +313,71 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           label="Password"
           type={showPassword ? 'text' : 'password'} // Toggle between text and password
           variant="outlined"
-          fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
+          fullWidth sx={{ 
+            '& .MuiOutlinedInput-root': { 
+              borderRadius: '12px',
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+              '& fieldset': {
+                borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                transition: 'border-color 0.3s ease',
+              },
+              '&:hover fieldset': {
+                borderColor: '#4361ee',
+                borderWidth: '1px',
+                // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+              },
+              '&.Mui-focused fieldset': {
+                borderColor: '#4361ee',
+                borderWidth: '2px',
+              },
+            },
+            '& .MuiInputLabel-root': {
+              color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+              '&.Mui-focused': {
+                color: '#4361ee',
+              },
+            },
+            '& .MuiInputBase-input': {
+              color: darkMode ? '#ffffff' : '#000000',
+              '&::placeholder': {
+                color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                opacity: 1,
+              },
+            },
+            // Fix for autofill background
+            '& input:-webkit-autofill': {
+              WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+              WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+              caretColor: darkMode ? '#ffffff' : '#000000',
+              // borderRadius: '12px',
+              // opacity: 1,
+            },
+            // '& input:-webkit-autofill:focus': {
+            //   WebkitBoxShadow: darkMode 
+            //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+            //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+            // },
+            '& input[type="password"]::-ms-reveal': {
+              display: 'none',
+            },
+            '& input[type="password"]::-webkit-credentials-auto-fill-button': {
+              display: 'none !important',
+            },
+          }}
           margin="normal"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           InputProps={{
-            endAdornment: isMobile && ( // Only show on desktop screens
+            endAdornment:  ( // Only show on desktop screens // isMobile &&
               <InputAdornment position="end">
                 <IconButton
                   onClick={handleTogglePasswordVisibility}
                   edge="end"
                   aria-label={showPassword ? "Hide password" : "Show password"} // Accessible name
                   title={showPassword ? "Hide password" : "Show password"} // Tooltip for better UX
+                  sx={{
+                    color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                  }}
                 >
                   {showPassword ? <PasswordRoundedIcon /> : <PinOutlinedIcon />}
                 </IconButton>
@@ -288,9 +385,15 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
             ),
           }}
         />
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
-        <Button type="submit" variant="contained"  fullWidth sx={{ marginTop: '1rem', borderRadius:'12px',   background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }} disabled={loading}>
+        {error && <Alert
+         sx={{borderRadius: '12px', color: darkMode ? 'error.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(244, 67, 54, 0.3)' : '1px solid rgba(244, 67, 54, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(244, 67, 54, 0.15)' : '0 2px 8px rgba(244, 67, 54, 0.1)', }} 
+         severity="error">{error}
+        </Alert>}
+        {success && <Alert
+         sx={{borderRadius: '12px', color: darkMode ? 'success.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(76, 175, 80, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(76, 175, 80, 0.15)' : '0 2px 8px rgba(76, 175, 80, 0.1)',}}
+         severity="success">{success}
+        </Alert>}
+        <Button type="submit" variant="contained"  fullWidth sx={{ marginTop: '1rem', borderRadius:'12px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }} disabled={loading}>
         {loading ? <CircularProgress size={24} color="inherit"/> : 'Login'}
         </Button>
         <Button variant="text" color="primary" fullWidth onClick={handleForgotPassword} sx={{ marginTop: '10px', borderRadius:'12px' }}>
@@ -308,9 +411,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           </Link>
         </Typography>
       </form>
-      <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)} maxWidth="sm" fullWidth fullScreen={isMobile ? true : false}
-        sx={{ margin: '1rem', '& .MuiPaper-root': { backdropFilter: 'blur(20px)',borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },'& .MuiDialogContent-root': { padding: isMobile ? '1rem' : '1rem', },}}>
-        <DialogContent sx={{scrollbarWidth:'thin'}}>
+      
         {/* Close button */}
         {/* <IconButton
           onClick={() => setForgotPasswordOpen(false)}
@@ -324,12 +425,8 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
         >
           <CloseIcon />
         </IconButton> */}
-              <ForgotPassword />
-        </DialogContent>
-        <DialogActions>
-          <Button sx={{borderRadius:'12px'}} onClick={() => setForgotPasswordOpen(false)} color="secondary">Close</Button>
-        </DialogActions>
-      </Dialog>
+              <ForgotPassword darkMode={darkMode} forgotPasswordOpen={forgotPasswordOpen} setForgotPasswordOpen={setForgotPasswordOpen} isMobile={isMobile}/>
+       
        {isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'}/> }
     </Box>
 </Box>

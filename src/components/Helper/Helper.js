@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Select, Snackbar, Stack, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -49,6 +49,19 @@ const DEFAULT_FILTERS = {
   postStatus: '',
   priceRange: [0, 100000]
 };
+
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
 
 // Enhanced glassmorphism styles
 // const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
@@ -674,6 +687,39 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         </Box> */}
         <DemoPosts isMobile={isMobile} postId={'685bee5458f2f12cad780008'} />
       </Box>
+      <Paper
+        sx={{
+          // position: 'fixed',
+          // bottom: 0,
+          // left: 0,
+          // right: 0,
+          zIndex: 1200, ...getGlassmorphismStyle(theme, darkMode), m: '12px', p:'12px',
+          // background: 'rgba(255, 255, 255, 0.85)',
+          // backdropFilter: 'blur(20px)',
+          // borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+          borderRadius: '12px',
+          // borderTopRightRadius: '20px',
+          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+          // transform: visible ? 'translateY(0)' : 'translateY(100%)',
+          // opacity: visible ? 1 : 0,
+          // pointerEvents: visible ? 'auto' : 'none',
+          // boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.1)',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0), transparent)',
+          }
+        }}
+        elevation={3}
+      >
+        <Typography textAlign="center">
+          Category Bar (Under development)
+        </Typography>
+      </Paper>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',

@@ -1,6 +1,6 @@
 // /src/components/Register.js
 import React, { useState } from 'react';
-import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton, MenuItem } from '@mui/material';
+import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton, MenuItem, Paper } from '@mui/material';
 import axios from 'axios';
 import Layout from './Layout';
 import Cropper from 'react-easy-crop';
@@ -18,6 +18,20 @@ const theme = createTheme({
       xl: 1920,
     },
   },
+});
+
+// Custom glassmorphism styling
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(205, 201, 201, 0.15)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
 // const indianStates = [
@@ -349,10 +363,56 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                 <TextField
                   label="Username (Format ex: Abc1234)"
                   variant="outlined"
-                  fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, maxWidth: '280px' }}
+                  fullWidth 
+                  // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, maxWidth: '280px' }}
                   margin="normal"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)} required
+                  sx={{ maxWidth: '280px',
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '12px',
+                      backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                      '& fieldset': {
+                        borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                        transition: 'border-color 0.3s ease',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#4361ee',
+                        borderWidth: '1px',
+                        // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#4361ee',
+                        borderWidth: '2px',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                      '&.Mui-focused': {
+                        color: '#4361ee',
+                      },
+                    },
+                    '& .MuiInputBase-input': {
+                      color: darkMode ? '#ffffff' : '#000000',
+                      '&::placeholder': {
+                        color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                        opacity: 1,
+                      },
+                    },
+                    // Fix for autofill background
+                    '& input:-webkit-autofill': {
+                      WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+                      WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+                      caretColor: darkMode ? '#ffffff' : '#000000',
+                      // borderRadius: '12px',
+                      // opacity: 1,
+                    },
+                    // '& input:-webkit-autofill:focus': {
+                    //   WebkitBoxShadow: darkMode 
+                    //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+                    //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+                    // },
+                  }}
                 />
               </Box>
             </Box>
@@ -362,12 +422,14 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                 borderRadius: '16px', // Apply border radius
                 minHeight: '500px'},  }}
             >
-              <DialogTitle>Add Profile Pic
+              <DialogTitle>
+                <Typography variant="h6" color={darkMode ? 'white' : 'black'} gutterBottom>Add Profile Pic</Typography>
                 <IconButton
                   onClick={() => setCropDialog(false)}
-                  style={{
+                  sx={{
                     position: 'absolute', top: 10, right: 10,
-                    // color: '#fff', backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                    color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                    // backgroundColor: 'rgba(0, 0, 0, 0.2)',
                   }}
                 >
                   <CloseIcon />
@@ -449,7 +511,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   {/* <Button onClick={handleCancelImg} sx={{borderRadius: '12px'}}>Cancel</Button> */}
                   <Button variant="contained"
                     onClick={handleSaveImg}
-                    disabled={!profilePic} sx={{borderRadius: '12px'}}
+                    disabled={!profilePic} sx={{borderRadius: '12px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'}}
                   >
                     Save
                   </Button>
@@ -457,8 +519,8 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
               </DialogActions>
             </Dialog>
 
-            <Box sx={{display: 'flex', mb: 3, bgcolor: '#f5f5f5', p: isMobile ? 1 : 2, borderRadius: '12px' }}>
-              <Box sx={{ bgcolor: 'white', p: 1, px: 2, borderRadius: '12px' }}>
+            <Paper sx={{display: 'flex', mb: 3,  p: isMobile ? 1 : 2, borderRadius: '12px', ...getGlassmorphismStyle(theme, darkMode), }}> {/* bgcolor: '#f5f5f5', */}
+              <Box sx={{  p: 1, px: 2, borderRadius: '12px' }}>
                 {/* <TextField
                   label="Username (Format ex: Abc1234)"
                   variant="outlined"
@@ -467,49 +529,260 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)} required
                 /> */}
-                <TextField label="Email" fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }} margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} required/>
-                <TextField label="Phone" fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }} margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} required/>
+                <TextField label="Email" fullWidth 
+                  // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }} 
+                  margin="normal" value={email} onChange={(e) => setEmail(e.target.value)} required
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '12px',
+                      backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                      '& fieldset': {
+                        borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                        transition: 'border-color 0.3s ease',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#4361ee',
+                        borderWidth: '1px',
+                        // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#4361ee',
+                        borderWidth: '2px',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                      '&.Mui-focused': {
+                        color: '#4361ee',
+                      },
+                    },
+                    '& .MuiInputBase-input': { padding: '14px 14px', 
+                      color: darkMode ? '#ffffff' : '#000000',
+                      '&::placeholder': {
+                        color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                        opacity: 1,
+                      },
+                    },
+                    // Fix for autofill background
+                    '& input:-webkit-autofill': {
+                      WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+                      WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+                      caretColor: darkMode ? '#ffffff' : '#000000',
+                      // borderRadius: '12px',
+                      // opacity: 1,
+                    },
+                    // '& input:-webkit-autofill:focus': {
+                    //   WebkitBoxShadow: darkMode 
+                    //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+                    //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+                    // },
+                  }}
+                />
+                <TextField label="Phone" fullWidth 
+                  // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
+                  margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} required
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '12px',
+                      backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                      '& fieldset': {
+                        borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                        transition: 'border-color 0.3s ease',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#4361ee',
+                        borderWidth: '1px',
+                        // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#4361ee',
+                        borderWidth: '2px',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                      '&.Mui-focused': {
+                        color: '#4361ee',
+                      },
+                    },
+                    '& .MuiInputBase-input': { padding: '14px 14px', 
+                      color: darkMode ? '#ffffff' : '#000000',
+                      '&::placeholder': {
+                        color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                        opacity: 1,
+                      },
+                    },
+                    // Fix for autofill background
+                    '& input:-webkit-autofill': {
+                      WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+                      WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+                      caretColor: darkMode ? '#ffffff' : '#000000',
+                      // borderRadius: '12px',
+                      // opacity: 1,
+                    },
+                    // '& input:-webkit-autofill:focus': {
+                    //   WebkitBoxShadow: darkMode 
+                    //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+                    //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+                    // },
+                  }}
+                />
                 <TextField
                   label="Password"
                   type={showPassword ? 'text' : 'password'} // Toggle between text and password
                   variant="outlined"
-                  fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
+                  fullWidth 
+                  // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
                   margin="normal"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   InputProps={{
-                    endAdornment: isMobile && ( // Only show on desktop screens
+                    endAdornment: ( // Only show on mobile screens isMobile && 
                       <InputAdornment position="end">
                         <IconButton
                           onClick={handleTogglePasswordVisibility}
                           edge="end"
+                          sx={{
+                            color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                          }}
                         >
                           {showPassword ? <PasswordRoundedIcon /> : <PinOutlinedIcon />}
                         </IconButton>
                       </InputAdornment>
                     ),
+                    // style: {
+                    //   // Hide default password reveal button
+                    //   WebkitAppearance: 'none',
+                    //   MozAppearance: 'textfield',
+                    // },
                   }} required
+                  sx={{ 
+                  '& .MuiOutlinedInput-root': { 
+                    borderRadius: '12px',
+                    backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                    '& fieldset': {
+                      borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                      transition: 'border-color 0.3s ease',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#4361ee',
+                      borderWidth: '1px',
+                      // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#4361ee',
+                      borderWidth: '2px',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                    '&.Mui-focused': {
+                      color: '#4361ee',
+                    },
+                  },
+                  '& .MuiInputBase-input': { padding: '14px 14px', 
+                    color: darkMode ? '#ffffff' : '#000000',
+                    '&::placeholder': {
+                      color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                      opacity: 1,
+                    },
+                  },
+                  // Fix for autofill background
+                  '& input:-webkit-autofill': {
+                    WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+                    WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+                    caretColor: darkMode ? '#ffffff' : '#000000',
+                    // borderRadius: '12px',
+                    // opacity: 1,
+                  },
+                  // '& input:-webkit-autofill:focus': {
+                  //   WebkitBoxShadow: darkMode 
+                  //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+                  //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+                  // },
+                  '& input[type="password"]::-ms-reveal': {
+                    display: 'none',
+                  },
+                  '& input[type="password"]::-webkit-credentials-auto-fill-button': {
+                    display: 'none !important',
+                  },
+                }}
                 />
                 <TextField
                   label="Confirm Password"
                   type={showConfirmPassword ? 'text' : 'password'} // Toggle between text and password
                   variant="outlined"
-                  fullWidth sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
+                  fullWidth 
+                  // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
                   margin="normal"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   InputProps={{
-                    endAdornment: isMobile && ( // Only show on desktop screens
+                    endAdornment: ( // Only show on desktop screens
                       <InputAdornment position="end">
                         <IconButton
                           onClick={handleToggleConfirmPasswordVisibility}
                           edge="end"
+                          sx={{
+                            color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                          }}
                         >
                           {showConfirmPassword ? <PasswordRoundedIcon /> : <PinOutlinedIcon />}
                         </IconButton>
                       </InputAdornment>
                     ),
                   }} required
+                   sx={{ 
+                  '& .MuiOutlinedInput-root': { 
+                    borderRadius: '12px',
+                    backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+                    '& fieldset': {
+                      borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.23)',
+                      transition: 'border-color 0.3s ease',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#4361ee',
+                      borderWidth: '1px',
+                      // borderColor: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#4361ee',
+                      borderWidth: '2px',
+                    },
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                    '&.Mui-focused': {
+                      color: '#4361ee',
+                    },
+                  },
+                  '& .MuiInputBase-input': { padding: '14px 14px', 
+                    color: darkMode ? '#ffffff' : '#000000',
+                    '&::placeholder': {
+                      color: darkMode ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)',
+                      opacity: 1,
+                    },
+                  },
+                  // Fix for autofill background
+                  '& input:-webkit-autofill': {
+                    WebkitBoxShadow: darkMode ? '0 0 0 100px #121212 inset' : '0 0 0 100pxrgba(255, 255, 255, 0.07) inset',
+                    WebkitTextFillColor: darkMode ? '#ffffff' : '#000000',
+                    caretColor: darkMode ? '#ffffff' : '#000000',
+                    // borderRadius: '12px',
+                    // opacity: 1,
+                  },
+                  // '& input:-webkit-autofill:focus': {
+                  //   WebkitBoxShadow: darkMode 
+                  //     ? '0 0 0 100px #121212 inset, 0 0 0 2px #90caf9' 
+                  //     : '0 0 0 100px #ffffff inset, 0 0 0 2px #90caf9',
+                  // },
+                  '& input[type="password"]::-ms-reveal': {
+                    display: 'none',
+                  },
+                  '& input[type="password"]::-webkit-credentials-auto-fill-button': {
+                    display: 'none !important',
+                  },
+                }}
                 />
               </Box>
               
@@ -565,12 +838,16 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   ))}
                 </TextField>
               </Box> */}
-            </Box>
+            </Paper>
 
             <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              {error && <Alert severity="error">{error}</Alert>}
-              {success && <Alert severity="success">{success}</Alert>}
-              <Button type="submit" sx={{marginTop:'1rem', borderRadius:'12px', maxWidth: isMobile ? '300px' : '500px',}} variant="contained" color="primary" fullWidth disabled={loading}>
+              {error && <Alert  
+                sx={{borderRadius: '12px', color: darkMode ? 'error.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(244, 67, 54, 0.3)' : '1px solid rgba(244, 67, 54, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(244, 67, 54, 0.15)' : '0 2px 8px rgba(244, 67, 54, 0.1)', }} 
+              severity="error">{error}</Alert>}
+              {success && <Alert
+                sx={{borderRadius: '12px', color: darkMode ? 'success.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(76, 175, 80, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(76, 175, 80, 0.15)' : '0 2px 8px rgba(76, 175, 80, 0.1)',}}
+              severity="success">{success}</Alert>}
+              <Button type="submit" sx={{marginTop:'1rem', borderRadius:'12px', maxWidth: isMobile ? '300px' : '500px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'}} variant="contained" color="primary" fullWidth disabled={loading}>
                 {loading ? <CircularProgress size={24} /> : 'Register'}
               </Button>
               <Typography variant="body2" align="center" sx={{ marginTop: '10px' }}>
