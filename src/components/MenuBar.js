@@ -97,7 +97,7 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
   return (
     <Paper
       sx={{
-        position: 'fixed',
+        position: 'fixed', m: "8px 16px ", borderRadius: '16px',
         bottom: 0,
         left: 0,
         right: 0,
@@ -105,8 +105,8 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
         // background: 'rgba(255, 255, 255, 0.85)',
         // backdropFilter: 'blur(20px)',
         // borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-        borderTopLeftRadius: '20px',
-        borderTopRightRadius: '20px',
+        // borderTopLeftRadius: '20px',
+        // borderTopRightRadius: '20px',
         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: visible ? 'translateY(0)' : 'translateY(100%)',
         opacity: visible ? 1 : 0,

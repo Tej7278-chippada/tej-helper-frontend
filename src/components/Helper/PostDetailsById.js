@@ -755,10 +755,10 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                       <Box >
                         <Button
                           variant="contained"
-                          color="primary"
+                          // color="primary"
                           // onClick={() => openRouteMapDialog(post)}
                           // disabled={stockCountId === 0}
-                          style={{ margin: "0rem", borderRadius: '8px' }}
+                          sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }}
                           startIcon={<ForumRoundedIcon />}
                           onClick={() => setChatDialogOpen(true)}
                         >
