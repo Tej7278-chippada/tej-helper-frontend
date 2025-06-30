@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -28,6 +28,7 @@ import LazyBackgroundImage from './LazyBackgroundImage';
 import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
 import DemoPosts from '../Banners/DemoPosts';
 import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -63,6 +64,45 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
     ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
+
+const SearchContainer = styled(Box)(({ theme }) => ({
+  display: 'flex', 
+  justifyContent: 'flex-end', 
+  transition: 'all 0.3s ease',
+}));
+
+const SearchTextField = styled(TextField)(({ theme, expanded, darkMode }) => ({
+  transition: 'all 0.3s ease',
+  width: expanded ? '100%' : '40px',
+  overflow: 'hidden',
+  // ...getGlassmorphismStyle(),
+  // background:'rgba(0,0,0,0)',
+  '& .MuiInputBase-root': {
+    height: '40px',
+    borderRadius: '20px',
+    '& .MuiOutlinedInput-notchedOutline': {
+      border: 'none',
+    },
+    '&.Mui-focused': {
+      // ...getGlassmorphismStyle(0.25, 20),
+      // background:'rgba(0,0,0,0)',
+      background: darkMode 
+        ? 'rgba(205, 201, 201, 0.15)' 
+        : 'rgba(255, 255, 255, 0.15)',
+      backdropFilter: 'blur(20px)',
+      border: darkMode 
+        ? '1px solid rgba(255, 255, 255, 0.1)' 
+        : '1px solid rgba(255, 255, 255, 0.2)',
+    },
+  },
+  '& .MuiInputBase-input': {
+    opacity: expanded ? 1 : 0,
+    transition: 'opacity 0.2s ease',
+    padding: expanded ? '6px 12px 6px 12px' : '6px 0',
+    cursor: expanded ? 'text' : 'pointer',
+    // ...getGlassmorphismStyle(),
+  },
+}));
 
 // Enhanced glassmorphism styles
 // const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
@@ -332,6 +372,24 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     return savedSearch || '';
   });
   const [isSearching, setIsSearching] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const inputRef = useRef(null);
+
+  const handleSearchClick = () => {
+    setExpanded(true);
+    setTimeout(() => inputRef.current?.focus(), 100); // Small delay for smooth expansion
+  };
+
+  const handleClearClick = () => {
+    setSearchQuery('');
+    inputRef.current?.focus();
+  };
+
+  const handleBlur = () => {
+    if (!searchQuery) {
+      setExpanded(false);
+    }
+  };
 
   // Generate a cache key based on current filters/location/searchQuery
   const generateCacheKey = useCallback(() => {
@@ -986,7 +1044,56 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           )}
           </Box>
           {/* Search Bar */}
-          {!isMobile && (<>
+          {!isMobile && <SearchContainer>
+            <Box>
+            <SearchTextField
+              variant="outlined"
+              placeholder={expanded ? "Search posts..." : ""}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setExpanded(true)}
+              onBlur={handleBlur}
+              inputRef={inputRef}
+              expanded={expanded} darkMode={darkMode}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconButton 
+                      onClick={!expanded ? handleSearchClick : undefined}
+                      sx={{
+                        minWidth: '40px',
+                        minHeight: '40px',
+                        // marginLeft: expanded ? '8px' : '0px',
+                      }}
+                    >
+                      {isSearching ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <SearchIcon color="action" />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                endAdornment: expanded && searchQuery && (
+                  <InputAdornment position="end">
+                    <IconButton 
+                      onClick={handleClearClick}
+                      size="small"
+                      sx={{ mr: '6px' }}
+                    >
+                      <ClearIcon color="action" fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  padding: 0,
+                }
+              }}
+            />
+            
+            </Box>
+          </SearchContainer>}
+          {/* {!isMobile && (<>
             <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -1032,8 +1139,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               }}
             />
           </Box>
-            </>)}
-          <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-6px'}}>
+            </>)} */}
+          {isMobile && !expanded && <IconButton 
+            onClick={!expanded ? handleSearchClick : undefined}
+            sx={{
+              minWidth: '40px',
+              minHeight: '40px',
+              marginLeft: expanded ? '8px' : '0px',
+            }}
+          >
+            {isSearching ? (
+              <CircularProgress size={16} />
+            ) : (
+              <SearchIcon color="action" />
+            )}
+          </IconButton>}
+          <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-6px', marginLeft:'8px'}}>
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
           <Button
@@ -1407,7 +1528,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           
         </Toolbar>
         {/* Search Bar */}
-        {isMobile && (<>
+        {/* {isMobile && (<>
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center',
@@ -1452,7 +1573,57 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               }
             }}
           />
-        </Box></>)}
+        </Box></>)} */}
+        {/* Search Bar */}
+         {isMobile && expanded &&  <SearchContainer sx={{mx : 2}}>
+            <Box>
+            <SearchTextField
+              variant="outlined"
+              placeholder={expanded ? "Search posts..." : ""}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setExpanded(true)}
+              onBlur={handleBlur}
+              inputRef={inputRef}
+              expanded={expanded} darkMode={darkMode}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconButton 
+                      onClick={!expanded ? handleSearchClick : undefined}
+                      sx={{
+                        minWidth: '40px',
+                        minHeight: '40px',
+                        // marginLeft: expanded ? '8px' : '0px',
+                      }}
+                    >
+                      {isSearching ? (
+                        <CircularProgress size={16} />
+                      ) : (
+                        <SearchIcon color="action" />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                endAdornment: expanded && searchQuery && (
+                  <InputAdornment position="end">
+                    <IconButton 
+                      onClick={handleClearClick}
+                      size="small"
+                      sx={{ mr: '6px' }}
+                    >
+                      <ClearIcon color="action" fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  p: 0,
+                }
+              }}
+            />
+            
+            </Box>
+          </SearchContainer> }
 
         <Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
