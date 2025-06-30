@@ -101,13 +101,18 @@ export const fetchUserPosts = () => {
 };
 
 // export const fetchPosts = () => API.get('/api/posts');
-export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}) => {
+export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '') => {
   const params = { skip, limit,
     categories: filters.categories,
     gender: filters.gender,
     postStatus: filters.postStatus,
     price: `${filters.priceRange[0]}-${filters.priceRange[1]}`
   };
+
+  // Add search query parameter
+  if (searchQuery && searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
   
   // Add location parameters if provided
   if (userLocation && distanceRange) {

@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -27,6 +27,7 @@ import DistanceSlider from './DistanceSlider';
 import LazyBackgroundImage from './LazyBackgroundImage';
 import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
 import DemoPosts from '../Banners/DemoPosts';
+import SearchIcon from '@mui/icons-material/Search';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -325,15 +326,44 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     }
   }, [fetchUserLocation]);
 
-  // Generate a cache key based on current filters/location
+  // Add search state at the top with other state declarations
+  const [searchQuery, setSearchQuery] = useState(() => {
+  const savedSearch = localStorage.getItem('helperSearchQuery');
+    return savedSearch || '';
+  });
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Generate a cache key based on current filters/location/searchQuery
   const generateCacheKey = useCallback(() => {
     return JSON.stringify({
       lat: userLocation?.latitude,
       lng: userLocation?.longitude,
       distance: distanceRange,
+      search: searchQuery, // Add search query to cache key
       ...filters
     });
-  }, [userLocation, distanceRange, filters]);
+  }, [userLocation, distanceRange, filters, searchQuery]);
+
+  // Add this effect to save search query to localStorage
+  useEffect(() => {
+    localStorage.setItem('helperSearchQuery', searchQuery);
+  }, [searchQuery]);
+
+  // Add search handler function
+  const handleSearch = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    setSkip(0); // Reset pagination when searching
+    // Clear cache for the old search query
+    globalCache.lastCacheKey = null;
+  };
+
+  // Add clear search handler
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    setSkip(0);
+    globalCache.lastCacheKey = null;
+  };
 
   // Fetch posts data
   useEffect(() => {
@@ -347,6 +377,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
         try {
           setLoading(true);
+          setIsSearching(!!searchQuery); // Set searching state based on query
+          // if (globalCache.lastSearchQuery) {
+          //   setSearchQuery(globalCache.lastSearchQuery);
+          //   // // Trigger a search if we have a cached query
+          //   // const timer = setTimeout(() => {
+          //   //   handleSearch();
+          //   // }, 100);
+            
+          //   // return () => clearTimeout(timer);
+          // }
           // Check if we have valid cached data
           if (globalCache.data[currentCacheKey] && 
             globalCache.lastCacheKey === currentCacheKey &&
@@ -358,6 +398,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               setHasMore(cachedHasMore);
               setTotalPosts(globalCache.totalPostsCount);
               setLoading(false);
+              setIsSearching(false);
               
               // Reset scroll restoration flag
               hasRestoredScroll.current = false;
@@ -365,7 +406,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               return;
             }
           // No valid cache - fetch fresh data
-          const response = await fetchPosts(0, 12, userLocation, distanceRange, filters);
+          const response = await fetchPosts(0, 12, userLocation, distanceRange, filters, searchQuery);
           const newPosts = response.data.posts || [];
           setTotalPosts(response.data.totalCount);
           globalCache.totalPostsCount = (response.data.totalCount);
@@ -390,18 +431,19 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           setSkip(12); // Set skip to 24 after initial load
           // Check if there are more posts to load
           setHasMore(newPosts.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
-          console.log(`posts fetched in range ${distanceRange} and initial count ${response.data.posts.length} and total count ${response.data.totalCount}`);
+          console.log(`posts fetched in range ${distanceRange} with search "${searchQuery}" and initial count ${response.data.posts.length} and total count ${response.data.totalCount}`);
         } catch (error) {
           console.error("Error fetching posts:", error);
           setSnackbar({ open: true, message: 'Failed to fetch the posts within your distance radius.', severity: 'error' });
         } finally {
           setLoading(false);
+          setIsSearching(false);
         }
     };
     if (userLocation && distanceRange) {
       fetchData();
     }
-  }, [userLocation, distanceRange, filters, generateCacheKey]); // Add distanceRange as dependency
+  }, [userLocation, distanceRange, filters, generateCacheKey, searchQuery]); // Add distanceRange as dependency
 
   // Load more posts function
   const loadMorePosts = async () => {
@@ -409,7 +451,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     
     try {
       setLoadingMore(true);
-      const response = await fetchPosts(skip, 12, userLocation, distanceRange, filters);
+      const response = await fetchPosts(skip, 12, userLocation, distanceRange, filters, searchQuery);
       const newPosts = response.data.posts || [];
       
       if (newPosts.length > 0) {
@@ -429,7 +471,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         setSkip(prevSkip => prevSkip + newPosts.length);
         // Update hasMore based on whether we've reached the total count
         setHasMore(updatedPosts.length < response.data.totalCount);
-        console.log(`Fetched ${newPosts.length} new posts (skip: ${skip}, total: ${response.data.totalCount})`);
+        console.log(`Fetched ${newPosts.length} new posts with search "${searchQuery}"  (skip: ${skip}, total: ${response.data.totalCount})`);
       } else {
         setHasMore(false);
       }
@@ -442,6 +484,19 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setLoadingMore(false);
     }
   };
+
+  // Add this function to clear search query on page refresh
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Only clear on actual page refresh, not navigation
+      localStorage.removeItem('helperSearchQuery');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   // Get user's current location
   // useEffect(() => {
@@ -770,6 +825,52 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           {/* <IconButton color="primary">
             <RefreshIcon onClick={refreshLocation} />
           </IconButton> */}
+          {/* Search Bar */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            flexGrow: 1, 
+            maxWidth: isMobile ? '200px' : '300px',
+            marginRight: '8px'
+          }}>
+            <TextField
+              placeholder="Search posts..."
+              value={searchQuery}
+              onChange={handleSearch}
+              size="small"
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                    {isSearching ? (
+                      <CircularProgress size={16} />
+                    ) : (
+                      <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    )}
+                  </Box>
+                ),
+                endAdornment: searchQuery && (
+                  <IconButton
+                    size="small"
+                    onClick={handleClearSearch}
+                    sx={{ p: 0.5 }}
+                  >
+                    <CloseIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                ),
+                sx: {
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  },
+                  '&.Mui-focused': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  }
+                }
+              }}
+            />
+          </Box>
           {/* Floating Map Card */}
           {showMap && (
             <Card
@@ -1141,10 +1242,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   *Distance range {isMobile ? '\n' : ' '} upto 1000km
                 </Typography> */}
               </Box>
-
+              <Divider/>
               <Box sx={{maxWidth: '450px'}}>
                 {/* Filter Card */}
-                <Card sx={{
+                <Box sx={{
                   m: 0,
                   // bgcolor: '#f5f5f5',
                   borderRadius: '8px',
@@ -1254,7 +1355,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       </Box>
                     </CardContent>
                   }
-                </Card>
+                </Box>
               </Box>
             </Box>
           </Card>
@@ -1624,15 +1725,30 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
                 />
                 <Typography variant="body1" color="text.secondary">
-                  No posts found within {distanceRange} km of your location...
+                  {searchQuery 
+                    ? `No posts found for "${searchQuery}" within ${distanceRange} km`
+                    : `No posts found within ${distanceRange} km of your location...`
+                  }
                 </Typography>
-                <Button 
-                  variant="text" disabled={distanceRange >= 100}
-                  sx={{ mt: 2, borderRadius: '12px' }}
-                  onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
-                >
-                  Increase Search Radius
-                </Button>
+                {searchQuery && (
+                  <Button 
+                    variant="outlined" 
+                    sx={{ mt: 2, borderRadius: '12px' }}
+                    onClick={handleClearSearch}
+                  >
+                    Clear Search
+                  </Button>
+                )}
+                {!searchQuery && (
+                  <Button 
+                    variant="outlined" 
+                    disabled={distanceRange >= 100}
+                    sx={{ mt: 2, borderRadius: '12px' }}
+                    onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
+                  >
+                    Increase Search Radius
+                  </Button>
+                )}
               </Box>
             )
             )}
