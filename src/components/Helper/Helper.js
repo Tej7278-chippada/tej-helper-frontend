@@ -825,52 +825,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           {/* <IconButton color="primary">
             <RefreshIcon onClick={refreshLocation} />
           </IconButton> */}
-          {/* Search Bar */}
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            flexGrow: 1, 
-            maxWidth: isMobile ? '200px' : '300px',
-            marginRight: '8px'
-          }}>
-            <TextField
-              placeholder="Search posts..."
-              value={searchQuery}
-              onChange={handleSearch}
-              size="small"
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
-                    {isSearching ? (
-                      <CircularProgress size={16} />
-                    ) : (
-                      <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
-                    )}
-                  </Box>
-                ),
-                endAdornment: searchQuery && (
-                  <IconButton
-                    size="small"
-                    onClick={handleClearSearch}
-                    sx={{ p: 0.5 }}
-                  >
-                    <CloseIcon sx={{ fontSize: 16 }} />
-                  </IconButton>
-                ),
-                sx: {
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                  },
-                  '&.Mui-focused': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                  }
-                }
-              }}
-            />
-          </Box>
+          
           {/* Floating Map Card */}
           {showMap && (
             <Card
@@ -1030,6 +985,54 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             </Card>
           )}
           </Box>
+          {/* Search Bar */}
+          {!isMobile && (<>
+            <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            flexGrow: 1, 
+            maxWidth: isMobile ? '200px' : '300px',
+            marginRight: '8px'
+          }}>
+            <TextField
+              placeholder="Search posts..."
+              value={searchQuery}
+              onChange={handleSearch}
+              size="small"
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                    {isSearching ? (
+                      <CircularProgress size={16} />
+                    ) : (
+                      <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    )}
+                  </Box>
+                ),
+                endAdornment: searchQuery && (
+                  <IconButton
+                    size="small"
+                    onClick={handleClearSearch}
+                    sx={{ p: 0.5 }}
+                  >
+                    <CloseIcon sx={{ fontSize: 16 }} />
+                  </IconButton>
+                ),
+                sx: {
+                  borderRadius: '12px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                  },
+                  '&.Mui-focused': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  }
+                }
+              }}
+            />
+          </Box>
+            </>)}
           <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-6px'}}>
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
@@ -1403,6 +1406,53 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </Box>
           
         </Toolbar>
+        {/* Search Bar */}
+        {isMobile && (<>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          // flexGrow: 1, 
+          // maxWidth: isMobile ? '200px' : '300px',
+          mx: 3
+        }}>
+          <TextField
+            placeholder="Search posts..."
+            value={searchQuery}
+            onChange={handleSearch}
+            size="small"
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ mr: 1, display: 'flex', alignItems: 'center' }}>
+                  {isSearching ? (
+                    <CircularProgress size={16} />
+                  ) : (
+                    <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                  )}
+                </Box>
+              ),
+              endAdornment: searchQuery && (
+                <IconButton
+                  size="small"
+                  onClick={handleClearSearch}
+                  sx={{ p: 0.5 }}
+                >
+                  <CloseIcon sx={{ fontSize: 16 }} />
+                </IconButton>
+              ),
+              sx: {
+                borderRadius: '12px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                },
+                '&.Mui-focused': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                }
+              }
+            }}
+          />
+        </Box></>)}
 
         <Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
