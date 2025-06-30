@@ -562,7 +562,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
                       sx={{
                         width: 40,
                         height: 40,
-                        border: '3px solid rgba(255, 255, 255, 0.8)',
+                        border: darkMode ? '3px solid rgba(168, 168, 168, 0.8)' : '3px solid rgba(255, 255, 255, 0.8)',
                         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
                         transition: 'all 0.3s ease',
                         background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',

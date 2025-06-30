@@ -29,6 +29,7 @@ import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
 import DemoPosts from '../Banners/DemoPosts';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import CategoryBar from './CategoryBar';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -212,10 +213,29 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     setShowDistanceRanges(false);
   };
 
+  const [selectedCategory, setSelectedCategory] = useState('');
+  // useEffect to sync selectedCategory with filters
+  useEffect(() => {
+    setSelectedCategory(filters.categories || '');
+  }, [filters.categories]);
+
+  // function to handle category selection
+  const handleCategorySelect = (category) => {
+    setSelectedCategory(category);
+    // Update filters with selected category
+    const newFilters = { ...filters, categories: category };
+    setFilters(newFilters);
+    setLocalFilters(newFilters);
+    setSkip(0);
+    // Clear cache for the old filter combination
+    globalCache.lastCacheKey = null;
+  };
+
   // Reset filters
   const handleResetFilters = () => {
     setLocalFilters(DEFAULT_FILTERS);
     setFilters(DEFAULT_FILTERS);
+    setSelectedCategory(''); // for category bar 'ALL' selection 
     setSkip(0);
     setPosts([]);
     // Clear cache for the old filter combination
@@ -800,7 +820,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         </Box> */}
         <DemoPosts isMobile={isMobile} postId={'685bee5458f2f12cad780008'} />
       </Box>
-      <Paper
+      {/* <Paper
         sx={{
           // position: 'fixed',
           // bottom: 0,
@@ -832,7 +852,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         <Typography textAlign="center">
           Category Bar (Under development)
         </Typography>
-      </Paper>
+      </Paper> */}
+      <CategoryBar selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} darkMode={darkMode} isMobile={isMobile}/>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
