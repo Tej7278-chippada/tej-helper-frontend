@@ -864,7 +864,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setTimeTo(null);
       setProtectLocation(false);
       setFakeAddress('');
-      setActiveStep(0);
+      // setActiveStep(0);
       setValidationErrors({});
       await fetchPostsData(); // Refresh products list
       handleCloseDialog();       // Close dialog
@@ -1686,6 +1686,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             </Alert>
           )} */}
           {/* Post Type Selection */}
+          {!editingProduct && (
           <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
@@ -1740,7 +1741,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 <FormHelperText error sx={{ mt: -1, mb: 1 }}>{validationErrors.postType}</FormHelperText>
               )}
             </CardContent>
-          </Card>
+          </Card>)}
 
           {/* Category Selection based on Post Type */}
           <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
