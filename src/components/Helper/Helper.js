@@ -51,7 +51,8 @@ const DEFAULT_FILTERS = {
   serviceType: '',
   gender: '',
   postStatus: '',
-  priceRange: [0, 100000]
+  priceRange: [0, 100000],
+  postType: 'HelpRequest' // added this line for only shows the Helper posts on ALL section
 };
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
@@ -234,7 +235,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     const newFilters = { 
       ...filters,
       categories: isCategory ? value : '',
-      serviceType: isService ? value : ''
+      serviceType: isService ? value : '',
+      postType: isService ? 'ServiceOffering' : 'HelpRequest' // added this line for only shows the Helper posts on ALL section
     };
 
     setFilters(newFilters);

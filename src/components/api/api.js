@@ -107,7 +107,8 @@ export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRa
     serviceType: filters.serviceType,
     gender: filters.gender,
     postStatus: filters.postStatus,
-    price: `${filters.priceRange[0]}-${filters.priceRange[1]}`
+    price: `${filters.priceRange[0]}-${filters.priceRange[1]}`,
+    postType: filters.serviceType ? 'ServiceOffering' : 'HelpRequest' // added this line for only shows the Helper posts on ALL section
   };
 
   // Add search query parameter
