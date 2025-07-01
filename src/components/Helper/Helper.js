@@ -48,6 +48,7 @@ const globalCache = {
 // Default filter values
 const DEFAULT_FILTERS = {
   categories: '',
+  serviceType: '',
   gender: '',
   postStatus: '',
   priceRange: [0, 100000]
@@ -216,14 +217,26 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const [selectedCategory, setSelectedCategory] = useState('');
   // useEffect to sync selectedCategory with filters
   useEffect(() => {
-    setSelectedCategory(filters.categories || '');
-  }, [filters.categories]);
+    setSelectedCategory(filters.categories || filters.serviceType  || '');
+  }, [filters.categories, filters.serviceType]);
 
   // function to handle category selection
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    // Update filters with selected category
-    const newFilters = { ...filters, categories: category };
+  const handleCategorySelect = (value) => {
+    setSelectedCategory(value);
+    // Determine if the selected value is a category or service
+    const isCategory = ['', 'Paid', 'UnPaid', 'Emergency'].includes(value);
+    const isService = [
+      'ParkingSpace', 'VehicleRental', 'Laundry', 'Cleaning', 
+      'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'Other'
+    ].includes(value);
+
+    // Update filters
+    const newFilters = { 
+      ...filters,
+      categories: isCategory ? value : '',
+      serviceType: isService ? value : ''
+    };
+
     setFilters(newFilters);
     setLocalFilters(newFilters);
     setSkip(0);
@@ -1424,6 +1437,29 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="Paid">Paid</MenuItem>
                             <MenuItem value="UnPaid">UnPaid</MenuItem>
                             <MenuItem value="Emergency">Emergency</MenuItem>
+                          </Select>
+                        </FormControl>
+
+                        {/* Service Filters */}
+                        <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
+                          <InputLabel>Service Type</InputLabel>
+                          <Select
+                            name="serviceType"
+                            value={localFilters.serviceType || ''}
+                            onChange={handleFilterChange}
+                            label="Service Type"
+                          >
+                            <MenuItem value="">All</MenuItem>
+                            <MenuItem value="ParkingSpace">Parking</MenuItem>
+                            <MenuItem value="VehicleRental">Vehicle Rental</MenuItem>
+                            <MenuItem value="Laundry">Laundry</MenuItem>
+                            <MenuItem value="Cleaning">Cleaning</MenuItem>
+                            <MenuItem value="Cooking">Cooking</MenuItem>
+                            <MenuItem value="Tutoring">Tutoring</MenuItem>
+                            <MenuItem value="PetCare">Pet Care</MenuItem>
+                            <MenuItem value="Delivery">Delivery</MenuItem>
+                            <MenuItem value="Maintenance">Maintenance</MenuItem>
+                            <MenuItem value="Other">Other</MenuItem>
                           </Select>
                         </FormControl>
 
