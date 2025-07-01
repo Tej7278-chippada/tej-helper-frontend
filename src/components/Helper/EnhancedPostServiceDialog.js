@@ -53,6 +53,9 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
+import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
+import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
+import BusinessCenterRoundedIcon from '@mui/icons-material/BusinessCenterRounded';
 
 import React, { useCallback, useEffect, useState } from 'react';
 // import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, } from '@mui/material';
@@ -62,7 +65,7 @@ import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, u
 import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
-import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
+// import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import { useNavigate } from 'react-router-dom';
 // import { MapContainer, Marker, Popup } from 'react-leaflet';
 import { MapContainer, TileLayer, Marker, useMap, Popup, Circle } from 'react-leaflet';
@@ -192,7 +195,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   //   const [generatedImages, setGeneratedImages] = useState([]);
   //   const [addedImages, setAddedImages] = useState([]);
 
-  const steps = ['Location & Privacy', 'Media & Images', 'Service Details', 'Summary & Submit'];
+  const steps = ['Location & Privacy', 'Title & Media', 'Service Details', 'Summary & Submit'];
 
   //   const isMobile = window.innerWidth <= 768;
 
@@ -266,6 +269,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   const [formData, setFormData] = useState({
     title: '',
     price: '',
+    postType: '', // New field
+    categories: '', // For help requests
+    serviceType: '', // For service offerings
     postStatus: '',
     peopleCount: '',
     gender: '',
@@ -274,6 +280,19 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     media: null,
     isFullTime: false,
   });
+  // Service type options
+  const serviceTypes = [
+    { value: 'ParkingSpace', label: 'Parking Space', icon: '🅿️' },
+    { value: 'VehicleRental', label: 'Vehicle Rental', icon: '🚗' },
+    { value: 'Laundry', label: 'Laundry Service', icon: '👕' },
+    { value: 'Cleaning', label: 'Cleaning Service', icon: '🧹' },
+    { value: 'Cooking', label: 'Cooking Service', icon: '👨‍🍳' },
+    { value: 'Tutoring', label: 'Tutoring', icon: '📚' },
+    { value: 'PetCare', label: 'Pet Care', icon: '🐕' },
+    { value: 'Delivery', label: 'Delivery Service', icon: '📦' },
+    { value: 'Maintenance', label: 'Maintenance', icon: '🔧' },
+    { value: 'Other', label: 'Other Services', icon: '⚙️' }
+  ];
   const [generatedImages, setGeneratedImages] = useState([]);
   const [loadingGeneration, setLoadingGeneration] = useState(false);
   const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
@@ -303,7 +322,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setFormData({
         title: editingProduct.title,
         price: editingProduct.price,
-        categories: editingProduct.categories,
+        postType: editingProduct?.postType,
+        categories: editingProduct?.categories,
+        serviceType: editingProduct?.serviceType,
         gender: editingProduct.gender,
         postStatus: editingProduct.postStatus,
         peopleCount: editingProduct.peopleCount,
@@ -332,7 +353,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setFormData({
         title: '',
         price: '',
-        categories: '',
+        postType: '', // New field
+        categories: '', // For help requests
+        serviceType: '', // For service offerings
         gender: '',
         postStatus: '',
         peopleCount: '',
@@ -352,7 +375,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     setFormData({
       title: '',
       price: '',
-      categories: '',
+      postType: '', // New field
+      categories: '', // For help requests
+      serviceType: '', // For service offerings
       gender: '',
       postStatus: '',
       peopleCount: '',
@@ -812,6 +837,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         setSnackbar({ open: true, message: `${formData.title} details updated successfully.`, severity: 'success' });
       } else {
         await addUserPost(data);
+        // const postTypeText = formData.postType === 'HelpRequest' ? 'Help Request' : 'Service';
         // showNotification(`New Post "${formData.title}" is added successfully.`, 'success');
         setSnackbar({ open: true, message: `New Post "${formData.title}" is added successfully.`, severity: 'success' });
       }
@@ -819,7 +845,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setFormData({
         title: '',
         price: '',
+        postType: '',
         categories: '',
+        serviceType: '',
         gender: '',
         postStatus: '',
         peopleCount: '',
@@ -999,8 +1027,20 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           break;
           
         case 2: // Service Details step
-          if (!formData.categories) {
+          if (!formData.postType) {
+            errors.postType = 'PostType is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          if (formData.postType === 'HelpRequest' && !formData.categories) {
             errors.categories = 'Category is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          if (formData.postType === 'ServiceOffering' && !formData.serviceType) {
+            errors.serviceType = 'Service Type is required';
             errorSteps.add(2);
           } else {
             errorSteps.delete(2);
@@ -1645,7 +1685,64 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               Please fill all required fields marked with *
             </Alert>
           )} */}
-          {/* Service Category */}
+          {/* Post Type Selection */}
+          <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" mb={2}>
+                <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+                  <PostAddRoundedIcon />
+                </Avatar>
+                <Typography variant="h6" fontWeight={600}>
+                  What are you posting?
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <Button
+                  variant={formData.postType === 'HelpRequest' ? 'contained' : 'outlined'}
+                  fullWidth
+                  onClick={() => {
+                    setFormData({...formData, postType: 'HelpRequest', serviceType: '', categories: ''});
+                    // Clear postType error when selecting
+                    if (validationErrors.postType) {
+                      setValidationErrors(prev => ({ ...prev, postType: undefined }));
+                      setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                    }
+                  }}
+                  sx={{ borderRadius: 2, p: 2 }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <HelpRoundedIcon sx={{ mb: 1 }} />
+                    <Typography variant="body2">I Need Help (Request)</Typography>
+                  </Box>
+                </Button>
+                
+                <Button
+                  variant={formData.postType === 'ServiceOffering' ? 'contained' : 'outlined'}
+                  fullWidth
+                  onClick={() => {
+                    setFormData({...formData, postType: 'ServiceOffering', categories: '', serviceType: ''});
+                    // Clear postType error when selecting
+                    if (validationErrors.postType) {
+                      setValidationErrors(prev => ({ ...prev, postType: undefined }));
+                      setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                    }
+                  }}
+                  sx={{ borderRadius: 2, p: 2 }}
+                >
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <BusinessCenterRoundedIcon sx={{ mb: 1 }} />
+                    <Typography variant="body2">I Provide Service (Offer)</Typography>
+                  </Box>
+                </Button>
+              </Box>
+              {validationErrors.postType && (
+                <FormHelperText error sx={{ mt: -1, mb: 1 }}>{validationErrors.postType}</FormHelperText>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Category Selection based on Post Type */}
           <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
             <CardContent>
               <Box display="flex" alignItems="center" mb={2}>
@@ -1653,11 +1750,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   <CategoryIcon />
                 </Avatar>
                 <Typography variant="h6" fontWeight={600}>
-                  Service Category
+                  {formData.postType === 'HelpRequest' ? 'Help Category' : 'Service Type'}
                 </Typography>
               </Box>
 
               <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+                {formData.postType === 'HelpRequest' ? (
                 <FormControl fullWidth required>
                   <InputLabel>Category</InputLabel>
                   <Select
@@ -1714,7 +1812,37 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     <FormHelperText error>{validationErrors.categories}</FormHelperText>
                   )}
                 </FormControl>
-
+                ) : (
+                  <FormControl fullWidth required>
+                    <InputLabel>Service Type</InputLabel>
+                    <Select
+                      value={formData.serviceType}
+                      required
+                      error={!!validationErrors.serviceType}
+                      onChange={(e) => {
+                        setFormData({ ...formData, serviceType: e.target.value });
+                        if (validationErrors.serviceType) {
+                          setValidationErrors(prev => ({ ...prev, serviceType: undefined }));
+                          setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                        }
+                      }}
+                      label="Service Type"
+                      sx={{ borderRadius: 2 }}
+                    >
+                      {serviceTypes.map((service) => (
+                        <MenuItem key={service.value} value={service.value}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <span>{service.icon}</span>
+                            {service.label}
+                          </Box>
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {validationErrors.serviceType && (
+                      <FormHelperText error>{validationErrors.serviceType}</FormHelperText>
+                    )}
+                  </FormControl>
+                )}
                 {editingProduct && (
                   <FormControl fullWidth required>
                     <InputLabel>Status</InputLabel>
@@ -1741,11 +1869,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 )}
               </Box>
 
-              {formData.categories === 'Paid' && (
+              {((formData.postType === 'HelpRequest' && formData.categories === 'Paid') || 
+                (formData.postType === 'ServiceOffering')) && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                   <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" fontWeight={500}>
-                      Full-time position?
+                      {formData.postType === 'HelpRequest' ? 'Full-time position?' : 'Always(24/7) available service?'}
                     </Typography>
                     <Switch
                       checked={formData.isFullTime}
@@ -1771,7 +1900,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               </Box>
 
               <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 2 }}>
-                {formData.categories !== 'UnPaid' && (
+                {/* Price field - show for paid help requests or all service offerings */}
+                {(formData.postType === 'ServiceOffering' || 
+                  (formData.postType === 'HelpRequest' && formData.categories !== 'UnPaid')) && (
                   <TextField
                     label="Service Price (₹)"
                     type="number"
@@ -1808,7 +1939,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 )}
 
                 <FormControl fullWidth required>
-                  <InputLabel>Preferred gender for this position</InputLabel>
+                  <InputLabel>{formData.postType === 'ServiceOffering' ? 'Target Customers' : 'Preferred gender for this position'}</InputLabel>
                   <Select
                     value={formData.gender}
                     error={!!validationErrors.gender}
@@ -1824,7 +1955,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                         setStepsWithErrors(prev => prev.filter(step => step !== 2));
                       }
                     }}
-                    label="Preferred gender for this position"
+                    label={formData.postType === 'ServiceOffering' ? 'Target Customers' : 'Preferred gender for this position'}
                     sx={{ borderRadius: 2 }} required
                   >
                     <MenuItem value="Male">
