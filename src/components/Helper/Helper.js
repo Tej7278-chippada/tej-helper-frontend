@@ -215,11 +215,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     setShowDistanceRanges(false);
   };
 
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(() => {
+    const savedFilters = localStorage.getItem('helperFilters');
+    return savedFilters 
+      ? JSON.parse(savedFilters).categories || JSON.parse(savedFilters).serviceType || '' 
+      : '';
+  });
   // useEffect to sync selectedCategory with filters
-  useEffect(() => {
-    setSelectedCategory(filters.categories || filters.serviceType  || '');
-  }, [filters.categories, filters.serviceType]);
+  // useEffect(() => {
+  //   setSelectedCategory(filters.categories || filters.serviceType  || '');
+  // }, [filters.categories, filters.serviceType]);
 
   // function to handle category selection
   const handleCategorySelect = (value) => {
@@ -244,6 +249,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     setSkip(0);
     // Clear cache for the old filter combination
     globalCache.lastCacheKey = null;
+    // Ensure filters are saved to localStorage
+    localStorage.setItem('helperFilters', JSON.stringify(newFilters));
   };
 
   // Reset filters

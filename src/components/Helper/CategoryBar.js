@@ -1,5 +1,5 @@
 // components/Helper/CategoryBar.js
-import React from 'react';
+import React, { useRef, useEffect} from 'react';
 import { Box, Chip, Divider } from '@mui/material';
 import PaidIcon from '@mui/icons-material/Paid';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
@@ -17,6 +17,29 @@ import HandymanIcon from '@mui/icons-material/Handyman';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 
 const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile }) => {
+
+  const scrollContainerRef = useRef(null);
+  
+  // Add this useEffect to scroll to the selected item
+  useEffect(() => {
+    if (scrollContainerRef.current && selectedCategory) {
+      // Wait for the next render cycle to ensure all chips are rendered
+      setTimeout(() => {
+        const selectedChip = scrollContainerRef.current.querySelector(
+          `[data-value="${selectedCategory}"]`
+        );
+        if (selectedChip) {
+          selectedChip.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+          });
+        }
+      }, 100);
+    }
+  }, [selectedCategory]);
+
+
   const categories = [
     { 
       value: '', 
@@ -140,6 +163,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
       return (
         <Chip
           key={item.value}
+          data-value={item.value} // Add this data attribute
           icon={item.icon}
           label={item.label}
           onClick={() => onCategorySelect(item.value)}
@@ -200,6 +224,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
       }}
     >
       <Box
+        ref={scrollContainerRef} // Add this ref
         sx={{
           display: 'flex',
           gap: isMobile ? 1 : 1.5,
