@@ -195,7 +195,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
             border: `1px solid ${item.color}`,
             '&:hover': {
               backgroundColor: item.color,
-              color: darkMode ? 'white' : 'rgba(0, 0, 0, 0.6)',
+              color: darkMode ? 'white' : isMobile ? 'white' : 'rgba(0, 0, 0, 0.6)',
               boxShadow: `0 4px 12px ${item.color}40`, //   transform: 'translateY(-2px)',
             },
             '& .MuiChip-icon': {
@@ -203,7 +203,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
               marginLeft: isMobile ? '4px' : '8px',
             },
             '&:hover .MuiChip-icon': {
-              color: darkMode ? 'white' : 'rgba(0, 0, 0, 0.6)',
+              color: darkMode ? 'white' : isMobile ? 'white' : 'rgba(0, 0, 0, 0.6)',
             }
           }}
         />
