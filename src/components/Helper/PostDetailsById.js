@@ -609,15 +609,15 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                       </Grid>
                       <Grid item xs={6} sm={4}>
                         <Typography variant="body1" style={{ fontWeight: 500 }}>
-                          Post Category:
+                          {post.postType === 'HelpRequest' ? 'Post Category' : 'Service Category'}
                         </Typography>
                         <Typography variant="body2" color={post.categories !== 'Emergency' ? 'textSecondary' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                          {post.categories}
+                          {post.postType === 'HelpRequest' ? post.categories : post.serviceType}
                         </Typography>
                       </Grid>
                       <Grid item xs={6} sm={4}>
                         <Typography variant="body1" style={{ fontWeight: 500 }}>
-                          Post Status:
+                          {post.postType === 'HelpRequest' ? 'Post Status' : 'Service Status'}
                         </Typography>
                         {/* <Typography variant="body2" color="textSecondary">
                         {post.gender}
@@ -796,7 +796,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 </IconButton>
               </Grid2>
               <Typography variant="body1" style={{ paddingLeft: '6px', fontWeight: 500 }}>
-                Post Description:
+                {post.postType === 'HelpRequest' ? 'Post Description' : 'Service Description'}
               </Typography>
               <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px'}}>
                 <Typography variant="body1" color="textSecondary" style={{
@@ -818,7 +818,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px', my:1, padding:'1rem'}}>
             <Grid item xs={6} sm={4} >
               <Typography variant="body1" style={{ fontWeight: 500 }}>
-                Post Owner Details:
+                {post.postType === 'HelpRequest' ? 'Post Owner Details' : 'Service Owner Details'}
               </Typography>
               {/* <Typography variant="body2" color="textSecondary">
                 {post.user.id}

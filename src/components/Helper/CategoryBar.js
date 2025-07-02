@@ -7,6 +7,7 @@ import EmergencyIcon from '@mui/icons-material/Emergency';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import LocalParkingIcon from '@mui/icons-material/LocalParking';
 import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import ChairIcon from '@mui/icons-material/Chair';
 import LocalLaundryServiceIcon from '@mui/icons-material/LocalLaundryService';
 import CleaningServicesIcon from '@mui/icons-material/CleaningServices';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
@@ -74,17 +75,24 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
   const services = [
     { 
       value: 'ParkingSpace', 
-      label: 'Parking', 
+      label: 'Parking Space', 
       icon: <LocalParkingIcon sx={{ fontSize: '18px' }} />,
       color: '#8b5cf6',
       bgColor: 'rgba(139, 92, 246, 0.1)'
     },
     { 
       value: 'VehicleRental', 
-      label: 'Vehicle', 
+      label: 'Vehicle Rental', 
       icon: <DirectionsCarIcon sx={{ fontSize: '18px' }} />,
       color: '#3b82f6',
       bgColor: 'rgba(59, 130, 246, 0.1)'
+    },
+    { 
+      value: 'FurnitureRental',
+      label: 'Furniture Rental',
+      icon: <ChairIcon sx={{ fontSize: '18px' }} />,
+      color: '#4f46e5',
+      bgColor: 'rgba(79, 70, 229, 0.1)'
     },
     { 
       value: 'Laundry', 
@@ -187,7 +195,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
             border: `1px solid ${item.color}`,
             '&:hover': {
               backgroundColor: item.color,
-              color: 'white',
+              color: darkMode ? 'white' : 'rgba(0, 0, 0, 0.6)',
               boxShadow: `0 4px 12px ${item.color}40`, //   transform: 'translateY(-2px)',
             },
             '& .MuiChip-icon': {
@@ -195,7 +203,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
               marginLeft: isMobile ? '4px' : '8px',
             },
             '&:hover .MuiChip-icon': {
-              color: 'white',
+              color: darkMode ? 'white' : 'rgba(0, 0, 0, 0.6)',
             }
           }}
         />

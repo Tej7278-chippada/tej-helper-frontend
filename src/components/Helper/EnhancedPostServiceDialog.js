@@ -284,6 +284,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   const serviceTypes = [
     { value: 'ParkingSpace', label: 'Parking Space', icon: '🅿️' },
     { value: 'VehicleRental', label: 'Vehicle Rental', icon: '🚗' },
+    { value: 'FurnitureRental', label: 'Furniture Rental', icon: '🛋️' },
     { value: 'Laundry', label: 'Laundry Service', icon: '👕' },
     { value: 'Cleaning', label: 'Cleaning Service', icon: '🧹' },
     { value: 'Cooking', label: 'Cooking Service', icon: '👨‍🍳' },
