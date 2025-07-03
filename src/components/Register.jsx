@@ -7,6 +7,7 @@ import Cropper from 'react-easy-crop';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import CloseIcon from '@mui/icons-material/Close';
+import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
 
 const theme = createTheme({
   breakpoints: {
@@ -857,6 +858,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                 </Button>
               </Typography>
             </Box>
+            <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
           </form>
         </Box>
       </Layout>

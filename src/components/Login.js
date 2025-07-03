@@ -13,6 +13,7 @@ import ForgotPassword from './ForgotPassword';
 import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import DemoPosts from './Banners/DemoPosts';
+import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
 
 const theme = createTheme({
   breakpoints: {
@@ -410,6 +411,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
             </Button>
           </Link>
         </Typography>
+        <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
       </form>
       
         {/* Close button */}
