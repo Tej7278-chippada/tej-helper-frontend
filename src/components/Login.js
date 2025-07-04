@@ -151,6 +151,8 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
         setError(`${validateEmail(identifier) ? 'Email' : 'Username'} ${identifier} doesn't match any existing account.`);
       } else if (error.response && error.response.status === 401) {
         setError(`Password doesn't match for ${validateEmail(identifier) ? 'Email' : 'Username'} : ${identifier}`);
+      } else if (error.response && error.response.status === 403) {
+        setError(`This account ${identifier} has been Suspened.`);
       } else {
         setError('An error occurred while logging in.');
       }

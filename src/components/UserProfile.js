@@ -331,7 +331,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       User Phone:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {userData.phone}
+                      {userData?.phone}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={12}>
@@ -339,7 +339,47 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       User Email:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {userData.email}
+                      {userData?.email}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Account Status:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {userData?.accountStatus}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Email Verified:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {userData?.emailVerified === true ? 'Yes' : 'No'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                     Account created at:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {new Date(userData?.accountCreatedAt).toLocaleString() || 'Invalid date'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                     Last login at:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {new Date(userData?.lastLoginAt).toLocaleString() || 'Invalid date'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                     lastProfilePicUpdate:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {new Date(userData?.lastProfilePicUpdate).toLocaleString() || 'Invalid date'}
                     </Typography>
                   </Grid>
                   {/* <Grid item xs={12} sm={12}>
