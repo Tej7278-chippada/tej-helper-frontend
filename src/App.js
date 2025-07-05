@@ -195,7 +195,12 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0);
   const userId = localStorage.getItem('userId');
   const [shouldAnimate, setShouldAnimate] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  // Enhanced loading state management for splash screen
+  const [isLoading, setIsLoading] = useState(() => {
+    // Check if this is the first time the app is loading in this session
+    const hasShownSplash = sessionStorage.getItem('hasShownSplash');
+    return !hasShownSplash;
+  });
   
   const [darkMode, setDarkMode] = useState(() => {
     const savedMode = localStorage.getItem('darkMode');
@@ -215,6 +220,8 @@ function App() {
   // Handle loading completion
   const handleLoadingComplete = () => {
     setIsLoading(false);
+    // Mark that splash screen has been shown in this session
+    sessionStorage.setItem('hasShownSplash', 'true');
   };
 
   useEffect(() => {
