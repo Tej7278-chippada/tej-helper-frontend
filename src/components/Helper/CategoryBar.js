@@ -16,6 +16,8 @@ import PetsIcon from '@mui/icons-material/Pets';
 import DeliveryDiningIcon from '@mui/icons-material/DeliveryDining';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import NightlifeRoundedIcon from '@mui/icons-material/NightlifeRounded';
+import SportsCricketRoundedIcon from '@mui/icons-material/SportsCricketRounded';
 
 const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile }) => {
 
@@ -100,6 +102,20 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
       icon: <LocalLaundryServiceIcon sx={{ fontSize: '18px' }} />,
       color: '#ec4899',
       bgColor: 'rgba(236, 72, 153, 0.1)'
+    },
+    { 
+      value: 'Events',
+      label: 'Events', 
+      icon: <NightlifeRoundedIcon sx={{ fontSize: '18px' }} />,
+      color: '#f43f5e',
+      bgColor: 'rgba(244, 63, 94, 0.1)'
+    },
+    { 
+      value: 'Playgrounds',
+      label: 'Playgrounds', 
+      icon: <SportsCricketRoundedIcon sx={{ fontSize: '18px' }} />,
+      color: '#22c55e',
+      bgColor: 'rgba(34, 197, 94, 0.1)'
     },
     { 
       value: 'Cleaning', 

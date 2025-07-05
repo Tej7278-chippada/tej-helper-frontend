@@ -232,7 +232,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     // Determine if the selected value is a category or service
     const isCategory = ['', 'Paid', 'UnPaid', 'Emergency'].includes(value);
     const isService = [
-      'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Laundry', 'Cleaning', 
+      'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
       'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'Other'
     ].includes(value);
 
@@ -1463,6 +1463,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="VehicleRental">Vehicle Rental</MenuItem>
                             <MenuItem value="FurnitureRental">Furniture Rental</MenuItem>
                             <MenuItem value="Laundry">Laundry</MenuItem>
+                            <MenuItem value="Events">Events</MenuItem>
+                            <MenuItem value="Playgrounds">Playgrounds</MenuItem>
                             <MenuItem value="Cleaning">Cleaning</MenuItem>
                             <MenuItem value="Cooking">Cooking</MenuItem>
                             <MenuItem value="Tutoring">Tutoring</MenuItem>
