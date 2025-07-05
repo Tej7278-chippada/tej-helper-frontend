@@ -23,6 +23,7 @@ import HelperHome from './components/Helper/HelperHome';
 import { fetchUnreadNotificationsCount } from './components/api/api';
 import { io } from 'socket.io-client';
 import Banner from './components/Banners/Banner';
+import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -194,6 +195,7 @@ function App() {
   const [unreadCount, setUnreadCount] = useState(0);
   const userId = localStorage.getItem('userId');
   const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [darkMode, setDarkMode] = useState(() => {
     const savedMode = localStorage.getItem('darkMode');
@@ -208,6 +210,11 @@ function App() {
     localStorage.setItem('darkMode', JSON.stringify(newMode));
     document.documentElement.classList.toggle('dark-mode', newMode);
     document.querySelector('meta[name="theme-color"]').setAttribute('content', newMode ? '#121212' : '#1976d2');
+  };
+
+  // Handle loading completion
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -296,6 +303,11 @@ function App() {
       }
     };
   }, [socket, userId]);
+
+  // Show loading screen first
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={handleLoadingComplete} darkMode={darkMode} />;
+  }
  
   return (
     <ThemeProvider theme={theme}>
