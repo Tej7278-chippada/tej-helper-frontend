@@ -1,5 +1,5 @@
 // components/Helper/CategoryBar.js
-import React, { useRef, useEffect} from 'react';
+import React, { useRef, useEffect, useState} from 'react';
 import { Box, Chip, Divider } from '@mui/material';
 import PaidIcon from '@mui/icons-material/Paid';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
@@ -22,6 +22,7 @@ import SportsCricketRoundedIcon from '@mui/icons-material/SportsCricketRounded';
 const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile }) => {
 
   const scrollContainerRef = useRef(null);
+  const [imagePreview, setImagePreview] = useState({ show: false, image: '', position: { x: 0, y: 0 } });
   
   // Add this useEffect to scroll to the selected item
   useEffect(() => {
@@ -42,6 +43,64 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
     }
   }, [selectedCategory]);
 
+  // image mapping for categories and services
+  const categoryImages = {
+    '': '/categoryBar/all.png' || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=120&fit=crop&auto=format',
+    'Paid': '/categoryBar/paid.png' || 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=200&h=120&fit=crop&auto=format',
+    'UnPaid': '/categoryBar/volunteer.png' || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200&h=120&fit=crop&auto=format',
+    'Emergency': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
+    'ParkingSpace': '/categoryBar/parking.png' || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop&auto=format',
+    'VehicleRental': '/categoryBar/vehiclesRental.png' || 'https://images.unsplash.com/photo-1549924231-f129b911e442?w=200&h=120&fit=crop&auto=format',
+    'FurnitureRental': '/categoryBar/furnitureRentals.png' || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=120&fit=crop&auto=format',
+    'Laundry': '/categoryBar/laundry.png' || 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=200&h=120&fit=crop&auto=format',
+    'Events': '/categoryBar/events.png' || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=200&h=120&fit=crop&auto=format',
+    'Playgrounds': '/categoryBar/playgrounds.png' || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=200&h=120&fit=crop&auto=format',
+    'Cleaning': '/categoryBar/cleaning.png' || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&h=120&fit=crop&auto=format',
+    'Cooking': '/categoryBar/cooking.png' || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=120&fit=crop&auto=format',
+    'Tutoring': '/categoryBar/tutoring.png' || 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=200&h=120&fit=crop&auto=format',
+    'PetCare': '/categoryBar/petCare.png' || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=120&fit=crop&auto=format',
+    'Delivery': '/categoryBar/delivery.png' || 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=120&fit=crop&auto=format',
+    'Maintenance': '/categoryBar/maintance.png' || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&h=120&fit=crop&auto=format',
+    'Other': '/categoryBar/others.png' || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=120&fit=crop&auto=format'
+  };
+
+  // mouse event handlers
+  const handleMouseEnter = (event, value) => {
+    if (!isMobile) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setImagePreview({
+        show: true,
+        image: categoryImages[value],
+        position: { x: rect.left + rect.width / 2, y: rect.top }
+      });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      setImagePreview({ show: false, image: '', position: { x: 0, y: 0 } });
+    }
+  };
+
+  const handleMobileClick = (value) => {
+    if (isMobile) {
+      const element = document.querySelector(`[data-value="${value}"]`);
+      if (element) {
+        const rect = element.getBoundingClientRect();
+        setImagePreview({
+          show: true,
+          image: categoryImages[value],
+          position: { x: rect.left + rect.width / 2, y: rect.top }
+        });
+        
+        // Hide after 2 seconds
+        setTimeout(() => {
+          setImagePreview({ show: false, image: '', position: { x: 0, y: 0 } });
+        }, 2000);
+      }
+    }
+    onCategorySelect(value);
+  };
 
   const categories = [
     { 
@@ -190,7 +249,10 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
           data-value={item.value} // Add this data attribute
           icon={item.icon}
           label={item.label}
-          onClick={() => onCategorySelect(item.value)}
+          // onClick={() => onCategorySelect(item.value)}
+          onClick={() => handleMobileClick(item.value)}
+          onMouseEnter={(e) => handleMouseEnter(e, item.value)}
+          onMouseLeave={handleMouseLeave}
           variant={isSelected ? 'filled' : 'outlined'}
           sx={{
             minWidth: 'fit-content',
@@ -247,6 +309,59 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
         }
       }}
     >
+      {/* Image Preview */}
+      {imagePreview.show && (
+        <Box
+          sx={{
+            position: 'fixed',
+            left: imagePreview.position.x,
+            // top: imagePreview.position.y - 140,
+            bottom: isMobile ? 60 : 65,
+            transform: 'translateX(-50%)',
+            zIndex: 9999,
+            pointerEvents: 'none',
+            animation: 'fadeIn 0.3s ease-out',
+            '@keyframes fadeIn': {
+              from: { opacity: 0, transform: 'translateX(-50%) translateY(10px)' },
+              to: { opacity: 1, transform: 'translateX(-50%) translateY(0)' },
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: '200px',
+              height: '120px',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                bottom: '-8px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '0',
+                height: '0',
+                borderLeft: '8px solid transparent',
+                borderRight: '8px solid transparent',
+                borderTop: '8px solid rgba(255, 255, 255, 0.2)',
+              }
+            }}
+          >
+            <img
+              src={imagePreview.image}
+              alt="Category preview"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        </Box>
+      )}
       <Box
         ref={scrollContainerRef} // Add this ref
         sx={{
