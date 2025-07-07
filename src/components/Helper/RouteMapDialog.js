@@ -22,6 +22,8 @@ import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
 
 // Set default icon manually
@@ -60,7 +62,7 @@ const ChangeView = ({ center }) => {
 //   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 // });
 
-function RouteMapDialog({ open, onClose, post }) {
+function RouteMapDialog({ open, onClose, post , darkMode}) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   // const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
@@ -373,8 +375,28 @@ function RouteMapDialog({ open, onClose, post }) {
   // Define the bounds of the world
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const iconButtonStyle = {
+    color: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(5px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    width: isMobile ? 40 : 44,
+    height: isMobile ? 40 : 44,
+    '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        transform: 'scale(1.05)',
+    },
+    transition: 'all 0.2s ease',
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile ? true : false} sx={{
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isFullscreen ? true : isMobile ? true : false} sx={{
       margin: isMobile ? '10px' : '10px', '& .MuiPaper-root': { // Target the dialog paper
         borderRadius: '14px', // Apply border radius
         backdropFilter: 'blur(12px)',
@@ -442,7 +464,20 @@ function RouteMapDialog({ open, onClose, post }) {
             </Box>
           )}
 
-          <Box sx={{ height: isMobile ? '350px' : '400px', padding: '10px' }}>
+          <Box sx={{ height: isMobile ? '350px' : '400px', padding: '10px',  position: 'relative',
+            ...(isFullscreen && {
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9999,
+              backgroundColor: 'white',
+              padding: 0,
+              height: '100%',
+              width: '100%'
+            })
+           }}>
             <MapContainer  whenCreated={(map) => {
                             mapRef.current = map;
                             map.on('unload', () => {
@@ -487,7 +522,25 @@ function RouteMapDialog({ open, onClose, post }) {
               {/* {route && <Polyline positions={route} color="blue" />} */}
 
             </MapContainer>
-           
+            {/* Floating fullscreen button */}
+            <Box sx={{
+              position: 'absolute',
+              bottom: '20px',
+              right: '20px',
+              zIndex: 1000,
+              // backgroundColor: 'white',
+              borderRadius: '50%',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            }}>
+              <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+                <IconButton
+                  onClick={handleFullscreen}
+                  sx={iconButtonStyle}
+                >
+                  {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+                </IconButton>
+              </Tooltip>
+            </Box>
 
             {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: '1rem' }}>
                   <Button variant="contained" color="primary" onClick={calculateDistance}>

@@ -21,6 +21,8 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import InstallMobileIcon from '@mui/icons-material/InstallMobile';
 import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import NightsStayRoundedIcon from '@mui/icons-material/NightsStayRounded';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 
 
 // Enhanced scrolling behavior
@@ -400,6 +402,19 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
 
   const currentPath = location.pathname;
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Fullscreen handler
+  const handleFullscreen = () => {
+      if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+          setIsFullscreen(true);
+      } else {
+          document.exitFullscreen();
+          setIsFullscreen(false);
+      }
+  };
+
   return (
     <Box sx={{ flexGrow: 1, marginBottom: isMobile ? '3.5rem' : '4rem' }}>
       <ElevationScroll>
@@ -663,6 +678,17 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
             }
           </ListItemIcon>
           {darkMode ? 'Light Mode' : 'Dark Mode'}
+        </MenuItem>
+
+        {/* Fullscreen view Toggle */}
+        <MenuItem onClick={() => { handleFullscreen(); handleClose(); }}>
+          <ListItemIcon>
+            {isFullscreen ? 
+              <FullscreenExitIcon fontSize="small" sx={{ color: '#64748b' }} /> :
+              <FullscreenIcon fontSize="small" sx={{ color: '#ec4899' }} />
+            }
+          </ListItemIcon>
+          {isFullscreen ? "Exit Fullscreen" : "Fullscreen View" }
         </MenuItem>
 
         {/* Install App Menu Item */}

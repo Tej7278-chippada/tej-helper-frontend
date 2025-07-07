@@ -915,7 +915,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             setLoginMessage={setLoginMessage} darkMode={darkMode} getGlassmorphismStyle={getGlassmorphismStyle}
           />
           <RouteMapDialog
-            open={routeMapDialogOpen}
+            open={routeMapDialogOpen} darkMode={darkMode}
             onClose={() => setRouteMapDialogOpen(false)}
             post={post} // Pass the current product
             // onCommentAdded={onCommentAdded}  // Passing the comment added handler
