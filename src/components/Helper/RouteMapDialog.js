@@ -80,11 +80,13 @@ function RouteMapDialog({ open, onClose, post }) {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
   const [currentAddress, setCurrentAddress] = useState('');
   const [directionsCard, setDirectionsCard] = useState(false);
+  const [showingRoute, setShowingRoute] = useState(true);
 
   // Automatically fetch location and show route when dialog opens
   useEffect(() => {
     if (open) {
       locateUser();
+      // setShowingRoute(true);
     } else {
       // Clean up when dialog closes
       if (routingControlRef.current) {
@@ -93,12 +95,17 @@ function RouteMapDialog({ open, onClose, post }) {
       }
       setCurrentLocation(null);
       setDistance(null);
+      if (routingControlRef.current) {
+        mapRef.current.removeControl(routingControlRef.current);
+        routingControlRef.current = null;
+        setDistance(null);
+      }
     }
   }, [open]);
 
   // Show route automatically when currentLocation changes
   useEffect(() => {
-    if (currentLocation && open) {
+    if (currentLocation && open && showingRoute) {
       showDistanceAndRoute();
     }
   }, [currentLocation, open, directionsCard]);
@@ -198,6 +205,22 @@ function RouteMapDialog({ open, onClose, post }) {
     setDirectionsCard(isChecked);
   };
 
+  const toggleRoute = (e) => {
+    const isChecked = e.target.checked;
+    // setDirectionsCard(isChecked);
+    if (isChecked) {
+      showDistanceAndRoute();
+      setShowingRoute(isChecked);
+    } else {
+      if (routingControlRef.current) {
+        mapRef.current.removeControl(routingControlRef.current);
+        routingControlRef.current = null;
+        setDistance(null);
+      }
+      setShowingRoute(false);
+    }
+  };
+
   const showDistanceAndRoute = () => {
     if (!mapRef.current || !mapRef.current._leaflet_id || !currentLocation || !post?.location) {
       return; // Map doesn't exist or is being destroyed
@@ -242,7 +265,7 @@ function RouteMapDialog({ open, onClose, post }) {
         // setRoute(routes[0]);
         setRouteCalculating(false); // Hide progress indicator after route calculation
         // Add close button to the directions panel
-        addCloseButtonToDirectionsPanel();
+        // addCloseButtonToDirectionsPanel();
       });
 
       routingControl.on('routingerror', function() {
@@ -308,6 +331,7 @@ function RouteMapDialog({ open, onClose, post }) {
           mapRef.current.removeControl(routingControlRef.current);
           routingControlRef.current = null;
           setDistance(null);
+          setShowingRoute(false);
         }
       };
       
@@ -353,6 +377,7 @@ function RouteMapDialog({ open, onClose, post }) {
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile ? true : false} sx={{
       margin: isMobile ? '10px' : '10px', '& .MuiPaper-root': { // Target the dialog paper
         borderRadius: '14px', // Apply border radius
+        backdropFilter: 'blur(12px)',
       },
     }} >
       <DialogContent style={{ position: 'sticky', height: 'auto', scrollbarWidth: 'none', paddingInline: isMobile ? '8px' : '1rem' }}>
@@ -363,8 +388,8 @@ function RouteMapDialog({ open, onClose, post }) {
             position: 'absolute',
             top: '0.5rem',
             right: '0.5rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            color: '#333'
+            // backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            // color: '#333'
           }}
         >
           <CloseIcon />
@@ -502,7 +527,7 @@ function RouteMapDialog({ open, onClose, post }) {
                 {currentLocation && (
                   <>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <IconButton
+                    {/* <IconButton
                       style={{
                         // display: 'inline-block',
                         // float: 'right',
@@ -519,6 +544,14 @@ function RouteMapDialog({ open, onClose, post }) {
                     </IconButton>
                     <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
                       Show Route
+                    </Typography> */}
+                    <Switch
+                      checked={showingRoute}
+                      onChange={toggleRoute}
+                      color="primary" disabled={loadingLocation && routeCalculating}
+                    /> 
+                    <Typography variant="caption" sx={{ m: 0.8, textAlign: 'center', color:'grey' }}>
+                      Route : <strong>{routeCalculating ? <CircularProgress size={12} /> : showingRoute ? 'ON' : 'OFF'}</strong>
                     </Typography>
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', }}>
@@ -540,7 +573,7 @@ function RouteMapDialog({ open, onClose, post }) {
                     <Switch
                       checked={directionsCard}
                       onChange={toggleDirectionDialog}
-                      color="primary"
+                      color="primary" disabled={!showingRoute}
                     /> 
                     <Typography variant="caption" sx={{ m: 0.8, textAlign: 'center', color:'grey' }}>
                       Directions : <strong>{directionsCard ? 'ON' : 'OFF'}</strong>
@@ -606,13 +639,13 @@ function RouteMapDialog({ open, onClose, post }) {
           </Box>
 
         </Box>
-        {distance && (
+        {/* {distance && ( */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', margin: '4px 10px', alignItems: 'center', alignContent: 'center' }}>
             <Typography variant="body1"  style={{ fontWeight: 500 }}>
-              Distance to post location: <strong>{distance}</strong>
+              Distance to post location: <strong>{distance ? distance : 'click on Route'}</strong>
             </Typography>
           </Box>
-        )}
+        {/* )} */}
         <Typography 
           variant="body2" 
           sx={{ 

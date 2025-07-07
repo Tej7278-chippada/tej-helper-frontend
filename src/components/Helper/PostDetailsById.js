@@ -43,6 +43,19 @@ const CustomTooltip = styled(({ className, ...props }) => (
     },
 }));
 
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  // border: darkMode 
+  //   ? '1px solid rgba(255, 255, 255, 0.1)' 
+  //   : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
 
 function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount, shouldAnimate }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -456,20 +469,20 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box>
         {loading || !post ?
-          <Box sx={{margin: '8px' }}>
+          <Box sx={{m: isMobile ? '8px' : '12px', }}>
             <SkeletonProductDetail/>
           </Box> : 
           <>
           <Box sx={{
-            padding: '8px',
+            m: isMobile ? '8px' : '12px',
             // position: 'relative',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            borderRadius: '8px', scrollbarWidth: 'thin'
+            // backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: '8px', scrollbarWidth: 'thin', mb: 4
           }}>
             <Box
               display="flex"
               flexDirection={isMobile1 ? "column" : "row"}
-              gap={2} sx={{ bgcolor: '#f5f5f5', borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px' }}
+              gap={1} sx={{ borderRadius: '10px',  }} // bgcolor: '#f5f5f5',
             >
                 <Box sx={{
                   flex: 2,
@@ -534,8 +547,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 <Box sx={{
                   flex: 3,
                   // height: '73vh', // Fixed height relative to viewport
-                  overflowY: 'auto',
-                  bgcolor: 'white', // Card background color (customizable)
+                  overflowY: 'auto', ...getGlassmorphismStyle(theme, darkMode),
+                  // bgcolor: 'white', // Card background color (customizable)
                   borderRadius: 3, // Card border radius (customizable)
                   // boxShadow: 3, // Shadow for a modern look
                   scrollbarWidth: 'thin', padding: '1rem',
@@ -551,7 +564,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                             // display: 'inline-block',
                             float: 'right',
                             fontWeight: '500',
-                            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            // backgroundColor: 'rgba(255, 255, 255, 0.8)',
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '10px'
                           }}
                           onClick={() => handleShare(post._id, post.title)}
@@ -563,9 +576,10 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                           </CustomTooltip >
                         </IconButton>
                         <IconButton
-                          style={{ display: 'inline-block', float: 'right', fontWeight: '500', backgroundColor: 'rgba(255, 255, 255, 0.8)', boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)' }}
                           onClick={() => handleWishlistToggle(post._id)}
-                          sx={{
+                          sx={{ display: 'inline-block', float: 'right', fontWeight: '500', /* backgroundColor: 'rgba(255, 255, 255, 0.8)', */
+                            // ...getGlassmorphismStyle(theme, darkMode),
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
                             color: wishlist.has(post._id) ? 'red' : 'gray',
                           }} disabled={wishLoading || wishStatusLoading} // Disable button while loading
                         >
@@ -602,7 +616,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                         <Typography variant="h5" style={{
                           fontWeight: 'bold',
                           marginBottom: '0.5rem',
-                          color: '#333'
+                          // color: '#333'
                         }}>
                           {post.title}
                         </Typography>
@@ -771,7 +785,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 </Box>
             </Box>
 
-            <Grid item xs={12} sx={{ paddingTop: '1rem' }}>
+            <Grid item xs={12} sx={{ mt: '1rem' }}>
               <Grid2 sx={{
                 bottom: '8px',
                 right: '0px', position: 'relative', display: 'inline-block', float: 'right',
@@ -798,9 +812,9 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
               <Typography variant="body1" style={{ paddingLeft: '6px', fontWeight: 500 }}>
                 {post.postType === 'HelpRequest' ? 'Post Description' : 'Service Description'}
               </Typography>
-              <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px'}}>
+              <Box sx={{borderRadius:'8px', ...getGlassmorphismStyle(theme, darkMode), mt: '4px'}}> {/* bgcolor: '#f5f5f5', */}
                 <Typography variant="body1" color="textSecondary" style={{
-                  marginTop: '0.5rem',
+                  // marginTop: '0.5rem',
                   lineHeight: '1.5',
                   // textAlign: 'justify',
                   whiteSpace: "pre-wrap", // Retain line breaks and tabs
@@ -815,7 +829,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 
               </Box>
             </Grid>
-            <Box sx={{bgcolor:'#f5f5f5', borderRadius:'8px', my:1, padding:'1rem'}}>
+            <Box sx={{ borderRadius:'8px', my:1, padding:'1rem', ...getGlassmorphismStyle(theme, darkMode), }}> {/* bgcolor: '#f5f5f5', */}
             <Grid item xs={6} sm={4} >
               <Typography variant="body1" style={{ fontWeight: 500 }}>
                 {post.postType === 'HelpRequest' ? 'Post Owner Details' : 'Service Owner Details'}
@@ -898,7 +912,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             onClose={() => setCommentPopupOpen(false)}
             post={post} // Pass the current product
             onCommentAdded={onCommentAdded}  // Passing the comment added handler
-            setLoginMessage={setLoginMessage} 
+            setLoginMessage={setLoginMessage} darkMode={darkMode} getGlassmorphismStyle={getGlassmorphismStyle}
           />
           <RouteMapDialog
             open={routeMapDialogOpen}
@@ -916,7 +930,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             onClose={handleCloseRateDialog}
             post={post}
             isMobile={isMobile}
-            isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+            isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
           />
           </>
         }

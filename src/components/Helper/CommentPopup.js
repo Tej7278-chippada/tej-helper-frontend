@@ -6,7 +6,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
 import { addComment } from '../api/api';
 
-function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage }) {
+function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage, darkMode, getGlassmorphismStyle }) {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState([]);
   const [commentAddedMessage, setCommentAddedMessage] = useState('');
@@ -81,6 +81,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage }) 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md"  fullWidth fullScreen={ isMobile ? true : false} sx={{margin: isMobile ? '10px' : '0px', '& .MuiPaper-root': { // Target the dialog paper
                   borderRadius: '14px', // Apply border radius
+                  backdropFilter: 'blur(12px)',
                 },}} >
       <DialogContent style={{ position: 'sticky', height: 'auto', scrollbarWidth: 'thin' }}>
         {/* Close button */}
@@ -90,8 +91,8 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage }) 
             position: 'absolute',
             top: '0.5rem',
             right: '1rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            color: '#333'
+            // backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            // color: '#333'
           }}
         >
           <CloseIcon />
@@ -140,15 +141,16 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage }) 
             variant="contained"
             color="primary" 
             // style={{ width: '150px' }}
-            sx={{borderRadius:2}}
+            sx={{borderRadius:2, background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',}}
             disabled={loading || newComment.trim() === ''}
           >
             {loading ? <CircularProgress size={24} /> : 'Submit'}
           </Button>
         </Box>
         {/* Display list of comments */}
-        <Box bgcolor="#f5f5f5" sx={{ height: isMobile ? '500px' : '300px', overflowY: 'auto', margin: '1rem 0', mx: '-10px', borderRadius:'8px',
+        <Box sx={{ height: isMobile ? '500px' : '300px', overflowY: 'auto', margin: '1rem 0', mx: '-10px', borderRadius:'8px',  /* bgcolor: '#f5f5f5', */
           // Custom scrollbar styles
+          // ...getGlassmorphismStyle(theme, darkMode),
           scrollbarWidth: 'thin', // Firefox
           scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
           "&::-webkit-scrollbar": {
@@ -177,10 +179,14 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage }) 
                 component="div"
                 style={{
                   margin: '6px',
-                  backgroundColor: '#f5f5f5',
+                  // backgroundColor: '#f5f5f5',
                   padding: '1rem',
                   borderRadius: '6px',
-                  border: '1px solid #ddd',
+                  // border: '1px solid #ddd',
+                  // border: darkMode 
+                  //   ? '1px solid rgba(255, 255, 255, 0.1)' 
+                  //   : '1px solid rgba(0, 0, 0, 0.2)',
+                  ...getGlassmorphismStyle(theme, darkMode),
                   marginTop: '6px',
                   lineHeight: '1.5',
                   textAlign: 'justify',

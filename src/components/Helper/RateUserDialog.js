@@ -3,8 +3,23 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, R
 import API from '../api/api';
 import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
+import { useTheme } from '@emotion/react';
 
-const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar }) => {
+
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
+const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar, darkMode }) => {
   const [rating, setRating] = useState(3);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,6 +30,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   const loggedUserData = userData();
   const [isRateUserOpen, setIsRateUserOpen] = useState(false);
   const [isRatingExisted, setIsRatingExisted] = useState(false);
+  const theme = useTheme();
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -105,7 +121,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
 
   return (
     <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ margin: isMobile ? '10px' : '0px',
-        '& .MuiPaper-root': { borderRadius: '14px',  } , //maxHeight: isMobile ? '300px' : 'auto'
+        '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '4px',  }
         }}>
       <DialogTitle>
@@ -121,14 +137,15 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
                   top: '0.5rem',
                   right: '1rem',
                   // backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                  color: '#333'
+                  // color: '#333'
                 }}
               >
                 <CloseIcon />
               </IconButton>
             </Box>
         </Box>
-        <Box sx={{display: 'flex',justifyContent:'center', gap: '20px', alignItems:'center', m: '10px 4px' }}>
+        <Box sx={{display: 'flex',justifyContent:'center', gap: '20px', alignItems:'center', my: '10px', p: 2,
+          ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
           <Rating value={averageRating || 0} precision={0.5} readOnly />
           <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
             {/* {isFetching ? (
@@ -141,12 +158,22 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         </Box>
         
       </DialogTitle>
-      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', backgroundColor: "#f5f5f5", borderRadius:'8px', mx:1}}>
-        
-
-        
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: isMobile ? '10px' : '14px', mb: 1}}>
+          <Typography variant="h6" >
+            Users Reviews
+          </Typography>
+          {( userId !== loggedUserData?.userId ) && !isRateUserOpen && (
+            <Button
+              variant="contained" size="small" sx={{borderRadius: '12px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',}}
+              onClick={() => setIsRateUserOpen((prev) => !prev)}
+            >
+              {isRatingExisted ? 'Edit your Rating' : 'Rate the User'}
+            </Button>
+          )}
+        </Box>
+      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', mx:1, mb: 2, ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px'}}> {/*  backgroundColor: "#f5f5f5", */}
         <Box
-          bgcolor="#f5f5f5"
+          // bgcolor="#f5f5f5"
           sx={{
             // height: isMobile ? "500px" : "300px",
             overflowY: "auto",
@@ -190,9 +217,12 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
                   margin: "0px",
                   padding: "12px",
                   borderRadius: "8px",
-                  border: "1px solid #ddd",
+                  // border: "1px solid #ddd",
+                  border: darkMode 
+                    ? '1px solid rgba(255, 255, 255, 0.1)' 
+                    : '1px solid rgba(0, 0, 0, 0.2)',
                   marginTop: "6px",
-                  backgroundColor: "#fff"
+                  // backgroundColor: "#fff"
                 }}
               >
                 <Box display="flex" alignItems="center" gap={1}>
@@ -226,8 +256,8 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
           
         </Box>
       </DialogContent>
-      <DialogActions sx={{gap: 1, m:'10px', display: 'flow'}}>
-        {( userId !== loggedUserData?.userId ) && (isRateUserOpen ? (
+      { isRateUserOpen && (
+      <DialogActions sx={{gap: 1, m:'10px', display: 'flow', ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
         <Box width="100%">
             {/* User Rating Input */}
             <Box>
@@ -263,35 +293,38 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
             </Box>
             <Box mt={1} display="flex" justifyContent="flex-end">
                 <Button onClick={() => setIsRateUserOpen((prev) => !prev)} disabled={loading} style={{ margin: "0rem", borderRadius: '8px', marginRight:'10px' }}>
-                    Cancel
+                  Cancel
                 </Button>
                 <Button
                     onClick={handleSubmit}
                     variant="contained"
                     color="primary"
                     disabled={loading || rating === 0}
-                    sx={{ margin: "0rem", borderRadius: '12px' }}
+                    sx={{ margin: "0rem", borderRadius: '12px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }}
                 >
                     { loading ? <CircularProgress size={20}/> : 'Submit' }
                 </Button>
             </Box>
         </Box>
-        ) : (
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end'}}>
-            <Button
-              variant="outlined" sx={{borderRadius: '12px',}}
-              onClick={() => setIsRateUserOpen((prev) => !prev)}
-            >
-              {isRatingExisted ? 'Edit your Rating' : 'Rate the User'}
-            </Button>
-          </Box>
-        ))}
+        
         {/* {userId === loggedUserData?.userId && (
           <Button onClick={onClose} disabled={loading} style={{ margin: "0rem", borderRadius: '8px' }}>
             Close
           </Button>
         )} */}
       </DialogActions>
+      
+      // ) : (
+      //     <Box sx={{ display: 'flex', justifyContent: 'flex-end', m: '10px'}}>
+      //       <Button
+      //         variant="outlined" sx={{borderRadius: '12px',}}
+      //         onClick={() => setIsRateUserOpen((prev) => !prev)}
+      //       >
+      //         {isRatingExisted ? 'Edit your Rating' : 'Rate the User'}
+      //       </Button>
+      //     </Box>
+      //   )
+      )}
     </Dialog>
   );
 };
