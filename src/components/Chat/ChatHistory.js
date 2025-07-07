@@ -23,7 +23,20 @@ const socket = io(process.env.REACT_APP_API_URL);
 
 const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthenticated }) => {
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  // border: darkMode 
+  //   ? '1px solid rgba(255, 255, 255, 0.1)' 
+  //   : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
+const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthenticated, darkMode }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
   const userId = localStorage.getItem('userId');
@@ -482,8 +495,8 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 10,
-        bgcolor: 'white',
+        zIndex: 10, ...getGlassmorphismStyle(theme, darkMode), backdropFilter: 'blur(12px)',
+        // bgcolor: 'white',
         boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
         padding: isMobile ? '10px' : '10px',
         display: 'flex',
@@ -537,7 +550,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
           </Box> 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap:1 }}>
             <IconButton onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper}>
-              {isHelper ? <StarRoundedIcon fontSize="medium" color="primary"/> : <StarOutlineRoundedIcon fontSize="medium" />}
+              {isHelper ? <StarRoundedIcon fontSize="medium" sx={{color: '#eab308'}}/> : <StarOutlineRoundedIcon fontSize="medium" />}
             </IconButton>
             {isMobile && (
               <Box >
@@ -552,9 +565,9 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
         {/* ) : null} */}
       {/* </Box> */}
     </Box>
-    <Box onScroll={handleScroll} height={isMobile ? 'calc(82vh - 44px)' : 'calc(66vh - 64px)'} bgcolor="#f5f5f5"
+    <Box onScroll={handleScroll} height={isMobile ? 'calc(82vh - 44px)' : 'calc(66vh - 64px)'} /* bgcolor="#f5f5f5" */
       sx={{
-      overflowY: 'auto',
+      overflowY: 'auto', backdropFilter: isMobile ? 'blur(12px)' : null,
       padding: '0px', scrollbarWidth:'thin', 
       scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
     }}>
@@ -575,7 +588,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
              Object.entries(groupedMessages).map(([date, msgs], dateIndex) => (
             <Box key={`date-${dateIndex}`} sx={{ textAlign: "center", mt: 2 }}>
               {/* Date Header in the Middle */}
-              <Typography variant="body2" sx={{ bgcolor: theme.palette.grey[200], px: 2, py: 1, borderRadius: 1, display: "inline-block" }}>
+              <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 1, display: "inline-block" , backdropFilter: 'blur(12px)', ...getGlassmorphismStyle(theme, darkMode)}}> {/* bgcolor: theme.palette.grey[200], */}
                 {format(new Date(date), "EEEE, MMM dd, yyyy")}
               </Typography>
 
@@ -585,8 +598,8 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
                   ref={index === msgs.length - 1 ? bottomRef : null} // Attach ref to last transaction
                 >
                   <Box sx={{
-                    bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
-                    color: msg.senderId === userId ? '#fff' : '#000',
+                    bgcolor: msg.senderId === userId ? '#4f46e5' : '#3b82f6', backdropFilter: 'blur(12px)',
+                    color: msg.senderId === userId ? '#fff' : '#fff',
                     p: 1,
                     borderRadius: 2,
                     maxWidth: '70%', textAlign: "start",
@@ -723,7 +736,8 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
-            alignItems: 'center', backgroundColor:'#f5f5f5', 
+            alignItems: 'center', backdropFilter: 'blur(12px)', 
+            // backgroundColor:'#f5f5f5', 
             justifyContent: 'center',
             padding: '6px 10px', // Reduce padding to shrink button size
             width: 'auto', // Set smaller width
@@ -758,7 +772,8 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
           // bgcolor: 'white',
           // boxShadow: '0px -2px 4px rgba(0, 0, 0, 0.1)',
           padding: '4px',  display: 'flex', alignItems: 'center', gap: 1, margin:'8px 8px',
-          bgcolor: theme.palette.background.paper, borderRadius: '20px',
+          // bgcolor: theme.palette.background.paper,
+           borderRadius: '20px', backdropFilter: 'blur(12px)',
           border: `1px solid ${theme.palette.divider}`, flex: 1
         }}
       >
@@ -839,10 +854,10 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
                     <IconButton color="primary" sx={{
                         // position: 'absolute',
                         right: '2px', padding:'6px 10px', borderRadius:6,
-                        backgroundColor: message.trim() ? theme.palette.primary.main : 'transparent',
+                        backgroundColor: message.trim() ? '#8b5cf6' : 'transparent',
                         color: message.trim() ? '#fff' : theme.palette.text.secondary,
                         '&:hover': {
-                          backgroundColor: message.trim() ? theme.palette.primary.dark : 'transparent',
+                          backgroundColor: message.trim() ? '#4f46e5' : 'transparent',
                         },
                         transition: 'all 0.2s ease',
                       }}
@@ -850,7 +865,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
                       onClick={handleSendMessage}
                       disabled={message.trim() === '' || !isAuthenticated}
                       >
-                      <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px' }} />
+                      <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px',  }} />
                     </IconButton>
                   </Box>
                 {/* </Toolbar> */}
@@ -860,7 +875,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
     open={helperDialogOpen}
     onClose={() => setHelperDialogOpen(false)}
     aria-labelledby="delete-dialog-title" 
-    sx={{ '& .MuiPaper-root': { borderRadius: '14px' }, '& .MuiDialogTitle-root': { padding: '14px 16px' },}}
+    sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, '& .MuiDialogTitle-root': { padding: '14px 16px' },}}
   >
     <DialogTitle id="delete-dialog-title" >
       {isHelper ? 'Are you sure want to remove user from the Helper!' : 'Are you sure you want to tag this user to Helper!'}
@@ -885,7 +900,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
       <Button onClick={() => setHelperDialogOpen(false)} disabled={helperCount >= peopleCount && !isHelper} variant='text' color="error" sx={{borderRadius:'8px'}}>
         Cancel
       </Button>
-      <Button onClick={toggleHelper} disabled={helperCount >= peopleCount && !isHelper} variant='contained' color="primary" sx={{ marginRight: '0px', borderRadius:'8px' }}>
+      <Button onClick={toggleHelper} disabled={helperCount >= peopleCount && !isHelper} variant='contained'  sx={{ marginRight: '0px', borderRadius:'8px', background: isHelper ? '#8b5cf6' : '#eab308' }}>
         {loadingHelerAction ? <> <CircularProgress size={20} sx={{marginRight:'8px', color:'white'}}/> processing... </> : isHelper ? 'Remove user' : 'Tag user'}
       </Button>
     </DialogActions>

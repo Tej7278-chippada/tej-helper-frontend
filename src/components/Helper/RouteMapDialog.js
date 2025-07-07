@@ -396,7 +396,7 @@ function RouteMapDialog({ open, onClose, post }) {
         </IconButton>
         <Typography variant="h6">Route Map to Post Location</Typography>
 
-        <Box sx={{ paddingBottom: '5rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
+        <Box sx={{ paddingBottom: '0rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
           <Box display="flex" justifyContent="start" sx={{paddingTop: '1rem', marginInline:'4px'}}>
             <LocationOnIcon color='primary'/>
             <Tooltip title="Click to center on post location" arrow placement="top-start">
@@ -487,7 +487,23 @@ function RouteMapDialog({ open, onClose, post }) {
               {/* {route && <Polyline positions={route} color="blue" />} */}
 
             </MapContainer>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', alignItems: 'center' }}>
+           
+
+            {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: '1rem' }}>
+                  <Button variant="contained" color="primary" onClick={calculateDistance}>
+                    Show Distance
+                  </Button>
+                  <Button variant="contained" color="secondary" onClick={fetchRoute}>
+                    Show Route
+                  </Button>
+                </Box>
+                {distance !== null && (
+                  <Typography variant="h6" sx={{ textAlign: 'center', marginTop: '1rem' }}>
+                    Distance: {distance} km
+                  </Typography>
+                )} */}
+          </Box>
+           <Box sx={{ display: 'flex', justifyContent: 'space-between', m: '8px 10px', alignItems: 'center' }}>
               {/* <Button
                     variant="contained"
                     onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
@@ -622,21 +638,6 @@ function RouteMapDialog({ open, onClose, post }) {
                   </Button> */}
 
             </Box>
-
-            {/* <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, marginTop: '1rem' }}>
-                  <Button variant="contained" color="primary" onClick={calculateDistance}>
-                    Show Distance
-                  </Button>
-                  <Button variant="contained" color="secondary" onClick={fetchRoute}>
-                    Show Route
-                  </Button>
-                </Box>
-                {distance !== null && (
-                  <Typography variant="h6" sx={{ textAlign: 'center', marginTop: '1rem' }}>
-                    Distance: {distance} km
-                  </Typography>
-                )} */}
-          </Box>
 
         </Box>
         {/* {distance && ( */}

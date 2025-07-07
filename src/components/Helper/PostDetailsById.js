@@ -921,7 +921,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             // onCommentAdded={onCommentAdded}  // Passing the comment added handler
           />
           <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
-            isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+            isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
           />
           {/* Rating Dialog */}
           <RateUserDialog

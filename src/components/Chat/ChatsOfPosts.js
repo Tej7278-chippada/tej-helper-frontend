@@ -13,7 +13,20 @@ import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
 import RateUserDialog from '../Helper/RateUserDialog';
 import { format } from 'date-fns';
 import { io } from 'socket.io-client';
+import { dark } from '@mui/material/styles/createPalette';
 
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  // border: darkMode 
+  //   ? '1px solid rgba(255, 255, 255, 0.1)' 
+  //   : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
 
 const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -147,13 +160,13 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
         <Box
           display="flex"
           flexDirection={isMobile ? "column" : "row"}
-          gap={1} p={isMobile ? '4px' : 1} sx={{ bgcolor: '#f5f5f5', borderRadius: '10px', }} /* p={isMobile ? '6px' : 1} paddingBottom:(isMobile ? '4px' : '8px' ), paddingTop:(isMobile ? '0px' : '8px' ) */
+          gap={1} p="4px" sx={{ borderRadius: '10px', }} /* p={isMobile ? '6px' : 1} paddingBottom:(isMobile ? '4px' : '8px' ), paddingTop:(isMobile ? '0px' : '8px' ) */
         >
           <Card sx={{
             flex: 1.5,
             height: '80vh', // Fixed height relative to viewport
-            overflowY: 'auto',
-            bgcolor: 'white', // Card background color (customizable)
+            overflowY: 'auto', ...getGlassmorphismStyle(theme, darkMode),
+            // bgcolor: 'white', // Card background color (customizable)
             borderRadius: 2, // Card border radius (customizable)
             // boxShadow: 3, // Shadow for a modern look
             scrollbarWidth: 'none'
@@ -166,8 +179,8 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                 left={0}
                 right={0}
                 zIndex={10}
-                sx={{
-                  bgcolor: 'white', // Background color to ensure visibility
+                sx={{ ...getGlassmorphismStyle(theme, darkMode),
+                  // bgcolor: 'white', // Background color to ensure visibility
                   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', // Optional shadow for separation
                   padding: '8px 16px', // Padding for a clean look
                 }}
@@ -204,7 +217,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                         lineHeight: '1.5rem',
                         fontWeight: 500,
                         fontFamily: 'sans-serif',
-                        color: 'black',
+                        // color: 'black',
                       }}
                     >
                       {postTitle}
@@ -212,7 +225,8 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                   </Box>
                 </Box>
               </Box>
-              <Box bgcolor="#f5f5f5"
+              <Box 
+              // bgcolor="#f5f5f5"
                 // mt="64px" // Matches the approximate height of the fixed header
                 // height="calc(80vh - 64px)" // Adjust the height of the scrollable area
                 sx={{
@@ -259,7 +273,8 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                         sx={{
                           mb: '4px', p: 1,
                           display: 'flex',
-                          alignItems: 'center', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', backgroundColor: 'white',
+                          alignItems: 'center', ...getGlassmorphismStyle(theme, darkMode),
+                          // boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)', backgroundColor: 'white',
                           cursor: 'pointer', borderRadius: '8px',
                           // '&:hover': { backgroundColor: '#f5f5f5' },
                           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
@@ -410,16 +425,16 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
 
           {!isMobile && (<Card sx={{
             flex: 3, padding: '0rem',
-            height: '80vh', // Fixed height relative to viewport
-            overflowY: 'auto',
-            bgcolor: 'white', // Card background color (customizable)
+            // height: '80vh', // Fixed height relative to viewport
+            overflowY: 'auto', ...getGlassmorphismStyle(theme, darkMode),
+            // bgcolor: 'white', // Card background color (customizable)
             borderRadius: 2, // Card border radius (customizable)
             // boxShadow: 3, // Shadow for a modern look
             scrollbarWidth: 'thin'
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} isAuthenticated={isAuthenticated}/>  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} isAuthenticated={isAuthenticated} darkMode={darkMode}/>  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
@@ -450,7 +465,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated}/>
+            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} />
           )}
         {/* </DialogContent> */}
       </Dialog>
@@ -461,7 +476,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
         onClose={handleCloseRateDialog}
         // post={post}
         isMobile={isMobile}
-        isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}
+        isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
       />
       <Snackbar
         open={loginMessage.open}

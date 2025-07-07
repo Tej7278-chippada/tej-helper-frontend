@@ -289,7 +289,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                           )}
 
                           {/* Floating Action Buttons */}
-                          <Box
+                          {/* <Box
                             className="card-actions"
                             sx={{
                               position: 'absolute',
@@ -340,7 +340,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                 )}
                               </IconButton>
                             </Tooltip>
-                          </Box>
+                          </Box> */}
 
                           </CardMedia>
                           <CardContent style={{ padding: '10px' }}>

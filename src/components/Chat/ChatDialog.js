@@ -27,9 +27,23 @@ const RECOMMENDED_MESSAGES = [
   "When would be a good time to meet?"
 ];
 
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  // border: darkMode 
+  //   ? '1px solid rgba(255, 255, 255, 0.1)' 
+  //   : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
+
 // const Picker = lazy(() => import("emoji-picker-react")); // Lazy load Emoji Picker
 
-const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage, setSnackbar, chatData }) => {
+const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessage, setSnackbar, chatData, darkMode }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
   const userId = localStorage.getItem('userId');
   const authToken = localStorage.getItem('authToken');
@@ -425,10 +439,11 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"  fullScreen={isMobile} sx={{
         margin: isMobile ? '10px' : '0px',
-        '& .MuiPaper-root': { borderRadius: '14px',  } , //maxHeight: isMobile ? '300px' : 'auto'
+        '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)',  } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }
       }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}> 
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+   }}> 
         <Box sx={{ display: 'flex', alignItems:'center', gap:2 }}>
           {/* {post.user?.profilePic && ( */}
             {/* Main user avatar with media thumbnail badge */}
@@ -505,7 +520,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         </Box>
         
       </DialogTitle>
-    <DialogContent onScroll={handleScroll} sx={{padding: 0, scrollbarWidth:'thin', bgcolor:'#f5f5f5',
+    <DialogContent onScroll={handleScroll} sx={{padding: 0, scrollbarWidth:'thin', /* bgcolor:'#f5f5f5', */ 
       scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
      }}>
         {post.helperIds.includes(userId) && (
@@ -531,7 +546,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             Object.entries(groupedMessages).map(([date, msgs], dateIndex) => (
               <Box key={`date-${dateIndex}`} sx={{ textAlign: "center", mt: 2 }}>
                 {/* Date Header in the Middle */}
-                <Typography variant="body2" sx={{ bgcolor: theme.palette.grey[200], px: 2, py: 1, borderRadius: 1, display: "inline-block" }}>
+                <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 1, display: "inline-block", backdropFilter: 'blur(12px)', ...getGlassmorphismStyle(theme, darkMode) }}> {/*  bgcolor: theme.palette.grey[200], */}
                   {format(new Date(date), "EEEE, MMM dd, yyyy")}
                 </Typography>
 
@@ -542,8 +557,10 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                     ref={index === messages.length - 1 ? bottomRef : null} // Attach ref to last message
                   >
                     <Box sx={{
-                      bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
-                      color: msg.senderId === userId ? '#fff' : '#000',
+                      // bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
+                      // color: msg.senderId === userId ? '#fff' : '#000',
+                      bgcolor: msg.senderId === userId ? '#4f46e5' : '#3b82f6', backdropFilter: 'blur(12px)',
+                      color: msg.senderId === userId ? '#fff' : '#fff',
                       p: 1,
                       borderRadius: 2,
                       maxWidth: '70%',
@@ -700,7 +717,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
-            alignItems: 'center', backgroundColor:'#f5f5f5', 
+            alignItems: 'center', backdropFilter: 'blur(12px)',
+            //  backgroundColor:'#f5f5f5', 
             justifyContent: 'center',
             padding: '6px 10px', // Reduce padding to shrink button size
             width: 'auto', // Set smaller width
@@ -753,7 +771,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
 
         {/* Input & Send Button */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? '2px' : '4px', padding: isMobile ? '2px' : '4px', position: 'relative',
-          bgcolor: theme.palette.background.paper,borderRadius: '20px',
+          // bgcolor: theme.palette.background.paper,
+          borderRadius: '20px', backdropFilter: 'blur(12px)',
           border: `1px solid ${theme.palette.divider}`, flex: 1 }}>
           {/* <IconButton 
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
@@ -799,10 +818,12 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             sx={{
               // position: 'absolute',
               right: '2px', padding:'6px 10px', borderRadius:6,
-              backgroundColor: message.trim() ? theme.palette.primary.main : 'transparent',
+              // backgroundColor: message.trim() ? theme.palette.primary.main : 'transparent',
+              backgroundColor: message.trim() ? '#8b5cf6' : 'transparent',
               color: message.trim() ? '#fff' : theme.palette.text.secondary,
               '&:hover': {
-                backgroundColor: message.trim() ? theme.palette.primary.dark : 'transparent',
+                // backgroundColor: message.trim() ? theme.palette.primary.dark : 'transparent',
+                backgroundColor: message.trim() ? '#4f46e5' : 'transparent',
               },
               transition: 'all 0.2s ease',
             }}

@@ -51,6 +51,19 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+const getGlassmorphismStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(30, 30, 30, 0.85)' 
+    : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  // border: darkMode 
+  //   ? '1px solid rgba(255, 255, 255, 0.1)' 
+  //   : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
 
 const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const { id } = useParams(); // Extract sellerId from URL
@@ -257,13 +270,13 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         <Box sx={{
           padding: isMobile ? '8px' : '12px',
           // position: 'relative',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          // backgroundColor: 'rgba(255, 255, 255, 0.9)',
           borderRadius: '8px', scrollbarWidth: 'thin'
         }}>
           <Box
             display="flex"
             flexDirection={isMobile ? "column" : "row"}
-            gap={2} sx={{ bgcolor: '#f5f5f5', borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px' }}
+            gap={2} sx={{  borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px', ...getGlassmorphismStyle(theme, darkMode) }} // bgcolor: '#f5f5f5',
           >
             <Box sx={{
               flex: 1,
@@ -299,8 +312,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             <Box sx={{
               flex: 3,
               // height: '73vh', // Fixed height relative to viewport
-              overflowY: 'auto',
-              bgcolor: 'white', // Card background color (customizable)
+              overflowY: 'auto', ...getGlassmorphismStyle(theme, darkMode),
+              // bgcolor: 'white', // Card background color (customizable)
               borderRadius: 3, // Card border radius (customizable)
               // boxShadow: 3, // Shadow for a modern look
               scrollbarWidth: 'thin', padding: '1rem',
@@ -401,7 +414,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   bottom: 0,
                   left: 0,
                   right: 0,
-                  bgcolor: 'white', borderRadius: '16px',
+                  // bgcolor: 'white', 
+                  borderRadius: '16px',
                   boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
                   display: 'flex',
                   justifyContent: 'right',
@@ -452,15 +466,16 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               <Card
                 sx={{
                   position: 'absolute',
-                  top: isMobile ? '150px' : '100px',
+                  top: isMobile ? '150px' : '10px',
                   left: isMobile ? '2%' : null,
                   right: isMobile ? null : '2%',
                   width: '95%',
                   maxWidth: '400px',
                   zIndex: 1000,
-                  borderRadius: '10px',
-                  boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-                  backgroundColor: '#fff', '& .MuiCardContent-root': { padding: '10px' },
+                  borderRadius: '10px', backdropFilter: 'blur(12px)',
+                  // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                  // backgroundColor: '#fff',
+                   '& .MuiCardContent-root': { padding: '10px' },
                 }}
               >
                 <CardContent>
@@ -492,7 +507,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                             borderRadius: "8px",
                             border: "1px solid #ddd",
                             marginTop: "6px",
-                            backgroundColor: "#fff"
+                            // backgroundColor: "#fff"
                           }}
                         >
                           <Box display="flex" alignItems="center" gap={1}>
@@ -528,7 +543,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               </Card>
             )}
           </Box>
-          <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, bgcolor: 'rgba(0, 0, 0, 0.07)' }}>
+          <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode),
+            /* bgcolor: 'rgba(0, 0, 0, 0.07)' */ }}>
             <Box sx={{ height: '300px', marginTop: '1rem', padding: '10px' }}>
               <Box display="flex" justifyContent="start" sx={{ marginBottom: isMobile ? '6px' : '8px' }}>
                 {/* <IconButton color="primary" sx={{borderRadius: 6, px: 0.5, py: 0.5,  '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' }}}> */}
@@ -737,7 +753,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}
         aria-labelledby="delete-dialog-title" 
-        sx={{ '& .MuiPaper-root': { borderRadius: '14px' }, }}
+        sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, }}
       >
         <DialogTitle id="delete-dialog-title" >
           Are you sure you want to delete your account permanently?

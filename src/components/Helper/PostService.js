@@ -686,7 +686,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
           open={deleteDialogOpen}
           onClose={() => setDeleteDialogOpen(false)}
           aria-labelledby="delete-dialog-title" 
-          sx={{ '& .MuiPaper-root': { borderRadius: '14px' }, }}
+          sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, }}
         >
           <DialogTitle id="delete-dialog-title" >
             Are you sure you want to delete this post?

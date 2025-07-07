@@ -295,7 +295,7 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 zIndex={10}
                 sx={{ ...getGlassmorphismStyle(0.1, 10),
                   // bgcolor: 'white',
-                  // boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+                  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
                   padding: '8px 16px', borderTopRightRadius: '16px', borderTopLeftRadius: '16px',
                 }}
               >
@@ -690,7 +690,7 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatDialog open={openDialog} onClose={handleCloseDialog} chatData={chatDetailsById} post={post}  isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar}/>
+            <ChatDialog open={openDialog} onClose={handleCloseDialog} chatData={chatDetailsById} post={post}  isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}/>
           )}
         {/* </DialogContent> */}
       </Dialog>
