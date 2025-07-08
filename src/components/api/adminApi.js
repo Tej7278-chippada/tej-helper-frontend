@@ -6,6 +6,22 @@ const API = axios.create({ baseURL: process.env.REACT_APP_API_URL });
 export default API;
 
 
+export const searchUsers = (query) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get(`/api/admin/searchUsers?query=${encodeURIComponent(query)}`, { headers });
+};
+
+export const updateAccountStatus = (userId, status) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.patch('/api/admin/updateAccountStatus', { userId, status }, { headers });
+};
+
 export const addAdminBanner = (data) => {
   const authToken = localStorage.getItem('authToken');
   const headers = {

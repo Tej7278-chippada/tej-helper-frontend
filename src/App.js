@@ -24,6 +24,7 @@ import { fetchUnreadNotificationsCount } from './components/api/api';
 import { io } from 'socket.io-client';
 import Banner from './components/Banners/Banner';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
+import AdminPage from './components/Banners/AdminPage';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -194,6 +195,7 @@ function App() {
   const username = localStorage.getItem('tokenUsername');
   const [unreadCount, setUnreadCount] = useState(0);
   const userId = localStorage.getItem('userId');
+  const userName = localStorage.getItem('tokenUsername');
   const [shouldAnimate, setShouldAnimate] = useState(false);
   // Enhanced loading state management for splash screen
   const [isLoading, setIsLoading] = useState(() => {
@@ -376,6 +378,11 @@ function App() {
           <Route path="/adminBanners" element={
             <PrivateRoute>
               <Banner darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
+            </PrivateRoute>
+          } />
+          <Route path="/adminPage" element={
+            <PrivateRoute>
+              <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
         </Routes>
