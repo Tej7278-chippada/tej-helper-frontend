@@ -439,7 +439,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"  fullScreen={isMobile} sx={{
         margin: isMobile ? '10px' : '0px',
-        '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)',  } , //maxHeight: isMobile ? '300px' : 'auto'
+        '& .MuiPaper-root': { borderRadius: '14px',/*  background: darkMode  ? 'rgb(0, 0, 0)'  : 'rgb(255, 255, 255)', */  } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }
       }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
@@ -546,7 +546,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             Object.entries(groupedMessages).map(([date, msgs], dateIndex) => (
               <Box key={`date-${dateIndex}`} sx={{ textAlign: "center", mt: 2 }}>
                 {/* Date Header in the Middle */}
-                <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 1, display: "inline-block", backdropFilter: 'blur(12px)', ...getGlassmorphismStyle(theme, darkMode) }}> {/*  bgcolor: theme.palette.grey[200], */}
+                <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 1, display: "inline-block",  ...getGlassmorphismStyle(theme, darkMode) }}> {/*  bgcolor: theme.palette.grey[200], */}
                   {format(new Date(date), "EEEE, MMM dd, yyyy")}
                 </Typography>
 
@@ -559,7 +559,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                     <Box sx={{
                       // bgcolor: msg.senderId === userId ? theme.palette.primary.main : theme.palette.grey[300],
                       // color: msg.senderId === userId ? '#fff' : '#000',
-                      bgcolor: msg.senderId === userId ? '#4f46e5' : '#3b82f6', backdropFilter: 'blur(12px)',
+                      bgcolor: msg.senderId === userId ? '#4f46e5' : '#3b82f6', 
                       color: msg.senderId === userId ? '#fff' : '#fff',
                       p: 1,
                       borderRadius: 2,
@@ -717,7 +717,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
-            alignItems: 'center', backdropFilter: 'blur(12px)',
+            alignItems: 'center', 
             //  backgroundColor:'#f5f5f5', 
             justifyContent: 'center',
             padding: '6px 10px', // Reduce padding to shrink button size
@@ -772,7 +772,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         {/* Input & Send Button */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: isMobile ? '2px' : '4px', padding: isMobile ? '2px' : '4px', position: 'relative',
           // bgcolor: theme.palette.background.paper,
-          borderRadius: '20px', backdropFilter: 'blur(12px)',
+          borderRadius: '20px', 
           border: `1px solid ${theme.palette.divider}`, flex: 1 }}>
           {/* <IconButton 
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
