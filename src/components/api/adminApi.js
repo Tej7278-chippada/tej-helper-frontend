@@ -6,12 +6,12 @@ const API = axios.create({ baseURL: process.env.REACT_APP_API_URL });
 export default API;
 
 
-export const searchUsers = (query) => {
+export const searchUsers = (query, page = 1, limit = 20) => {
   const authToken = localStorage.getItem('authToken');
   const headers = {
     Authorization: `Bearer ${authToken}`,
   };
-  return API.get(`/api/admin/searchUsers?query=${encodeURIComponent(query)}`, { headers });
+  return API.get(`/api/admin/searchUsers?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`, { headers });
 };
 
 export const updateAccountStatus = (userId, status) => {
@@ -22,12 +22,12 @@ export const updateAccountStatus = (userId, status) => {
   return API.patch('/api/admin/updateAccountStatus', { userId, status }, { headers });
 };
 
-export const filterUsersByStatus = (status) => {
+export const filterUsersByStatus = (status, page = 1, limit = 20, search = '') => {
   const authToken = localStorage.getItem('authToken');
   const headers = {
     Authorization: `Bearer ${authToken}`,
   };
-  return API.get(`/api/admin/filterUsers?status=${status}`, { headers });
+  return API.get(`/api/admin/filterUsers?status=${status}&page=${page}&limit=${limit}&search=${encodeURIComponent(search)}`, { headers });
 };
 
 export const getUserCounts = () => {

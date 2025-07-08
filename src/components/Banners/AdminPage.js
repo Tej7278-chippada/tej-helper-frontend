@@ -19,6 +19,8 @@ import {
   Tabs,
   Tab,
   Badge,
+  Pagination,
+  Stack,
   InputAdornment,
   IconButton
 } from "@mui/material";
@@ -44,6 +46,15 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
     deleted: 0
   });
   const inputRef = useRef(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 20,
+    total: 0,
+    pages: 1,
+    hasNext: false,
+    hasPrev: false
+  });
+  const [searchMode, setSearchMode] = useState(false);
 
   // Fetch user counts on component mount
   useEffect(() => {
@@ -61,20 +72,35 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   // Load users based on active tab
   useEffect(() => {
     const loadUsers = async () => {
-      if (activeTab === 'search') return;
+      // if (activeTab === 'search') return;
       
       setLoading(true);
       try {
         let response;
-        if (activeTab === 'all') {
-          response = await filterUsersByStatus('');
+        if (searchQuery.trim() && activeTab === 'all') {
+          setSearchMode(true);
+          response = await searchUsers(searchQuery, pagination.page, pagination.limit);
         } else {
-          response = await filterUsersByStatus(activeTab);
+          setSearchMode(false);
+          response = await filterUsersByStatus(
+          activeTab === 'all' ? '' : activeTab,
+          pagination.page,
+          pagination.limit,
+          searchQuery
+          );
         }
-        setUsers(response.data);
+        setUsers(response.data.users);
+        setPagination({
+          page: response.data.currentPage,
+          limit: pagination.limit,
+          total: response.data.total,
+          pages: response.data.pages,
+          hasNext: response.data.hasNextPage,
+          hasPrev: response.data.hasPrevPage
+        });
         // Initialize status updates
         const updates = {};
-        response.data.forEach(user => {
+        response.data.users.forEach(user => {
           updates[user._id] = user.accountStatus;
         });
         setStatusUpdates(updates);
@@ -86,36 +112,23 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
     };
 
     loadUsers();
-  }, [activeTab]);
+  }, [activeTab, pagination.page, pagination.limit, searchQuery]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    
-    setLoading(true);
-    try {
-      const response = await searchUsers(searchQuery);
-      setUsers(response.data);
-      // Initialize status updates
-      const updates = {};
-      response.data.forEach(user => {
-        updates[user._id] = user.accountStatus;
-      });
-      setStatusUpdates(updates);
-    } catch (error) {
-      console.error("Error searching users:", error);
-    } finally {
-      setLoading(false);
-    }
+    setPagination(prev => ({ ...prev, page: 1 }));
   };
 
   const handleClearClick = () => {
     setSearchQuery('');
+    setPagination(prev => ({ ...prev, page: 1 }));
     inputRef.current?.focus();
   };
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
     setSearchQuery('');
+    setPagination(prev => ({ ...prev, page: 1 })); // Reset to first page on tab change
   };
 
   const handleStatusChange = (userId, newStatus) => {
@@ -128,6 +141,9 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   const handleSaveStatus = async (userId) => {
     try {
       const newStatus = statusUpdates[userId];
+       const currentStatus = users.find(u => u._id === userId)?.accountStatus;
+      
+      if (!newStatus || newStatus === currentStatus) return;
       await updateAccountStatus(userId, newStatus);
       // Update the user in local state
       setUsers(prev => prev.map(user => 
@@ -135,15 +151,33 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       ));
 
       // Update counts if status changed
-      if (users.find(u => u._id === userId)?.accountStatus !== newStatus) {
+      // if (users.find(u => u._id === userId)?.accountStatus !== newStatus) {
         const response = await getUserCounts();
         setUserCounts(response.data);
-      }
+      // }
     } catch (error) {
       console.error("Error updating status:", error);
+      // Revert the status change in UI
+      setStatusUpdates(prev => ({
+        ...prev,
+        [userId]: users.find(u => u._id === userId)?.accountStatus
+      }));
     }
   };
 
+  const handlePageChange = (event, newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const handleLimitChange = (e) => {
+    const newLimit = parseInt(e.target.value);
+    setPagination(prev => ({ 
+      ...prev, 
+      limit: newLimit, 
+      page: 1 // Always reset to page 1 when changing limit
+    }));
+  };
+  
   return (
     <Layout 
       darkMode={darkMode} 
@@ -158,9 +192,9 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
         </Typography>
 
         <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }} variant={isMobile ? "scrollable" : "standard"}
-      // scrollButtons={isMobile ? "auto" : false}
-      // allowScrollButtonsMobile
-      >
+          // scrollButtons={isMobile ? "auto" : false}
+          // allowScrollButtonsMobile
+        >
           <Tab
             label={<Badge badgeContent={userCounts.all} color="primary">All Users</Badge>} 
             value="all" 
@@ -242,11 +276,31 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
         </Box>
         )}
 
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+          <Typography variant="subtitle1">
+            Showing {(pagination.page - 1) * pagination.limit + 1}-
+            {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} users
+            {searchMode && searchQuery.trim() && ` (search results)`}
+          </Typography>
+          <Select
+            value={pagination.limit}
+            onChange={handleLimitChange}
+            size="small"
+            sx={{ width: 100 }}
+          >
+            <MenuItem value={10}>10 per page</MenuItem>
+            <MenuItem value={20}>20 per page</MenuItem>
+            <MenuItem value={50}>50 per page</MenuItem>
+            <MenuItem value={100}>100 per page</MenuItem>
+          </Select>
+        </Box>
+
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
             <CircularProgress />
           </Box>
         ) : users.length > 0 ? (
+          <>
           <TableContainer component={Paper}>
             <Table>
               <TableHead >
@@ -293,6 +347,20 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
               </TableBody>
             </Table>
           </TableContainer>
+
+           <Stack spacing={2} sx={{ mt: 3, alignItems: 'center' }}>
+            <Pagination
+              count={pagination.pages}
+              page={pagination.page}
+              onChange={handlePageChange}
+              shape="rounded"
+              showFirstButton
+              showLastButton
+              siblingCount={1}
+              boundaryCount={1}
+            />
+          </Stack>
+          </>
         ) : (
           <Box sx={{ 
             display: 'flex',
