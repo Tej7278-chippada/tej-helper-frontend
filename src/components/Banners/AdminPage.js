@@ -1,5 +1,5 @@
 // src/components/AdminPage.js
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { 
   Typography, 
   TextField, 
@@ -15,11 +15,17 @@ import {
   Select,
   Box,
   CircularProgress,
-  useMediaQuery
+  useMediaQuery,
+  Tabs,
+  Tab,
+  Badge,
+  InputAdornment,
+  IconButton
 } from "@mui/material";
 import Layout from "../Layout";
-import { searchUsers, updateAccountStatus } from "../api/adminApi";
+import { filterUsersByStatus, getUserCounts, searchUsers, updateAccountStatus } from "../api/adminApi";
 import { useTheme } from "@emotion/react";
+import ClearIcon from '@mui/icons-material/Clear';
 
 const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,6 +34,59 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   const [statusUpdates, setStatusUpdates] = useState({});
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [activeTab, setActiveTab] = useState('all');
+  // const [filterStatus, setFilterStatus] = useState('');
+  const [userCounts, setUserCounts] = useState({
+    all: 0,
+    active: 0,
+    inactive: 0,
+    suspended: 0,
+    deleted: 0
+  });
+  const inputRef = useRef(null);
+
+  // Fetch user counts on component mount
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const response = await getUserCounts();
+        setUserCounts(response.data);
+      } catch (error) {
+        console.error("Error fetching user counts:", error);
+      }
+    };
+    fetchCounts();
+  }, []);
+
+  // Load users based on active tab
+  useEffect(() => {
+    const loadUsers = async () => {
+      if (activeTab === 'search') return;
+      
+      setLoading(true);
+      try {
+        let response;
+        if (activeTab === 'all') {
+          response = await filterUsersByStatus('');
+        } else {
+          response = await filterUsersByStatus(activeTab);
+        }
+        setUsers(response.data);
+        // Initialize status updates
+        const updates = {};
+        response.data.forEach(user => {
+          updates[user._id] = user.accountStatus;
+        });
+        setStatusUpdates(updates);
+      } catch (error) {
+        console.error("Error loading users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, [activeTab]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -49,6 +108,16 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
     }
   };
 
+  const handleClearClick = () => {
+    setSearchQuery('');
+    inputRef.current?.focus();
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+    setSearchQuery('');
+  };
+
   const handleStatusChange = (userId, newStatus) => {
     setStatusUpdates(prev => ({
       ...prev,
@@ -64,6 +133,12 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       setUsers(prev => prev.map(user => 
         user._id === userId ? { ...user, accountStatus: newStatus } : user
       ));
+
+      // Update counts if status changed
+      if (users.find(u => u._id === userId)?.accountStatus !== newStatus) {
+        const response = await getUserCounts();
+        setUserCounts(response.data);
+      }
     } catch (error) {
       console.error("Error updating status:", error);
     }
@@ -81,7 +156,35 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
         <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
           User Management
         </Typography>
-        
+
+        <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }} variant={isMobile ? "scrollable" : "standard"}
+      // scrollButtons={isMobile ? "auto" : false}
+      // allowScrollButtonsMobile
+      >
+          <Tab
+            label={<Badge badgeContent={userCounts.all} color="primary">All Users</Badge>} 
+            value="all" 
+          />
+          <Tab 
+            label={<Badge badgeContent={userCounts.active} color="success">Active</Badge>} 
+            value="active" 
+          />
+          <Tab 
+            label={<Badge badgeContent={userCounts.inactive} color="warning">Inactive</Badge>} 
+            value="inactive" 
+          />
+          <Tab 
+            label={<Badge badgeContent={userCounts.suspended} color="error">Suspended</Badge>} 
+            value="suspended" 
+          />
+          <Tab 
+            label={<Badge badgeContent={userCounts.deleted} color="secondary">Deleted</Badge>} 
+            value="deleted" 
+          />
+          {/* <Tab label="Search" value="search" /> */}
+        </Tabs>
+
+        {activeTab === 'all' && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end',gap: 0, mb: 3 }}>
           <TextField
             fullWidth
@@ -112,6 +215,19 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
                 },
               },
             }}
+            InputProps={{
+              endAdornment: searchQuery && (
+                <InputAdornment position="end">
+                  <IconButton 
+                    onClick={handleClearClick}
+                    size="small"
+                    sx={{ ml: 1 }}
+                  >
+                    <ClearIcon color="action" fontSize="small" />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button 
             variant="contained" 
@@ -119,11 +235,18 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
             disabled={searchQuery.trim() === '' || loading}
             sx={{borderRadius: '12px', m: '6px', backgroundColor: '#4f46e5', width: '100px'}}
           >
-            {loading ? <CircularProgress size={24} /> : "Search"}
+            {/* {loading ? <CircularProgress size={24} /> : " */}
+            Search
+            {/* "} */}
           </Button>
         </Box>
+        )}
 
-        {users.length > 0 ? (
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+            <CircularProgress />
+          </Box>
+        ) : users.length > 0 ? (
           <TableContainer component={Paper}>
             <Table>
               <TableHead >
@@ -185,7 +308,7 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
               style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
             />
             <Typography variant="body1" color="text.secondary">
-              Users not found!
+              No Users found!
             </Typography>
           </Box>
         )}

@@ -22,6 +22,22 @@ export const updateAccountStatus = (userId, status) => {
   return API.patch('/api/admin/updateAccountStatus', { userId, status }, { headers });
 };
 
+export const filterUsersByStatus = (status) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get(`/api/admin/filterUsers?status=${status}`, { headers });
+};
+
+export const getUserCounts = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/admin/userCounts', { headers });
+};
+
 export const addAdminBanner = (data) => {
   const authToken = localStorage.getItem('authToken');
   const headers = {
