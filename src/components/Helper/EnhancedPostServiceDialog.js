@@ -294,6 +294,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     { value: 'PetCare', label: 'Pet Care', icon: '🐕' },
     { value: 'Delivery', label: 'Delivery Service', icon: '📦' },
     { value: 'Maintenance', label: 'Maintenance', icon: '🔧' },
+    { value: 'HouseSaleLease', label: 'House Sale/Lease', icon: '🏠' },
+    { value: 'LandSaleLease', label: 'Land Sale/Lease', icon: '⛰️' },
     { value: 'Other', label: 'Other Services', icon: '⚙️' }
   ];
   const [generatedImages, setGeneratedImages] = useState([]);

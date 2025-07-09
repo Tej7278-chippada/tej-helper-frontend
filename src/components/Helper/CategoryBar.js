@@ -18,6 +18,9 @@ import HandymanIcon from '@mui/icons-material/Handyman';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import NightlifeRoundedIcon from '@mui/icons-material/NightlifeRounded';
 import SportsCricketRoundedIcon from '@mui/icons-material/SportsCricketRounded';
+import HomeIcon from '@mui/icons-material/Home';
+import LandscapeIcon from '@mui/icons-material/Landscape';
+import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
 
 const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile }) => {
 
@@ -49,6 +52,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
     'Paid': '/categoryBar/paid.png' || 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=200&h=120&fit=crop&auto=format',
     'UnPaid': '/categoryBar/volunteer.png' || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200&h=120&fit=crop&auto=format',
     'Emergency': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
+    // 'Friends': '/categoryBar/friends.png',
     'ParkingSpace': '/categoryBar/parking.png' || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop&auto=format',
     'VehicleRental': '/categoryBar/vehiclesRental.png' || 'https://images.unsplash.com/photo-1549924231-f129b911e442?w=200&h=120&fit=crop&auto=format',
     'FurnitureRental': '/categoryBar/furnitureRentals.png' || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=120&fit=crop&auto=format',
@@ -61,6 +65,8 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
     'PetCare': '/categoryBar/petCare.png' || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=120&fit=crop&auto=format',
     'Delivery': '/categoryBar/delivery.png' || 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=120&fit=crop&auto=format',
     'Maintenance': '/categoryBar/maintance.png' || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&h=120&fit=crop&auto=format',
+    'HouseSaleLease': '/categoryBar/house.png',
+    'LandSaleLease': '/categoryBar/land.png',
     'Other': '/categoryBar/others.png' || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=120&fit=crop&auto=format'
   };
 
@@ -130,8 +136,19 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
       icon: <EmergencyIcon sx={{ fontSize: '18px' }} />,
       color: '#ef4444',
       bgColor: 'rgba(239, 68, 68, 0.1)'
-    }
+    },
+    
   ];
+
+  // const friends = [
+  //   { 
+  //     value: 'Friends', 
+  //     label: 'Friends', 
+  //     icon: <Diversity2RoundedIcon sx={{ fontSize: '18px' }} />,
+  //     color: '#f43f5e',
+  //     bgColor: 'rgba(244, 63, 94, 0.1)'
+  //   }
+  // ];
 
   const services = [
     { 
@@ -217,6 +234,20 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
       icon: <HandymanIcon sx={{ fontSize: '18px' }} />,
       color: '#64748b',
       bgColor: 'rgba(100, 116, 139, 0.1)'
+    },
+    { 
+      value: 'HouseSaleLease', 
+      label: 'House Sale/Lease', 
+      icon: <HomeIcon sx={{ fontSize: '18px' }} />,
+      color: '#8b5cf6',
+      bgColor: 'rgba(139, 92, 246, 0.1)'
+    },
+    { 
+      value: 'LandSaleLease', 
+      label: 'Land Sale/Lease', 
+      icon: <LandscapeIcon sx={{ fontSize: '18px' }} />,
+      color: '#10b981',
+      bgColor: 'rgba(16, 185, 129, 0.1)'
     },
     { 
       value: 'Other', 
@@ -388,6 +419,8 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
         }}
       >
         {renderChips(categories)}
+        {/* <Divider orientation="vertical" flexItem sx={{ borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+        {renderChips(friends)} */}
         <Divider orientation="vertical" flexItem sx={{ borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
         {renderChips(services)}
       </Box>

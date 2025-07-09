@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -51,7 +51,7 @@ const DEFAULT_FILTERS = {
   serviceType: '',
   gender: '',
   postStatus: '',
-  priceRange: [0, 100000],
+  priceRange: [0, 10000000],
   postType: 'HelpRequest' // added this line for only shows the Helper posts on ALL section
 };
 
@@ -233,7 +233,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     const isCategory = ['', 'Paid', 'UnPaid', 'Emergency'].includes(value);
     const isService = [
       'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
-      'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'Other'
+      'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'HouseSaleLease', 'LandSaleLease', 'Other'
     ].includes(value);
 
     // Update filters
@@ -1446,6 +1446,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="Paid">Paid</MenuItem>
                             <MenuItem value="UnPaid">UnPaid</MenuItem>
                             <MenuItem value="Emergency">Emergency</MenuItem>
+                            {/* <MenuItem value="Friends">Friends</MenuItem> */}
                           </Select>
                         </FormControl>
 
@@ -1471,6 +1472,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="PetCare">Pet Care</MenuItem>
                             <MenuItem value="Delivery">Delivery</MenuItem>
                             <MenuItem value="Maintenance">Maintenance</MenuItem>
+                            <MenuItem value="HouseSaleLease">House Sale/Lease</MenuItem>
+                            <MenuItem value="LandSaleLease">Land Sale/Lease</MenuItem>
                             <MenuItem value="Other">Other</MenuItem>
                           </Select>
                         </FormControl>
@@ -1693,6 +1696,19 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             
             </Box>
           </SearchContainer> }
+
+        {/* Friends profile visibility */}
+        {/* {selectedCategory === 'Friends' && (
+          <Box sx={{display: 'flex', justifyContent: 'center', m: '12px', alignItems: 'center', gap: '4px'}}>
+            <Typography color="text.secondary">Do u want ot visible your profile in Friends!</Typography>
+            <Switch
+              // checked={protectLocation}
+              // onChange={toggleLocationPrivacy}
+              color="primary"
+            />
+          </Box>
+        )} */}
+
 
         <Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
