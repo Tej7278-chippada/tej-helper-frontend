@@ -25,6 +25,7 @@ import { io } from 'socket.io-client';
 import Banner from './components/Banners/Banner';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import AdminPage from './components/Banners/AdminPage';
+import Feedbacks from './components/Admin/Feedbacks';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -383,6 +384,11 @@ function App() {
           <Route path="/adminPage" element={
             <PrivateRoute>
               <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+            </PrivateRoute>
+          } />
+          <Route path="/userFeedbacks" element={
+            <PrivateRoute>
+              <Feedbacks darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
         </Routes>

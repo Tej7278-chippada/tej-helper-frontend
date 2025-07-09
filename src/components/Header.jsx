@@ -23,6 +23,8 @@ import LightModeRoundedIcon from '@mui/icons-material/LightModeRounded';
 import NightsStayRoundedIcon from '@mui/icons-material/NightsStayRounded';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
+import ReportProblemRoundedIcon from '@mui/icons-material/ReportProblemRounded';
+import FeedbackDialog from './Feedback/FeedbackDialog';
 
 
 // Enhanced scrolling behavior
@@ -69,6 +71,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isInstallable, setIsInstallable] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false);
 
   const getTextColor = () => darkMode ? '#ffffff' : '#000000';
   const getSecondaryTextColor = () => darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)';
@@ -720,6 +723,23 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
         <Divider sx={{ my: 1 }} />
 
         <MenuItem
+          onClick={() => { setFeedbackDialogOpen(true);  handleClose(); }}
+          sx={{
+            color: '#d32f2f',
+            '&:hover': {
+              backgroundColor: 'rgba(211, 47, 47, 0.1)',
+            }
+          }}
+        >
+          <ListItemIcon>
+            <ReportProblemRoundedIcon fontSize="small" sx={{ color: '#d32f2f' }} />
+          </ListItemIcon>
+          Feedback
+        </MenuItem>
+
+        <Divider sx={{ my: 1 }} />
+
+        <MenuItem
           onClick={() => { handleLogout(); handleClose(); }}
           sx={{
             color: '#d32f2f',
@@ -784,6 +804,12 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
           </Box>
         </Box>
       </Dialog>
+
+      {/* Feedback giving dialog */}
+      <FeedbackDialog
+        open={feedbackDialogOpen}
+        onClose={() => setFeedbackDialogOpen(false)}
+      />
     </Box>
   );
 };

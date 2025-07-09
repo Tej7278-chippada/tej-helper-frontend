@@ -266,3 +266,13 @@ export const clearAllNotifications = async () => {
     }
   });
 };
+
+// feedback adding route
+export const addFeedback = (data) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    'Content-Type': 'multipart/form-data',
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.post('/api/feedback/addFeedback', data, { headers });
+};

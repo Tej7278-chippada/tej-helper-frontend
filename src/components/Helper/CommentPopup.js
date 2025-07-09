@@ -113,7 +113,7 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage, da
               bgcolor: theme.palette.background.paper,
             },
             '& .MuiInputBase-input': {
-              padding: '0px 0px', scrollbarWidth: 'thin'
+              padding: '0px 0px', scrollbarWidth: 'thin', scrollbarColor: '#888 transparent',
             },
           }}
         />

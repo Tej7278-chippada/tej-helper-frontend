@@ -38,6 +38,16 @@ export const getUserCounts = () => {
   return API.get('/api/admin/userCounts', { headers });
 };
 
+// Get all feedbacks for admin
+export const getAllFeedbacks = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/feedback/user-feedbacks', { headers });
+};
+
 export const addAdminBanner = (data) => {
   const authToken = localStorage.getItem('authToken');
   const headers = {
