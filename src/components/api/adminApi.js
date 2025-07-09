@@ -45,7 +45,15 @@ export const getAllFeedbacks = () => {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${authToken}`,
   };
-  return API.get('/api/feedback/user-feedbacks', { headers });
+  return API.get('/api/feedback/all-feedbacks', { headers });
+};
+
+// Update feedback status (admin only)
+export const updateFeedbackStatus = (id, data) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.put(`/api/feedback/update-feedback/${id}`, data, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
 };
 
 export const addAdminBanner = (data) => {
