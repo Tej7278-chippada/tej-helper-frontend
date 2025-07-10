@@ -25,7 +25,8 @@ import {
   Tabs,
   Tab,
   Badge,
-  Snackbar, 
+  Snackbar,
+  Backdrop, 
 } from "@mui/material";
 import {
   Person,
@@ -753,6 +754,16 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
               </Button>
             </Box>
           </DialogActions>
+          <Backdrop
+            sx={{
+              // color: '#fff',
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            }}
+            open={isUpdating}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </Dialog>
 
         {/* existed Feedback Delete Confirmation Dialog */}
