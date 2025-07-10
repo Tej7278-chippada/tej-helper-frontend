@@ -20,7 +20,7 @@ import {
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import AddPhotoAlternateRoundedIcon from '@mui/icons-material/AddPhotoAlternateRounded';
-import DemoPosts from './DemoPosts';
+import DemoPosts from '../Banners/DemoPosts';
 
 
 // Custom glassmorphism styling
@@ -365,7 +365,7 @@ function Banner({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) {
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
-      <DemoPosts isMobile={isMobile} postId={'685afb2de9b24aff7187478e'} />
+      <DemoPosts isMobile={isMobile} postId={'686a29298fd9f4cea51cc9d4'} />
       <Box>
         <Toolbar sx={{
           display: 'flex', justifyContent: 'space-between',

@@ -22,10 +22,11 @@ import NearPostsNotification from './components/Helper/NearPostsNotification';
 import HelperHome from './components/Helper/HelperHome';
 import { fetchUnreadNotificationsCount } from './components/api/api';
 import { io } from 'socket.io-client';
-import Banner from './components/Banners/Banner';
+import Banner from './components/Admin/Banner';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen';
-import AdminPage from './components/Banners/AdminPage';
+import AdminPage from './components/Admin/AdminPage';
 import Feedbacks from './components/Admin/Feedbacks';
+import UserManagement from './components/Admin/UserManagement';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -381,14 +382,19 @@ function App() {
               <Banner darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
-          <Route path="/adminPage" element={
+          <Route path="/userManagement" element={
             <PrivateRoute>
-              <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <UserManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
           <Route path="/userFeedbacks" element={
             <PrivateRoute>
               <Feedbacks darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+            </PrivateRoute>
+          } />
+          <Route path="/adminPage" element={
+            <PrivateRoute>
+              <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
         </Routes>

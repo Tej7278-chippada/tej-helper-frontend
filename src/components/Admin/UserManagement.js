@@ -1,4 +1,4 @@
-// src/components/AdminPage.js
+// src/components/Admin/UserManagement.js
 import React, { useEffect, useRef, useState } from "react";
 import { 
   Typography, 
@@ -29,7 +29,7 @@ import { filterUsersByStatus, getUserCounts, searchUsers, updateAccountStatus } 
 import { useTheme } from "@emotion/react";
 import ClearIcon from '@mui/icons-material/Clear';
 
-const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -385,4 +385,4 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   );
 };
 
-export default AdminPage;
+export default UserManagement;
