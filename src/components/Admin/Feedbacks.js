@@ -24,7 +24,8 @@ import {
   Paper,
   Tabs,
   Tab,
-  Badge, 
+  Badge,
+  Snackbar, 
 } from "@mui/material";
 import {
   Person,
@@ -44,10 +45,11 @@ import {
   FilterList as FilterListIcon
 } from "@mui/icons-material";
 import Layout from "../Layout";
-import { getAllFeedbacks, updateFeedbackStatus } from "../api/adminApi";
+import { deleteFeedback, getAllFeedbacks, updateFeedbackStatus } from "../api/adminApi";
 // import { getAllFeedbacks } from "../adminApi"; // Import the API function
 import { format } from 'date-fns';
 import { useSnackbar } from 'notistack';
+import DeleteSweepRoundedIcon from '@mui/icons-material/DeleteSweepRounded';
 
 
 const statusColors = {
@@ -75,13 +77,22 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   const [tabValue, setTabValue] = useState('all');
   const [isUpdating, setIsUpdating] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [loadingFeedbackDeletion, setLoadingFeedbackDeletion] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
+  const [SelectedFeedbackDelete, setSelectedFeedbackDelete] = useState(false);
+
+  
 
   useEffect(() => {
     fetchFeedbacks();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [tabValue]);
 
   const fetchFeedbacks = async () => {
     try {
@@ -144,16 +155,16 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
     return new Date(dateString).toLocaleString();
   };
   
-  const filteredFeedbacks = feedbacks.filter(feedback => {
+  const filteredFeedbacks = feedbacks?.filter(feedback => {
     if (tabValue === 'all') return true;
     return feedback.status === tabValue;
-  });
+  }) || [];
 
   // Pagination logic
   const indexOfLastFeedback = currentPage * feedbacksPerPage;
   const indexOfFirstFeedback = indexOfLastFeedback - feedbacksPerPage;
   const currentFeedbacks = filteredFeedbacks.slice(indexOfFirstFeedback, indexOfLastFeedback);
-  const totalPages = Math.ceil(filteredFeedbacks.length / feedbacksPerPage);
+  const totalPages = Math.max(Math.ceil(filteredFeedbacks.length / feedbacksPerPage), 1);
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -181,6 +192,30 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       ))}
     </Grid>
   );
+
+  const handleDeleteClick = (feedback) => {
+    setSelectedFeedbackDelete(feedback);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!SelectedFeedbackDelete) return;
+    setLoadingFeedbackDeletion(true);
+    try {
+      await deleteFeedback(SelectedFeedbackDelete._id);
+      // Instead of fetching all feedbacks again, just remove the deleted one from state
+      setFeedbacks(prev => prev.filter(fb => fb._id !== SelectedFeedbackDelete._id));
+      setSnackbar({ open: true, message: `Feedback deleted successfully.`, severity: 'success' });
+    } catch (error) {
+      console.error("Error deleting feedback:", error);
+      setSnackbar({ open: true, message: `Failed to delete Feedback. Please try again later.`, severity: 'error' });
+    } finally {
+      setLoadingFeedbackDeletion(false);
+      setDeleteDialogOpen(false); // Close dialog after action
+    }
+  };
+
+  const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
   return (
     <Layout 
@@ -296,7 +331,7 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
         {loading && <LoadingSkeleton />}
 
         {/* Empty State */}
-        {!loading && !error && feedbacks.length === 0 && (
+        {!loading && !error && filteredFeedbacks.length === 0 && (
           <Box sx={{ 
             textAlign: 'center', 
             py: 8,
@@ -309,7 +344,9 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
               No feedbacks found
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              Users haven't submitted any feedback yet.
+              {tabValue === 'all' ? 
+              'No feedbacks available' : 
+              `No ${tabValue} feedbacks found`}
             </Typography>
           </Box>
         )}
@@ -460,7 +497,9 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
                         </Box>
                       )}
 
+                      <Box sx={{display: 'flex', alignItems: 'center'}}>
                       {/* Timestamp */}
+                      <Box>
                       <Box sx={{ display: 'flex', alignItems: 'center', mt: 'auto' }}>
                         <AccessTime sx={{ fontSize: 14, color: 'text.secondary', mr: 0.5 }} />
                         <Typography variant="caption" color="text.secondary">
@@ -473,12 +512,17 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
                           {formatDate(feedback.updatedAt)}
                         </Typography>
                       </Box>)}
+                      </Box>
                       {/* <Chip
                         label="View Details"
                         size="small"
                         variant="outlined"
                         sx={{ cursor: 'pointer' }}
                       /> */}
+                      <Box sx={{ ml: 'auto'}}>
+                        <Button color="secondary" size="small" variant="outlined" startIcon={<DeleteSweepRoundedIcon />} key={feedback._id} sx={{ borderRadius: '8px' }} onClick={(event) => { event.stopPropagation(); handleDeleteClick(feedback); }}>Delete</Button>
+                      </Box>
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -710,7 +754,42 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
             </Box>
           </DialogActions>
         </Dialog>
+
+        {/* existed Feedback Delete Confirmation Dialog */}
+        <Dialog
+          open={deleteDialogOpen}
+          onClose={() => setDeleteDialogOpen(false)}
+          aria-labelledby="delete-dialog-title"
+          sx={{ '& .MuiPaper-root': { borderRadius: '14px' }, }}
+        >
+          <DialogTitle id="delete-dialog-title" >
+            Are you sure you want to delete this Feedback?
+          </DialogTitle>
+          <DialogContent style={{ padding: '2rem' }}>
+            <Typography color='error'>
+              If you proceed, the feedback will be removed permanently...
+            </Typography>
+          </DialogContent>
+          <DialogActions style={{ padding: '1rem', gap: 1 }}>
+            <Button onClick={() => setDeleteDialogOpen(false)} variant='outlined' color="primary" sx={{ borderRadius: '8px' }}>
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} variant='contained' color="error" sx={{ marginRight: '10px', borderRadius: '8px' }}>
+              {loadingFeedbackDeletion ? <> <CircularProgress size={20} sx={{ marginRight: '8px' }} /> Deleting... </> : "Delete Feedback"}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius: '1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };

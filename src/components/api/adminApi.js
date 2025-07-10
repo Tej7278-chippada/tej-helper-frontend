@@ -56,6 +56,13 @@ export const updateFeedbackStatus = (id, data) => {
   });
 };
 
+// Delete feedback (admin only)
+export const deleteFeedback = (id) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  return API.delete(`/api/feedback/${id}`, { headers });
+};
+
 export const addAdminBanner = (data) => {
   const authToken = localStorage.getItem('authToken');
   const headers = {
