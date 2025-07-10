@@ -588,9 +588,9 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
               <Typography variant="caption" color="textSecondary">
                 {selectedFeedback && format(new Date(selectedFeedback.createdAt), 'MMM dd, yyyy HH:mm')}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              {selectedFeedback?.updatedAt && (<Typography variant="caption" color="textSecondary">
                 {selectedFeedback && format(new Date(selectedFeedback.updatedAt), 'MMM dd, yyyy HH:mm')}
-              </Typography>
+              </Typography>)}
             </Box>
           </DialogContent>
 
