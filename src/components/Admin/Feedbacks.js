@@ -19,7 +19,12 @@ import {
   useTheme,
   useMediaQuery,
   Pagination,
-  TextField, 
+  TextField,
+  Tooltip,
+  Paper,
+  Tabs,
+  Tab,
+  Badge, 
 } from "@mui/material";
 import {
   Person,
@@ -67,7 +72,7 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   const [feedbacksPerPage] = useState(6);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
   const [adminNotes, setAdminNotes] = useState('');
-  // const [tabValue, setTabValue] = useState('all');
+  const [tabValue, setTabValue] = useState('all');
   const [isUpdating, setIsUpdating] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
@@ -121,6 +126,10 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
     }
   };
 
+  const getStatusCount = (status) => {
+    return feedbacks.filter(fb => fb.status === status).length;
+  };
+
   const handleImageClick = (imageBase64) => {
     setSelectedImage(imageBase64);
     setImageDialogOpen(true);
@@ -134,12 +143,17 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
   };
+  
+  const filteredFeedbacks = feedbacks.filter(feedback => {
+    if (tabValue === 'all') return true;
+    return feedback.status === tabValue;
+  });
 
   // Pagination logic
   const indexOfLastFeedback = currentPage * feedbacksPerPage;
   const indexOfFirstFeedback = indexOfLastFeedback - feedbacksPerPage;
-  const currentFeedbacks = feedbacks.slice(indexOfFirstFeedback, indexOfLastFeedback);
-  const totalPages = Math.ceil(feedbacks.length / feedbacksPerPage);
+  const currentFeedbacks = filteredFeedbacks.slice(indexOfFirstFeedback, indexOfLastFeedback);
+  const totalPages = Math.ceil(filteredFeedbacks.length / feedbacksPerPage);
 
   const handlePageChange = (event, value) => {
     setCurrentPage(value);
@@ -183,7 +197,7 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
           alignItems: 'center', 
           mb: 3,
         //   flexDirection: { xs: 'column', sm: 'row' },
-          gap: 2
+          gap: 1
         }}>
           <FeedbackIcon sx={{ fontSize: 32, color: 'primary.main' }} />
           <Typography 
@@ -196,12 +210,72 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
           >
             User Feedbacks
           </Typography>
+          <Box sx={{ ml:  'auto' }}>
+          <Tooltip title="Refresh">
+            <IconButton onClick={fetchFeedbacks} disabled={loading}>
+              <RefreshIcon />
+            </IconButton>
+          </Tooltip>
           <Chip 
             label={`${feedbacks.length} Total`} 
             color="primary" 
-            sx={{ ml:  'auto' }}
+            sx={{ml: '4px'}}
           />
+          </Box>
         </Box>
+
+        <Paper sx={{ mb: 3, borderRadius: 2 }}>
+          <Tabs
+            value={tabValue}
+            onChange={(e, newValue) => setTabValue(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              '& .MuiTabs-indicator': { width: '80%',
+                backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.light : theme.palette.primary.main,
+              }
+            }}
+          >
+            <Tab 
+              label={
+                <Badge badgeContent={feedbacks.length} color="primary">
+                  All
+                </Badge>
+              } 
+              value="all" 
+            />
+            <Tab 
+              label={
+                <Badge badgeContent={getStatusCount('pending')} color="warning">
+                  Pending
+                </Badge>
+              } 
+              value="pending" 
+              icon={<PendingIcon />}
+              iconPosition="start"
+            />
+            <Tab 
+              label={
+                <Badge badgeContent={getStatusCount('reviewed')} color="secondary">
+                  Reviewed
+                </Badge>
+              } 
+              value="reviewed" 
+              icon={<EditIcon />}
+              iconPosition="start"
+            />
+            <Tab 
+              label={
+                <Badge badgeContent={getStatusCount('resolved')} color="success">
+                  Resolved
+                </Badge>
+              } 
+              value="resolved" 
+              icon={<CheckCircleIcon />}
+              iconPosition="start"
+            />
+          </Tabs>
+        </Paper>
 
         {/* Error State */}
         {error && (
@@ -585,9 +659,9 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
                 icon={statusIcons[selectedFeedback?.status]}
                 sx={{ textTransform: 'capitalize' }}
               /> */}
-              <Typography variant="caption" color="textSecondary">
+              {selectedFeedback?.createdAt && (<Typography variant="caption" color="textSecondary">
                 {selectedFeedback && format(new Date(selectedFeedback.createdAt), 'MMM dd, yyyy HH:mm')}
-              </Typography>
+              </Typography>)}
               {selectedFeedback?.updatedAt && (<Typography variant="caption" color="textSecondary">
                 {selectedFeedback && format(new Date(selectedFeedback.updatedAt), 'MMM dd, yyyy HH:mm')}
               </Typography>)}
