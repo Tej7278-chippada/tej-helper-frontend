@@ -378,22 +378,22 @@ function App() {
             </PrivateRoute>
           } />
           <Route path="/adminBanners" element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <Banner darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/userManagement" element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <UserManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
           <Route path="/userFeedbacks" element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <Feedbacks darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
           <Route path="/adminPage" element={
-            <PrivateRoute>
+            <PrivateRoute adminOnly>
               <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />

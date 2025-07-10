@@ -14,7 +14,8 @@ export const userData = () => {   // getUserIdFromToken
     const decoded = jwtDecode(token);
     return {    // this is from: jwt.sign({ id: user._id, ... })
         userId : decoded.id, // assuming token includes: { id: user._id }
-        userName : decoded.tokenUsername // make sure this field is actually named `tokenUsername` in your token
+        userName : decoded.tokenUsername, // make sure this field is actually named `tokenUsername` in your token
+        userRole : decoded.userRole
     };
 
   } catch (error) {
