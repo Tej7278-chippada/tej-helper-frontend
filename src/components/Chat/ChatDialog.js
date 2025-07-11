@@ -528,12 +528,12 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             position: 'absolute',
             top: '75px',
             left: '0%',
-            width:'100%',
+            width:'100%', zIndex: 10000,
             backgroundColor:'rgba(244, 238, 238, 0.24)',
             boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
             borderRadius:'12px'
             }} >
-            <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You are tagged as the Helper of this post.</Typography>
+            <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You are tagged as the Helper of this post.</Typography>{/*  {chatData.chatId} */}
           </Box>
         )}
         <Box  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}} >

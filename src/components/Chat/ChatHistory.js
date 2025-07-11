@@ -571,6 +571,20 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
       padding: '0px', scrollbarWidth:'thin', 
       scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
     }}>
+      {isHelper && (
+        <Box sx={{
+          position: 'sticky',
+          top: '5px',
+          left: '0%',
+          width:'100%', zIndex: 10000,
+          backgroundColor:'rgba(244, 238, 238, 0.24)',
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+          borderRadius:'12px'
+          }} >
+          <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
+          <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>Please share the code <strong>ABC123</strong> once the service is complete.</Typography>
+        </Box>
+      )}
       {/* <Box mb={0} sx={{ scrollbarWidth: 'thin' }}> */}
       {/* <GroupTransHistory transactions={filteredTransactions  || []} loggedInUserId={loggedInUserId}
         socket={socket} // Pass the socket instance
