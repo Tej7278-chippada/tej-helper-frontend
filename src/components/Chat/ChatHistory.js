@@ -65,6 +65,8 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
   const typingTimeout = useRef(null);
   const typingDebounceTimeout = useRef(null);
   const senderUsername = localStorage.getItem('tokenUsername');
+  // const [loadingHelperCode, setLoadingHelperCode] = useState(false);
+  const [helperCode, setHelperCode] = useState('');
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -93,6 +95,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
         setIsHelper(post.helperIds.includes(chatData.id));
         setHelperCount(post.helperIds.length);
         setPeopleCount(post.peopleCount);
+        setHelperCode(chatData.helperCode);
       } catch (error) {
         console.error('Error fetching post details:', error);
       }
@@ -350,6 +353,39 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
     bottomRef.current?.scrollIntoView({ behavior: 'auto' });
   }, [messages]);
 
+  // const handleGenerateHelperCode = async () => {
+  //   setLoadingHelperCode(true);
+  //   try {
+  //     const response = await axios.post(
+  //       `${process.env.REACT_APP_API_URL}/api/chats/${chatData.chatId}/generate-helperCode`,
+  //       {},
+  //       { headers: { Authorization: `Bearer ${authToken}` } }
+  //     );
+  //     setHelperCode(response.data.helperCode);
+  //     // setGroup((prevGroup) => ({
+  //     //   ...prevGroup,
+  //     //   joinCode: response.data.joinCode,
+  //     //   joinCodeExpiry: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1-hour expiry
+  //     // }));
+  //     // Show success message
+  //     // setSnackbar({
+  //     //   open: true,
+  //     //   message: 'New helper code generated successfully, & valid till an hour.',
+  //     //   severity: 'success',
+  //     // });
+  //   } catch (error) {
+  //     console.error('Error generating new join code:', error);
+  //     // Show error message
+  //     // setSnackbar({
+  //     //   open: true,
+  //     //   message: 'Unable to generate new helper code, please try again later.',
+  //     //   severity: 'error',
+  //     // });
+  //   } finally {
+  //     setLoadingHelperCode(false);
+  //   }
+  // };
+
   const toggleHelper = async () => {
     setLoadingHelperAction(true);
     try {
@@ -362,6 +398,10 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
       setHelperCount(response.data.helperIds.length);
       setLoadingHelperAction(false);
       setHelperDialogOpen(false);
+      setHelperCode(response.data.helperCode);
+      // if(!isHelper) {
+      // handleGenerateHelperCode();
+      // }
     } catch (error) {
       console.error('Error toggling helper:', error);
     } finally {
@@ -582,7 +622,20 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
           borderRadius:'12px'
           }} >
           <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
-          <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>Please share the code <strong>ABC123</strong> once the service is complete.</Typography>
+          {/* Helper Code Section */}
+          <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>
+            {helperCode ? 
+              `Please share the helper code ${helperCode} once the service is complete.` : 
+              'Give code only after the service is done.'}
+          </Typography>
+          
+          {/* <Box display="flex" flexDirection={isMobile ? 'column' : 'column'} alignItems="center" ml={isMobile ? '8rem' : '0rem'}>
+            <Box display="flex" alignItems="center">
+              <Typography variant="subtitle1">
+                {helperCode ? `Helper Code: ${helperCode}` : 'Generating helper code...'}
+              </Typography>
+            </Box>
+          </Box> */}
         </Box>
       )}
       {/* <Box mb={0} sx={{ scrollbarWidth: 'thin' }}> */}
