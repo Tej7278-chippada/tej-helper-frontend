@@ -819,11 +819,11 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
               // position: 'absolute',
               right: '2px', padding:'6px 10px', borderRadius:6,
               // backgroundColor: message.trim() ? theme.palette.primary.main : 'transparent',
-              backgroundColor: message.trim() ? '#8b5cf6' : 'transparent',
+              backgroundColor: message.trim() ? '#4f46e5' : 'transparent',
               color: message.trim() ? '#fff' : theme.palette.text.secondary,
               '&:hover': {
                 // backgroundColor: message.trim() ? theme.palette.primary.dark : 'transparent',
-                backgroundColor: message.trim() ? '#4f46e5' : 'transparent',
+                backgroundColor: message.trim() ? '#3b82f6' : 'transparent',
               },
               transition: 'all 0.2s ease',
             }}
