@@ -14,7 +14,7 @@ const Friends = ({ isMobile , darkMode, setSnackbar}) => {
             try {
                 const authToken = localStorage.getItem('authToken');
                 const id = localStorage.getItem('userId');
-                const response = await API.get(`/api/auth/profile/${id}`, {
+                const response = await API.get(`/api/auth/friendsProfile/${id}`, {
                     headers: { Authorization: `Bearer ${authToken}` }
                 });
                 setIsVisible(response.data.friendsProfile || false);
