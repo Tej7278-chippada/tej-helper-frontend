@@ -31,6 +31,8 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   const [isRateUserOpen, setIsRateUserOpen] = useState(false);
   const [isRatingExisted, setIsRatingExisted] = useState(false);
   const theme = useTheme();
+  const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' or 'services'
+  const [serviceHistory, setServiceHistory] = useState([]);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -50,6 +52,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       setAverageRating(response.data.averageRating);
       setTotalReviews(response.data.totalReviews);
       setRatings(response.data.ratings);
+      setServiceHistory(response.data.serviceHistory || []);
 
       // Autofill if logged-in user already rated this user
       const existingRating = response.data.ratings.find(
@@ -119,6 +122,87 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     }
   };
 
+  // tab navigation component
+  const renderTabNavigation = () => (
+    <Box sx={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      mb: 2,
+      borderBottom: 1,
+      borderColor: 'divider'
+    }}>
+      <Button
+        onClick={() => setActiveTab('reviews')}
+        sx={{
+          fontWeight: activeTab === 'reviews' ? 'bold' : 'normal',
+          color: activeTab === 'reviews' ? 'primary.main' : 'text.secondary',
+          borderBottom: activeTab === 'reviews' ? '2px solid' : 'none',
+          borderColor: 'primary.main',
+          borderRadius: 0
+        }}
+      >
+        Reviews ({totalReviews})
+      </Button>
+      <Button
+        onClick={() => setActiveTab('services')}
+        sx={{
+          fontWeight: activeTab === 'services' ? 'bold' : 'normal',
+          color: activeTab === 'services' ? 'primary.main' : 'text.secondary',
+          borderBottom: activeTab === 'services' ? '2px solid' : 'none',
+          borderColor: 'primary.main',
+          borderRadius: 0
+        }}
+      >
+        Service History ({serviceHistory.length})
+      </Button>
+    </Box>
+  );
+
+  // service history item component
+  const renderServiceItem = (service) => (
+    <Box
+      sx={{
+        margin: "0px",
+        padding: "12px",
+        borderRadius: "8px",
+        border: darkMode 
+          ? '1px solid rgba(255, 255, 255, 0.1)' 
+          : '1px solid rgba(0, 0, 0, 0.2)',
+        marginTop: "6px",
+      }}
+      key={service._id}
+    >
+      <Box display="flex" alignItems="center" gap={1}>
+        <Avatar
+          src={`data:image/jpeg;base64,${btoa(
+            String.fromCharCode(...new Uint8Array(service.ownerId?.profilePic?.data || []))
+          )}`}
+          alt={service.ownerId?.username[0]}
+          style={{ width: 32, height: 32, borderRadius: '50%' }}
+        />
+        <Typography fontWeight="bold">
+          {service.ownerId?.username || "Anonymous"}
+        </Typography>
+        <Typography variant="body2" sx={{ ml: 'auto' }}>
+          {new Date(service.verifiedAt).toLocaleString()}
+        </Typography>
+      </Box>
+      <Typography variant="body2" sx={{ mt: 1 }}>
+        {service.postId?.title || "Service"}
+      </Typography>
+      <Typography variant="caption" color="textSecondary">
+        {service.postId?.postType === 'HelpRequest' 
+          ? `Help Request (${service.postId?.categories})`
+          : `Service Offering (${service.postId?.serviceType})`}
+      </Typography>
+      {/* <Box display="flex" alignItems="center" mt={1}>
+        <Typography variant="caption" color="primary">
+          Helper Code: {service.helperCode}
+        </Typography>
+      </Box> */}
+    </Box>
+  );
+
   return (
     <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ margin: isMobile ? '10px' : '0px',
         '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', } , //maxHeight: isMobile ? '300px' : 'auto'
@@ -171,6 +255,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
             </Button>
           )}
         </Box>
+      {renderTabNavigation()}
       <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', mx:1, mb: 2, ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px'}}> {/*  backgroundColor: "#f5f5f5", */}
         <Box
           // bgcolor="#f5f5f5"
@@ -209,7 +294,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
               <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
               <Typography color='grey' variant='body2'>Loading Ratings...</Typography>
             </Box>
-          ) : ratings.length ? (
+          ) : activeTab === 'reviews' ? (ratings.length ? (
             ratings.map((rating, index) => (
               <Box
                 key={index}
@@ -252,8 +337,15 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
             <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
               No Ratings available.
             </Typography>
+          )) : (
+            serviceHistory.length ? (
+              serviceHistory.map(renderServiceItem)
+            ) : (
+              <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
+                No Service History available.
+              </Typography>
+            )
           )}
-          
         </Box>
       </DialogContent>
       { isRateUserOpen && (

@@ -580,10 +580,12 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                 Helper code verified!
               </Typography>
             ) : (
-            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', alignItems: 'center'}}>
-              {/* <Typography variant="body2" align="center">
-                Enter the helper code provided by the post owner:
-              </Typography> */}
+            <>
+            <Typography variant="body2" align="center" sx={{mt: 2, mb: 1}}>
+              Enter the helper code provided by the post owner to increase your profile’s trust level.
+            </Typography> 
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', alignItems: 'center'}}>
+              
               
               <TextField
                 size="small"
@@ -608,6 +610,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                 {isVerifying ? <CircularProgress size={24} /> : 'Verify Code'}
               </Button>
             </Box>
+            </>
             )}
           </Box>
         )}
