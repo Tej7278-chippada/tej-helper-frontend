@@ -52,7 +52,7 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
     'Paid': '/categoryBar/paid.png' || 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=200&h=120&fit=crop&auto=format',
     'UnPaid': '/categoryBar/volunteer.png' || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200&h=120&fit=crop&auto=format',
     'Emergency': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
-    // 'Friends': '/categoryBar/friends.png',
+    'Friends': '/categoryBar/friends.png',
     'ParkingSpace': '/categoryBar/parking.png' || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop&auto=format',
     'VehicleRental': '/categoryBar/vehiclesRental.png' || 'https://images.unsplash.com/photo-1549924231-f129b911e442?w=200&h=120&fit=crop&auto=format',
     'FurnitureRental': '/categoryBar/furnitureRentals.png' || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=120&fit=crop&auto=format',
@@ -140,15 +140,15 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
     
   ];
 
-  // const friends = [
-  //   { 
-  //     value: 'Friends', 
-  //     label: 'Friends', 
-  //     icon: <Diversity2RoundedIcon sx={{ fontSize: '18px' }} />,
-  //     color: '#f43f5e',
-  //     bgColor: 'rgba(244, 63, 94, 0.1)'
-  //   }
-  // ];
+  const friends = [
+    { 
+      value: 'Friends', 
+      label: 'Friends', 
+      icon: <Diversity2RoundedIcon sx={{ fontSize: '18px' }} />,
+      color: '#f43f5e',
+      bgColor: 'rgba(244, 63, 94, 0.1)'
+    }
+  ];
 
   const services = [
     { 
@@ -419,8 +419,8 @@ const CategoryBar = ({ selectedCategory, onCategorySelect, darkMode, isMobile })
         }}
       >
         {renderChips(categories)}
-        {/* <Divider orientation="vertical" flexItem sx={{ borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
-        {renderChips(friends)} */}
+        <Divider orientation="vertical" flexItem sx={{ borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
+        {renderChips(friends)}
         <Divider orientation="vertical" flexItem sx={{ borderColor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }} />
         {renderChips(services)}
       </Box>

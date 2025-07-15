@@ -30,6 +30,7 @@ import DemoPosts from '../Banners/DemoPosts';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import CategoryBar from './CategoryBar';
+import Friends from '../Friends/Friends';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -230,7 +231,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const handleCategorySelect = (value) => {
     setSelectedCategory(value);
     // Determine if the selected value is a category or service
-    const isCategory = ['', 'Paid', 'UnPaid', 'Emergency'].includes(value);
+    const isCategory = ['', 'Paid', 'UnPaid', 'Emergency', 'Friends'].includes(value);
     const isService = [
       'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
       'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'HouseSaleLease', 'LandSaleLease', 'Other'
@@ -1698,19 +1699,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </SearchContainer> }
 
         {/* Friends profile visibility */}
-        {/* {selectedCategory === 'Friends' && (
-          <Box sx={{display: 'flex', justifyContent: 'center', m: '12px', alignItems: 'center', gap: '4px'}}>
-            <Typography color="text.secondary">Do u want ot visible your profile in Friends!</Typography>
+        {selectedCategory === 'Friends' && (
+          <>
+          {/* <Box sx={{display: 'flex', justifyContent: 'center', m: '12px', alignItems: 'center', gap: '4px'}}>
+            <Typography color="text.secondary">Do u want ot visible your profile to nearby Friends!</Typography>
             <Switch
               // checked={protectLocation}
               // onChange={toggleLocationPrivacy}
               color="primary"
             />
-          </Box>
-        )} */}
+          </Box> */}
+          <Friends isMobile={isMobile} darkMode={darkMode} setSnackbar={setSnackbar} />
+          </>
+        )}
 
 
-        <Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        {selectedCategory !== 'Friends' && (<Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
               <SkeletonCards/>
             ) : 
@@ -2082,7 +2086,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </Typography>
               </Box>
             )}
-          </Box>
+          </Box>)}
 
 
       </Box>
