@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar, Badge, styled } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar, Badge, styled, Button } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -67,6 +67,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const typingTimeout = useRef(null);
   const typingDebounceTimeout = useRef(null);
   const senderUsername = localStorage.getItem('tokenUsername');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState('');
 
 //   useEffect(() => {
 //     // if (open) {
@@ -430,7 +433,41 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       });
     }, 2000);
   };
-  
+
+  // helper code verification handler
+  const handleVerifyHelperCode = async () => {
+    if (!verificationCode.trim() || chatData?.helperCodeVerified) return;
+    
+    setIsVerifying(true);
+    setVerificationError('');
+    
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/chats/verify-helper-code`,
+        { postId: post._id, helperCode: verificationCode },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+      
+      if (response.data.success) {
+        setSnackbar({ 
+          open: true, 
+          message: 'Helper code verified successfully!', 
+          severity: "success" 
+        });
+        setVerificationCode('');
+        // Update local chat data to reflect verification
+        if (chatData) {
+          chatData.helperCodeVerified = true;
+        }
+      }
+    } catch (error) {
+      setVerificationError(
+        error.response?.data?.message || 'Failed to verify helper code'
+      );
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   
 
@@ -525,15 +562,53 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
      }}>
         {post.helperIds.includes(userId) && (
           <Box sx={{
-            position: 'absolute',
-            top: '75px',
-            left: '0%',
-            width:'100%', zIndex: 10000,
-            backgroundColor:'rgba(244, 238, 238, 0.24)',
+            position: 'sticky',
+            top: '0px',
+            left: '0px', right: '0px',
+            // width: '100%', 
+            zIndex: 10000,
+            backgroundColor: 'rgba(244, 238, 238, 0.24)',
             boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-            borderRadius:'12px'
-            }} >
-            <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You are tagged as the Helper of this post.</Typography>{/*  {chatData.chatId} */}
+            borderRadius: '12px',
+            p: 1
+          }}>
+            <Typography color="success" align="center" sx={{ fontSize: isMobile ? '12px' : '14px' }}>
+              You are tagged as the Helper of this post. 
+            </Typography>
+            {chatData?.helperCodeVerified ? (
+              <Typography color="success" align="center" sx={{ mt: 1, fontSize: isMobile ? '12px' : '14px' }}>
+                Helper code verified!
+              </Typography>
+            ) : (
+            <Box sx={{ mt: 2, display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', alignItems: 'center'}}>
+              {/* <Typography variant="body2" align="center">
+                Enter the helper code provided by the post owner:
+              </Typography> */}
+              
+              <TextField
+                size="small"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value)}
+                placeholder="Enter helper code"
+                label="Enter helper code"
+                sx={{ maxWidth: '200px',
+                  '& .MuiOutlinedInput-root': { borderRadius: '12px', }
+                }}
+                error={!!verificationError}
+                helperText={verificationError}
+              />
+              
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleVerifyHelperCode}
+                disabled={isVerifying || !verificationCode.trim()}
+                sx={{ borderRadius: '12px' }}
+              >
+                {isVerifying ? <CircularProgress size={24} /> : 'Verify Code'}
+              </Button>
+            </Box>
+            )}
           </Box>
         )}
         <Box  sx={{  overflowY: 'auto', p: 1 , scrollbarWidth:'thin'}} >

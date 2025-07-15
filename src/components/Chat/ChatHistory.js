@@ -67,6 +67,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
   const senderUsername = localStorage.getItem('tokenUsername');
   // const [loadingHelperCode, setLoadingHelperCode] = useState(false);
   const [helperCode, setHelperCode] = useState('');
+  const [helperCodeVerified, setHelperCodeVerified] = useState(false);
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -96,6 +97,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
         setHelperCount(post.helperIds.length);
         setPeopleCount(post.peopleCount);
         setHelperCode(chatData.helperCode);
+        setHelperCodeVerified(chatData.helperCodeVerified);
       } catch (error) {
         console.error('Error fetching post details:', error);
       }
@@ -589,7 +591,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
             
           </Box> 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap:1 }}>
-            <IconButton onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper}>
+            <IconButton onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper || helperCodeVerified}>
               {isHelper ? <StarRoundedIcon fontSize="medium" sx={{color: '#eab308'}}/> : <StarOutlineRoundedIcon fontSize="medium" />}
             </IconButton>
             {isMobile && (
@@ -624,9 +626,10 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
           <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
           {/* Helper Code Section */}
           <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>
-            {helperCode ? 
+            { helperCodeVerified ? 'Helper code verified!' : helperCode ? 
               `Please share the helper code ${helperCode} once the service is complete.` : 
-              'Give code only after the service is done.'}
+              'Give code only after the service is done.'} 
+              {/* {chatData.chatId} */}
           </Typography>
           
           {/* <Box display="flex" flexDirection={isMobile ? 'column' : 'column'} alignItems="center" ml={isMobile ? '8rem' : '0rem'}>

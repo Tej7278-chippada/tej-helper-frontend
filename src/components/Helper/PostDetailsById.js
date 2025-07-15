@@ -26,6 +26,7 @@ import ChatDialog from '../Chat/ChatDialog';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
 import RateUserDialog from './RateUserDialog';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
+import axios from 'axios';
 
 const CustomTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -85,6 +86,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const handleOpenRateDialog = () => setRateDialogOpen(true);
   const handleCloseRateDialog = () => setRateDialogOpen(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
+  const authToken = localStorage.getItem('authToken');
+  const [chatData, setChatData] = useState({});
   
 
 
@@ -450,8 +453,23 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
       });
     }
   };
-  
-  
+
+  const handleOpenChatDialog = async () => {
+    setChatDialogOpen(true);
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/chats/chat-details`,
+        { postId: post._id },
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+      
+      if (response.data.success) {
+        setChatData({chatId: response.data.chatID, helperCodeVerified: response.data.helperCodeVerified})
+      }
+    } catch (error) {
+      console.log('error data', error);
+    }
+  };
 
 
   // if (loading || !post) {
@@ -774,7 +792,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                           // disabled={stockCountId === 0}
                           sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }}
                           startIcon={<ForumRoundedIcon />}
-                          onClick={() => setChatDialogOpen(true)}
+                          onClick={handleOpenChatDialog}
                         >
                           Chat
                         </Button>
@@ -922,6 +940,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
           />
           <ChatDialog open={chatDialogOpen} onClose={() => setChatDialogOpen(false)} post={post} user={user} 
             isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
+            chatData={chatData}
           />
           {/* Rating Dialog */}
           <RateUserDialog
