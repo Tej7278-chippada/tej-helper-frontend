@@ -18,9 +18,10 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
 import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-import StarRoundedIcon from '@mui/icons-material/StarRounded';
-import CloseIcon from '@mui/icons-material/Close';
+// import StarRoundedIcon from '@mui/icons-material/StarRounded';
+// import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import RateUserDialog from './Helper/RateUserDialog';
 
 
 // Set default icon manually
@@ -82,7 +83,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const [savingLocation, setSavingLocation] = useState(false);
-  const [showRatings, setShowRatings] = useState(false);
+  // const [showRatings, setShowRatings] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
   const [currentAddress, setCurrentAddress] = useState('');
 
@@ -245,6 +246,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   // if (error) return <Alert severity="error">{error}</Alert>;
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
+  // const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [isRateDialogOpen, setRateDialogOpen] = useState(false);
+  const handleOpenRateDialog = () => setRateDialogOpen(true);
+  const handleCloseRateDialog = () => setRateDialogOpen(false);
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
@@ -423,8 +429,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', flex: 1, alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Button variant="text" size="small" onClick={() => setShowRatings(true)}>
+                      {/* <Button variant="text" size="small" onClick={() => setShowRatings(true)}>
                         Ratings
+                      </Button> */}
+                      <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px'}} onClick={handleOpenRateDialog}>
+                        Profile Ratings
                       </Button>
                     </Box>
                     <IconButton
@@ -462,7 +471,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 </Toolbar>
               </Box>
             </Box>
-            {showRatings && (
+            {/* {showRatings && (
               <Card
                 sx={{
                   position: 'absolute',
@@ -479,7 +488,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 }}
               >
                 <CardContent>
-                  {/* Close Button */}
+                  Close Button
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Typography variant="h6">Your Profile Ratings</Typography>
                     <IconButton onClick={() => setShowRatings(false)}>
@@ -522,11 +531,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                               {rating.userId?.username || "Anonymous"}
                             </Typography>
                             <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{ marginLeft: 'auto' }} />
-                            {/* <Typography variant="caption" color="textSecondary" marginLeft="auto">
+                            <Typography variant="caption" color="textSecondary" marginLeft="auto">
                             {new Date(rating.createdAt).toLocaleString()}
-                          </Typography> */}
+                          </Typography>
                           </Box>
-                          {/* <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/> */}
+                          <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/>
                           <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
                           <Typography variant="caption" color="textSecondary" >
                             {new Date(rating.createdAt).toLocaleString()}
@@ -541,7 +550,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   </Box>
                 </CardContent>
               </Card>
-            )}
+            )} */}
           </Box>
           <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode),
             /* bgcolor: 'rgba(0, 0, 0, 0.07)' */ }}>
@@ -773,6 +782,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
 
         </DialogActions>
       </Dialog>
+
+      <RateUserDialog
+        userId={id}
+        open={isRateDialogOpen}
+        onClose={handleCloseRateDialog}
+        // post={post}
+        isMobile={isMobile}
+        // isAuthenticated={isAuthenticated} 
+        // setLoginMessage={setLoginMessage}  
+        setSnackbar={setSnackbar} darkMode={darkMode}
+      />
 
       <Snackbar
         open={snackbar.open}
