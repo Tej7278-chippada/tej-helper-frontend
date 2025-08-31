@@ -197,7 +197,12 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
           await deleteUserPost(selectedPost._id);
           // showNotification(`Post "${post.title}" deleted successfully.`, "success");
           setSnackbar({ open: true, message: `Post "${selectedPost.title}" deleted successfully.`, severity: 'success' });
-          await fetchPostsData(); // Refresh posts list
+          // await fetchPostsData(); // Refresh posts list
+          // Update local state and cache
+          setPosts(prevPosts => {
+            const updatedPosts = prevPosts.filter(post => post._id !== selectedPost._id);
+            return updatedPosts;
+          });
           setLoadingPostDeletion(false);
         } catch (error) {
           console.error("Error deleting post:", error);
@@ -271,6 +276,41 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   };
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
+
+  const handlePostSuccess = (newOrUpdatedPost, isEdit) => {
+    // const currentCacheKey = generateCacheKey();
+
+    if (isEdit) {
+      // Update existing product in cache and local state
+      // if (globalCache.data[currentCacheKey]) {
+      //   globalCache.data[currentCacheKey] = {
+      //     ...globalCache.data[currentCacheKey],
+      //     posts: globalCache.data[currentCacheKey].posts.map(product =>
+      //       product._id === newOrUpdatedProduct._id ? newOrUpdatedProduct : product
+      //     )
+      //   };
+      // }
+
+      setPosts(prevPosts =>
+        prevPosts.map(post =>
+          post._id === newOrUpdatedPost._id ? newOrUpdatedPost : post
+        )
+      );
+    } else {
+      // Add new product to cache and local state
+      // if (globalCache.data[currentCacheKey]) {
+      //   globalCache.data[currentCacheKey] = {
+      //     ...globalCache.data[currentCacheKey],
+      //     posts: [newOrUpdatedProduct, ...globalCache.data[currentCacheKey].posts],
+      //     skip: globalCache.data[currentCacheKey].skip + 1
+      //   };
+      // }
+
+      setPosts(prevPosts => [newOrUpdatedPost, ...prevPosts]);
+      // setTotalPosts(totalPosts + 1);
+      // globalCache.totalPostsCount = globalCache.totalPostsCount + 1;
+    }
+  };
 
 
     return (
@@ -657,6 +697,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
          selectedDate={selectedDate} setSelectedDate={setSelectedDate} timeFrom={timeFrom} setTimeFrom={setTimeFrom} timeTo={timeTo} setTimeTo={setTimeTo}
          protectLocation={protectLocation} setProtectLocation={setProtectLocation} fakeAddress={fakeAddress} setFakeAddress={setFakeAddress}
          activeStep={activeStep} setActiveStep={setActiveStep} darkMode={darkMode} setValidationErrors={setValidationErrors} validationErrors={validationErrors}
+         onPostSuccess={(post, isEdit) => handlePostSuccess(post, isEdit)}
         />
 
         {/* Snackbar for notifications */}

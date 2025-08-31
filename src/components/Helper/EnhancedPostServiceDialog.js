@@ -170,7 +170,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   noImagesFound, */ newMedia, setNewMedia, editingProduct, /* formData, setFormData, */ selectedDate, setSelectedDate, mediaError, setMediaError,
   timeFrom, setTimeFrom, timeTo, setTimeTo, existingMedia, setExistingMedia, /* fetchUnsplashImages, */ loadingMedia, loading, setLoading,
   setSnackbar, setSubmitError, submitError, protectLocation, setProtectLocation, fakeAddress, setFakeAddress, activeStep, setActiveStep,
-  darkMode, validationErrors, setValidationErrors, }) => {
+  darkMode, validationErrors, setValidationErrors, onPostSuccess }) => {
   //   const [openDialog, setOpenDialog] = useState(false);
   // const [activeStep, setActiveStep] = useState(0);
   //   const [editingProduct, setEditingProduct] = useState(false);
@@ -836,14 +836,21 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     }
 
     try {
+      let response;
       if (editingProduct) {
-        await updateUserPost(editingProduct._id, data);
+        response = await updateUserPost(editingProduct._id, data);
         // showNotification(`${formData.title} details updated successfully.`, 'success');
+        if (onPostSuccess) {
+          onPostSuccess(response.data.post, true);
+        }
         setSnackbar({ open: true, message: `${formData.title} details updated successfully.`, severity: 'success' });
       } else {
-        await addUserPost(data);
+        response = await addUserPost(data);
         // const postTypeText = formData.postType === 'HelpRequest' ? 'Help Request' : 'Service';
         // showNotification(`New Post "${formData.title}" is added successfully.`, 'success');
+        if (onPostSuccess) {
+          onPostSuccess(response.data.post, false);
+        }
         setSnackbar({ open: true, message: `New Post "${formData.title}" is added successfully.`, severity: 'success' });
       }
       // Reset form after successful submission
@@ -871,7 +878,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setFakeAddress('');
       // setActiveStep(0);
       setValidationErrors({});
-      await fetchPostsData(); // Refresh products list
+      // await fetchPostsData(); // Refresh products list
       handleCloseDialog();       // Close dialog
     } catch (error) {
       console.error("Error submitting post:", error);
