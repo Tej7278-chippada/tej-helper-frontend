@@ -276,3 +276,35 @@ export const addFeedback = (data) => {
   };
   return API.post('/api/feedback/addFeedback', data, { headers });
 };
+
+export const updateUserProfile = async (userId, userData) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.put(`/api/auth/update-profile/${userId}`, userData, { headers });
+};
+
+export const updateProfilePicture = async (userId, profilePic) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'multipart/form-data'
+  } : {};
+  
+  const formData = new FormData();
+  formData.append('profilePic', profilePic);
+  
+  return await API.put(`/api/auth/update-profile-pic/${userId}`, formData, { headers });
+};
+
+export const deleteProfilePicture = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.delete(`/api/auth/delete-profile-pic/${userId}`, { headers });
+};

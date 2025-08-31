@@ -1,10 +1,10 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import API from './api/api';
+import API, { deleteProfilePicture, updateProfilePicture, updateUserProfile } from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 // import { Marker, TileLayer } from 'leaflet';
@@ -22,6 +22,10 @@ import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 // import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RateUserDialog from './Helper/RateUserDialog';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import Cropper from 'react-easy-crop';
 
 
 // Set default icon manually
@@ -86,6 +90,20 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   // const [showRatings, setShowRatings] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
   const [currentAddress, setCurrentAddress] = useState('');
+  // states for profile editing
+  const [editProfileOpen, setEditProfileOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    username: '',
+    email: '',
+    phone: ''
+  });
+  const [profilePicDialog, setProfilePicDialog] = useState(false);
+  const [profilePic, setProfilePic] = useState(null);
+  const [croppedImage, setCroppedImage] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -252,6 +270,188 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const handleOpenRateDialog = () => setRateDialogOpen(true);
   const handleCloseRateDialog = () => setRateDialogOpen(false);
 
+  const handleEditProfile = () => {
+    setProfileForm({
+      username: userData.username,
+      email: userData.email,
+      phone: userData.phone || ''
+    });
+    setEditProfileOpen(true);
+  };
+
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleUpdateProfile = async () => {
+    try {
+      setUpdating(true);
+      const response = await updateUserProfile(id, profileForm);
+      setUserData(prev => ({
+        ...prev,
+        username: response.data.user.username,
+        email: response.data.user.email,
+        phone: response.data.user.phone
+      }));
+      localStorage.setItem('tokenUsername', response.data.user.username);
+      setEditProfileOpen(false);
+      setSnackbar({ 
+        open: true, 
+        message: 'Profile updated successfully!', 
+        severity: 'success' 
+      });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Error updating profile', 
+        severity: 'error' 
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Profile picture functions
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file && file.size > 2 * 1024 * 1024) {
+      const resizedBlob = await resizeImage(file, 2 * 1024 * 1024);
+      const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+      setProfilePic(resizedFile);
+    } else {
+      setProfilePic(file);
+    }
+  };
+
+  const resizeImage = (blob, maxSize) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(blob);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        let width = img.width;
+        let height = img.height;
+        const scaleFactor = Math.sqrt(maxSize / blob.size);
+        width *= scaleFactor;
+        height *= scaleFactor;
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (resizedBlob) => resolve(resizedBlob),
+          "image/jpeg",
+          0.8
+        );
+      };
+    });
+  };
+
+  const handleCropComplete = async (_, croppedAreaPixels) => {
+    if (!profilePic) return;
+    const canvas = document.createElement('canvas');
+    const image = new Image();
+    const objectURL = URL.createObjectURL(profilePic);
+    image.src = objectURL;
+    image.onload = () => {
+      const ctx = canvas.getContext('2d');
+      const { width, height } = croppedAreaPixels;
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(
+        image,
+        croppedAreaPixels.x,
+        croppedAreaPixels.y,
+        width,
+        height,
+        0,
+        0,
+        width,
+        height
+      );
+      canvas.toBlob((blob) => {
+        if (blob) {
+          setCroppedImage(URL.createObjectURL(blob));
+        }
+      }, 'image/jpeg', 0.8);
+    };
+  };
+
+  const handleSaveProfilePic = async () => {
+    try {
+      setUpdating(true);
+      if (!croppedImage) {
+        setSnackbar({ 
+          open: true, 
+          message: 'Please select and crop an image first', 
+          severity: 'warning' 
+        });
+        return;
+      }
+
+      const blob = await fetch(croppedImage).then(r => r.blob());
+      const file = new File([blob], 'profile-pic.jpg', { type: 'image/jpeg' });
+      
+      const response = await updateProfilePicture(id, file);
+      setUserData(prev => ({
+        ...prev,
+        profilePic: response.data.user.profilePic,
+        lastProfilePicUpdate: response.data.user.lastProfilePicUpdate
+      }));
+      localStorage.setItem('tokenProfilePic', response.data.user.profilePic);
+      setProfilePicDialog(false);
+      setProfilePic(null);
+      setCroppedImage(null);
+      setSnackbar({ 
+        open: true, 
+        message: 'Profile picture updated successfully!', 
+        severity: 'success' 
+      });
+    } catch (error) {
+      console.error('Error updating profile picture:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Error updating profile picture', 
+        severity: 'error' 
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteProfilePic = async () => {
+    try {
+      setDeleting(true);
+      const response = await deleteProfilePicture(id);
+      setUserData(prev => ({
+        ...prev,
+        profilePic: null,
+        lastProfilePicUpdate: response.data.user.lastProfilePicUpdate
+      }));
+      localStorage.setItem('tokenProfilePic', null);
+      setProfilePicDialog(false);
+      setSnackbar({ 
+        open: true, 
+        message: 'Profile picture deleted successfully!', 
+        severity: 'success' 
+      });
+    } catch (error) {
+      console.error('Error deleting profile picture:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Error deleting profile picture', 
+        severity: 'error' 
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* <Snackbar
@@ -302,15 +502,33 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   alignItems: isMobile ? "center" : "flex-start",
                 }}
               >
-                <Avatar
-                  alt={userData.username}
-                  src={
-                    userData.profilePic
-                      ? `data:image/jpeg;base64,${userData.profilePic}`
-                      : 'https://placehold.co/56x56?text=No+Image'
-                  }
-                  sx={{ width: isMobile ? '160px' : 'auto', height: isMobile ? '160px' : 'auto', borderRadius: isMobile ? '50%' : '50%' }} // fit-content
-                />
+                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                  <Avatar
+                    alt={userData.username}
+                    src={
+                      userData.profilePic
+                        ? `data:image/jpeg;base64,${userData.profilePic}`
+                        : 'https://placehold.co/200x200?text=No+Image'
+                    }
+                    sx={{ width: isMobile ? '160px' : 'auto', height: isMobile ? '160px' : 'auto', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer' }} // fit-content
+                    onClick={() => setProfilePicDialog(true)}
+                  />
+                  <IconButton
+                    sx={{
+                      position: 'absolute',
+                      bottom: 8,
+                      right: 8,
+                      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)'
+                      }
+                    }}
+                    onClick={() => setProfilePicDialog(true)}
+                  >
+                    <PhotoCameraIcon />
+                  </IconButton>
+                </Box>
               </Box>
             </Box>
 
@@ -327,6 +545,18 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               // height: 'calc(100vh - 16px)', // Adjust height as needed
             }}>
               <Box flex={isMobile ? "1" : "0 0 70%"} mb={6}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6">Profile Information</Typography>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={handleEditProfile}
+                    startIcon={<EditIcon />}
+                    sx={{ borderRadius: '12px', textTransform: 'none' }}
+                  >
+                    Edit Profile
+                  </Button>
+                </Box>
                 <Grid container spacing={2}>
 
                   <Grid item xs={6} sm={4}>
@@ -780,6 +1010,228 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             Cancel
           </Button>
 
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Profile Dialog */}
+      <Dialog
+        open={editProfileOpen}
+        onClose={() => setEditProfileOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            overflow: 'visible'
+          }
+        }}
+      >
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent>
+          <Box >
+            <TextField
+              fullWidth
+              label="Username"
+              name="username"
+              value={profileForm.username}
+              onChange={handleProfileChange}
+              margin="normal"
+              required
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#1976d2',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#5f6368',
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={profileForm.email}
+              onChange={handleProfileChange}
+              margin="normal"
+              required
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#1976d2',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#5f6368',
+                },
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Phone Number"
+              name="phone"
+              value={profileForm.phone}
+              onChange={handleProfileChange}
+              margin="normal"
+              size="small"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: '#ffffff',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#1976d2',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#5f6368',
+                },
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{p: 2}}>
+          <Button sx={{borderRadius: '12px', textTransform: 'none'}} onClick={() => setEditProfileOpen(false)}>Cancel</Button>
+          <Button 
+            onClick={handleUpdateProfile} 
+            variant="contained"
+            disabled={updating}
+            sx={{
+              textTransform:'none', borderRadius: '12px'
+            }}
+          >
+            {updating ? <CircularProgress size={24} /> : 'Update Profile'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Profile Picture Dialog */}
+      <Dialog
+        open={profilePicDialog}
+        onClose={() => setProfilePicDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        // fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            overflow: 'visible'
+          }
+        }}
+      >
+        <DialogTitle>Update Profile Picture</DialogTitle>
+        <DialogContent sx={{ scrollbarWidth: 'thin' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Current Profile Picture Preview */}
+            {/* {userData?.profilePic && !profilePic && (
+              <Box sx={{ mb: 3, textAlign: 'center' }}>
+                <Typography variant="body1" gutterBottom>
+                  Current Profile Picture:
+                </Typography>
+                <Avatar
+                  src={`data:image/jpeg;base64,${userData.profilePic}`}
+                  sx={{ width: 120, height: 120, margin: '0 auto', mb: 2 }}
+                />
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleDeleteProfilePic}
+                  disabled={updating}
+                  startIcon={<DeleteIcon />}
+                  sx={{ borderRadius: '12px', textTransform: 'none' }}
+                >
+                  {updating ? <CircularProgress size={20} /> : 'Delete Current Photo'}
+                </Button>
+              </Box>
+            )} */}
+            <Box sx={{display: 'flex', flexDirection: isMobile ? 'column-reverse' : 'row-reverse', gap: 1, alignItems: 'center', mb: 2, }}>
+              <Button 
+                variant="contained" 
+                component="label"
+                sx={{ borderRadius: '12px' }}
+              >
+                Choose Photo
+                <input 
+                  type="file" 
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </Button>
+              {userData?.profilePic && (<Button
+                variant="outlined"
+                color="error"
+                onClick={handleDeleteProfilePic}
+                disabled={deleting || updating}
+                startIcon={<DeleteIcon />}
+                sx={{ borderRadius: '12px', textTransform: 'none' }}
+              >
+                {deleting ? <CircularProgress size={20} /> : 'Delete Current Photo'}
+              </Button>)}
+            </Box>
+
+            {profilePic && (
+              <Box sx={{ position: 'relative', width: '100%', height: 300 }}>
+                <Cropper
+                  image={URL.createObjectURL(profilePic)}
+                  crop={crop}
+                  zoom={zoom}
+                  aspect={1}
+                  cropShape="round"
+                  showGrid={false}
+                  onCropChange={setCrop}
+                  onZoomChange={setZoom}
+                  onCropComplete={handleCropComplete}
+                  style={{
+                    containerStyle: {
+                      height: 300,
+                      position: 'relative',
+                    },
+                    cropAreaStyle: {
+                      border: '2px dashed #2196f3',
+                      borderRadius: '50%',
+                    },
+                  }}
+                />
+              </Box>
+            )}
+
+            {croppedImage && (
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Typography variant="body2" gutterBottom>
+                  Preview:
+                </Typography>
+                <Avatar
+                  src={croppedImage}
+                  sx={{ width: 120, height: 120, margin: '0 auto' }}
+                />
+              </Box>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{p: 2}}>
+          <Button 
+            sx={{
+              textTransform:'none', borderRadius: '12px'
+            }} 
+            onClick={() => setProfilePicDialog(false)}>Cancel</Button>
+          <Button 
+            onClick={handleSaveProfilePic} 
+            variant="contained"
+            disabled={updating || !croppedImage || deleting}
+            sx={{
+              textTransform:'none', borderRadius: '12px'
+            }}
+          >
+            {updating ? <CircularProgress size={24} /> : 'Save Picture'}
+          </Button>
         </DialogActions>
       </Dialog>
 
