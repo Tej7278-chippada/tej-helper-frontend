@@ -691,7 +691,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
       )}
       </Box>
         <EnhancedPostServiceDialog openDialog={openDialog} onCloseDialog={handleCloseDialog} setSnackbar={setSnackbar} submitError={submitError} setSubmitError={setSubmitError} theme={theme}
-         isMobile={isMobile} fetchPostsData={fetchPostsData} /* fetchUnsplashImages={fetchUnsplashImages} noImagesFound={noImagesFound} */ loading={loading} setLoading={setLoading}
+         isMobile={isMobile} fetchPostsData={fetchPostsData} /* fetchUnsplashImages={fetchUnsplashImages} noImagesFound={noImagesFound} */ 
          newMedia={newMedia} setNewMedia={setNewMedia} mediaError={mediaError} setMediaError={setMediaError} editingProduct={editingProduct} existingMedia={existingMedia} setExistingMedia={setExistingMedia}
          /* formData={formData} setFormData={setFormData} */ /* generatedImages={generatedImages} loadingGeneration={loadingGeneration} */ loadingMedia={loadingMedia}
          selectedDate={selectedDate} setSelectedDate={setSelectedDate} timeFrom={timeFrom} setTimeFrom={setTimeFrom} timeTo={timeTo} setTimeTo={setTimeTo}
