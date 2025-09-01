@@ -30,7 +30,14 @@ import {
   Avatar,
   ListItemIcon,
   ListItemText,
-  FormHelperText
+  FormHelperText,
+  Checkbox,
+  FormGroup,
+  FormControlLabel,
+  Grid,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -165,6 +172,34 @@ L.Icon.Default.mergeOptions({
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+
+// Add these constants after the serviceTypes array
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const TIME_SLOTS = [
+  '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', 
+  '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', 
+  '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
+];
+
+// Service features constant (copy from your provided data)
+const SERVICE_FEATURES = {
+  ParkingSpace: ['24/7 Available', 'Covered Parking', 'Security Surveillance', 'Well Lit Area', 'EV Charging Station', 'Valet Service', 'Monthly Discount', 'Reserved Spot', 'Accessible Parking', 'Indoor Parking'],
+  VehicleRental: ['Insurance Included', 'Free Delivery', '24/7 Support', 'Multiple Payment Options', 'Child Seats Available', 'GPS Navigation', 'Unlimited Mileage', 'Roadside Assistance', 'Fuel Included', 'Airport Delivery'],
+  FurnitureRental: ['Free Delivery & Setup', 'Assembly Included', 'Flexible Rental Terms', 'Damage Waiver', 'Upgrade Options', 'Maintenance Included', 'Quick Delivery', 'Eco-Friendly Furniture', 'Customization Available', 'Storage Solutions'],
+  Laundry: ['Pickup & Delivery', 'Same Day Service', 'Eco-Friendly Detergents', 'Ironing Included', 'Dry Cleaning', 'Stain Removal', 'Fold & Pack', 'Bulk Discounts', 'Emergency Service', 'Special Fabric Care'],
+  Events: ['Full Planning Service', 'Venue Decoration', 'Catering Options', 'Audio-Visual Equipment', 'Photography/Videography', 'Entertainment Arrangements', 'Guest Management', 'Budget Planning', 'Theme Development', 'Cleanup Service'],
+  Playgrounds: ['Safety Certified', 'Supervision Included', 'Party Packages', 'Indoor Facility', 'Weather Protected', 'Educational Toys', 'Snack Bar', 'Birthday Decorations', 'Group Discounts', 'Special Needs Accessible'],
+  Cleaning: ['Eco-Friendly Products', 'Deep Cleaning', 'Move-In/Move-Out Cleaning', 'Regular Maintenance', 'Disinfection Service', 'Window Cleaning', 'Carpet Cleaning', 'Quick Service', 'Equipment Provided', 'Green Certified'],
+  Cooking: ['Diet Specific Meals', 'Meal Prep Service', 'Local Cuisine', 'International Dishes', 'Ingredients Provided', 'Cooking Classes', 'Party Catering', 'Healthy Options', 'Custom Menu', 'Food Safety Certified'],
+  Tutoring: ['Certified Tutors', 'Online Sessions', 'Group Discounts', 'Exam Preparation', 'Homework Help', 'Special Needs Support', 'Progress Reports', 'Flexible Scheduling', 'Multiple Subjects', 'Study Materials Included'],
+  PetCare: ['Veterinary Background', 'Pet Grooming', 'Medication Administration', 'Daily Updates', 'Emergency Care', 'Multiple Pets Discount', 'Pet Training', 'Playtime Included', 'Special Diet Management', '24/7 Availability'],
+  Delivery: ['Express Delivery', 'Same Day Service', 'Tracking Available', 'Fragile Handling', 'Large Items Delivery', 'Multiple Stops', 'Cash on Delivery', 'Temperature Controlled', 'Weekend Service', 'Real-time Updates'],
+  Maintenance: ['Emergency Repair', '24/7 Service', 'Warranty Included', 'Free Diagnosis', 'Quality Parts', 'Senior Discount', 'Regular Maintenance Plans', 'Eco-Friendly Solutions', 'Licensed Technicians', 'Same Day Service'],
+  HouseSaleLease: ['Legal Documentation Help', 'Property Valuation', 'Virtual Tours', 'Negotiation Support', 'Home Inspection', 'Financing Assistance', 'Interior Staging', 'Photography Service', 'Flexible Viewing', 'Tenant Screening'],
+  LandSaleLease: ['Surveying Services', 'Zoning Information', 'Development Potential', 'Legal Assistance', 'Financing Options', 'Environmental Assessment', 'Infrastructure Details', 'Investment Analysis', 'Long-term Lease Options', 'Multiple Payment Plans'],
+  Other: ['Customizable Service', 'Quick Response', 'Quality Guarantee', 'Affordable Pricing', 'Experienced Professional', 'Free Consultation', 'Satisfaction Guaranteed', 'Emergency Service', 'Eco-Friendly', 'Technology Enabled']
+};
 
 const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile, fetchPostsData, /* generatedImages, loadingGeneration,
   noImagesFound, */ newMedia, setNewMedia, editingProduct, /* formData, setFormData, */ selectedDate, setSelectedDate, mediaError, setMediaError,
@@ -807,6 +842,14 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       data.append('existingMedia', JSON.stringify(mediaToKeep));
     }
 
+    // Append availability data
+    data.append('availability', JSON.stringify(availability));
+
+    // Append service features
+    selectedFeatures.forEach(feature => {
+      data.append('serviceFeatures', feature);
+    });
+
     // Append location data
     data.append('location', JSON.stringify({
       latitude: finalLocation.latitude,
@@ -868,6 +911,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         isFullTime: false,
         media: null,
       });
+      setAvailability({
+        days: [],
+        timeSlots: [],
+        isAlwaysAvailable: false
+      });
+      setSelectedFeatures([]);
       setExistingMedia([]);
       setNewMedia([]);
       setGeneratedImages([]);
@@ -1882,8 +1931,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 )}
               </Box>
 
-              {((formData.postType === 'HelpRequest' && formData.categories === 'Paid') || 
-                (formData.postType === 'ServiceOffering')) && (
+              {(formData.postType === 'HelpRequest' && formData.categories === 'Paid') && (
                 <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                   <Box display="flex" alignItems="center" justifyContent="space-between">
                     <Typography variant="body2" fontWeight={500}>
@@ -1896,6 +1944,14 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     />
                   </Box>
                 </Box>
+              )}
+
+              {/* Add these sections after the existing cards */}
+              {formData.postType === 'ServiceOffering' && formData.serviceType && (
+                <>
+                  {renderAvailabilitySection()}
+                  {renderServiceFeaturesSection()}
+                </>
               )}
             </CardContent>
           </Card>
@@ -2207,6 +2263,14 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 <Typography variant="body2">
                   <strong>Category:</strong> {formData.categories || 'Not selected'}
                 </Typography>
+                <Typography variant="body2">
+                  <strong>Availability:</strong> {availability.isAlwaysAvailable ? '24/7' : availability.days.join(', ')}
+                </Typography>
+                {selectedFeatures.length > 0 && (
+                  <Typography variant="body2">
+                    <strong>Features:</strong> {selectedFeatures.join(', ')}
+                  </Typography>
+                )}
                 {formData.price && (
                   <Typography variant="body2">
                     <strong>Price:</strong> ₹{formData.price}
@@ -2257,6 +2321,223 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           return null;
       }
     };
+
+    // Add these state variables after the existing states
+    const [availability, setAvailability] = useState({
+      days: [],
+      timeSlots: [],
+      isAlwaysAvailable: false
+    });
+    const [selectedFeatures, setSelectedFeatures] = useState([]);
+    const [expandedDay, setExpandedDay] = useState(null);
+
+    // Add this useEffect to initialize availability when editing
+    useEffect(() => {
+      if (editingProduct) {
+        // ... existing code ...
+        
+        // Initialize availability data
+        if (editingProduct.availability) {
+          setAvailability(editingProduct.availability);
+        }
+        
+        // Initialize service features
+        if (editingProduct.serviceFeatures) {
+          setSelectedFeatures(editingProduct.serviceFeatures);
+        }
+      } else {
+        // Reset availability and features when creating new post
+        setAvailability({
+          days: [],
+          timeSlots: [],
+          isAlwaysAvailable: false
+        });
+        setSelectedFeatures([]);
+      }
+    }, [editingProduct]);
+
+    // Add these handler functions
+    const handleDayToggle = (day) => {
+      setAvailability(prev => {
+        const newDays = prev.days.includes(day)
+          ? prev.days.filter(d => d !== day)
+          : [...prev.days, day];
+        
+        return {
+          ...prev,
+          days: newDays
+        };
+      });
+    };
+
+    const handleAlwaysAvailableToggle = (e) => {
+      setAvailability(prev => ({
+        ...prev,
+        isAlwaysAvailable: e.target.checked
+      }));
+    };
+
+    const handleTimeSlotChange = (day, from, to) => {
+      setAvailability(prev => {
+        const existingSlotIndex = prev.timeSlots.findIndex(slot => slot.day === day);
+        let newTimeSlots;
+        
+        if (existingSlotIndex >= 0) {
+          newTimeSlots = [...prev.timeSlots];
+          newTimeSlots[existingSlotIndex] = { day, from, to };
+        } else {
+          newTimeSlots = [...prev.timeSlots, { day, from, to }];
+        }
+        
+        return {
+          ...prev,
+          timeSlots: newTimeSlots
+        };
+      });
+    };
+
+    const handleFeatureToggle = (feature) => {
+      setSelectedFeatures(prev =>
+        prev.includes(feature)
+          ? prev.filter(f => f !== feature)
+          : [...prev, feature]
+      );
+    };
+
+    // Add this function to render the availability section
+    const renderAvailabilitySection = () => (
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 3, mt: 2 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
+              <ScheduleIcon />
+            </Avatar>
+            <Typography variant="h6" fontWeight={600}>
+              Availability
+            </Typography>
+          </Box>
+
+          <FormGroup sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={availability.isAlwaysAvailable}
+                  onChange={handleAlwaysAvailableToggle}
+                  color="primary"
+                />
+              }
+              label="Available 24/7"
+            />
+          </FormGroup>
+
+          {!availability.isAlwaysAvailable && (
+            <>
+              <Typography variant="subtitle1" gutterBottom>
+                Select Available Days
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 3 }}>
+                {DAYS_OF_WEEK.map(day => (
+                  <Chip
+                    key={day}
+                    label={day}
+                    clickable
+                    color={availability.days.includes(day) ? 'primary' : 'default'}
+                    onClick={() => handleDayToggle(day)}
+                    variant={availability.days.includes(day) ? 'filled' : 'outlined'}
+                  />
+                ))}
+              </Box>
+
+              <Typography variant="subtitle1" gutterBottom>
+                Set Time Slots
+              </Typography>
+              {DAYS_OF_WEEK.map(day => (
+                <Accordion 
+                  key={day} 
+                  expanded={expandedDay === day}
+                  onChange={() => setExpandedDay(expandedDay === day ? null : day)}
+                  disabled={!availability.days.includes(day)}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography>{day}</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                      <FormControl sx={{ minWidth: 120 }}>
+                        <InputLabel>From</InputLabel>
+                        <Select
+                          value={availability.timeSlots.find(slot => slot.day === day)?.from || ''}
+                          onChange={(e) => handleTimeSlotChange(day, e.target.value, availability.timeSlots.find(slot => slot.day === day)?.to || '')}
+                          label="From"
+                        >
+                          {TIME_SLOTS.map(time => (
+                            <MenuItem key={`${day}-from-${time}`} value={time}>
+                              {time}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      
+                      <Typography>to</Typography>
+                      
+                      <FormControl sx={{ minWidth: 120 }}>
+                        <InputLabel>To</InputLabel>
+                        <Select
+                          value={availability.timeSlots.find(slot => slot.day === day)?.to || ''}
+                          onChange={(e) => handleTimeSlotChange(day, availability.timeSlots.find(slot => slot.day === day)?.from || '', e.target.value)}
+                          label="To"
+                        >
+                          {TIME_SLOTS.map(time => (
+                            <MenuItem key={`${day}-to-${time}`} value={time}>
+                              {time}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    );
+
+    // Add this function to render the service features section
+    const renderServiceFeaturesSection = () => (
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 3 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'info.main', mr: 2 }}>
+              <CheckIcon />
+            </Avatar>
+            <Typography variant="h6" fontWeight={600}>
+              Service Features
+            </Typography>
+          </Box>
+
+          {formData.serviceType && SERVICE_FEATURES[formData.serviceType] ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              {SERVICE_FEATURES[formData.serviceType].map(feature => (
+                <Chip
+                  key={feature}
+                  label={feature}
+                  clickable
+                  color={selectedFeatures.includes(feature) ? 'primary' : 'default'}
+                  onClick={() => handleFeatureToggle(feature)}
+                  variant={selectedFeatures.includes(feature) ? 'filled' : 'outlined'}
+                />
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              Select a service type to see available features
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+    );
 
   return (
     
