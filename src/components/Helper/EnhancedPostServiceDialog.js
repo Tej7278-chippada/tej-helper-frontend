@@ -63,7 +63,7 @@ import {
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import BusinessCenterRoundedIcon from '@mui/icons-material/BusinessCenterRounded';
-
+import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
 import React, { useCallback, useEffect, useState } from 'react';
 // import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, updateUserPost } from '../api/api';
@@ -388,6 +388,63 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       if (editingProduct.timeTo) {
         setTimeTo(new Date(editingProduct.timeTo));
       }
+      if (editingProduct.availability) {
+        setAvailability(editingProduct.availability);
+      }
+      if (editingProduct.serviceFeatures) {
+        setSelectedFeatures(editingProduct.serviceFeatures);
+      }
+      if (editingProduct.availability) {
+        setAvailability(editingProduct.availability);
+      }
+      // Initialize pricing data based on service type
+      if (editingProduct.pricing) {
+        switch (editingProduct.pricing.type) {
+          case 'parking':
+            setParkingPricing(editingProduct.pricing.parking || {
+              vehicleTypes: [
+                { name: 'Car', price: '', duration: 'per hour', description: '' },
+                { name: 'Motorcycle', price: '', duration: 'per hour', description: '' },
+                { name: 'Truck', price: '', duration: 'per hour', description: '' }
+              ],
+              hourlyRate: '',
+              dailyRate: '',
+              monthlyRate: '',
+              minDuration: '',
+              maxDuration: ''
+            });
+            setPricingType('parking');
+            break;
+          
+          case 'vehicle_rental':
+            setVehicleRentalPricing(editingProduct.pricing.vehicleRental || {
+              vehicleType: 'Sedan',
+              hourlyRate: '',
+              dailyRate: '',
+              weeklyRate: '',
+              monthlyRate: '',
+              fuelIncluded: false,
+              insuranceIncluded: false
+            });
+            setPricingType('vehicle_rental');
+            break;
+          
+          case 'service_tiered':
+            setServicePricing(editingProduct.pricing.service || {
+              basePrice: '',
+              pricingModel: 'fixed',
+              additionalCharges: [],
+              minDuration: '',
+              maxDuration: ''
+            });
+            setPricingType('service_tiered');
+            break;
+          
+          default:
+            setPricingType('service_tiered');
+            break;
+        }
+      }
     } else {
       // Reset form when creating new post
       setFormData({
@@ -407,6 +464,41 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setSelectedDate(null);
       setTimeFrom(null);
       setTimeTo(null);
+      setAvailability({
+        days: [],
+        timeSlots: [],
+        isAlwaysAvailable: false
+      });
+      setSelectedFeatures([]);
+      setParkingPricing({
+        vehicleTypes: [
+          { name: 'Car', price: '', duration: 'per hour', description: '' },
+          { name: 'Motorcycle', price: '', duration: 'per hour', description: '' },
+          { name: 'Truck', price: '', duration: 'per hour', description: '' }
+        ],
+        hourlyRate: '',
+        dailyRate: '',
+        monthlyRate: '',
+        minDuration: '',
+        maxDuration: ''
+      });
+      setVehicleRentalPricing({
+        vehicleType: 'Sedan',
+        hourlyRate: '',
+        dailyRate: '',
+        weeklyRate: '',
+        monthlyRate: '',
+        fuelIncluded: false,
+        insuranceIncluded: false
+      });
+      setServicePricing({
+        basePrice: '',
+        pricingModel: 'fixed',
+        additionalCharges: [],
+        minDuration: '',
+        maxDuration: ''
+      });
+      setPricingType('service_tiered');
     }
   }, [editingProduct]);
 
@@ -850,6 +942,37 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       data.append('serviceFeatures', feature);
     });
 
+    // Prepare pricing data based on service type
+    let pricingData = {
+      type: 'service_tiered'
+    };
+
+    if (formData.postType === 'ServiceOffering') {
+      switch (formData.serviceType) {
+        case 'ParkingSpace':
+          pricingData = {
+            type: 'parking',
+            parking: parkingPricing
+          };
+          break;
+        case 'VehicleRental':
+          pricingData = {
+            type: 'vehicle_rental',
+            vehicleRental: vehicleRentalPricing
+          };
+          break;
+        default:
+          pricingData = {
+            type: 'service_tiered',
+            service: servicePricing
+          };
+          break;
+      }
+    }
+
+    // Append pricing data
+    data.append('pricing', JSON.stringify(pricingData));
+
     // Append location data
     data.append('location', JSON.stringify({
       latitude: finalLocation.latitude,
@@ -1106,7 +1229,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           } else {
             errorSteps.delete(2);
           }
-          if (formData.categories !== 'UnPaid' && !formData.price) {
+          if (formData.postType === 'HelpRequest' && formData.categories !== 'UnPaid' && !formData.price) {
             errors.price = 'Price is required';
             errorSteps.add(2);
           } else {
@@ -1118,13 +1241,13 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           } else {
             errorSteps.delete(2);
           }
-          if (!formData.peopleCount) {
+          if (formData.postType === 'HelpRequest' && !formData.peopleCount) {
             errors.peopleCount = 'People count is required';
             errorSteps.add(2);
           } else {
             errorSteps.delete(2);
           }
-          if (!formData.serviceDays) {
+          if (formData.postType === 'HelpRequest' && !formData.serviceDays) {
             errors.serviceDays = 'Service Days is required';
             errorSteps.add(2);
           } else {
@@ -1945,33 +2068,42 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   </Box>
                 </Box>
               )}
-
-              {/* Add these sections after the existing cards */}
-              {formData.postType === 'ServiceOffering' && formData.serviceType && (
-                <>
-                  {renderAvailabilitySection()}
-                  {renderServiceFeaturesSection()}
-                </>
-              )}
             </CardContent>
           </Card>
+
+          {formData.postType === 'ServiceOffering' && formData.serviceType && (
+            <>
+              {renderAvailabilitySection()}
+              {renderPricingSection()}
+            </>
+          )}
 
           {/* Pricing & Requirements */}
           <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
             <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
-                  <CurrencyRupeeIcon />
-                </Avatar>
-                <Typography variant="h6" fontWeight={600}>
-                  Pricing & Requirements
-                </Typography>
-              </Box>
+              {formData.postType === 'HelpRequest' ? 
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+                    <CurrencyRupeeIcon />
+                  </Avatar>
+                  <Typography variant="h6" fontWeight={600}>
+                    Pricing & Requirements
+                  </Typography>
+                </Box> 
+                : 
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
+                    <SupervisorAccountRoundedIcon/>
+                  </Avatar>
+                  <Typography variant="h6" fontWeight={600}>
+                    Target Customers
+                  </Typography>
+                </Box> 
+              }
 
               <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2, mb: 2 }}>
                 {/* Price field - show for paid help requests or all service offerings */}
-                {(formData.postType === 'ServiceOffering' || 
-                  (formData.postType === 'HelpRequest' && formData.categories !== 'UnPaid')) && (
+                {(formData.postType === 'HelpRequest' && formData.categories !== 'UnPaid') && (
                   <TextField
                     label="Service Price (₹)"
                     type="number"
@@ -2058,140 +2190,148 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 </FormControl>
               </Box>
 
-              <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
-                <TextField
-                  label="People Count" required
-                  type="number"
-                  fullWidth
-                  error={!!validationErrors.peopleCount}
-                  helperText={validationErrors.peopleCount}
-                  value={formData.peopleCount}
-                  onChange={(e) => {
-                    let value = e.target.value;
-    
-                    // Remove any non-numeric characters except empty string (allow backspacing)
-                    value = value.replace(/[^0-9]/g, '');
-    
-                    // Convert to a number if it's not empty
-                    if (value === '' || (Number(value) <= 10000)) {
-                      setFormData({ ...formData, peopleCount: value });
-                    }
+              {formData.postType === 'HelpRequest' && (
+                <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+                  <TextField
+                    label="People Count" required
+                    type="number"
+                    fullWidth
+                    error={!!validationErrors.peopleCount}
+                    helperText={validationErrors.peopleCount}
+                    value={formData.peopleCount}
+                    onChange={(e) => {
+                      let value = e.target.value;
+      
+                      // Remove any non-numeric characters except empty string (allow backspacing)
+                      value = value.replace(/[^0-9]/g, '');
+      
+                      // Convert to a number if it's not empty
+                      if (value === '' || (Number(value) <= 10000)) {
+                        setFormData({ ...formData, peopleCount: value });
+                      }
 
-                    // Clear error when typing
-                    if (validationErrors.peopleCount) {
-                      setValidationErrors(prev => ({ ...prev, peopleCount: undefined }));
-                      setStepsWithErrors(prev => prev.filter(step => step !== 2));
-                    }
+                      // Clear error when typing
+                      if (validationErrors.peopleCount) {
+                        setValidationErrors(prev => ({ ...prev, peopleCount: undefined }));
+                        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                      }
 
-                  }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  InputProps={{
-                    startAdornment: <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} /> , min: 1, max: 10000, step: 1,
-                  }}
-                />
+                    }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} /> , min: 1, max: 10000, step: 1,
+                    }}
+                  />
 
-                <TextField
-                  label="Service Days"
-                  type="number"
-                  fullWidth required
-                  error={!!validationErrors.serviceDays}
-                  helperText={validationErrors.serviceDays}
-                  value={formData.serviceDays}
-                  onChange={(e) => {
-                    let value = e.target.value;
-    
-                    // Remove any non-numeric characters except empty string (allow backspacing)
-                    value = value.replace(/[^0-9]/g, '');
-    
-                    // Convert to a number if it's not empty
-                    if (value === '' || (Number(value) <= 365)) {
-                      setFormData({ ...formData, serviceDays: value });
-                    }
-                    // Clear error when typing
-                    if (validationErrors.serviceDays) {
-                      setValidationErrors(prev => ({ ...prev, serviceDays: undefined }));
-                      setStepsWithErrors(prev => prev.filter(step => step !== 2));
-                    }
-                  }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  InputProps={{
-                    startAdornment: <CalendarIcon sx={{ mr: 1, color: 'text.secondary' }} />, min: 1, max: 365, step: 1,
-                  }}
-                />
-              </Box>
+                  <TextField
+                    label="Service Days"
+                    type="number"
+                    fullWidth required
+                    error={!!validationErrors.serviceDays}
+                    helperText={validationErrors.serviceDays}
+                    value={formData.serviceDays}
+                    onChange={(e) => {
+                      let value = e.target.value;
+      
+                      // Remove any non-numeric characters except empty string (allow backspacing)
+                      value = value.replace(/[^0-9]/g, '');
+      
+                      // Convert to a number if it's not empty
+                      if (value === '' || (Number(value) <= 365)) {
+                        setFormData({ ...formData, serviceDays: value });
+                      }
+                      // Clear error when typing
+                      if (validationErrors.serviceDays) {
+                        setValidationErrors(prev => ({ ...prev, serviceDays: undefined }));
+                        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+                      }
+                    }}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CalendarIcon sx={{ mr: 1, color: 'text.secondary' }} />, min: 1, max: 365, step: 1,
+                    }}
+                  />
+                </Box>
+              )}
             </CardContent>
           </Card>
 
-          <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
-            <CardContent>
-              <Box display="flex" alignItems="center" mb={2}>
-                <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
-                  <ScheduleIcon />
-                </Avatar>
-                <Typography variant="h6" fontWeight={600}>
-                  Schedule & Timing
-                </Typography>
-              </Box>
+          {formData.postType === 'HelpRequest' ? (
+            <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)' }}>
+              <CardContent>
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
+                    <ScheduleIcon />
+                  </Avatar>
+                  <Typography variant="h6" fontWeight={600}>
+                    Schedule & Timing
+                  </Typography>
+                </Box>
 
-              {/* <TextField
-                type="date"
-                label="Service Date"
-                fullWidth
-                sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                InputLabelProps={{ shrink: true }}
-              /> */}
-
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DatePicker
-                  label="Service Date" sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 5, } }}
-                  value={selectedDate} format="dd MM yyyy" // Formats date as "14 03 2025"
-                  onChange={handleDateChange}
-                  slotProps={{
-                    textField: { fullWidth: true, sx: { mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
-                  }}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </LocalizationProvider>
-
-              <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
                 {/* <TextField
-                  type="time"
-                  label="Start Time"
+                  type="date"
+                  label="Service Date"
                   fullWidth
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                  type="time"
-                  label="End Time"
-                  fullWidth
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   InputLabelProps={{ shrink: true }}
                 /> */}
+
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <TimePicker
-                    label="Start Time" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem', } }}
-                    value={timeFrom}
-                    onChange={handleTimeFromChange}
+                  <DatePicker
+                    label="Service Date" sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 5, } }}
+                    value={selectedDate} format="dd MM yyyy" // Formats date as "14 03 2025"
+                    onChange={handleDateChange}
                     slotProps={{
-                      textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
+                      textField: { fullWidth: true, sx: { mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
                     }}
+                    InputLabelProps={{ shrink: true }}
                   />
                 </LocalizationProvider>
-                
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <TimePicker
-                    label="End Time" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem', } }}
-                    value={timeTo}
-                    onChange={handleTimeToChange}
-                    slotProps={{
-                      textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
-                    }}
+
+                <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+                  {/* <TextField
+                    type="time"
+                    label="Start Time"
+                    fullWidth
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputLabelProps={{ shrink: true }}
                   />
-                </LocalizationProvider>
-              </Box>
-            </CardContent>
-          </Card>
+                  <TextField
+                    type="time"
+                    label="End Time"
+                    fullWidth
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputLabelProps={{ shrink: true }}
+                  /> */}
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <TimePicker
+                      label="Start Time" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem', } }}
+                      value={timeFrom}
+                      onChange={handleTimeFromChange}
+                      slotProps={{
+                        textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
+                      }}
+                    />
+                  </LocalizationProvider>
+                  
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <TimePicker
+                      label="End Time" sx={{ '& .MuiOutlinedInput-root': { borderRadius: '1rem', } }}
+                      value={timeTo}
+                      onChange={handleTimeToChange}
+                      slotProps={{
+                        textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
+                      }}
+                    />
+                  </LocalizationProvider>
+                </Box>
+              </CardContent>
+            </Card>
+          ) : ( formData.serviceType && 
+            <>
+              {renderServiceFeaturesSection()}
+            </>
+          )}
           
         </Box>
       </Fade>
@@ -2261,32 +2401,63 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   <strong>Title:</strong> {formData.title || 'Not specified'}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Category:</strong> {formData.categories || 'Not selected'}
+                  <strong>Post Type:</strong> {formData.postType || 'Not selected'}
                 </Typography>
-                <Typography variant="body2">
-                  <strong>Availability:</strong> {availability.isAlwaysAvailable ? '24/7' : availability.days.join(', ')}
-                </Typography>
-                {selectedFeatures.length > 0 && (
-                  <Typography variant="body2">
-                    <strong>Features:</strong> {selectedFeatures.join(', ')}
-                  </Typography>
-                )}
-                {formData.price && (
-                  <Typography variant="body2">
-                    <strong>Price:</strong> ₹{formData.price}
-                  </Typography>
+                {formData.postType === 'HelpRequest' ? (
+                  <>
+                    <Typography variant="body2">
+                      <strong>Category:</strong> {formData.categories || 'Not selected'}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>Price:</strong> ₹{formData.price || 'Not specified'}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>People Count:</strong> {formData.peopleCount || 'Not specified'}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>Service Days:</strong> {formData.serviceDays || 'Not specified'}
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>Service Date on:</strong> {new Date(selectedDate).toLocaleDateString() || 'Not specified'} <strong>Time From To:</strong> {new Date(timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || 'Not specified'}
+                    </Typography>
+                  </>
+                  ) : (
+                  <>
+                    <Typography variant="body2">
+                      <strong>Service Type:</strong> {formData.serviceType || 'Not selected'}
+                    </Typography>
+                    {formData.serviceType === 'ParkingSpace' ? (
+                      <Typography variant="body2">
+                        <strong>Vehicle Rates:</strong>{' '}
+                        {parkingPricing.vehicleTypes.map(vehicle => 
+                          `${vehicle.name}: ₹${vehicle.price} ${vehicle.duration}`
+                        ).join(', ')}
+                      </Typography>
+                      ) : formData.serviceType === 'VehicleRental' ? (
+                      <Typography variant="body2">
+                        <strong>Rental Rates:</strong>{' '}
+                        {`Hourly: ₹${vehicleRentalPricing.hourlyRate}, Daily: ₹${vehicleRentalPricing.dailyRate}, Weekly: ₹${vehicleRentalPricing.weeklyRate}`}
+                        {vehicleRentalPricing.fuelIncluded && ', Fuel Included'}
+                        {vehicleRentalPricing.insuranceIncluded && ', Insurance Included'}
+                      </Typography>
+                      ) : (
+                      <Typography variant="body2">
+                        <strong>Service Pricing:</strong>{' '}
+                        {`Base: ₹${servicePricing.basePrice} (${servicePricing.pricingModel})`}
+                      </Typography>
+                    )}
+                    <Typography variant="body2">
+                      <strong>Availability:</strong> {availability.isAlwaysAvailable ? '24/7' : availability.days.join(', ')}
+                    </Typography>
+                    {selectedFeatures.length > 0 && (
+                      <Typography variant="body2">
+                        <strong>Features:</strong> {selectedFeatures.join(', ')}
+                      </Typography>
+                    )}
+                  </>
                 )}
                 <Typography variant="body2">
                   <strong>Target Gender:</strong> {formData.gender || 'Not specified'}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>People Count:</strong> {formData.peopleCount || 'Not specified'}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Service Days:</strong> {formData.serviceDays || 'Not specified'}
-                </Typography>
-                <Typography variant="body2">
-                  <strong>Service Date on:</strong> {new Date(selectedDate).toLocaleDateString() || 'Not specified'} <strong>Time From To:</strong> {new Date(timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) || 'Not specified'}
                 </Typography>
                 <Typography variant="body2">
                   <strong>Post Address:</strong> {fakeAddress || currentAddress || 'Loading location...'}
@@ -2330,31 +2501,6 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     });
     const [selectedFeatures, setSelectedFeatures] = useState([]);
     const [expandedDay, setExpandedDay] = useState(null);
-
-    // Add this useEffect to initialize availability when editing
-    useEffect(() => {
-      if (editingProduct) {
-        // ... existing code ...
-        
-        // Initialize availability data
-        if (editingProduct.availability) {
-          setAvailability(editingProduct.availability);
-        }
-        
-        // Initialize service features
-        if (editingProduct.serviceFeatures) {
-          setSelectedFeatures(editingProduct.serviceFeatures);
-        }
-      } else {
-        // Reset availability and features when creating new post
-        setAvailability({
-          days: [],
-          timeSlots: [],
-          isAlwaysAvailable: false
-        });
-        setSelectedFeatures([]);
-      }
-    }, [editingProduct]);
 
     // Add these handler functions
     const handleDayToggle = (day) => {
@@ -2406,7 +2552,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
 
     // Add this function to render the availability section
     const renderAvailabilitySection = () => (
-      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 3, mt: 2 }}>
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 0 }}>
         <CardContent>
           <Box display="flex" alignItems="center" mb={2}>
             <Avatar sx={{ bgcolor: 'warning.main', mr: 2 }}>
@@ -2463,7 +2609,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   </AccordionSummary>
                   <AccordionDetails>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-                      <FormControl sx={{ minWidth: 120 }}>
+                      <FormControl sx={{ minWidth: 100 }} size='small'>
                         <InputLabel>From</InputLabel>
                         <Select
                           value={availability.timeSlots.find(slot => slot.day === day)?.from || ''}
@@ -2480,7 +2626,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       
                       <Typography>to</Typography>
                       
-                      <FormControl sx={{ minWidth: 120 }}>
+                      <FormControl sx={{ minWidth: 100 }} size='small'>
                         <InputLabel>To</InputLabel>
                         <Select
                           value={availability.timeSlots.find(slot => slot.day === day)?.to || ''}
@@ -2535,6 +2681,279 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               Select a service type to see available features
             </Typography>
           )}
+        </CardContent>
+      </Card>
+    );
+
+    const [pricingType, setPricingType] = useState('simple');
+    const [parkingPricing, setParkingPricing] = useState({
+      vehicleTypes: [
+        { name: 'Car', price: '', duration: 'per hour', description: '' },
+        { name: 'Motorcycle', price: '', duration: 'per hour', description: '' },
+        { name: 'Truck', price: '', duration: 'per hour', description: '' }
+      ],
+      hourlyRate: '',
+      dailyRate: '',
+      monthlyRate: '',
+      minDuration: '',
+      maxDuration: ''
+    });
+
+    const [vehicleRentalPricing, setVehicleRentalPricing] = useState({
+      vehicleType: 'Sedan',
+      hourlyRate: '',
+      dailyRate: '',
+      weeklyRate: '',
+      monthlyRate: '',
+      fuelIncluded: false,
+      insuranceIncluded: false
+    });
+
+    const [servicePricing, setServicePricing] = useState({
+      basePrice: '',
+      pricingModel: 'fixed',
+      additionalCharges: [],
+      minDuration: '',
+      maxDuration: ''
+    });
+
+    // Add this function to render pricing section
+    const renderPricingSection = () => {
+      if (formData.postType !== 'ServiceOffering') return null;
+
+      switch (formData.serviceType) {
+        case 'ParkingSpace':
+          return renderParkingPricing();
+        case 'VehicleRental':
+          return renderVehicleRentalPricing();
+        default:
+          return renderGeneralServicePricing();
+      }
+    };
+
+    const renderParkingPricing = () => (
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 0 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+              <CurrencyRupeeIcon />
+            </Avatar>
+            <Typography variant="h6" fontWeight={600}>
+              Parking Pricing
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Vehicle Type Pricing
+            </Typography>
+            {parkingPricing.vehicleTypes.map((vehicle, index) => (
+              <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
+                <TextField
+                  label="Vehicle Type"
+                  value={vehicle.name}
+                  onChange={(e) => {
+                    const newVehicleTypes = [...parkingPricing.vehicleTypes];
+                    newVehicleTypes[index].name = e.target.value;
+                    setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
+                  }}
+                  sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
+                <TextField
+                  label="Price"
+                  type="number"
+                  value={vehicle.price}
+                  onChange={(e) => {
+                    const newVehicleTypes = [...parkingPricing.vehicleTypes];
+                    newVehicleTypes[index].price = e.target.value;
+                    setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
+                  }}
+                  sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  InputProps={{
+                    startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  }}
+                />
+                <FormControl sx={{ flex: 1 }}>
+                  <InputLabel>Duration</InputLabel>
+                  <Select
+                    value={vehicle.duration}
+                    onChange={(e) => {
+                      const newVehicleTypes = [...parkingPricing.vehicleTypes];
+                      newVehicleTypes[index].duration = e.target.value;
+                      setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
+                    }}
+                    label="Duration"
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="per hour">Per Hour</MenuItem>
+                    <MenuItem value="per day">Per Day</MenuItem>
+                    <MenuItem value="per month">Per Month</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            ))}
+          </Box>
+
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+            <TextField
+              label="Hourly Rate"
+              type="number"
+              value={parkingPricing.hourlyRate}
+              onChange={(e) => setParkingPricing({ ...parkingPricing, hourlyRate: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Daily Rate"
+              type="number"
+              value={parkingPricing.dailyRate}
+              onChange={(e) => setParkingPricing({ ...parkingPricing, dailyRate: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Monthly Rate"
+              type="number"
+              value={parkingPricing.monthlyRate}
+              onChange={(e) => setParkingPricing({ ...parkingPricing, monthlyRate: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+          </Box>
+        </CardContent>
+      </Card>
+    );
+
+    const renderVehicleRentalPricing = () => (
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 0 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+              <CurrencyRupeeIcon />
+            </Avatar>
+            <Typography variant="h6" fontWeight={600}>
+              Vehicle Rental Pricing
+            </Typography>
+          </Box>
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Vehicle Type</InputLabel>
+            <Select
+              value={vehicleRentalPricing.vehicleType}
+              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, vehicleType: e.target.value })}
+              label="Vehicle Type"
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="Sedan">Sedan</MenuItem>
+              <MenuItem value="SUV">SUV</MenuItem>
+              <MenuItem value="Hatchback">Hatchback</MenuItem>
+              <MenuItem value="Bike">Bike</MenuItem>
+              <MenuItem value="Scooter">Scooter</MenuItem>
+              <MenuItem value="Truck">Truck</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+            <TextField
+              label="Hourly Rate"
+              type="number"
+              value={vehicleRentalPricing.hourlyRate}
+              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, hourlyRate: e.target.value })}
+              sx={{ flex: 1,'& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Daily Rate"
+              type="number"
+              value={vehicleRentalPricing.dailyRate}
+              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, dailyRate: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Weekly Rate"
+              type="number"
+              value={vehicleRentalPricing.weeklyRate}
+              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, weeklyRate: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+          </Box>
+
+          <FormGroup sx={{ mb: 2 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={vehicleRentalPricing.fuelIncluded}
+                  onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, fuelIncluded: e.target.checked })}
+                />
+              }
+              label="Fuel Included"
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={vehicleRentalPricing.insuranceIncluded}
+                  onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, insuranceIncluded: e.target.checked })}
+                />
+              }
+              label="Insurance Included"
+            />
+          </FormGroup>
+        </CardContent>
+      </Card>
+    );
+
+    const renderGeneralServicePricing = () => (
+      <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 0 }}>
+        <CardContent>
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
+              <CurrencyRupeeIcon />
+            </Avatar>
+            <Typography variant="h6" fontWeight={600}>
+              Service Pricing
+            </Typography>
+          </Box>
+
+          <TextField
+            label="Base Price"
+            type="number"
+            fullWidth
+            value={servicePricing.basePrice}
+            onChange={(e) => setServicePricing({ ...servicePricing, basePrice: e.target.value })}
+            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            InputProps={{
+              startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+            }}
+          />
+
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Pricing Model</InputLabel>
+            <Select
+              value={servicePricing.pricingModel}
+              onChange={(e) => setServicePricing({ ...servicePricing, pricingModel: e.target.value })}
+              label="Pricing Model"
+              sx={{ borderRadius: 2 }}
+            >
+              <MenuItem value="fixed">Fixed Price</MenuItem>
+              <MenuItem value="hourly">Hourly Rate</MenuItem>
+              <MenuItem value="daily">Daily Rate</MenuItem>
+              <MenuItem value="per_item">Per Item</MenuItem>
+              <MenuItem value="per_person">Per Person</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              label="Min Duration (hours)"
+              type="number"
+              value={servicePricing.minDuration}
+              onChange={(e) => setServicePricing({ ...servicePricing, minDuration: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+            <TextField
+              label="Max Duration (hours)"
+              type="number"
+              value={servicePricing.maxDuration}
+              onChange={(e) => setServicePricing({ ...servicePricing, maxDuration: e.target.value })}
+              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+          </Box>
         </CardContent>
       </Card>
     );
