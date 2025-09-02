@@ -364,6 +364,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                   </Typography>
                                 </Tooltip>
                                 
+                                {post.postType === 'HelpRequest' && 
                                 <Chip
                                   className="price-chip"
                                   icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
@@ -371,35 +372,36 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                   variant="filled"
                                   sx={{
                                     backgroundColor: alpha(theme.palette.success.main, 0.1),
-                                    color: 'success.main',
+                                    color: 'success.main', px: 1,
                                     fontWeight: 700,
                                     fontSize: '0.875rem',
                                     transition: 'transform 0.2s ease'
                                   }}
-                                />
+                                />}
                               </Box>
 
                               {/* Category and People Count */}
                               <Box display="flex" gap={1} flexWrap="wrap">
                                 <Chip
                                   icon={<CategoryIcon sx={{ fontSize: 14 }} />}
-                                  label={post.categories}
+                                  label={post.categories || post.serviceType}
                                   size="small"
                                   variant="outlined"
                                   sx={{
                                     borderColor: post.categories === 'Emergency' ? 'error.main' : 'divider',
                                     color: post.categories === 'Emergency' ? 'error.main' : 'text.secondary',
-                                    fontSize: '0.75rem'
+                                    fontSize: '0.75rem', px: 0.5,
                                   }}
                                 />
                                 
+                                {post.postType === 'HelpRequest' && 
                                 <Chip
                                   icon={<PersonIcon sx={{ fontSize: 14 }} />}
                                   label={`${post.peopleCount} (${post.gender})`}
                                   size="small"
                                   variant="outlined"
-                                  sx={{ fontSize: '0.75rem', color: 'text.secondary' }}
-                                />
+                                  sx={{ fontSize: '0.75rem', color: 'text.secondary', px: 0.5, }}
+                                />}
                               </Box>
 
                               {/* Description */}

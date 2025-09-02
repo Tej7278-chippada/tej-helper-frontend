@@ -1,6 +1,6 @@
 // src/components/Helper/PostDetailsById.js
 import React, { useEffect, useState } from 'react';
-import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button, styled, Avatar } from '@mui/material';
+import { Typography, CardMedia, IconButton, Grid, Grid2, Tooltip, Box, useMediaQuery, Snackbar, Alert, Toolbar, CircularProgress, Button, styled, Avatar, Chip } from '@mui/material';
 import ForumRoundedIcon from '@mui/icons-material/ForumRounded';
 import ThumbUpRoundedIcon from '@mui/icons-material/ThumbUpRounded';
 import ThumbUpOutlinedIcon from '@mui/icons-material/ThumbUpOutlined';
@@ -27,6 +27,34 @@ import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
 import RateUserDialog from './RateUserDialog';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import axios from 'axios';
+import PaidIcon from '@mui/icons-material/Paid';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import EmergencyIcon from '@mui/icons-material/Emergency';
+import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, ChildCare, CleaningServices, Restaurant, School, Pets, LocalShipping, Handyman, HomeWork, Landscape, MoreHoriz, CurrencyRupee, Schedule } from '@mui/icons-material';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+
+const getServiceIcon = (serviceType) => {
+  switch (serviceType) {
+    case 'Paid' : return <PaidIcon/>;
+    case 'UnPaid' : return <VolunteerActivismIcon/>;
+    case 'Emergency' : return <EmergencyIcon/>;
+    case 'ParkingSpace': return <LocalParking />;
+    case 'VehicleRental': return <DirectionsCar />;
+    case 'FurnitureRental': return <EventSeat />;
+    case 'Laundry': return <LocalLaundryService />;
+    case 'Events': return <Event />;
+    case 'Playgrounds': return <ChildCare />;
+    case 'Cleaning': return <CleaningServices />;
+    case 'Cooking': return <Restaurant />;
+    case 'Tutoring': return <School />;
+    case 'PetCare': return <Pets />;
+    case 'Delivery': return <LocalShipping />;
+    case 'Maintenance': return <Handyman />;
+    case 'HouseSaleLease': return <HomeWork />;
+    case 'LandSaleLease': return <Landscape />;
+    default: return <MoreHoriz />;
+  }
+};
 
 const CustomTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} arrow classes={{ popper: className }} />
@@ -484,7 +512,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   // }
 
   // Service Details Component
-  const ServiceDetailsSection = ({ post, darkMode, theme }) => {
+  const renderServiceDetails = (post, darkMode, theme) => {
     if (post.postType !== 'ServiceOffering') return null;
 
     const getGlassmorphismStyle = (theme, darkMode) => ({
@@ -497,156 +525,303 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
         : '0 8px 32px rgba(0, 0, 0, 0.1)',
     });
 
-    const renderParkingDetails = () => (
-      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          Parking Space Details
-        </Typography>
-        {post.pricingDetails?.parking?.vehicleTypes?.map((vehicle, index) => (
-          <Box key={index} sx={{ mb: 2, p: 1, bgcolor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', borderRadius: '4px' }}>
-            <Typography variant="body1" fontWeight="bold">{vehicle.name}</Typography>
-            <Typography variant="body2">Price: ₹{vehicle.price} {vehicle.currency} {vehicle.duration}</Typography>
-            {vehicle.description && <Typography variant="body2">Description: {vehicle.description}</Typography>}
-          </Box>
-        ))}
-        {post.pricingDetails?.parking?.hourlyRate && (
-          <Typography variant="body2">Hourly Rate: ₹{post.pricingDetails.parking.hourlyRate}</Typography>
-        )}
-        {post.pricingDetails?.parking?.dailyRate && (
-          <Typography variant="body2">Daily Rate: ₹{post.pricingDetails.parking.dailyRate}</Typography>
-        )}
-        {post.pricingDetails?.parking?.monthlyRate && (
-          <Typography variant="body2">Monthly Rate: ₹{post.pricingDetails.parking.monthlyRate}</Typography>
-        )}
-        {post.capacity && <Typography variant="body2">Available Slots: {post.capacity}</Typography>}
-      </Box>
-    );
+    // Render pricing information based on service type
+    const renderPricingDetails = () => {
+      if (!post.pricingDetails) return null;
 
-    const renderVehicleRentalDetails = () => (
-      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          Vehicle Rental Details
-        </Typography>
-        {post.pricingDetails?.vehicleRental && (
-          <>
-            <Typography variant="body1" fontWeight="bold">{post.pricingDetails.vehicleRental.vehicleType}</Typography>
-            {post.pricingDetails.vehicleRental.hourlyRate && (
-              <Typography variant="body2">Hourly: ₹{post.pricingDetails.vehicleRental.hourlyRate}</Typography>
-            )}
-            {post.pricingDetails.vehicleRental.dailyRate && (
-              <Typography variant="body2">Daily: ₹{post.pricingDetails.vehicleRental.dailyRate}</Typography>
-            )}
-            {post.pricingDetails.vehicleRental.weeklyRate && (
-              <Typography variant="body2">Weekly: ₹{post.pricingDetails.vehicleRental.weeklyRate}</Typography>
-            )}
-            {post.pricingDetails.vehicleRental.monthlyRate && (
-              <Typography variant="body2">Monthly: ₹{post.pricingDetails.vehicleRental.monthlyRate}</Typography>
-            )}
-            <Typography variant="body2">
-              Fuel Included: {post.pricingDetails.vehicleRental.fuelIncluded ? 'Yes' : 'No'}
-            </Typography>
-            <Typography variant="body2">
-              Insurance Included: {post.pricingDetails.vehicleRental.insuranceIncluded ? 'Yes' : 'No'}
-            </Typography>
-          </>
-        )}
-        {post.capacity && <Typography variant="body2">Available Vehicles: {post.capacity}</Typography>}
-      </Box>
-    );
-
-    const renderServiceDetails = () => (
-      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          Service Details
-        </Typography>
-        {post.pricingDetails?.service && (
-          <>
-            <Typography variant="body2">
-              Base Price: ₹{post.pricingDetails.service.basePrice}
-            </Typography>
-            <Typography variant="body2">
-              Pricing Model: {post.pricingDetails.service.pricingModel}
-            </Typography>
-            {post.pricingDetails.service.additionalCharges?.length > 0 && (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" fontWeight="bold">Additional Charges:</Typography>
-                {post.pricingDetails.service.additionalCharges.map((charge, index) => (
-                  <Typography key={index} variant="body2">
-                    {charge.name}: ₹{charge.price} {charge.description && `- ${charge.description}`}
-                  </Typography>
-                ))}
+      switch (post.serviceType) {
+        case 'ParkingSpace':
+          return (
+            <Box sx={{ 
+              p: 2, 
+              borderRadius: '12px', 
+              ...getGlassmorphismStyle(theme, darkMode), 
+              mt: 1,
+              // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+            }}>
+              {/* <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                Parking Rates
+              </Typography> */}
+              <Box display="flex" alignItems="center" mb={2}>
+                <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
+                  <CurrencyRupee fontSize="small" />
+                </Avatar>
+                <Typography variant="h6" >
+                  Parking Rates
+                </Typography>
               </Box>
-            )}
-          </>
-        )}
-      </Box>
-    );
-
-    const renderAvailability = () => (
-      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
-        <Typography variant="h6" gutterBottom>
-          Availability
-        </Typography>
-        {post.availability?.isAlwaysAvailable ? (
-          <Typography variant="body2">Always Available</Typography>
-        ) : (
-          <>
-            {post.availability?.days && post.availability.days.length > 0 && (
-              <Typography variant="body2">
-                Days: {post.availability.days.join(', ')}
+              {post.pricingDetails.parking?.vehicleTypes?.map((vehicle, index) => (
+                <Box key={index} sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  p: 1, 
+                  bgcolor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                  borderRadius: 1,
+                  mb: 1
+                }}>
+                  <Typography variant="body2">{vehicle.name}</Typography>
+                  <Typography variant="body2" fontWeight="bold">
+                    ₹{vehicle.price} {vehicle.duration && `/${vehicle.duration}`}
+                  </Typography>
+                </Box>
+              ))}
+              {post.capacity && (
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Available slots: <Box component="span" fontWeight="bold">{post.capacity}</Box>
+                </Typography>
+              )}
+            </Box>
+          );
+        
+        case 'VehicleRental':
+          return (
+            <Box sx={{ 
+              p: 2, 
+              borderRadius: '12px', 
+              ...getGlassmorphismStyle(theme, darkMode), 
+              mt: 1,
+              // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+            }}>
+              {/* <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <CurrencyRupee/> Rental Rates
+              </Typography> */}
+              <Box display="flex" alignItems="center" mb={2}>
+                <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
+                  <CurrencyRupee fontSize="small" />
+                </Avatar>
+                <Typography variant="h6" >
+                  Rental rates
+                </Typography>
+              </Box>
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                {post.pricingDetails.vehicleRental?.vehicleType}
               </Typography>
-            )}
-            {post.availability?.timeSlots && post.availability.timeSlots.length > 0 && (
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" fontWeight="bold">Time Slots:</Typography>
-                {post.availability.timeSlots.map((slot, index) => (
-                  <Typography key={index} variant="body2">
-                    {slot.day}: {slot.from} - {slot.to}
+              {post.pricingDetails.vehicleRental && (
+                <>
+                  <Grid container spacing={1}>
+                    {post.pricingDetails.vehicleRental.hourlyRate && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">Hourly: ₹{post.pricingDetails.vehicleRental.hourlyRate}</Typography>
+                      </Grid>
+                    )}
+                    {post.pricingDetails.vehicleRental.dailyRate && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">Daily: ₹{post.pricingDetails.vehicleRental.dailyRate}</Typography>
+                      </Grid>
+                    )}
+                    {post.pricingDetails.vehicleRental.weeklyRate && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">Weekly: ₹{post.pricingDetails.vehicleRental.weeklyRate}</Typography>
+                      </Grid>
+                    )}
+                    {post.pricingDetails.vehicleRental.monthlyRate && (
+                      <Grid item xs={6} sm={4}>
+                        <Typography variant="body2">Monthly: ₹{post.pricingDetails.vehicleRental.monthlyRate}</Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+                  <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                    <Chip 
+                      size="small" 
+                      label={`Fuel: ${post.pricingDetails.vehicleRental.fuelIncluded ? 'Included' : 'Not included'}`} 
+                      color={post.pricingDetails.vehicleRental.fuelIncluded ? "success" : "default"}
+                      variant="outlined"
+                    />
+                    <Chip 
+                      size="small" 
+                      label={`Insurance: ${post.pricingDetails.vehicleRental.insuranceIncluded ? 'Included' : 'Not included'}`} 
+                      color={post.pricingDetails.vehicleRental.insuranceIncluded ? "success" : "default"}
+                      variant="outlined"
+                    />
+                  </Box>
+                </>
+              )}
+            </Box>
+          );
+        
+        default:
+          if (post.pricingDetails.service) {
+            return (
+              <Box sx={{ 
+                p: 2, 
+                borderRadius: '12px', 
+                ...getGlassmorphismStyle(theme, darkMode), 
+                mt: 1,
+                // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+              }}>
+                {/* <Typography variant="h6" sx={{ mb: 1 }}>Pricing</Typography> */}
+                <Box display="flex" alignItems="center" mb={2}>
+                  <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
+                    <CurrencyRupee fontSize="small" />
+                  </Avatar>
+                  <Typography variant="h6" >
+                    Service Pricing
                   </Typography>
-                ))}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="h6" color="primary">
+                    ₹{post.pricingDetails.service.basePrice}
+                  </Typography>
+                  <Chip 
+                    label={post.pricingDetails.service.pricingModel} 
+                    size="small" 
+                    color="primary" 
+                    variant="outlined"
+                  />
+                </Box>
+                
+                {post.pricingDetails.service.additionalCharges?.length > 0 && (
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="body2" fontWeight="bold">Additional charges:</Typography>
+                    {post.pricingDetails.service.additionalCharges.map((charge, index) => (
+                      <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                        <Typography variant="body2">{charge.name}:</Typography>
+                        <Typography variant="body2">₹{charge.price}</Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                )}
               </Box>
-            )}
-          </>
-        )}
-      </Box>
-    );
+            );
+          }
+          return null;
+      }
+    };
 
-    const renderServiceFeatures = () => (
-      post.serviceFeatures && post.serviceFeatures.length > 0 && (
-        <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
-          <Typography variant="h6" gutterBottom>
-            Service Features
-          </Typography>
+    // Render availability information
+    const renderAvailability = () => {
+      if (!post.availability) return null;
+
+      return (
+        <Box sx={{ 
+          p: 2, 
+          borderRadius: '12px', 
+          ...getGlassmorphismStyle(theme, darkMode), 
+          mt: 1,
+          // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+        }}>
+          {/* <Typography variant="h6" sx={{ mb: 1 }}>Availability</Typography> */}
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'warning.main', mr: 1, height: '32px', width: '32px' }}>
+              <Schedule fontSize="small" />
+            </Avatar>
+            <Typography variant="h6" >
+              Availability
+            </Typography>
+          </Box>
+          {post.availability.isAlwaysAvailable ? (
+            <Chip label="Always Available 24/7" color="success" variant="outlined" />
+          ) : (
+            <>
+              {post.availability.days && post.availability.days.length > 0 && (
+                <Box sx={{ mb: 1 }}>
+                  <Typography variant="body2" fontWeight="bold">Days available:</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.5 }}>
+                    {post.availability.days.map(day => (
+                      <Chip key={day} label={day.slice(0, 3)} size="small" 
+                        sx={{backgroundColor : darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', px: 1, py: 1}}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              
+              {post.availability.timeSlots && post.availability.timeSlots.length > 0 && (
+                <Box>
+                  <Typography variant="body2" fontWeight="bold">Time slots:</Typography>
+                  {post.availability.timeSlots.map((slot, index) => (
+                    <Box key={index} sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      p: 0.5,
+                      bgcolor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                      borderRadius: 1,
+                      mt: 0.5
+                    }}>
+                      <Typography variant="body2">{slot.day}:</Typography>
+                      <Typography variant="body2">{slot.from} - {slot.to}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </>
+          )}
+        </Box>
+      );
+    };
+
+    // Render service features
+    const renderServiceFeatures = () => {
+      if (!post.serviceFeatures || post.serviceFeatures.length === 0) return null;
+
+      return (
+        <Box sx={{ 
+          p: 2, 
+          borderRadius: '12px', 
+          ...getGlassmorphismStyle(theme, darkMode), 
+          mt: 1,
+          // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+        }}>
+          {/* <Typography variant="h6" sx={{ mb: 1 }}>Service Features</Typography> */}
+          <Box display="flex" alignItems="center" mb={2}>
+            <Avatar sx={{ bgcolor: 'info.main', mr: 1, height: '32px', width: '32px' }}>
+              <AutoAwesomeRoundedIcon fontSize="small"/>
+            </Avatar>
+            <Typography variant="h6">
+              Service Features
+            </Typography>
+          </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {post.serviceFeatures.map((feature, index) => (
-              <Box
-                key={index}
-                sx={{
-                  px: 2,
-                  py: 1,
-                  bgcolor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                  borderRadius: '16px',
-                  fontSize: '0.875rem'
-                }}
-              >
-                {feature}
-              </Box>
+              <Chip 
+                key={index} 
+                label={feature} 
+                size="small" 
+                // color="primary"
+                // variant="outlined"
+                sx={{ backgroundColor : darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', px: 1, py: 2}}
+              />
             ))}
           </Box>
         </Box>
-      )
-    );
+      );
+    };
 
     return (
-      <Box sx={{ mt: 2 }}>
-        {/* Service Type Specific Details */}
-        {post.serviceType === 'ParkingSpace' && renderParkingDetails()}
-        {post.serviceType === 'VehicleRental' && renderVehicleRentalDetails()}
-        {post.serviceType !== 'ParkingSpace' && post.serviceType !== 'VehicleRental' && renderServiceDetails()}
-        
-        {/* Common Service Details */}
+      <Box sx={{ 
+        // p: 2, 
+        // borderRadius: '12px', 
+        // ...getGlassmorphismStyle(theme, darkMode), 
+        // mt: 2,
+        // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+      }}>
+        {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          {getServiceIcon(post.serviceType)}
+          <Typography variant="h5">Service Details</Typography>
+        </Box> */}
+
+        {/* Service Type Badge */}
+        {/* <Chip 
+          label={post.serviceType} 
+          color="primary" 
+          sx={{ mb: 2 }} 
+        /> */}
+
+        {/* Pricing Details */}
+        {renderPricingDetails()}
+        {/* Availability */}
         {renderAvailability()}
+        {/* Service Features */}
         {renderServiceFeatures()}
+
+        {/* Capacity for services that have it */}
+        {post.capacity && post.serviceType !== 'ParkingSpace' && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              Available: <Box component="span" fontWeight="bold">{post.capacity}</Box> units
+            </Typography>
+          </Box>
+        )}
       </Box>
     );
   };
@@ -810,10 +985,26 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                       <Grid item xs={6} sm={4}>
                         <Typography variant="body1" style={{ fontWeight: 500 }}>
                           {post.postType === 'HelpRequest' ? 'Post Category' : 'Service Category'}
-                        </Typography>
-                        <Typography variant="body2" color={post.categories !== 'Emergency' ? 'textSecondary' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                          {post.postType === 'HelpRequest' ? post.categories : post.serviceType}
-                        </Typography>
+                        </Typography> 
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          {/* {post.postType === 'ServiceOffering' && getServiceIcon(post.serviceType)} */}
+                          {post.postType === 'HelpRequest' ?
+                            // <Typography variant="body2" color={post.categories !== 'Emergency' ? 'textSecondary' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block',  }}>
+                            //   {post.categories}
+                            // </Typography> 
+                            <Chip 
+                              label={post.categories} icon={getServiceIcon(post.categories)}
+                              // color="primary"
+                              variant="outlined" size="small" color={post.categories !== 'Emergency' ? 'default' : 'error'} sx={{px: 1}}
+                            />
+                            :
+                            <Chip 
+                              label={post.serviceType} icon={getServiceIcon(post.serviceType)}
+                              // color="primary"
+                              variant="outlined" size="small" sx={{px: 1}}
+                            />
+                          }
+                        </Box>
                       </Grid>
                       <Grid item xs={6} sm={4}>
                         <Typography variant="body1" style={{ fontWeight: 500 }}>
@@ -822,9 +1013,14 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                         {/* <Typography variant="body2" color="textSecondary">
                         {post.gender}
                       </Typography> */}
-                        <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
+                        {/* <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
                           {post.postStatus}
-                        </Typography>
+                        </Typography> */}
+                        <Chip 
+                          label={post.postStatus} 
+                          color={post.postStatus === 'Active' ? 'success' : post.postStatus === 'InActive' ? 'warning': 'error'}
+                          sx={{ height: '24px', }} 
+                        />
                       </Grid>
                       {post.postType === 'HelpRequest' && (
                         <>
@@ -968,14 +1164,19 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             </Box>
 
             {/* Service Details section */}
-            <ServiceDetailsSection post={post} darkMode={darkMode} theme={theme} />
+            {post.postType === 'ServiceOffering' && renderServiceDetails(post, darkMode, theme)}
 
             <Grid item xs={12} sx={{ mt: '1rem' }}>
-              <Grid2 sx={{
+              <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 1 }}>
+              <Typography variant="body1" style={{ fontWeight: 500 }}>
+                {post.postType === 'HelpRequest' ? 'Post Description' : 'Service Description'}
+              </Typography>
+              {/* <Grid2 sx={{
                 bottom: '8px',
                 right: '0px', position: 'relative', display: 'inline-block', float: 'right',
-              }}>
-                <IconButton
+              }}> */}
+              <Box >
+                {/* <IconButton
                   onClick={handleLike} sx={{gap:'2px'}}
                   disabled={likeLoading} // Disable button while loading, sx={{ color: product.likedByUser ? 'blue' : 'gray' }} 
                 >
@@ -987,16 +1188,61 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                     <ThumbUpOutlinedIcon />
                   )}
                   {post.likes}
-                </IconButton>
-                <IconButton sx={{gap:'2px'}}
+                </IconButton> */}
+                <Chip 
+                  label={post.likes} 
+                  icon={likeLoading ? (
+                    <CircularProgress size={20} color="inherit" /> // Show spinner while loading
+                  ) : post.likedByUser ? (
+                    <ThumbUpRoundedIcon fontSize="small"/>
+                  ) : (
+                    <ThumbUpOutlinedIcon fontSize="small" />
+                  )}
+                  // color="primary"
+                  variant="outlined"
+                  onClick={handleLike}
+                  sx={{px: 1, fontWeight: 500, fontSize: '1rem',
+                    background: darkMode 
+                      ? 'rgba(30, 30, 30, 0.85)' 
+                      : 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: darkMode 
+                      ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+                      : '0 8px 32px rgba(0, 0, 0, 0.1)', 
+                    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                    height: '28px', minWidth: 'fit-content',
+                    // flexShrink: 0,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                  disabled={likeLoading}
+                />
+                {/* <IconButton sx={{gap:'2px'}}
                   onClick={() => openComments(post)}
                 >
                   <ChatRoundedIcon /> {post.comments?.length || 0}
-                </IconButton>
-              </Grid2>
-              <Typography variant="body1" style={{ paddingLeft: '6px', fontWeight: 500 }}>
-                {post.postType === 'HelpRequest' ? 'Post Description' : 'Service Description'}
-              </Typography>
+                </IconButton> */}
+                <Chip 
+                  label={post.comments?.length || 0} icon={<ChatRoundedIcon fontSize="small"/>}
+                  // color="primary"
+                  variant="outlined" size="small" 
+                  onClick={() => openComments(post)}
+                  sx={{px: 1, ml: 0.5, fontWeight: 500, fontSize: '1rem',
+                    background: darkMode 
+                      ? 'rgba(30, 30, 30, 0.85)' 
+                      : 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: darkMode 
+                      ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+                      : '0 8px 32px rgba(0, 0, 0, 0.1)', 
+                    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                    height: '28px', minWidth: 'fit-content',
+                    // flexShrink: 0,
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  }}
+                />
+                </Box>
+              {/* </Grid2> */}
+              </Box>
               <Box sx={{borderRadius:'8px', ...getGlassmorphismStyle(theme, darkMode), mt: '4px'}}> {/* bgcolor: '#f5f5f5', */}
                 <Typography variant="body1" color="textSecondary" style={{
                   // marginTop: '0.5rem',
