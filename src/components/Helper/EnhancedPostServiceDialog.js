@@ -402,18 +402,80 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       if (editingProduct.pricing) {
         switch (editingProduct.pricing.type) {
           case 'parking':
-            setParkingPricing(editingProduct.pricing.parking || {
-              vehicleTypes: [
-                { name: 'Car', price: '', duration: 'per hour', description: '' },
-                { name: 'Motorcycle', price: '', duration: 'per hour', description: '' },
-                { name: 'Truck', price: '', duration: 'per hour', description: '' }
-              ],
-              hourlyRate: '',
-              dailyRate: '',
-              monthlyRate: '',
-              minDuration: '',
-              maxDuration: ''
-            });
+            const parkingPricingData = editingProduct.pricing.parking;
+      
+            // if (parkingPricingData.vehicleTypes && parkingPricingData.vehicleTypes.length > 0) {
+            //   setParkingVehicleTypes(parkingPricingData.vehicleTypes);
+            // } else {
+            //   // Convert legacy parking data to new format
+            //   const vehicleTypes = [];
+              
+            //   // Add predefined vehicle types if they have rates
+            //   if (parkingPricingData.hourlyRate || parkingPricingData.dailyRate || parkingPricingData.monthlyRate) {
+            //     vehicleTypes.push({
+            //       type: 'Car',
+            //       hourlyRate: parkingPricingData.hourlyRate || '',
+            //       dailyRate: parkingPricingData.dailyRate || '',
+            //       weeklyRate: parkingPricingData.weeklyRate || '',
+            //       monthlyRate: parkingPricingData.monthlyRate || '',
+            //       slotsAvailable: parkingPricingData.capacity || '',
+            //       description: ''
+            //     });
+            //   }
+              
+            //   setParkingVehicleTypes(vehicleTypes.length > 0 ? vehicleTypes : [
+            //     {
+            //       type: 'Car',
+            //       hourlyRate: '',
+            //       dailyRate: '',
+            //       weeklyRate: '',
+            //       monthlyRate: '',
+            //       slotsAvailable: '',
+            //       description: ''
+            //     }
+            //   ]);
+            // }
+      
+            if (parkingPricingData.vehicleTypes && parkingPricingData.vehicleTypes.length > 0) {
+              // Use the new vehicleTypes array if available
+              const formattedVehicleTypes = parkingPricingData.vehicleTypes.map(vehicle => {
+                // Check if this is a custom vehicle type (not in predefined list)
+                const predefinedTypes = [
+                  'Car', 'Motorcycle', 'Scooter', 'Bike', 'SUV', 'Truck', 
+                  'Van', 'Bus', 'Electric Vehicle'
+                ];
+                
+                if (!predefinedTypes.includes(vehicle.type)) {
+                  return {
+                    ...vehicle,
+                    type: 'custom',
+                    customType: vehicle.type
+                  };
+                }
+                return vehicle;
+              });
+              
+              setParkingVehicleTypes(formattedVehicleTypes);
+            } else if (parkingPricingData.vehicleType) {
+              // Convert legacy single vehicle type to array format
+              const predefinedTypes = [
+                'Car', 'Motorcycle', 'Scooter', 'Bike', 'SUV', 'Truck', 
+                'Van', 'Bus', 'Electric Vehicle'
+              ];
+              
+              const isCustomType = !predefinedTypes.includes(parkingPricingData.vehicleType);
+              
+              setParkingVehicleTypes([{
+                type: isCustomType ? 'custom' : parkingPricingData.vehicleType,
+                customType: isCustomType ? parkingPricingData.vehicleType : '',
+                hourlyRate: parkingPricingData.hourlyRate || '',
+                dailyRate: parkingPricingData.dailyRate || '',
+                weeklyRate: parkingPricingData.weeklyRate || '',
+                monthlyRate: parkingPricingData.monthlyRate || '',
+                slotsAvailable: parkingPricingData.slotsAvailable || '',
+                description: parkingPricingData.description || ''
+              }]);
+            }
             setPricingType('parking');
             break;
           
@@ -459,6 +521,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 dailyRate: pricingData.dailyRate || '',
                 weeklyRate: pricingData.weeklyRate || '',
                 monthlyRate: pricingData.monthlyRate || '',
+                description: pricingData.description || '',
                 fuelIncluded: pricingData.fuelIncluded || false,
                 insuranceIncluded: pricingData.insuranceIncluded || false
               }]);
@@ -507,18 +570,18 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         isAlwaysAvailable: false
       });
       setSelectedFeatures([]);
-      setParkingPricing({
-        vehicleTypes: [
-          { name: 'Car', price: '', duration: 'per hour', description: '' },
-          { name: 'Motorcycle', price: '', duration: 'per hour', description: '' },
-          { name: 'Truck', price: '', duration: 'per hour', description: '' }
-        ],
-        hourlyRate: '',
-        dailyRate: '',
-        monthlyRate: '',
-        minDuration: '',
-        maxDuration: ''
-      });
+      setParkingVehicleTypes([
+        {
+          type: 'Car',
+          customType: '',
+          hourlyRate: '',
+          dailyRate: '',
+          weeklyRate: '',
+          monthlyRate: '',
+          slotsAvailable: '',
+          description: ''
+        }
+      ]);
       setVehicleTypes([
         {
           type: 'Sedan',
@@ -528,6 +591,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           dailyRate: '',
           weeklyRate: '',
           monthlyRate: '',
+          description: '',
           fuelIncluded: false,
           insuranceIncluded: false
         }
@@ -993,7 +1057,30 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         case 'ParkingSpace':
           pricingData = {
             type: 'parking',
-            parking: parkingPricing
+            parking: {
+              vehicleTypes: parkingVehicleTypes.map(vehicle => {
+                // Use custom type if specified, otherwise use the selected type
+                const finalVehicleType = vehicle.type === 'custom' && vehicle.customType 
+                  ? vehicle.customType 
+                  : vehicle.type;
+                
+                return {
+                  type: finalVehicleType,
+                  hourlyRate: Number(vehicle.hourlyRate) || undefined,
+                  dailyRate: Number(vehicle.dailyRate) || undefined,
+                  weeklyRate: Number(vehicle.weeklyRate) || undefined,
+                  monthlyRate: Number(vehicle.monthlyRate) || undefined,
+                  slotsAvailable: Number(vehicle.slotsAvailable) || undefined,
+                  description: vehicle.description || ''
+                };
+              }),
+              // minDuration: Number(parkingPricing.minDuration) || 1,
+              // maxDuration: Number(parkingPricing.maxDuration) || 24,
+              // // Legacy fields for backward compatibility
+              // hourlyRate: parkingVehicleTypes[0]?.hourlyRate || 0,
+              // dailyRate: parkingVehicleTypes[0]?.dailyRate || 0,
+              // monthlyRate: parkingVehicleTypes[0]?.monthlyRate || 0
+            }
           };
           break;
         case 'VehicleRental':
@@ -1013,6 +1100,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   dailyRate: Number(vehicle.dailyRate) || undefined,
                   weeklyRate: Number(vehicle.weeklyRate) || undefined,
                   monthlyRate: Number(vehicle.monthlyRate) || undefined,
+                  description: vehicle.description || '',
                   fuelIncluded: vehicle.fuelIncluded,
                   insuranceIncluded: vehicle.insuranceIncluded
                 };
@@ -2490,12 +2578,37 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       <strong>Service Type:</strong> {formData.serviceType || 'Not selected'}
                     </Typography>
                     {formData.serviceType === 'ParkingSpace' ? (
-                      <Typography variant="body2">
-                        <strong>Vehicle Rates:</strong>{' '}
-                        {parkingPricing.vehicleTypes.map(vehicle => 
-                          `${vehicle.name}: ₹${vehicle.price} ${vehicle.duration}`
-                        ).join(', ')}
-                      </Typography>
+                      // <Typography variant="body2">
+                      //   <strong>Vehicle Rates:</strong>{' '}
+                      //   {parkingPricing.vehicleTypes.map(vehicle => 
+                      //     `${vehicle.name}: ₹${vehicle.price} ${vehicle.duration}`
+                      //   ).join(', ')}
+                      // </Typography>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>
+                          Parking Rates:
+                        </Typography>
+                        {parkingVehicleTypes.map((vehicle, index) => {
+                          const displayType = vehicle.type === 'custom' && vehicle.customType 
+                            ? vehicle.customType 
+                            : vehicle.type;
+                          
+                          return (
+                            <Typography key={index} variant="body2" sx={{ ml: 2 }}>
+                              • {displayType}: ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day
+                              {vehicle.weeklyRate && `, ₹${vehicle.weeklyRate}/week`}
+                              {vehicle.monthlyRate && `, ₹${vehicle.monthlyRate}/month`}
+                              {vehicle.slotsAvailable && ` (${vehicle.slotsAvailable} slots available)`}
+                              {vehicle.description && ` - ${vehicle.description}`}
+                            </Typography>
+                          );
+                        })}
+                        {/* {parkingPricing.minDuration && (
+                          <Typography variant="body2" sx={{ ml: 2, mt: 1 }}>
+                            Min duration: {parkingPricing.minDuration} hours, Max duration: {parkingPricing.maxDuration} hours
+                          </Typography>
+                        )} */}
+                      </Box>
                       ) : formData.serviceType === 'VehicleRental' ? (
                       // <Typography variant="body2">
                       //   <strong>Rental Rates:</strong>{' '}
@@ -2515,9 +2628,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                             
                             return (
                               <Typography key={index} variant="body2" sx={{ ml: 2 }}>
-                                • {displayType}: total {vehicle.quantity}, ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day
+                                • {displayType}: ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day
                                 {vehicle.weeklyRate && `, ₹${vehicle.weeklyRate}/week`}
                                 {vehicle.monthlyRate && `, ₹${vehicle.monthlyRate}/month`}
+                                {vehicle.quantity && ` (${vehicle.quantity} vehicles available)`}
+                                {vehicle.description && ` - ${vehicle.description}`}
                                 {vehicle.fuelIncluded && ' (Fuel Included)'}
                                 {vehicle.insuranceIncluded && ' (Insurance Included)'}
                               </Typography>
@@ -2771,18 +2886,45 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     );
 
     const [pricingType, setPricingType] = useState('simple');
-    const [parkingPricing, setParkingPricing] = useState({
-      vehicleTypes: [
-        { name: 'Car', price: '', duration: 'per hour', description: '' },
-        { name: 'Motorcycle', price: '', duration: 'per hour', description: '' },
-        { name: 'Truck', price: '', duration: 'per hour', description: '' }
-      ],
-      hourlyRate: '',
-      dailyRate: '',
-      monthlyRate: '',
-      minDuration: '',
-      maxDuration: ''
-    });
+    const [parkingVehicleTypes, setParkingVehicleTypes] = useState([
+      {
+        type: 'Car',
+        hourlyRate: '',
+        dailyRate: '',
+        weeklyRate: '',
+        monthlyRate: '',
+        slotsAvailable: '',
+        description: ''
+      }
+    ]);
+
+    // Add these handler functions for parking pricing
+    const addParkingVehicleType = () => {
+      setParkingVehicleTypes([
+        ...parkingVehicleTypes,
+        {
+          type: 'Car',
+          hourlyRate: '',
+          dailyRate: '',
+          weeklyRate: '',
+          monthlyRate: '',
+          slotsAvailable: '',
+          description: ''
+        }
+      ]);
+    };
+
+    const removeParkingVehicleType = (index) => {
+      if (parkingVehicleTypes.length > 1) {
+        setParkingVehicleTypes(parkingVehicleTypes.filter((_, i) => i !== index));
+      }
+    };
+
+    const updateParkingVehicleType = (index, field, value) => {
+      const updatedVehicleTypes = [...parkingVehicleTypes];
+      updatedVehicleTypes[index][field] = value;
+      setParkingVehicleTypes(updatedVehicleTypes);
+    };
 
     const [vehicleTypes, setVehicleTypes] = useState([{
       vehicleType: 'Sedan',
@@ -2791,6 +2933,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       dailyRate: '',
       weeklyRate: '',
       monthlyRate: '',
+      description: '',
       fuelIncluded: false,
       insuranceIncluded: false
     }]);
@@ -2807,6 +2950,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           dailyRate: '',
           weeklyRate: '',
           monthlyRate: '',
+          description: '',
           fuelIncluded: false,
           insuranceIncluded: false
         }
@@ -2859,90 +3003,202 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             </Typography>
           </Box>
 
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle1" gutterBottom>
-              Vehicle Type Pricing
-            </Typography>
-            {parkingPricing.vehicleTypes.map((vehicle, index) => (
-              <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
-                <TextField
-                  label="Vehicle Type"
-                  value={vehicle.name}
-                  onChange={(e) => {
-                    const newVehicleTypes = [...parkingPricing.vehicleTypes];
-                    newVehicleTypes[index].name = e.target.value;
-                    setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
+          {parkingVehicleTypes.map((vehicle, index) => (
+            <Box key={index} sx={{ 
+              p: 2, 
+              mb: 2, 
+              border: '1px solid rgba(0, 0, 0, 0.1)', 
+              borderRadius: 2,
+              position: 'relative'
+            }}>
+              {parkingVehicleTypes.length > 1 && (
+                <IconButton
+                  size="small"
+                  onClick={() => removeParkingVehicleType(index)}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'error.dark' }
                   }}
-                  sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
-                <TextField
-                  label="Price"
-                  type="number"
-                  value={vehicle.price}
-                  onChange={(e) => {
-                    const newVehicleTypes = [...parkingPricing.vehicleTypes];
-                    newVehicleTypes[index].price = e.target.value;
-                    setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
-                  }}
-                  sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  InputProps={{
-                    startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                  }}
-                />
-                <FormControl sx={{ flex: 1 }}>
-                  <InputLabel>Duration</InputLabel>
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
+
+              <Typography variant="subtitle1" gutterBottom>
+                Vehicle Type {index + 1}
+              </Typography>
+
+              <Box sx={{ mb: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Vehicle Type</InputLabel>
                   <Select
-                    value={vehicle.duration}
-                    onChange={(e) => {
-                      const newVehicleTypes = [...parkingPricing.vehicleTypes];
-                      newVehicleTypes[index].duration = e.target.value;
-                      setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
-                    }}
-                    label="Duration"
+                    value={vehicle.type}
+                    onChange={(e) => updateParkingVehicleType(index, 'type', e.target.value)}
+                    label="Vehicle Type"
                     sx={{ borderRadius: 2 }}
                   >
-                    <MenuItem value="per hour">Per Hour</MenuItem>
-                    <MenuItem value="per day">Per Day</MenuItem>
-                    <MenuItem value="per month">Per Month</MenuItem>
+                    <MenuItem value="Car">Car</MenuItem>
+                    <MenuItem value="Motorcycle">Motorcycle</MenuItem>
+                    <MenuItem value="Scooter">Scooter</MenuItem>
+                    <MenuItem value="Bike">Bike</MenuItem>
+                    <MenuItem value="SUV">SUV</MenuItem>
+                    <MenuItem value="Truck">Truck</MenuItem>
+                    <MenuItem value="Van">Van</MenuItem>
+                    <MenuItem value="Bus">Bus</MenuItem>
+                    <MenuItem value="Electric Vehicle">Electric Vehicle</MenuItem>
+                    <MenuItem value="custom">Custom Vehicle Type...</MenuItem>
                   </Select>
                 </FormControl>
-                <TextField
-                  label="Description"
-                  value={vehicle.description}
-                  onChange={(e) => {
-                    const newVehicleTypes = [...parkingPricing.vehicleTypes];
-                    newVehicleTypes[index].description = e.target.value;
-                    setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
-                  }}
-                  sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
+                
+                {/* Show custom input field when "Custom Vehicle Type..." is selected */}
+                {vehicle.type === 'custom' && (
+                  <TextField
+                    fullWidth
+                    label="Custom Vehicle Type Name"
+                    value={vehicle.customType || ''}
+                    onChange={(e) => updateParkingVehicleType(index, 'customType', e.target.value)}
+                    sx={{ mt: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    placeholder="Enter your custom vehicle type name"
+                  />
+                )}
               </Box>
-            ))}
-          </Box>
 
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            <TextField
-              label="Hourly Rate"
-              type="number"
-              value={parkingPricing.hourlyRate}
-              onChange={(e) => setParkingPricing({ ...parkingPricing, hourlyRate: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Daily Rate"
-              type="number"
-              value={parkingPricing.dailyRate}
-              onChange={(e) => setParkingPricing({ ...parkingPricing, dailyRate: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Monthly Rate"
-              type="number"
-              value={parkingPricing.monthlyRate}
-              onChange={(e) => setParkingPricing({ ...parkingPricing, monthlyRate: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-          </Box>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    label="Hourly Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.hourlyRate}
+                    onChange={(e) => updateParkingVehicleType(index, 'hourlyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                      inputProps: { min: 0 }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    label="Daily Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.dailyRate}
+                    onChange={(e) => updateParkingVehicleType(index, 'dailyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                      inputProps: { min: 0 }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    label="Weekly Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.weeklyRate}
+                    onChange={(e) => updateParkingVehicleType(index, 'weeklyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                      inputProps: { min: 0 }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <TextField
+                    label="Monthly Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.monthlyRate}
+                    onChange={(e) => updateParkingVehicleType(index, 'monthlyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                      inputProps: { min: 0 }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Slots Available"
+                    type="number"
+                    fullWidth
+                    value={vehicle.slotsAvailable}
+                    onChange={(e) => updateParkingVehicleType(index, 'slotsAvailable', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      inputProps: { min: 1, max: 1000 }
+                    }}
+                    helperText="Number of parking slots available for this vehicle type"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Description (Optional)"
+                    fullWidth
+                    value={vehicle.description}
+                    onChange={(e) => updateParkingVehicleType(index, 'description', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    placeholder="e.g., Covered parking, EV charging, etc."
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          ))}
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={addParkingVehicleType}
+            sx={{ borderRadius: 2, textTransform: 'none' }}
+          >
+            Add Another Vehicle Type
+          </Button>
+
+          {/* Additional parking settings */}
+          {/* <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Additional Parking Settings
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Min Parking Duration (hours)"
+                  type="number"
+                  fullWidth
+                  value={parkingPricing.minDuration}
+                  onChange={(e) => setParkingPricing({ ...parkingPricing, minDuration: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  InputProps={{
+                    inputProps: { min: 1, max: 24 }
+                  }}
+                  helperText="Minimum parking duration in hours"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Max Parking Duration (hours)"
+                  type="number"
+                  fullWidth
+                  value={parkingPricing.maxDuration}
+                  onChange={(e) => setParkingPricing({ ...parkingPricing, maxDuration: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  InputProps={{
+                    inputProps: { min: 1, max: 744 } // 31 days
+                  }}
+                  helperText="Maximum parking duration in hours"
+                />
+              </Grid>
+            </Grid>
+          </Box> */}
         </CardContent>
       </Card>
     );
@@ -2989,48 +3245,31 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               </Typography>
 
               <Box sx={{ mb: 2 }}>
-                <Grid container spacing={2} sx={{ mb: 2 }}>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth >
-                      <InputLabel>Vehicle Type</InputLabel>
-                      <Select
-                        value={vehicle.type}
-                        onChange={(e) => updateVehicleType(index, 'type', e.target.value)}
-                        label="Vehicle Type"
-                        sx={{ borderRadius: 2 }}
-                      >
-                        <MenuItem value="Sedan">Sedan</MenuItem>
-                        <MenuItem value="SUV">SUV</MenuItem>
-                        <MenuItem value="Hatchback">Hatchback</MenuItem>
-                        <MenuItem value="Bike">Bike</MenuItem>
-                        <MenuItem value="Scooter">Scooter</MenuItem>
-                        <MenuItem value="Truck">Truck</MenuItem>
-                        <MenuItem value="Luxury">Luxury</MenuItem>
-                        <MenuItem value="Van">Van</MenuItem>
-                        <MenuItem value="Convertible">Convertible</MenuItem>
-                        <MenuItem value="Minivan">Minivan</MenuItem>
-                        <MenuItem value="Pickup Truck">Pickup Truck</MenuItem>
-                        <MenuItem value="Sports Car">Sports Car</MenuItem>
-                        <MenuItem value="Electric Vehicle">Electric Vehicle</MenuItem>
-                        <MenuItem value="Hybrid">Hybrid</MenuItem>
-                        <MenuItem value="custom">Custom Vehicle Type...</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="No.of Vehicles"
-                      type="number"
-                      fullWidth
-                      value={vehicle.quantity}
-                      onChange={(e) => updateVehicleType(index, 'quantity', e.target.value)}
-                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      // InputProps={{
-                      //   startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
-                      // }}
-                    />
-                  </Grid>
-                </Grid>
+                <FormControl fullWidth >
+                  <InputLabel>Vehicle Type</InputLabel>
+                  <Select
+                    value={vehicle.type}
+                    onChange={(e) => updateVehicleType(index, 'type', e.target.value)}
+                    label="Vehicle Type"
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="Sedan">Sedan</MenuItem>
+                    <MenuItem value="SUV">SUV</MenuItem>
+                    <MenuItem value="Hatchback">Hatchback</MenuItem>
+                    <MenuItem value="Bike">Bike</MenuItem>
+                    <MenuItem value="Scooter">Scooter</MenuItem>
+                    <MenuItem value="Truck">Truck</MenuItem>
+                    <MenuItem value="Luxury">Luxury</MenuItem>
+                    <MenuItem value="Van">Van</MenuItem>
+                    <MenuItem value="Convertible">Convertible</MenuItem>
+                    <MenuItem value="Minivan">Minivan</MenuItem>
+                    <MenuItem value="Pickup Truck">Pickup Truck</MenuItem>
+                    <MenuItem value="Sports Car">Sports Car</MenuItem>
+                    <MenuItem value="Electric Vehicle">Electric Vehicle</MenuItem>
+                    <MenuItem value="Hybrid">Hybrid</MenuItem>
+                    <MenuItem value="custom">Custom Vehicle Type...</MenuItem>
+                  </Select>
+                </FormControl>
                 {/* Show custom input field when "Custom Vehicle Type..." is selected */}
                 {vehicle.type === 'custom' && (
                   <TextField
@@ -3095,6 +3334,32 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     InputProps={{
                       startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
                     }}
+                  />
+                </Grid>
+              </Grid>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="No.of Vehicles available"
+                    type="number"
+                    fullWidth
+                    value={vehicle.quantity}
+                    onChange={(e) => updateVehicleType(index, 'quantity', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      inputProps: { min: 1, max: 1000 }
+                    }}
+                    helperText="Number of vehicles available for this vehicle type"
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Description (Optional)"
+                    fullWidth
+                    value={vehicle.description}
+                    onChange={(e) => updateVehicleType(index, 'description', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    placeholder="e.g., Driving Licence must, Minimun 2000 cash deposit, etc."
                   />
                 </Grid>
               </Grid>
