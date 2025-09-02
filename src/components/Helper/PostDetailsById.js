@@ -483,6 +483,174 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   //   );
   // }
 
+  // Service Details Component
+  const ServiceDetailsSection = ({ post, darkMode, theme }) => {
+    if (post.postType !== 'ServiceOffering') return null;
+
+    const getGlassmorphismStyle = (theme, darkMode) => ({
+      background: darkMode 
+        ? 'rgba(30, 30, 30, 0.85)' 
+        : 'rgba(255, 255, 255, 0.15)',
+      backdropFilter: 'blur(20px)',
+      boxShadow: darkMode 
+        ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+        : '0 8px 32px rgba(0, 0, 0, 0.1)',
+    });
+
+    const renderParkingDetails = () => (
+      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
+        <Typography variant="h6" gutterBottom>
+          Parking Space Details
+        </Typography>
+        {post.pricingDetails?.parking?.vehicleTypes?.map((vehicle, index) => (
+          <Box key={index} sx={{ mb: 2, p: 1, bgcolor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', borderRadius: '4px' }}>
+            <Typography variant="body1" fontWeight="bold">{vehicle.name}</Typography>
+            <Typography variant="body2">Price: ₹{vehicle.price} {vehicle.currency} {vehicle.duration}</Typography>
+            {vehicle.description && <Typography variant="body2">Description: {vehicle.description}</Typography>}
+          </Box>
+        ))}
+        {post.pricingDetails?.parking?.hourlyRate && (
+          <Typography variant="body2">Hourly Rate: ₹{post.pricingDetails.parking.hourlyRate}</Typography>
+        )}
+        {post.pricingDetails?.parking?.dailyRate && (
+          <Typography variant="body2">Daily Rate: ₹{post.pricingDetails.parking.dailyRate}</Typography>
+        )}
+        {post.pricingDetails?.parking?.monthlyRate && (
+          <Typography variant="body2">Monthly Rate: ₹{post.pricingDetails.parking.monthlyRate}</Typography>
+        )}
+        {post.capacity && <Typography variant="body2">Available Slots: {post.capacity}</Typography>}
+      </Box>
+    );
+
+    const renderVehicleRentalDetails = () => (
+      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
+        <Typography variant="h6" gutterBottom>
+          Vehicle Rental Details
+        </Typography>
+        {post.pricingDetails?.vehicleRental && (
+          <>
+            <Typography variant="body1" fontWeight="bold">{post.pricingDetails.vehicleRental.vehicleType}</Typography>
+            {post.pricingDetails.vehicleRental.hourlyRate && (
+              <Typography variant="body2">Hourly: ₹{post.pricingDetails.vehicleRental.hourlyRate}</Typography>
+            )}
+            {post.pricingDetails.vehicleRental.dailyRate && (
+              <Typography variant="body2">Daily: ₹{post.pricingDetails.vehicleRental.dailyRate}</Typography>
+            )}
+            {post.pricingDetails.vehicleRental.weeklyRate && (
+              <Typography variant="body2">Weekly: ₹{post.pricingDetails.vehicleRental.weeklyRate}</Typography>
+            )}
+            {post.pricingDetails.vehicleRental.monthlyRate && (
+              <Typography variant="body2">Monthly: ₹{post.pricingDetails.vehicleRental.monthlyRate}</Typography>
+            )}
+            <Typography variant="body2">
+              Fuel Included: {post.pricingDetails.vehicleRental.fuelIncluded ? 'Yes' : 'No'}
+            </Typography>
+            <Typography variant="body2">
+              Insurance Included: {post.pricingDetails.vehicleRental.insuranceIncluded ? 'Yes' : 'No'}
+            </Typography>
+          </>
+        )}
+        {post.capacity && <Typography variant="body2">Available Vehicles: {post.capacity}</Typography>}
+      </Box>
+    );
+
+    const renderServiceDetails = () => (
+      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
+        <Typography variant="h6" gutterBottom>
+          Service Details
+        </Typography>
+        {post.pricingDetails?.service && (
+          <>
+            <Typography variant="body2">
+              Base Price: ₹{post.pricingDetails.service.basePrice}
+            </Typography>
+            <Typography variant="body2">
+              Pricing Model: {post.pricingDetails.service.pricingModel}
+            </Typography>
+            {post.pricingDetails.service.additionalCharges?.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" fontWeight="bold">Additional Charges:</Typography>
+                {post.pricingDetails.service.additionalCharges.map((charge, index) => (
+                  <Typography key={index} variant="body2">
+                    {charge.name}: ₹{charge.price} {charge.description && `- ${charge.description}`}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+          </>
+        )}
+      </Box>
+    );
+
+    const renderAvailability = () => (
+      <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
+        <Typography variant="h6" gutterBottom>
+          Availability
+        </Typography>
+        {post.availability?.isAlwaysAvailable ? (
+          <Typography variant="body2">Always Available</Typography>
+        ) : (
+          <>
+            {post.availability?.days && post.availability.days.length > 0 && (
+              <Typography variant="body2">
+                Days: {post.availability.days.join(', ')}
+              </Typography>
+            )}
+            {post.availability?.timeSlots && post.availability.timeSlots.length > 0 && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" fontWeight="bold">Time Slots:</Typography>
+                {post.availability.timeSlots.map((slot, index) => (
+                  <Typography key={index} variant="body2">
+                    {slot.day}: {slot.from} - {slot.to}
+                  </Typography>
+                ))}
+              </Box>
+            )}
+          </>
+        )}
+      </Box>
+    );
+
+    const renderServiceFeatures = () => (
+      post.serviceFeatures && post.serviceFeatures.length > 0 && (
+        <Box sx={{ p: 2, borderRadius: '8px', ...getGlassmorphismStyle(theme, darkMode), mt: 1 }}>
+          <Typography variant="h6" gutterBottom>
+            Service Features
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {post.serviceFeatures.map((feature, index) => (
+              <Box
+                key={index}
+                sx={{
+                  px: 2,
+                  py: 1,
+                  bgcolor: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                  borderRadius: '16px',
+                  fontSize: '0.875rem'
+                }}
+              >
+                {feature}
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      )
+    );
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        {/* Service Type Specific Details */}
+        {post.serviceType === 'ParkingSpace' && renderParkingDetails()}
+        {post.serviceType === 'VehicleRental' && renderVehicleRentalDetails()}
+        {post.serviceType !== 'ParkingSpace' && post.serviceType !== 'VehicleRental' && renderServiceDetails()}
+        
+        {/* Common Service Details */}
+        {renderAvailability()}
+        {renderServiceFeatures()}
+      </Box>
+    );
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box>
@@ -658,41 +826,37 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                           {post.postStatus}
                         </Typography>
                       </Grid>
-                      <Grid item xs={6} sm={4}>
-                        <Typography variant="body1" style={{ fontWeight: 500 }}>
-                          Price:
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary" >
-                          ₹{post.price}
-                        </Typography>
-                      </Grid>
-                      {/* <Grid item xs={6} sm={4}>
-                      <Typography variant="body1" style={{ fontWeight: 500 }}>
-                        Post Status: 
-                      </Typography>
-                      <Typography variant="body2" color={post.postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block', marginBottom: '0.5rem' }}>
-                        {post.postStatus}
-                      </Typography>
-                    </Grid> */}
-                      <Grid item xs={12} sm={6}>
-                        <Typography variant="body1" style={{ fontWeight: 500 }}>
-                          Service Required on:
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Date: {new Date(post.serviceDate).toLocaleDateString()} (for {post.serviceDays} day's)
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          Time: {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6} sm={4}>
-                        <Typography variant="body1" style={{ fontWeight: 500 }}>
-                          People Required:
-                        </Typography>
-                        <Typography variant="body2" color="textSecondary">
-                          {post.peopleCount} ({post.gender})
-                        </Typography>
-                      </Grid>
+                      {post.postType === 'HelpRequest' && (
+                        <>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Price:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary" >
+                            ₹{post.price}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            Service Required on:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Date: {new Date(post.serviceDate).toLocaleDateString()} (for {post.serviceDays} day's)
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            Time: {new Date(post.timeFrom).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(post.timeTo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={4}>
+                          <Typography variant="body1" style={{ fontWeight: 500 }}>
+                            People Required:
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary">
+                            {post.peopleCount} ({post.gender})
+                          </Typography>
+                        </Grid>
+                        </>
+                      )}
                       {/* <Grid item xs={12} sm={6}>
                       <Typography variant="body1" style={{ fontWeight: 500 }}>
                         Service required on time: 
@@ -802,6 +966,9 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
 
                 </Box>
             </Box>
+
+            {/* Service Details section */}
+            <ServiceDetailsSection post={post} darkMode={darkMode} theme={theme} />
 
             <Grid item xs={12} sx={{ mt: '1rem' }}>
               <Grid2 sx={{
