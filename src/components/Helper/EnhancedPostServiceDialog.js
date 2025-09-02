@@ -418,15 +418,51 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             break;
           
           case 'vehicle_rental':
-            setVehicleRentalPricing(editingProduct.pricing.vehicleRental || {
-              vehicleType: 'Sedan',
-              hourlyRate: '',
-              dailyRate: '',
-              weeklyRate: '',
-              monthlyRate: '',
-              fuelIncluded: false,
-              insuranceIncluded: false
-            });
+            const pricingData = editingProduct.pricing.vehicleRental;
+      
+            if (pricingData.vehicleTypes && pricingData.vehicleTypes.length > 0) {
+              // Use the new vehicleTypes array if available
+              const formattedVehicleTypes = pricingData.vehicleTypes.map(vehicle => {
+                // Check if this is a custom vehicle type (not in predefined list)
+                const predefinedTypes = [
+                  'Sedan', 'SUV', 'Hatchback', 'Bike', 'Scooter', 'Truck', 
+                  'Luxury', 'Van', 'Convertible', 'Minivan', 'Pickup Truck', 
+                  'Sports Car', 'Electric Vehicle', 'Hybrid'
+                ];
+                
+                if (!predefinedTypes.includes(vehicle.type)) {
+                  return {
+                    ...vehicle,
+                    type: 'custom',
+                    customType: vehicle.type
+                  };
+                }
+                return vehicle;
+              });
+              
+              setVehicleTypes(formattedVehicleTypes);
+            } else if (pricingData.vehicleType) {
+              // Convert legacy single vehicle type to array format
+              const predefinedTypes = [
+                'Sedan', 'SUV', 'Hatchback', 'Bike', 'Scooter', 'Truck', 
+                'Luxury', 'Van', 'Convertible', 'Minivan', 'Pickup Truck', 
+                'Sports Car', 'Electric Vehicle', 'Hybrid'
+              ];
+              
+              const isCustomType = !predefinedTypes.includes(pricingData.vehicleType);
+              
+              setVehicleTypes([{
+                type: isCustomType ? 'custom' : pricingData.vehicleType,
+                customType: isCustomType ? pricingData.vehicleType : '',
+                quantity: pricingData.quantity || '',
+                hourlyRate: pricingData.hourlyRate || '',
+                dailyRate: pricingData.dailyRate || '',
+                weeklyRate: pricingData.weeklyRate || '',
+                monthlyRate: pricingData.monthlyRate || '',
+                fuelIncluded: pricingData.fuelIncluded || false,
+                insuranceIncluded: pricingData.insuranceIncluded || false
+              }]);
+            }
             setPricingType('vehicle_rental');
             break;
           
@@ -483,15 +519,19 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         minDuration: '',
         maxDuration: ''
       });
-      setVehicleRentalPricing({
-        vehicleType: 'Sedan',
-        hourlyRate: '',
-        dailyRate: '',
-        weeklyRate: '',
-        monthlyRate: '',
-        fuelIncluded: false,
-        insuranceIncluded: false
-      });
+      setVehicleTypes([
+        {
+          type: 'Sedan',
+          customType: '',
+          quantity: '',
+          hourlyRate: '',
+          dailyRate: '',
+          weeklyRate: '',
+          monthlyRate: '',
+          fuelIncluded: false,
+          insuranceIncluded: false
+        }
+      ]);
       setServicePricing({
         basePrice: '',
         pricingModel: 'fixed',
@@ -959,7 +999,25 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         case 'VehicleRental':
           pricingData = {
             type: 'vehicle_rental',
-            vehicleRental: vehicleRentalPricing
+            vehicleRental: {
+              vehicleTypes: vehicleTypes.map(vehicle => {
+                // Use custom type if specified, otherwise use the selected type
+                const finalVehicleType = vehicle.type === 'custom' && vehicle.customType 
+                  ? vehicle.customType 
+                  : vehicle.type;
+                
+                return {
+                  type: finalVehicleType,
+                  quantity: Number(vehicle.quantity) || undefined,
+                  hourlyRate: Number(vehicle.hourlyRate) || undefined,
+                  dailyRate: Number(vehicle.dailyRate) || undefined,
+                  weeklyRate: Number(vehicle.weeklyRate) || undefined,
+                  monthlyRate: Number(vehicle.monthlyRate) || undefined,
+                  fuelIncluded: vehicle.fuelIncluded,
+                  insuranceIncluded: vehicle.insuranceIncluded
+                };
+              })
+            }
           };
           break;
         default:
@@ -2439,12 +2497,34 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                         ).join(', ')}
                       </Typography>
                       ) : formData.serviceType === 'VehicleRental' ? (
-                      <Typography variant="body2">
-                        <strong>Rental Rates:</strong>{' '}
-                        {`Hourly: ₹${vehicleRentalPricing.hourlyRate}, Daily: ₹${vehicleRentalPricing.dailyRate}, Weekly: ₹${vehicleRentalPricing.weeklyRate}`}
-                        {vehicleRentalPricing.fuelIncluded && ', Fuel Included'}
-                        {vehicleRentalPricing.insuranceIncluded && ', Insurance Included'}
-                      </Typography>
+                      // <Typography variant="body2">
+                      //   <strong>Rental Rates:</strong>{' '}
+                      //   {`Hourly: ₹${vehicleRentalPricing.hourlyRate}, Daily: ₹${vehicleRentalPricing.dailyRate}, Weekly: ₹${vehicleRentalPricing.weeklyRate}, Monthly: ₹${vehicleRentalPricing.monthlyRate}`}
+                      //   {vehicleRentalPricing.fuelIncluded && ', Fuel Included'}
+                      //   {vehicleRentalPricing.insuranceIncluded && ', Insurance Included'}
+                      // </Typography>
+                      // {vehicleTypes.length > 0 && (
+                        <Box>
+                          <Typography variant="body2" fontWeight={600}>
+                            Vehicle Rental Rates:
+                          </Typography>
+                          {vehicleTypes.map((vehicle, index) => {
+                            const displayType = vehicle.type === 'custom' && vehicle.customType 
+                              ? vehicle.customType 
+                              : vehicle.type;
+                            
+                            return (
+                              <Typography key={index} variant="body2" sx={{ ml: 2 }}>
+                                • {displayType}: total {vehicle.quantity}, ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day
+                                {vehicle.weeklyRate && `, ₹${vehicle.weeklyRate}/week`}
+                                {vehicle.monthlyRate && `, ₹${vehicle.monthlyRate}/month`}
+                                {vehicle.fuelIncluded && ' (Fuel Included)'}
+                                {vehicle.insuranceIncluded && ' (Insurance Included)'}
+                              </Typography>
+                            );
+                          })}
+                        </Box>
+                      // )}
                       ) : (
                       <Typography variant="body2">
                         <strong>Service Pricing:</strong>{' '}
@@ -2704,15 +2784,46 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       maxDuration: ''
     });
 
-    const [vehicleRentalPricing, setVehicleRentalPricing] = useState({
+    const [vehicleTypes, setVehicleTypes] = useState([{
       vehicleType: 'Sedan',
+      quantity: '',
       hourlyRate: '',
       dailyRate: '',
       weeklyRate: '',
       monthlyRate: '',
       fuelIncluded: false,
       insuranceIncluded: false
-    });
+    }]);
+
+    // Add these handler functions
+    const addVehicleType = () => {
+      setVehicleTypes([
+        ...vehicleTypes,
+        {
+          type: 'Sedan',
+          customType: '',
+          quantity: '',
+          hourlyRate: '',
+          dailyRate: '',
+          weeklyRate: '',
+          monthlyRate: '',
+          fuelIncluded: false,
+          insuranceIncluded: false
+        }
+      ]);
+    };
+
+    const removeVehicleType = (index) => {
+      if (vehicleTypes.length > 1) {
+        setVehicleTypes(vehicleTypes.filter((_, i) => i !== index));
+      }
+    };
+
+    const updateVehicleType = (index, field, value) => {
+      const updatedVehicleTypes = [...vehicleTypes];
+      updatedVehicleTypes[index][field] = value;
+      setVehicleTypes(updatedVehicleTypes);
+    };
 
     const [servicePricing, setServicePricing] = useState({
       basePrice: '',
@@ -2795,6 +2906,16 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     <MenuItem value="per month">Per Month</MenuItem>
                   </Select>
                 </FormControl>
+                <TextField
+                  label="Description"
+                  value={vehicle.description}
+                  onChange={(e) => {
+                    const newVehicleTypes = [...parkingPricing.vehicleTypes];
+                    newVehicleTypes[index].description = e.target.value;
+                    setParkingPricing({ ...parkingPricing, vehicleTypes: newVehicleTypes });
+                  }}
+                  sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
               </Box>
             ))}
           </Box>
@@ -2838,67 +2959,176 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             </Typography>
           </Box>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Vehicle Type</InputLabel>
-            <Select
-              value={vehicleRentalPricing.vehicleType}
-              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, vehicleType: e.target.value })}
-              label="Vehicle Type"
-              sx={{ borderRadius: 2 }}
-            >
-              <MenuItem value="Sedan">Sedan</MenuItem>
-              <MenuItem value="SUV">SUV</MenuItem>
-              <MenuItem value="Hatchback">Hatchback</MenuItem>
-              <MenuItem value="Bike">Bike</MenuItem>
-              <MenuItem value="Scooter">Scooter</MenuItem>
-              <MenuItem value="Truck">Truck</MenuItem>
-            </Select>
-          </FormControl>
+          {vehicleTypes.map((vehicle, index) => (
+            <Box key={index} sx={{ 
+              p: 2, 
+              mb: 2, 
+              border: '1px solid rgba(0, 0, 0, 0.1)', 
+              borderRadius: 2,
+              position: 'relative'
+            }}>
+              {vehicleTypes.length > 1 && (
+                <IconButton
+                  size="small"
+                  onClick={() => removeVehicleType(index)}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'error.dark' }
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
 
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-            <TextField
-              label="Hourly Rate"
-              type="number"
-              value={vehicleRentalPricing.hourlyRate}
-              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, hourlyRate: e.target.value })}
-              sx={{ flex: 1,'& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Daily Rate"
-              type="number"
-              value={vehicleRentalPricing.dailyRate}
-              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, dailyRate: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Weekly Rate"
-              type="number"
-              value={vehicleRentalPricing.weeklyRate}
-              onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, weeklyRate: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-          </Box>
+              <Typography variant="subtitle1" gutterBottom>
+                Vehicle Type {index + 1}
+              </Typography>
 
-          <FormGroup sx={{ mb: 2 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={vehicleRentalPricing.fuelIncluded}
-                  onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, fuelIncluded: e.target.checked })}
+              <Box sx={{ mb: 2 }}>
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={6}>
+                    <FormControl fullWidth >
+                      <InputLabel>Vehicle Type</InputLabel>
+                      <Select
+                        value={vehicle.type}
+                        onChange={(e) => updateVehicleType(index, 'type', e.target.value)}
+                        label="Vehicle Type"
+                        sx={{ borderRadius: 2 }}
+                      >
+                        <MenuItem value="Sedan">Sedan</MenuItem>
+                        <MenuItem value="SUV">SUV</MenuItem>
+                        <MenuItem value="Hatchback">Hatchback</MenuItem>
+                        <MenuItem value="Bike">Bike</MenuItem>
+                        <MenuItem value="Scooter">Scooter</MenuItem>
+                        <MenuItem value="Truck">Truck</MenuItem>
+                        <MenuItem value="Luxury">Luxury</MenuItem>
+                        <MenuItem value="Van">Van</MenuItem>
+                        <MenuItem value="Convertible">Convertible</MenuItem>
+                        <MenuItem value="Minivan">Minivan</MenuItem>
+                        <MenuItem value="Pickup Truck">Pickup Truck</MenuItem>
+                        <MenuItem value="Sports Car">Sports Car</MenuItem>
+                        <MenuItem value="Electric Vehicle">Electric Vehicle</MenuItem>
+                        <MenuItem value="Hybrid">Hybrid</MenuItem>
+                        <MenuItem value="custom">Custom Vehicle Type...</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="No.of Vehicles"
+                      type="number"
+                      fullWidth
+                      value={vehicle.quantity}
+                      onChange={(e) => updateVehicleType(index, 'quantity', e.target.value)}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      // InputProps={{
+                      //   startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                      // }}
+                    />
+                  </Grid>
+                </Grid>
+                {/* Show custom input field when "Custom Vehicle Type..." is selected */}
+                {vehicle.type === 'custom' && (
+                  <TextField
+                    fullWidth
+                    label="Custom Vehicle Type Name"
+                    value={vehicle.customType || ''}
+                    onChange={(e) => updateVehicleType(index, 'customType', e.target.value)}
+                    sx={{ mt: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    placeholder="Enter your custom vehicle type name"
+                  />
+                )}
+              </Box>
+
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Hourly Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.hourlyRate}
+                    onChange={(e) => updateVehicleType(index, 'hourlyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Daily Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.dailyRate}
+                    onChange={(e) => updateVehicleType(index, 'dailyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Weekly Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.weeklyRate}
+                    onChange={(e) => updateVehicleType(index, 'weeklyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Monthly Rate (₹)"
+                    type="number"
+                    fullWidth
+                    value={vehicle.monthlyRate}
+                    onChange={(e) => updateVehicleType(index, 'monthlyRate', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                    }}
+                  />
+                </Grid>
+              </Grid>
+
+              <FormGroup sx={{ mb: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={vehicle.fuelIncluded}
+                      onChange={(e) => updateVehicleType(index, 'fuelIncluded', e.target.checked)}
+                    />
+                  }
+                  label="Fuel Included"
                 />
-              }
-              label="Fuel Included"
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={vehicleRentalPricing.insuranceIncluded}
-                  onChange={(e) => setVehicleRentalPricing({ ...vehicleRentalPricing, insuranceIncluded: e.target.checked })}
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={vehicle.insuranceIncluded}
+                      onChange={(e) => updateVehicleType(index, 'insuranceIncluded', e.target.checked)}
+                    />
+                  }
+                  label="Insurance Included"
                 />
-              }
-              label="Insurance Included"
-            />
-          </FormGroup>
+              </FormGroup>
+            </Box>
+          ))}
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={addVehicleType}
+            sx={{ borderRadius: 2, alignSelf: 'center', textTransform: 'none' }}
+          >
+            Add Another Vehicle Type
+          </Button>
         </CardContent>
       </Card>
     );
