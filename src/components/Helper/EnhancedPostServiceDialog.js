@@ -2900,6 +2900,27 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     });
     const [selectedFeatures, setSelectedFeatures] = useState([]);
     const [expandedDay, setExpandedDay] = useState(null);
+    const [showCustomFeatureInput, setShowCustomFeatureInput] = useState(false);
+    const [customFeature, setCustomFeature] = useState('');
+
+    // handler functions for custom features
+    const handleAddCustomFeature = () => {
+      if (customFeature.trim()) {
+        setSelectedFeatures(prev => [...prev, customFeature.trim()]);
+        setCustomFeature('');
+        setShowCustomFeatureInput(false);
+      }
+    };
+
+    const handleCancelCustomFeature = () => {
+      setCustomFeature('');
+      setShowCustomFeatureInput(false);
+    };
+
+    // function to remove feature
+    const handleRemoveFeature = (featureToRemove) => {
+      setSelectedFeatures(prev => prev.filter(feature => feature !== featureToRemove));
+    };
 
     // Add these handler functions
     const handleDayToggle = (day) => {
@@ -3049,7 +3070,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       </Card>
     );
 
-    // Add this function to render the service features section
+    // this function to render the service features section
     const renderServiceFeaturesSection = () => (
       <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid rgba(0, 0, 0, 0.1)', mb: 3 }}>
         <CardContent>
@@ -3063,22 +3084,167 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           </Box>
 
           {formData.serviceType && SERVICE_FEATURES[formData.serviceType] ? (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-              {SERVICE_FEATURES[formData.serviceType].map(feature => (
-                <Chip
-                  key={feature}
-                  label={feature}
-                  clickable
-                  color={selectedFeatures.includes(feature) ? 'primary' : 'default'}
-                  onClick={() => handleFeatureToggle(feature)}
-                  variant={selectedFeatures.includes(feature) ? 'filled' : 'outlined'}
-                />
-              ))}
+            <Box>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Select available features for your service:
+              </Typography>
+              
+              {/* Selected Features */}
+              {selectedFeatures.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Selected Features:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                    {selectedFeatures.map(feature => (
+                      <Chip
+                        key={feature}
+                        label={feature}
+                        onDelete={() => handleRemoveFeature(feature)}
+                        color="primary"
+                        variant="filled"
+                        sx={{ 
+                          // borderRadius: 1,
+                          '& .MuiChip-deleteIcon': {
+                            color: 'white',
+                            '&:hover': {
+                              color: 'rgba(255, 255, 255, 0.8)'
+                            }
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {/* Available Features */}
+              <Typography variant="subtitle2" gutterBottom>
+                Available Features:
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                {SERVICE_FEATURES[formData.serviceType].map(feature => (
+                  <Chip
+                    key={feature}
+                    label={feature}
+                    clickable
+                    color={selectedFeatures.includes(feature) ? 'primary' : 'default'}
+                    onClick={() => handleFeatureToggle(feature)}
+                    variant={selectedFeatures.includes(feature) ? 'filled' : 'outlined'}
+                    // sx={{ borderRadius: 1 }}
+                  />
+                ))}
+              </Box>
+
+              {/* Custom Feature Input */}
+              {showCustomFeatureInput ? (
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Add Custom Feature:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={customFeature}
+                    onChange={(e) => setCustomFeature(e.target.value)}
+                    placeholder="Enter your custom feature"
+                    sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    autoFocus
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddCustomFeature();
+                      }
+                    }}
+                  />
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleAddCustomFeature}
+                      disabled={!customFeature.trim()}
+                      size="small"
+                    >
+                      Add Feature
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={handleCancelCustomFeature}
+                      size="small"
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCustomFeatureInput(true)}
+                  sx={{ mt: 1, borderRadius: 2 }}
+                  size="small"
+                >
+                  Add Custom Feature
+                </Button>
+              )}
+
+              {/* Helper text */}
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                Select features that apply to your service. You can also add custom features not listed above.
+              </Typography>
             </Box>
           ) : (
-            <Typography variant="body2" color="text.secondary">
-              Select a service type to see available features
-            </Typography>
+            <Box>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Select a service type to see available features, or add custom features:
+              </Typography>
+              
+              {/* Custom Feature Input when no service type selected */}
+              {showCustomFeatureInput ? (
+                <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Add Custom Feature:
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    value={customFeature}
+                    onChange={(e) => setCustomFeature(e.target.value)}
+                    placeholder="Enter your custom feature"
+                    sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    autoFocus
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleAddCustomFeature();
+                      }
+                    }}
+                  />
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Button
+                      variant="contained"
+                      onClick={handleAddCustomFeature}
+                      disabled={!customFeature.trim()}
+                      size="small"
+                    >
+                      Add Feature
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      onClick={handleCancelCustomFeature}
+                      size="small"
+                    >
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={() => setShowCustomFeatureInput(true)}
+                  sx={{ mt: 1, borderRadius: 2 }}
+                  size="small"
+                >
+                  Add Custom Feature
+                </Button>
+              )}
+            </Box>
           )}
         </CardContent>
       </Card>
