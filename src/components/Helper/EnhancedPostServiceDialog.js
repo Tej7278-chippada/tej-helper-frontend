@@ -182,6 +182,157 @@ const TIME_SLOTS = [
   '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'
 ];
 
+const getDurationUnit = (pricingModel) => {
+  switch (pricingModel) {
+    case 'hourly': return 'hours';
+    case 'daily': return 'days';
+    case 'weekly': return 'weeks';
+    case 'monthly': return 'months';
+    default: return '';
+  }
+};
+
+// to get service type examples on the general services name input
+const getServiceTypeExamples = (serviceType) => {
+  switch (serviceType) {
+    case 'Cleaning':
+      return [
+        'Basic House Cleaning',
+        'Deep Cleaning',
+        'Office Cleaning',
+        'Move-In/Move-Out Cleaning',
+        'Carpet Cleaning',
+        'Window Cleaning'
+      ];
+    case 'Cooking':
+      return [
+        'Home Cooked Meals',
+        'Meal Prep Service',
+        'Diet Specific Meals',
+        'Party Catering',
+        'Cooking Classes',
+        'Local Cuisine'
+      ];
+    case 'Tutoring':
+      return [
+        'Math Tutoring',
+        'Science Tutoring',
+        'Language Classes',
+        'Exam Preparation',
+        'Homework Help',
+        'Online Sessions'
+      ];
+    case 'PetCare':
+      return [
+        'Pet Sitting',
+        'Dog Walking',
+        'Pet Grooming',
+        'Veterinary Assistance',
+        'Pet Training',
+        'Pet Boarding'
+      ];
+    case 'Delivery':
+      return [
+        'Food Delivery',
+        'Package Delivery',
+        'Grocery Delivery',
+        'Express Delivery',
+        'Local Courier',
+        'Luggage shifting'
+      ];
+    case 'Maintenance':
+      return [
+        'Plumbing Repair',
+        'Electrical Work',
+        'AC Service',
+        'Appliance Repair',
+        'Carpentry Work',
+        'Painting Service'
+      ];
+    case 'Laundry':
+      return [
+        'Wash & Fold',
+        'Dry Cleaning',
+        'Ironing Service',
+        'Bulk Laundry',
+        'Stain Removal',
+        'Special Fabric Care',
+        'Shoes wash'
+      ];
+    case 'Events':
+      return [
+        'Event Planning',
+        'Venue Decoration',
+        'Fire works show',
+        'Photography',
+        'DJ night',
+        'Guest Management'
+      ];
+    case 'FurnitureRental':
+      return [
+        'Sofa Rental',
+        'Bed Rental',
+        'Table Rental',
+        'Chair Rental',
+        'Office Furniture',
+        'Event Furniture'
+      ];
+    case 'Playgrounds':
+      return [
+        'Kids Party Package',
+        'Play Area Access',
+        'Cricket ground',
+        'Volly ball court',
+        'Shuttle court',
+        'Carroms, Chess'
+      ];
+    case 'HouseSaleLease':
+      return [
+        'Apartment for Rent',
+        'House for Sale',
+        'Commercial Property',
+        'Vacation Rental',
+        'Studio Apartment',
+        'Family Home'
+      ];
+    case 'LandSaleLease':
+      return [
+        'Residential Plot',
+        'Commercial Land',
+        'Agricultural Land',
+        'Industrial Property',
+        'Development Land',
+        'Investment Property'
+      ];
+    case 'Other':
+      return [
+        'Custom Service',
+        'Specialized Service',
+        'Professional Service',
+        'Consultation Service',
+        'Repair Service',
+        'Maintenance Service'
+      ];
+    default:
+      return [
+        'Basic Service',
+        'Premium Package',
+        'Standard Service',
+        'Custom Package',
+        'Professional Service',
+        'Specialized Service'
+      ];
+  }
+};
+
+// function to get random examples
+const getRandomExamples = (serviceType) => {
+  const examples = getServiceTypeExamples(serviceType);
+  // Return 2-3 random examples
+  const shuffled = [...examples].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, Math.floor(Math.random() * 2) + 2).join(', ');
+};
+
 // Service features constant (copy from your provided data)
 const SERVICE_FEATURES = {
   ParkingSpace: ['24/7 Available', 'Covered Parking', 'Security Surveillance', 'Well Lit Area', 'EV Charging Station', 'Valet Service', 'Monthly Discount', 'Reserved Spot', 'Accessible Parking', 'Indoor Parking'],
@@ -530,13 +681,22 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             break;
           
           case 'service_tiered':
-            setServicePricing(editingProduct.pricing.service || {
-              basePrice: '',
-              pricingModel: 'fixed',
-              additionalCharges: [],
-              minDuration: '',
-              maxDuration: ''
-            });
+            const serviceItemsData = editingProduct.pricing.service;
+      
+            if (serviceItemsData.serviceItems && serviceItemsData.serviceItems.length > 0) {
+              setServiceItems(serviceItemsData.serviceItems);
+            } else {
+              // Convert legacy data to new format
+              setServiceItems([{
+                name: serviceItemsData.name || '',
+                price: serviceItemsData.price || '',
+                pricingModel: serviceItemsData.pricingModel || 'fixed',
+                description: serviceItemsData.description || '',
+                quantity: serviceItemsData.quantity || '',
+                minDuration: serviceItemsData.minDuration || '',
+                maxDuration: serviceItemsData.maxDuration || ''
+              }]);
+            }
             setPricingType('service_tiered');
             break;
           
@@ -596,13 +756,17 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           insuranceIncluded: false
         }
       ]);
-      setServicePricing({
-        basePrice: '',
-        pricingModel: 'fixed',
-        additionalCharges: [],
-        minDuration: '',
-        maxDuration: ''
-      });
+      setServiceItems([
+        {
+          name: '',
+          price: '',
+          pricingModel: 'fixed',
+          description: '',
+          quantity: '',
+          minDuration: '',
+          maxDuration: ''
+        }
+      ]);
       setPricingType('service_tiered');
     }
   }, [editingProduct]);
@@ -1111,7 +1275,19 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         default:
           pricingData = {
             type: 'service_tiered',
-            service: servicePricing
+            service: {
+              serviceItems: serviceItems.map(service => ({
+                name: service.name || undefined,
+                price: Number(service.price) || undefined,
+                description: service.description || undefined,
+                pricingModel: service.pricingModel,
+                quantity: service.quantity || undefined,
+                minDuration: Number(service.minDuration) || undefined,
+                maxDuration: Number(service.maxDuration) || undefined
+              })),
+              // minNotice: Number(servicePricing.minNotice) || 24,
+              // maxDailyBookings: Number(servicePricing.maxDailyBookings) || 10
+            }
           };
           break;
       }
@@ -2641,10 +2817,33 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                         </Box>
                       // )}
                       ) : (
-                      <Typography variant="body2">
-                        <strong>Service Pricing:</strong>{' '}
-                        {`Base: ₹${servicePricing.basePrice} (${servicePricing.pricingModel})`}
-                      </Typography>
+                      // <Typography variant="body2">
+                      //   <strong>Service Pricing:</strong>{' '}
+                      //   {`Base: ₹${servicePricing.basePrice} (${servicePricing.pricingModel})`}
+                      // </Typography>
+                      <Box>
+                        <Typography variant="body2" fontWeight={600}>
+                          Service Pricing:
+                        </Typography>
+                        {serviceItems.map((service, index) => (
+                          <Typography key={index} variant="body2" sx={{ ml: 2 }}>
+                            • {service.name}: ₹{service.price} ({service.pricingModel})
+                            {service.quantity && ` (${service.quantity} items or slots available)`}
+                            {service.description && ` - ${service.description}`}
+                            {(service.minDuration || service.maxDuration) && ` [Duration: ${service.minDuration || 'Any'}-${service.maxDuration || 'Any'} ${getDurationUnit(service.pricingModel)}]`}
+                          </Typography>
+                        ))}
+                        {/* {servicePricing.minNotice && (
+                          <Typography variant="body2" sx={{ ml: 2, mt: 1 }}>
+                            Minimum notice: {servicePricing.minNotice} hours
+                          </Typography>
+                        )}
+                        {servicePricing.maxDailyBookings && (
+                          <Typography variant="body2" sx={{ ml: 2 }}>
+                            Max bookings per day: {servicePricing.maxDailyBookings}
+                          </Typography>
+                        )} */}
+                      </Box>
                     )}
                     <Typography variant="body2">
                       <strong>Availability:</strong> {availability.isAlwaysAvailable ? '24/7' : availability.days.join(', ')}
@@ -2969,13 +3168,44 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       setVehicleTypes(updatedVehicleTypes);
     };
 
-    const [servicePricing, setServicePricing] = useState({
-      basePrice: '',
-      pricingModel: 'fixed',
-      additionalCharges: [],
-      minDuration: '',
-      maxDuration: ''
-    });
+    const [serviceItems, setServiceItems] = useState([
+      {
+        name: '',
+        price: '',
+        pricingModel: 'fixed',
+        quantity: '',
+        description: '',
+        minDuration: '',
+        maxDuration: ''
+      }
+    ]);
+
+    const addServiceItem = () => {
+      setServiceItems([
+        ...serviceItems,
+        {
+          name: '',
+          price: '',
+          pricingModel: 'fixed',
+          quantity: '',
+          description: '',
+          minDuration: '',
+          maxDuration: ''
+        }
+      ]);
+    };
+
+    const removeServiceItem = (index) => {
+      if (serviceItems.length > 1) {
+        setServiceItems(serviceItems.filter((_, i) => i !== index));
+      }
+    };
+
+    const updateServiceItem = (index, field, value) => {
+      const updatedItems = [...serviceItems];
+      updatedItems[index][field] = value;
+      setServiceItems(updatedItems);
+    };
 
     // Add this function to render pricing section
     const renderPricingSection = () => {
@@ -3410,50 +3640,196 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             </Typography>
           </Box>
 
-          <TextField
-            label="Base Price"
-            type="number"
-            fullWidth
-            value={servicePricing.basePrice}
-            onChange={(e) => setServicePricing({ ...servicePricing, basePrice: e.target.value })}
-            sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            InputProps={{
-              startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
-            }}
-          />
+          {serviceItems.map((service, index) => (
+            <Box key={index} sx={{ 
+              p: 2, 
+              mb: 2, 
+              border: '1px solid rgba(0, 0, 0, 0.1)', 
+              borderRadius: 2,
+              position: 'relative'
+            }}>
+              {serviceItems.length > 1 && (
+                <IconButton
+                  size="small"
+                  onClick={() => removeServiceItem(index)}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    bgcolor: 'error.main',
+                    color: 'white',
+                    '&:hover': { bgcolor: 'error.dark' }
+                  }}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              )}
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel>Pricing Model</InputLabel>
-            <Select
-              value={servicePricing.pricingModel}
-              onChange={(e) => setServicePricing({ ...servicePricing, pricingModel: e.target.value })}
-              label="Pricing Model"
-              sx={{ borderRadius: 2 }}
-            >
-              <MenuItem value="fixed">Fixed Price</MenuItem>
-              <MenuItem value="hourly">Hourly Rate</MenuItem>
-              <MenuItem value="daily">Daily Rate</MenuItem>
-              <MenuItem value="per_item">Per Item</MenuItem>
-              <MenuItem value="per_person">Per Person</MenuItem>
-            </Select>
-          </FormControl>
+              <Typography variant="subtitle1" gutterBottom>
+                Service Item {index + 1}
+              </Typography>
 
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <TextField
-              label="Min Duration (hours)"
-              type="number"
-              value={servicePricing.minDuration}
-              onChange={(e) => setServicePricing({ ...servicePricing, minDuration: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-            <TextField
-              label="Max Duration (hours)"
-              type="number"
-              value={servicePricing.maxDuration}
-              onChange={(e) => setServicePricing({ ...servicePricing, maxDuration: e.target.value })}
-              sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            />
-          </Box>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Service or Item Type Name"
+                    fullWidth
+                    value={service.name}
+                    onChange={(e) => updateServiceItem(index, 'name', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    placeholder={`e.g., ${getRandomExamples(formData.serviceType)}`}
+                    helperText={formData.serviceType ? `Examples: ${getServiceTypeExamples(formData.serviceType).slice(0, 3).join(', ')}...` : 'Enter the name of your service or item'}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="No.of items or slots Available"
+                    type="number"
+                    fullWidth
+                    value={service.quantity}
+                    onChange={(e) => updateServiceItem(index, 'quantity', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      inputProps: { min: 1, max: 1000 }
+                    }}
+                    helperText="Number of items or slots available for this item or service  type"
+                  />
+                </Grid>
+              </Grid>
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Price (₹)"
+                    type="number"
+                    fullWidth
+                    value={service.price}
+                    onChange={(e) => updateServiceItem(index, 'price', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                      inputProps: { min: 0 }
+                    }}
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Pricing Model</InputLabel>
+                    <Select
+                      value={service.pricingModel}
+                      onChange={(e) => updateServiceItem(index, 'pricingModel', e.target.value)}
+                      label="Pricing Model"
+                      sx={{ borderRadius: 2 }}
+                    >
+                      <MenuItem value="fixed">Fixed Price</MenuItem>
+                      <MenuItem value="hourly">Hourly Rate</MenuItem>
+                      <MenuItem value="daily">Daily Rate</MenuItem>
+                      <MenuItem value="weekly">Weekly Rate</MenuItem>
+                      <MenuItem value="monthly">Monthly Rate</MenuItem>
+                      <MenuItem value="per_item">Per Item</MenuItem>
+                      <MenuItem value="per_person">Per Person</MenuItem>
+                      <MenuItem value="per_square_foot">Per Square Foot</MenuItem>
+                      <MenuItem value="per_room">Per Room</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+
+              {/* Show duration fields only for time-based pricing models */}
+              {(service.pricingModel === 'hourly' || service.pricingModel === 'daily' || 
+              service.pricingModel === 'weekly' || service.pricingModel === 'monthly') && (
+                <Grid container spacing={2} sx={{ mb: 2 }}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Min Duration"
+                      type="number"
+                      fullWidth
+                      value={service.minDuration}
+                      onChange={(e) => updateServiceItem(index, 'minDuration', e.target.value)}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      InputProps={{
+                        inputProps: { min: 1 }
+                      }}
+                      helperText={`Minimum ${service.pricingModel.replace('ly', '')}s`}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Max Duration"
+                      type="number"
+                      fullWidth
+                      value={service.maxDuration}
+                      onChange={(e) => updateServiceItem(index, 'maxDuration', e.target.value)}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      InputProps={{
+                        inputProps: { min: 1 }
+                      }}
+                      helperText={`Maximum ${service.pricingModel.replace('ly', '')}s`}
+                    />
+                  </Grid>
+                </Grid>
+              )}
+
+              <Grid container >
+                <Grid item xs={12} sm={12}>
+                  <TextField
+                    label="Description (Optional)"
+                    fullWidth
+                    value={service.description}
+                    onChange={(e) => updateServiceItem(index, 'description', e.target.value)}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    placeholder="Describe what this service includes"
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          ))}
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={addServiceItem}
+            sx={{ borderRadius: 2, textTransform: 'none' }}
+          >
+            Add Another Service or Item Type
+          </Button>
+
+          {/* Global service settings */}
+          {/* <Box sx={{ mt: 3, p: 2, bgcolor: 'rgba(0, 0, 0, 0.02)', borderRadius: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Service Settings
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Minimum Booking Notice (hours)"
+                  type="number"
+                  fullWidth
+                  value={servicePricing.minNotice}
+                  onChange={(e) => setServicePricing({ ...servicePricing, minNotice: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  InputProps={{
+                    inputProps: { min: 1, max: 168 }
+                  }}
+                  helperText="Hours advance notice required"
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label="Max Bookings Per Day"
+                  type="number"
+                  fullWidth
+                  value={servicePricing.maxDailyBookings}
+                  onChange={(e) => setServicePricing({ ...servicePricing, maxDailyBookings: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  InputProps={{
+                    inputProps: { min: 1, max: 100 }
+                  }}
+                  helperText="Maximum bookings accepted per day"
+                />
+              </Grid>
+            </Grid>
+          </Box> */}
         </CardContent>
       </Card>
     );
