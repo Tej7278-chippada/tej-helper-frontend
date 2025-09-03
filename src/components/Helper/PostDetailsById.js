@@ -529,6 +529,19 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
     const renderPricingDetails = () => {
       if (!post.pricingDetails) return null;
 
+      const getPricingCardStyle = (darkMode) => ({
+        // background: darkMode 
+        //   ? 'rgba(30, 30, 30, 0.85)' 
+        //   : 'rgba(255, 255, 255, 0.15)',
+        // backdropFilter: 'blur(20px)',
+        border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+        borderRadius: '12px',
+        padding: '16px',
+        // margin: '8px 0',
+        minWidth: '250px',
+        flex: '1 1 300px'
+      });
+
       switch (post.serviceType) {
         case 'ParkingSpace':
           return (
@@ -539,9 +552,6 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
               mt: 1,
               // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
             }}>
-              {/* <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                Parking Rates
-              </Typography> */}
               <Box display="flex" alignItems="center" mb={2}>
                 <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
                   <CurrencyRupee fontSize="small" />
@@ -550,29 +560,63 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   Parking Rates
                 </Typography>
               </Box>
-              {post.pricingDetails.parking?.vehicleTypes?.map((vehicle, index) => (
-                <Box key={index} sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  p: 1, 
-                  bgcolor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
-                  borderRadius: 1,
-                  mb: 1
-                }}>
-                  <Typography variant="body2">{vehicle.name}</Typography>
-                  <Typography variant="body2" fontWeight="bold">
-                    ₹{vehicle.price} {vehicle.duration && `/${vehicle.duration}`}
-                  </Typography>
-                </Box>
-              ))}
-              {post.capacity && (
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  Available slots: <Box component="span" fontWeight="bold">{post.capacity}</Box>
-                </Typography>
-              )}
+              <Box sx={{ display: 'flex',  gap: 2, overflowX: 'auto', pb: 1 }}>
+                {post.pricingDetails.parking?.vehicleTypes?.map((vehicle, index) => (
+                  <Box key={index} sx={getPricingCardStyle(darkMode)}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        {vehicle.type}
+                      </Typography>
+                      <Chip 
+                        size="small" 
+                        label={`Slots: ${vehicle.slotsAvailable}`}
+                        color="success"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {vehicle.hourlyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Hourly:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.hourlyRate}</Typography>
+                        </Box>
+                      )}
+                      {vehicle.dailyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Daily:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.dailyRate}</Typography>
+                        </Box>
+                      )}
+                      {vehicle.weeklyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Weekly:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.weeklyRate}</Typography>
+                        </Box>
+                      )}
+                      {vehicle.monthlyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Monthly:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.monthlyRate}</Typography>
+                        </Box>
+                      )}
+                      {/* {vehicle.slotsAvailable > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                          <Typography variant="body2">Slots:</Typography>
+                          <Typography variant="body2" fontWeight="bold">{vehicle.slotsAvailable}</Typography>
+                        </Box>
+                      )} */}
+                      {vehicle.description && (
+                        <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
+                          {vehicle.description}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
             </Box>
           );
-        
+
         case 'VehicleRental':
           return (
             <Box sx={{ 
@@ -582,65 +626,91 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
               mt: 1,
               // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
             }}>
-              {/* <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <CurrencyRupee/> Rental Rates
-              </Typography> */}
               <Box display="flex" alignItems="center" mb={2}>
                 <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
                   <CurrencyRupee fontSize="small" />
                 </Avatar>
-                <Typography variant="h6" >
-                  Rental rates
+                <Typography variant="h6">
+                  Rental Rates
                 </Typography>
               </Box>
-              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                {post.pricingDetails.vehicleRental?.vehicleType}
-              </Typography>
-              {post.pricingDetails.vehicleRental && (
-                <>
-                  <Grid container spacing={1}>
-                    {post.pricingDetails.vehicleRental.hourlyRate && (
-                      <Grid item xs={6} sm={4}>
-                        <Typography variant="body2">Hourly: ₹{post.pricingDetails.vehicleRental.hourlyRate}</Typography>
-                      </Grid>
-                    )}
-                    {post.pricingDetails.vehicleRental.dailyRate && (
-                      <Grid item xs={6} sm={4}>
-                        <Typography variant="body2">Daily: ₹{post.pricingDetails.vehicleRental.dailyRate}</Typography>
-                      </Grid>
-                    )}
-                    {post.pricingDetails.vehicleRental.weeklyRate && (
-                      <Grid item xs={6} sm={4}>
-                        <Typography variant="body2">Weekly: ₹{post.pricingDetails.vehicleRental.weeklyRate}</Typography>
-                      </Grid>
-                    )}
-                    {post.pricingDetails.vehicleRental.monthlyRate && (
-                      <Grid item xs={6} sm={4}>
-                        <Typography variant="body2">Monthly: ₹{post.pricingDetails.vehicleRental.monthlyRate}</Typography>
-                      </Grid>
-                    )}
-                  </Grid>
-                  <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                    <Chip 
-                      size="small" 
-                      label={`Fuel: ${post.pricingDetails.vehicleRental.fuelIncluded ? 'Included' : 'Not included'}`} 
-                      color={post.pricingDetails.vehicleRental.fuelIncluded ? "success" : "default"}
-                      variant="outlined"
-                    />
-                    <Chip 
-                      size="small" 
-                      label={`Insurance: ${post.pricingDetails.vehicleRental.insuranceIncluded ? 'Included' : 'Not included'}`} 
-                      color={post.pricingDetails.vehicleRental.insuranceIncluded ? "success" : "default"}
-                      variant="outlined"
-                    />
+              <Box sx={{ display: 'flex',  gap: 2, overflowX: 'auto', pb: 1 }}>
+                {post.pricingDetails.vehicleRental?.vehicleTypes?.map((vehicle, index) => (
+                  <Box key={index} sx={getPricingCardStyle(darkMode)}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        {vehicle.type}
+                      </Typography>
+                      {vehicle.quantity > 1 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          {/* <Typography variant="body2">Available:</Typography> */}
+                          {/* <Typography variant="body2" fontWeight="bold">{vehicle.quantity}</Typography> */}
+                          <Chip 
+                            size="small" 
+                            label={`Available: ${vehicle.quantity}`}
+                            color="success"
+                            variant="outlined"
+                          />
+                        </Box>
+                      )}
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                      {vehicle.hourlyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Hourly:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.hourlyRate}</Typography>
+                        </Box>
+                      )}
+                      {vehicle.dailyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Daily:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.dailyRate}</Typography>
+                        </Box>
+                      )}
+                      {vehicle.weeklyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Weekly:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.weeklyRate}</Typography>
+                        </Box>
+                      )}
+                      {vehicle.monthlyRate > 0 && (
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2">Monthly:</Typography>
+                          <Typography variant="body2" fontWeight="bold">₹{vehicle.monthlyRate}</Typography>
+                        </Box>
+                      )}
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                        {vehicle.fuelIncluded && (
+                          <Chip 
+                            size="small" 
+                            label="Fuel Included" 
+                            color="success"
+                            variant="outlined"
+                          />
+                        )}
+                        {vehicle.insuranceIncluded && (
+                          <Chip 
+                            size="small" 
+                            label="Insurance Included" 
+                            color="success"
+                            variant="outlined"
+                          />
+                        )}
+                      </Box>
+                      {vehicle.description && (
+                        <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
+                          {vehicle.description}
+                        </Typography>
+                      )}
+                    </Box>
                   </Box>
-                </>
-              )}
+                ))}
+              </Box>
             </Box>
           );
-        
+
         default:
-          if (post.pricingDetails.service) {
+          if (post.pricingDetails.service?.serviceItems) {
             return (
               <Box sx={{ 
                 p: 2, 
@@ -649,7 +719,6 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 mt: 1,
                 // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
               }}>
-                {/* <Typography variant="h6" sx={{ mb: 1 }}>Pricing</Typography> */}
                 <Box display="flex" alignItems="center" mb={2}>
                   <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
                     <CurrencyRupee fontSize="small" />
@@ -658,35 +727,63 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                     Service Pricing
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="h6" color="primary">
-                    ₹{post.pricingDetails.service.basePrice}
-                  </Typography>
-                  <Chip 
-                    label={post.pricingDetails.service.pricingModel} 
-                    size="small" 
-                    color="primary" 
-                    variant="outlined"
-                  />
-                </Box>
-                
-                {post.pricingDetails.service.additionalCharges?.length > 0 && (
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2" fontWeight="bold">Additional charges:</Typography>
-                    {post.pricingDetails.service.additionalCharges.map((charge, index) => (
-                      <Box key={index} sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                        <Typography variant="body2">{charge.name}:</Typography>
-                        <Typography variant="body2">₹{charge.price}</Typography>
+                <Box sx={{ display: 'flex', gap: 2, overflowX: 'auto', pb: 1 }}> {/*  flexWrap: 'wrap', scrollbarWidth: 'none' */}
+                  {post.pricingDetails.service.serviceItems.map((item, index) => (
+                    <Box key={index} sx={getPricingCardStyle(darkMode)}>
+                      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                        {item.name}
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <Typography variant="body2">Price:</Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="h6" color="primary" fontWeight="bold">
+                              ₹{item.price}
+                            </Typography>
+                            <Chip 
+                              label={item.pricingModel} 
+                              size="small" 
+                              color="primary" 
+                              variant="outlined"
+                            />
+                          </Box>
+                        </Box>
+                        
+                        {item.quantity > 1 && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2">Available Items:</Typography>
+                            <Typography variant="body2" fontWeight="bold">{item.quantity}</Typography>
+                          </Box>
+                        )}
+                        
+                        {(item.minDuration || item.maxDuration) && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2">Duration:</Typography>
+                            <Typography variant="body2">
+                              {item.minDuration || 'Any'}-{item.maxDuration || 'Any'} 
+                              {item.pricingModel === 'hourly' && ' hours'}
+                              {item.pricingModel === 'daily' && ' days'}
+                              {item.pricingModel === 'weekly' && ' weeks'}
+                              {item.pricingModel === 'monthly' && ' months'}
+                            </Typography>
+                          </Box>
+                        )}
+                        
+                        {item.description && (
+                          <Typography variant="caption" color="textSecondary" sx={{ mt: 1 }}>
+                            {item.description}
+                          </Typography>
+                        )}
                       </Box>
-                    ))}
-                  </Box>
-                )}
+                    </Box>
+                  ))}
+                </Box>
               </Box>
             );
           }
-          return null;
-      }
-    };
+        return null;
+      };
+    }
 
     // Render availability information
     const renderAvailability = () => {
