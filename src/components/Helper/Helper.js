@@ -34,7 +34,9 @@ import Friends from '../Friends/Friends';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
-// import WorkIcon from '@mui/icons-material/Work';
+import WorkIcon from '@mui/icons-material/Work';
+import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
+import { formatPrice } from '../../utils/priceFormatter';
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -1855,10 +1857,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         }}
                       /> */}
                       {/* Full Time Badge */}
-                      {/* {post.isFullTime && (
+                      {post.isFullTime && (
                         <Chip
                           icon={<WorkIcon sx={{ fontSize: 16 }} />}
-                          label="Full Time"
+                          label="Full Time" color="#fff"
                           size="small"
                           sx={{
                             position: 'absolute',
@@ -1867,10 +1869,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             backgroundColor: 'info.main',
                             color: 'white',
                             fontWeight: 600,
-                            fontSize: '0.75rem'
+                            fontSize: '0.75rem',
+                            '& .MuiChip-icon': {
+                              marginLeft: '6px',
+                              height: '16px'
+                            },
                           }}
                         />
-                      )} */}
+                      )}
                       <CardContent style={{
                         position: 'absolute',
                         bottom: 0,
@@ -1879,30 +1885,203 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         padding: '16px',
                         color: 'white'
                       }}>
-                        {post.isFullTime && 
+                        {/* {post.isFullTime && 
                           <Typography sx={{ px: 2, py: 0.5, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>
                             Full Time
                           </Typography>
-                        }
-                        <Tooltip title={post.title} placement="top" arrow>
-                          <Typography variant="h6" component="div" style={{ fontWeight: 'bold', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
-                            {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
-                          </Typography>
-                        </Tooltip>
-                        <Typography variant="body1" style={{ display: 'inline-block', float: 'right', fontWeight: '500', color: 'white' }}>
+                        } */}
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',}}>
+                          <Tooltip title={post.title} placement="top" arrow>
+                            <Typography variant="h6" component="div" style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
+                              {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
+                            </Typography>
+                          </Tooltip>
+                          {post.postType === 'HelpRequest' && post.categories !== 'UnPaid' &&
+                            <Chip
+                              icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: 16 }} />}
+                              label={`${formatPrice(post.price)}`} color="white"
+                              variant="filled" size="small"
+                              sx={{
+                                backgroundColor: 'success.main',
+                                color: '#fff',
+                                px: 0.5, py: 1,
+                                fontWeight: 500,
+                                fontSize: '0.875rem',
+                                transition: 'transform 0.2s ease',
+                                '& .MuiChip-label': {
+                                  px: '4px',
+                                },
+                                '& .MuiChip-icon': {
+                                  marginLeft: '2px',
+                                  height: '16px'
+                                },
+                              }}
+                            />
+                          }
+                          {post.postType !== 'HelpRequest' &&
+                            <Chip
+                              // icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
+                              label={`${post.postStatus}`}
+                              variant="filled" size="small"
+                              // color="post.postStatus === 'Active' ? 'success' : post.postStatus === 'InActive' ? 'warning': 'error'"
+                              sx={{
+                                backgroundColor: post.postStatus === 'Active' ? 'success.main' : post.postStatus === 'InActive' ? 'warning.main': 'error.main',
+                                color: '#fff',
+                                px: 0.5, py: 0.5,
+                                fontWeight: 700,
+                                fontSize: '0.875rem',
+                                transition: 'transform 0.2s ease'
+                              }}
+                            />
+                          }
+                        </Box>
+                        {/* <Typography variant="body1" style={{ display: 'inline-block', float: 'right', fontWeight: '500', color: 'white' }}>
                           Price: ₹{post.price}
-                        </Typography>
-                        <Typography variant="body2" color={post.categories === 'Emergency' ? '#ffa5a5' : 'rgba(255, 255, 255, 0.9)'} style={{ marginBottom: '0.5rem' }}>
+                        </Typography> */}
+                        {/* <Typography variant="body2" color={post.categories === 'Emergency' ? '#ffa5a5' : 'rgba(255, 255, 255, 0.9)'} style={{ marginBottom: '0.5rem' }}>
                           Category: {post.categories}
-                        </Typography>
+                        </Typography> */}
+                        {/* {post.postType === 'HelpRequest' ?
+                          // <Typography variant="body2" color={post.categories !== 'Emergency' ? 'textSecondary' : 'rgba(194, 28, 28, 0.89)'} style={{ display: 'inline-block',  }}>
+                          //   {post.categories}
+                          // </Typography> 
+                          <Chip 
+                            label={post.categories} 
+                            icon={getServiceIcon(post.categories)}
+                            // color="primary"
+                            variant="outlined" size="small" color={post.categories !== 'Emergency' ? '#fff' : 'error'} sx={{px: 1, color: '#fff'}}
+                          />
+                          :
+                          <Chip 
+                            label={post.serviceType} 
+                            icon={getServiceIcon(post.serviceType)}
+                            // color="primary"
+                            variant="outlined" size="small" sx={{px: 1}}
+                          />
+                        } */}
                         {/* {post.stockStatus === 'In Stock' && ( */}
-                        <Typography variant="body2" style={{ display: 'inline-block', marginBottom: '0.5rem',  color: 'rgba(255, 255, 255, 0.9)' }}>
+                        {/* <Typography variant="body2" style={{ display: 'inline-block', marginBottom: '0.5rem',  color: 'rgba(255, 255, 255, 0.9)' }}>
                           People Required: {post.peopleCount} ({post.gender})
-                        </Typography>
-                        {/* )} */}
-                        <Typography variant="body2" style={{ display: 'inline-block', float: 'right', marginBottom: '0.5rem', color: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5' }}>
-                          Status: {post.postStatus}
-                        </Typography>
+                        </Typography> */}
+                        {post.postType === 'HelpRequest' ? (
+                          // Help Request specific content
+                          <Box sx={{ mb: 1 }}>
+                            <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                              {post.peopleCount && (
+                                <Chip 
+                                  label={`${post.peopleCount} ${post.gender || 'People'}`}
+                                  variant="outlined" 
+                                  size="small" 
+                                  sx={{ 
+                                    color: '#fff', 
+                                    borderColor: 'rgba(255,255,255,0.5)',
+                                    fontSize: '0.75rem'
+                                  }}
+                                />
+                              )}
+                              <Chip
+                                label={`Status: ${post.postStatus}`}
+                                variant="outlined"
+                                size="small"
+                                sx={{
+                                  color: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5',
+                                  borderColor: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5',
+                                  fontSize: '0.75rem'
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        ) : (
+                          // Service Offering specific content
+                          <Box sx={{ mb: 1 }}>
+                            {post.availability?.isAlwaysAvailable ? (
+                              <Chip 
+                                label="Available 24/7" 
+                                variant="outlined" 
+                                size="small" 
+                                sx={{
+                                  color: '#4caf50', 
+                                  borderColor: '#4caf50',
+                                  backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                  mb: 1,
+                                  fontWeight: 600
+                                }}
+                              />
+                            ) : (
+                              post.availability?.days && post.availability.days.length > 0 && (
+                                <Box sx={{ mb: 1 }}>
+                                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', mb: 0.5, display: 'block' }}>
+                                    Available:
+                                  </Typography>
+                                  <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                    {post.availability.days.slice(0, 7).map(day => (
+                                      <Chip 
+                                        key={day} 
+                                        label={day.slice(0, 3)} 
+                                        size="small" 
+                                        variant="outlined"
+                                        sx={{
+                                          backgroundColor: 'rgba(255,255,255,0.15)', 
+                                          color: '#fff',
+                                          borderColor: 'rgba(255,255,255,0.3)',
+                                          fontSize: '0.7rem',
+                                          height: '20px'
+                                        }}
+                                      />
+                                    ))}
+                                    {/* {post.availability.days.length > 4 && (
+                                      <Chip 
+                                        label={`+${post.availability.days.length - 4}`} 
+                                        size="small" 
+                                        variant="outlined"
+                                        sx={{
+                                          backgroundColor: 'rgba(255,255,255,0.15)', 
+                                          color: '#fff',
+                                          borderColor: 'rgba(255,255,255,0.3)',
+                                          fontSize: '0.7rem',
+                                          height: '20px'
+                                        }}
+                                      />
+                                    )} */}
+                                  </Box>
+                                </Box>
+                              )
+                            )}
+
+                            {/* Service Features */}
+                            {post.serviceFeatures && post.serviceFeatures.length > 0 && (
+                              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+                                {post.serviceFeatures.slice(0, 5).map((feature, idx) => (
+                                  <Chip
+                                    key={idx}
+                                    label={feature}
+                                    size="small"
+                                    sx={{
+                                      backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                      color: '#90caf9',
+                                      fontSize: '0.7rem',
+                                      height: '20px'
+                                    }}
+                                  />
+                                ))}
+                                {post.serviceFeatures.length > 5 && (
+                                  <Chip 
+                                    label={`+${post.serviceFeatures.length - 5}`} 
+                                    size="small" 
+                                    variant="outlined"
+                                    sx={{
+                                      backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                      color: '#90caf9',
+                                      borderColor: 'rgba(255,255,255,0.3)',
+                                      fontSize: '0.7rem',
+                                      height: '20px'
+                                    }}
+                                  />
+                                )}
+                              </Box>
+                            )}
+                          </Box>
+                        )}
                         {/* <Typography variant="body2" color="textSecondary" style={{ marginBottom: '0.5rem' }}>
                           Service Days: {post.serviceDays}
                         </Typography>
@@ -1924,12 +2103,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           variant="body2"
                           color="textSecondary"
                           style={{
-                            marginBottom: '0rem', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
+                            marginBottom: '0rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis',
                             maxHeight: '3rem',  // This keeps the text within three lines based on the line height.
                             lineHeight: '1.5rem',  // Adjust to control exact line spacing.
                             color: 'rgba(255, 255, 255, 0.9)'
                           }}>
-                          Description: {post.description}
+                          {post.description}
                         </Typography>
                         {/* <Grid item xs={6} sm={4}>
                           <Typography variant="body1" style={{ fontWeight: 500 }}>
