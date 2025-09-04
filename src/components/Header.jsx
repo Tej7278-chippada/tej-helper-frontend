@@ -53,6 +53,19 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
+const getGlassmorphismCardStyle = (theme, darkMode) => ({
+  background: darkMode 
+    ? 'rgba(205, 201, 201, 0.15)' 
+    : 'rgba(255, 255, 255, 0.70)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
 const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimate}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -620,7 +633,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
         TransitionComponent={Fade}
         PaperProps={{
           sx: {
-            ...getGlassmorphismStyle(theme, darkMode),
+            ...getGlassmorphismCardStyle(theme, darkMode),
             mt: 1,
             minWidth: 200,
             borderRadius: 3,

@@ -1716,7 +1716,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         )}
 
 
-        {selectedCategory !== 'Friends' && (<Box mb={1} sx={{ background: 'rgba(255, 255, 255, 0)',  backdropFilter: 'blur(10px)', paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '8px' : '10px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        {selectedCategory !== 'Friends' && (<Box mb={1} sx={{ paddingTop: '1rem', paddingBottom: '2rem', mx: isMobile ? '4px' : '8px', paddingInline: isMobile ? '4px' : '6px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
           {loadingLocation || loading ? (
               <SkeletonCards/>
             ) : 
@@ -1753,7 +1753,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       // },
                       // transition: 'transform 0.1s ease, box-shadow 0.1s ease', // Smooth transition for hover
                       position: 'relative',
-                      height: isMobile ? '260px' : '300px', // Fixed height for consistency
+                      height: isMobile ? '300px' : '340px', // Fixed height for consistency
                       overflow: 'hidden',
                     }}
                       onClick={() => openPostDetail(post)}

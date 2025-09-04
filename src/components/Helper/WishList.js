@@ -15,8 +15,9 @@ import { useTheme } from '@emotion/react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import PersonIcon from '@mui/icons-material/Person';
 import CategoryIcon from '@mui/icons-material/Category';
-import PriceChangeIcon from '@mui/icons-material/PriceChange';
 import WorkIcon from '@mui/icons-material/Work';
+import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
+import { formatPrice } from '../../utils/priceFormatter';
 // import EmptyStateIcon from '@mui/icons-material/BookmarkBorder';
 
 const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
@@ -114,7 +115,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
         {/* <div style={{
           backgroundSize: 'cover', backgroundPosition: 'center', backdropFilter: 'blur(10px)'
         }}> */}
-          <Box sx={{ background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`, paddingTop: '1rem', paddingBottom: '1rem', mx: isMobile ? '6px' : '8px', paddingInline: isMobile ? '6px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+          <Box sx={{ paddingTop: '1rem', paddingBottom: '2rem', mx: isMobile ? '4px' : '8px', paddingInline: isMobile ? '4px' : '8px', borderRadius: '10px' }} > {/* sx={{ p: 2, background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`, }} */}
             {loading ? (
               <SkeletonCards />
             ) : (
@@ -274,7 +275,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                           {post.isFullTime && (
                             <Chip
                               icon={<WorkIcon sx={{ fontSize: 16 }} />}
-                              label="Full Time"
+                              label="Full Time" color="#fff"
                               size="small"
                               sx={{
                                 position: 'absolute',
@@ -283,7 +284,11 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                 backgroundColor: 'info.main',
                                 color: 'white',
                                 fontWeight: 600,
-                                fontSize: '0.75rem'
+                                fontSize: '0.75rem',
+                                '& .MuiChip-icon': {
+                                  marginLeft: '6px',
+                                  height: '16px'
+                                },
                               }}
                             />
                           )}
@@ -364,24 +369,31 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                   </Typography>
                                 </Tooltip>
                                 
-                                {post.postType === 'HelpRequest' && 
+                                {post.postType === 'HelpRequest' && post.categories !== 'UnPaid' &&
                                 <Chip
                                   className="price-chip"
-                                  icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
-                                  label={`₹${post.price}`}
-                                  variant="filled"
+                                  icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: 16 }} />}
+                                  label={`${formatPrice(post.price)}`} color="white"
+                                  variant="filled" size="small"
                                   sx={{
                                     backgroundColor: alpha(theme.palette.success.main, 0.1),
                                     color: 'success.main', px: 1,
-                                    fontWeight: 700,
+                                    fontWeight: 600,
                                     fontSize: '0.875rem',
-                                    transition: 'transform 0.2s ease'
+                                    transition: 'transform 0.2s ease',
+                                    '& .MuiChip-label': {
+                                      px: '4px',
+                                    },
+                                    '& .MuiChip-icon': {
+                                      marginLeft: '2px',
+                                      height: '16px'
+                                    },
                                   }}
                                 />}
                               </Box>
 
                               {/* Category and People Count */}
-                              <Box display="flex" gap={1} flexWrap="wrap">
+                              {/* <Box display="flex" gap={1} flexWrap="wrap">
                                 <Chip
                                   icon={<CategoryIcon sx={{ fontSize: 14 }} />}
                                   label={post.categories || post.serviceType}
@@ -402,7 +414,117 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                   variant="outlined"
                                   sx={{ fontSize: '0.75rem', color: 'text.secondary', px: 0.5, }}
                                 />}
-                              </Box>
+                              </Box> */}
+
+                              {post.postType === 'HelpRequest' ? (
+                                // Help Request specific content
+                                <Box sx={{ mb: 1 }}>
+                                  <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                                    {post.peopleCount && (
+                                      <Chip 
+                                        label={`${post.peopleCount} ${post.gender || 'People'}`}
+                                        variant="outlined" 
+                                        size="small" 
+                                        sx={{ 
+                                          // color: '#fff', 
+                                          // borderColor: 'rgba(255,255,255,0.5)',
+                                          fontSize: '0.75rem'
+                                        }}
+                                      />
+                                    )}
+                                  </Box>
+                                </Box>
+                              ) : (
+                                // Service Offering specific content
+                                <Box sx={{ mb: 1 }}>
+                                  {post.availability?.isAlwaysAvailable ? (
+                                    <Chip 
+                                      label="Available 24/7" 
+                                      variant="outlined" 
+                                      size="small" 
+                                      sx={{
+                                        color: '#2e7d32', 
+                                        borderColor: '#4caf50',
+                                        backgroundColor: 'rgba(76, 175, 80, 0.08)',
+                                        mb: 1,
+                                        fontWeight: 600
+                                      }}
+                                    />
+                                  ) : (
+                                    post.availability?.days && post.availability.days.length > 0 && (
+                                      <Box sx={{ mb: 1 }}>
+                                        <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
+                                          Available:
+                                        </Typography>
+                                        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                                          {post.availability.days.slice(0, 7).map(day => (
+                                            <Chip 
+                                              key={day} 
+                                              label={day.slice(0, 3)} 
+                                              size="small" 
+                                              variant="outlined"
+                                              sx={{
+                                                // backgroundColor: 'rgba(255,255,255,0.15)', 
+                                                // color: '#fff',
+                                                // borderColor: 'rgba(255,255,255,0.3)',
+                                                fontSize: '0.7rem',
+                                                height: '20px'
+                                              }}
+                                            />
+                                          ))}
+                                          {/* {post.availability.days.length > 4 && (
+                                            <Chip 
+                                              label={`+${post.availability.days.length - 4}`} 
+                                              size="small" 
+                                              variant="outlined"
+                                              sx={{
+                                                backgroundColor: 'rgba(255,255,255,0.15)', 
+                                                color: '#fff',
+                                                borderColor: 'rgba(255,255,255,0.3)',
+                                                fontSize: '0.7rem',
+                                                height: '20px'
+                                              }}
+                                            />
+                                          )} */}
+                                        </Box>
+                                      </Box>
+                                    )
+                                  )}
+      
+                                  {/* Service Features */}
+                                  {post.serviceFeatures && post.serviceFeatures.length > 0 && (
+                                    <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mb: 1 }}>
+                                      {post.serviceFeatures.slice(0, 5).map((feature, idx) => (
+                                        <Chip
+                                          key={idx}
+                                          label={feature}
+                                          size="small"
+                                          sx={{
+                                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                                            color: '#1565c0',
+                                            fontSize: '0.7rem',
+                                            height: '20px'
+                                          }}
+                                        />
+                                      ))}
+                                      {post.serviceFeatures.length > 5 && (
+                                        <Chip 
+                                          label={`+${post.serviceFeatures.length - 5}`} 
+                                          size="small" 
+                                          variant="outlined"
+                                          sx={{
+                                            backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                                            color: '#1565c0',
+                                            border: '1px solid rgba(25, 118, 210, 0.3)',
+                                            fontSize: '0.7rem',
+                                            height: '20px'
+                                          }}
+                                        />
+                                      )}
+                                    </Box>
+                                  )}
+                                </Box>
+                              )}
 
                               {/* Description */}
                               <Typography
@@ -410,7 +532,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                 color="text.secondary"
                                 sx={{
                                   display: '-webkit-box',
-                                  WebkitLineClamp: 1, // no of lines of description
+                                  WebkitLineClamp: 2, // no of lines of description
                                   WebkitBoxOrient: 'vertical',
                                   overflow: 'hidden',
                                   lineHeight: 1.4
