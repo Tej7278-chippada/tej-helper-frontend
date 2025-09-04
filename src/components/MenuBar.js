@@ -1,5 +1,5 @@
 //src/components/MenuBar.js
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Badge, BottomNavigation, BottomNavigationAction, Box, Paper, Tooltip, Typography, useMediaQuery, Zoom } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
@@ -48,7 +48,7 @@ const navItems = [
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
     ? 'rgba(30, 30, 30, 0.85)' 
-    : 'rgba(255, 255, 255, 0.15)',
+    : 'rgba(255, 255, 255, 0.8)', // 0.15
   backdropFilter: 'blur(20px)',
   border: darkMode 
     ? '1px solid rgba(255, 255, 255, 0.1)' 
@@ -63,6 +63,7 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  // const [isAnimating, setIsAnimating] = useState(false);
   // const [activeIndex, setActiveIndex] = useState(0);
   // const [isAnimating, setIsAnimating] = useState(false);
 
@@ -92,12 +93,21 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
     // }, 150);
   };
 
-  if (!visible || !isMobile) return null;
+  // Animation effect for smooth transitions
+  // useEffect(() => {
+  //   setIsAnimating(true);
+  //   const timer = setTimeout(() => setIsAnimating(false), 400); // Match transition duration
+  //   return () => clearTimeout(timer);
+  // }, [visible]);
+
+  if (!isMobile) return null;
 
   return (
     <Paper
       sx={{
-        position: 'fixed', m: "8px 16px ", borderRadius: '16px',
+        position: 'fixed', 
+        // m: "8px 16px ", 
+        // borderRadius: '16px',
         bottom: 0,
         left: 0,
         right: 0,
@@ -105,11 +115,11 @@ const MenuBar = ({ visible, badgeCounts = {}, darkMode }) => {
         // background: 'rgba(255, 255, 255, 0.85)',
         // backdropFilter: 'blur(20px)',
         // borderTop: '1px solid rgba(255, 255, 255, 0.2)',
-        // borderTopLeftRadius: '20px',
-        // borderTopRightRadius: '20px',
-        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+        borderTopLeftRadius: '20px',
+        borderTopRightRadius: '20px',
+        transition: 'transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease',
         transform: visible ? 'translateY(0)' : 'translateY(100%)',
-        opacity: visible ? 1 : 0,
+        opacity: visible ? 1 : 0.8,
         pointerEvents: visible ? 'auto' : 'none',
         // boxShadow: '0 -8px 32px rgba(0, 0, 0, 0.1)',
         '&::before': {

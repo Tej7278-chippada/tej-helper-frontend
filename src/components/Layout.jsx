@@ -16,16 +16,19 @@ const Layout = ({ children, username, darkMode, toggleDarkMode, unreadCount, sho
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
 
-      if (currentScrollY < lastScrollY) {
-        setShowMenu(true); // scrolling up
-      } else if (currentScrollY > lastScrollY) {
-        setShowMenu(false); // scrolling down
+      if (scrollDifference > 5) {
+        if (currentScrollY < lastScrollY) {
+          setShowMenu(true); // scrolling up
+        } else if (currentScrollY > lastScrollY + 15) { // Added buffer for downward scroll
+          setShowMenu(false); // scrolling down
+        }
+        setLastScrollY(currentScrollY);
       }
-      setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
