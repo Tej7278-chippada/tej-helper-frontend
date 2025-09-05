@@ -1437,7 +1437,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       
                       <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
                         {/* Category Filter */}
-                        <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px', } }}>
+                        {/* <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px', } }}>
                           <InputLabel>Category</InputLabel>
                           <Select
                             name="categories"
@@ -1449,12 +1449,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="Paid">Paid</MenuItem>
                             <MenuItem value="UnPaid">UnPaid</MenuItem>
                             <MenuItem value="Emergency">Emergency</MenuItem>
-                            {/* <MenuItem value="Friends">Friends</MenuItem> */}
+                            <MenuItem value="Friends">Friends</MenuItem>
                           </Select>
-                        </FormControl>
+                        </FormControl> */}
 
                         {/* Service Filters */}
-                        <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
+                        {/* <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
                           <InputLabel>Service Type</InputLabel>
                           <Select
                             name="serviceType"
@@ -1479,7 +1479,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="LandSaleLease">Land Sale/Lease</MenuItem>
                             <MenuItem value="Other">Other</MenuItem>
                           </Select>
-                        </FormControl>
+                        </FormControl> */}
 
                         {/* Gender Filter */}
                         <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
