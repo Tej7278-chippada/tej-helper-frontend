@@ -37,6 +37,7 @@ import Friends from '../Friends/Friends';
 import WorkIcon from '@mui/icons-material/Work';
 import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
 import { formatPrice } from '../../utils/priceFormatter';
+import MenuCard from './MenuCard';
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -50,7 +51,7 @@ const globalCache = {
 
 // Default filter values
 const DEFAULT_FILTERS = {
-  categories: '',
+  categories: 'Paid',
   serviceType: '',
   gender: '',
   postStatus: '',
@@ -878,7 +879,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           Category Bar (Under development)
         </Typography>
       </Paper> */}
-      <CategoryBar selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} darkMode={darkMode} isMobile={isMobile}/>
+      {/* <CategoryBar selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} darkMode={darkMode} isMobile={isMobile}/> */}
+      <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
       <Box>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
