@@ -961,7 +961,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                     <CardMedia>
                       <div style={{
                         display: 'flex',
-                        overflowX: 'auto',
+                        justifyContent: post.media?.length === 1 ? "center" : "flex-start",
+                        overflowX: post.media?.length === 1 ? "hidden" : "auto",
                         scrollbarWidth: 'none',
                         scrollbarColor: '#888 transparent',
                         // borderRadius: '8px',
@@ -975,6 +976,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                               alt={`Post ${index}`}
                               style={{
                                 // height: '200px',
+                                width: post.media.length === 1 ? "100%" : "auto",
+                                objectFit: post.media.length === 1 ? "contain" : "cover",
                                 borderRadius: '6px',
                                 objectFit: 'cover',
                                 flexShrink: 0,
@@ -991,6 +994,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                             alt="No media available"
                             style={{
                               // height: '200px',
+                              width: "100%",
                               borderRadius: '8px',
                               objectFit: 'cover',
                               flexShrink: 0,
