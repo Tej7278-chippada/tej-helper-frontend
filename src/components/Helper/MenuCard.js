@@ -19,7 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 const AnimatedToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   position: 'relative',
   overflow: 'hidden',
-  borderRadius: '20px',
+  borderRadius: '24px',
   padding: '4px',
   background: theme.palette.mode === 'dark' 
     ? 'rgba(255, 255, 255, 0.1)' 
@@ -40,8 +40,8 @@ const SliderThumb = styled(Box)(({ theme, position }) => ({
   height: 'calc(100% - 8px)',
   backgroundColor: theme.palette.mode === 'dark' 
     ? 'rgba(67, 97, 238, 0.7)' 
-    : 'rgba(67, 97, 238, 0.2)',
-  borderRadius: '18px',
+    : '#4361ee',
+  borderRadius: '22px',
   transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   zIndex: 0,
 }));
@@ -196,7 +196,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
               fontSize: isMobile ? '0.875rem' : '0.9rem',
               '&.Mui-selected': {
                 backgroundColor: 'transparent',
-                color: darkMode ? '#fff' : '#4361ee',
+                color: darkMode ? '#fff' : '#fff',
                 '&:hover': {
                   backgroundColor: 'transparent',
                 }
@@ -218,6 +218,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
               e.preventDefault();
               handleTypeChange(e, 'HelpRequest');
             }}
+            sx={{textTransform: 'none'}}
           >
             <LiveHelpRoundedIcon sx={{ mr: 1, fontSize: '18px' }} />
             Help Requests
@@ -230,6 +231,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
               e.preventDefault();
               handleTypeChange(e, 'ServiceOffering');
             }}
+            sx={{textTransform: 'none'}}
           >
             <HomeRepairServiceRoundedIcon sx={{ mr: 1, fontSize: '18px' }} />
             Services Nearby
