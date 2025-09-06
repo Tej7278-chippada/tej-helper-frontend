@@ -27,6 +27,8 @@ import LoadingScreen from './components/LoadingScreen/LoadingScreen';
 import AdminPage from './components/Admin/AdminPage';
 import Feedbacks from './components/Admin/Feedbacks';
 import UserManagement from './components/Admin/UserManagement';
+import TermsConditions from './components/TermsAndPolicies/TermsConditions';
+import PrivacyPolicy from './components/TermsAndPolicies/PrivacyPolicy';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -397,6 +399,8 @@ function App() {
               <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         </Routes>
       </Router>
     </ThemeProvider>

@@ -8,6 +8,7 @@ import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
+import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 
 const theme = createTheme({
   breakpoints: {
@@ -861,6 +862,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
             <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
           </form>
         </Box>
+        <TermsPolicyBar/>
       </Layout>
     </ThemeProvider>
   );

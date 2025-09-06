@@ -14,6 +14,7 @@ import PasswordRoundedIcon from '@mui/icons-material/PasswordRounded';
 import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import DemoPosts from './Banners/DemoPosts';
 import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
+import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 
 const theme = createTheme({
   breakpoints: {
@@ -453,6 +454,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
             <Button onClick={handleResetPassword} color="primary">Reset Password</Button>
           </DialogActions>
         </Dialog> */}
+        <TermsPolicyBar/>
     </Layout>
     </ThemeProvider>
   );

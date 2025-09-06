@@ -26,6 +26,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import Cropper from 'react-easy-crop';
+import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 
 
 // Set default icon manually
@@ -1256,6 +1257,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <TermsPolicyBar/>
     </Layout>
   );
 };

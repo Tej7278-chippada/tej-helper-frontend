@@ -10,7 +10,7 @@ const Layout = ({ children, username, darkMode, toggleDarkMode, unreadCount, sho
   const [lastScrollY, setLastScrollY] = useState(0);
   // ❗️ Hide MenuBar on login and register pages
   const location = useLocation();
-  const hideMenuBarRoutes = ['/login', '/register'];
+  const hideMenuBarRoutes = ['/login', '/register', '/terms-conditions', '/privacy-policy'];
   const shouldShowMenuBar = !hideMenuBarRoutes.includes(location.pathname);
 
   useEffect(() => {
