@@ -3,7 +3,7 @@ import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-const TermsPolicyBar = () => {
+const TermsPolicyBar = ({darkMode}) => {
   return (
     <Box sx={{ m: 1, mb: 3}}>
         {/* <Box sx={{ bgcolor: 'background.paper', p: 3, mt: 'auto', textAlign: 'center' }}>
@@ -12,7 +12,7 @@ const TermsPolicyBar = () => {
         </Typography>
         </Box> */}
         <Box sx={{ textAlign: "center", py: 2 }}>
-        <Typography variant="body2" color="textSecondary">
+        <Typography variant="body2" color={darkMode ? '#f5f5f5' : 'textSecondary'}>
         &copy;2025 Tej Tech |{" "}
         <Link to="/terms-conditions">Terms and Conditions</Link> |{" "}
         <Link to="/privacy-policy">Privacy Policy</Link>

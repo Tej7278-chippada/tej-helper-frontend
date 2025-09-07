@@ -862,7 +862,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
             <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
           </form>
         </Box>
-        <TermsPolicyBar/>
+        <TermsPolicyBar darkMode={darkMode}/>
       </Layout>
     </ThemeProvider>
   );

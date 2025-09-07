@@ -454,7 +454,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
             <Button onClick={handleResetPassword} color="primary">Reset Password</Button>
           </DialogActions>
         </Dialog> */}
-        <TermsPolicyBar/>
+        <TermsPolicyBar darkMode={darkMode}/>
     </Layout>
     </ThemeProvider>
   );

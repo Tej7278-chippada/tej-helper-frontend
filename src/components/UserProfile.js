@@ -1257,7 +1257,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <TermsPolicyBar/>
+      <TermsPolicyBar darkMode={darkMode}/>
     </Layout>
   );
 };
