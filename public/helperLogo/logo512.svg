@@ -47,36 +47,36 @@
         <!-- hands (as gradient circles with glow) -->
         <!-- hand-1 (top-left) -->
         <g filter="url(#softGlow)">
-            <circle cx="17.5" cy="22.5" r="37.5" fill="url(#g-green)" />
+            <circle cx="47.5" cy="22.5" r="17.5" fill="url(#g-green)" />
         </g>
         <!-- hand-2 (top-right) -->
         <g filter="url(#softGlow)">
-            <circle cx="90.0" cy="42.5" r="37.5" fill="url(#g-blue)" />
+            <circle cx="80.0" cy="32.5" r="17.5" fill="url(#g-blue)" />
         </g>
         <!-- hand-3 (bottom-left) -->
         <g filter="url(#softGlow)">
-            <circle cx="32.5" cy="85.0" r="37.5" fill="url(#g-orange)" />
+            <circle cx="52.5" cy="55.0" r="17.5" fill="url(#g-orange)" />
         </g>
         <!-- hand-4 (bottom-right) -->
         <g filter="url(#softGlow)">
-            <circle cx="82.5" cy="102.5" r="37.5" fill="url(#g-pink)" />
+            <circle cx="72.5" cy="62.5" r="17.5" fill="url(#g-pink)" />
         </g>
 
         <!-- connector lines -->
         <g opacity="0.85">
             <!-- line-1: rotate 45° -->
-            <rect x="25" y="25" width="65" height="6" rx="4" transform="rotate(0 47.5 26)" fill="#FFFFFF"
+            <rect x="55" y="25" width="25" height="2" rx="1" transform="rotate(0 47.5 26)" fill="#FFFFFF"
                 opacity="0.8" />
             <!-- line-2: rotate -45° -->
-            <rect x="15" y="85" width="65" height="6" rx="4" transform="rotate(0 37.5 46)" fill="#FFFFFF"
+            <rect x="45" y="45" width="25" height="2" rx="1" transform="rotate(0 37.5 46)" fill="#FFFFFF"
                 opacity="0.8" />
         </g>
 
     </g>
 
     <!-- Logo text -->
-    <text x="50%" y="230" text-anchor="middle"
-        font-family="Inter, Poppins, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="64" font-weight="700"
+    <text x="50%" y="210" text-anchor="middle"
+        font-family="Inter, Poppins, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="44" font-weight="700"
         letter-spacing="-0.5" fill="#FFFFFF" filter="url(#textGlow)">
         Helper
     </text>

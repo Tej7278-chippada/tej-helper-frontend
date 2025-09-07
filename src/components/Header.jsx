@@ -66,6 +66,67 @@ const getGlassmorphismCardStyle = (theme, darkMode) => ({
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
+const HelperLogo = ({ size = 40, darkMode }) => {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 180 180"
+      width={size} 
+      height={size}
+      role="img"
+      aria-label="Helper logo" 
+      style={{ display: 'block' }}
+    >
+      <defs>
+        <linearGradient id="g-green" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#4CAF50" />
+          <stop offset="100%" stopColor="#45A049" />
+        </linearGradient>
+        <linearGradient id="g-blue" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#2196F3" />
+          <stop offset="100%" stopColor="#1976D2" />
+        </linearGradient>
+        <linearGradient id="g-orange" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#FF9800" />
+          <stop offset="100%" stopColor="#F57C00" />
+        </linearGradient>
+        <linearGradient id="g-pink" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#E91E63" />
+          <stop offset="100%" stopColor="#C2185B" />
+        </linearGradient>
+
+        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <g transform="translate(35,30)">
+        <g filter="url(#softGlow)">
+          <circle cx="17.5" cy="22.5" r="37.5" fill="url(#g-green)" />
+        </g>
+        <g filter="url(#softGlow)">
+          <circle cx="90.0" cy="42.5" r="37.5" fill="url(#g-blue)" />
+        </g>
+        <g filter="url(#softGlow)">
+          <circle cx="32.5" cy="85.0" r="37.5" fill="url(#g-orange)" />
+        </g>
+        <g filter="url(#softGlow)">
+          <circle cx="82.5" cy="102.5" r="37.5" fill="url(#g-pink)" />
+        </g>
+
+        <g opacity="0.85">
+          <rect x="25" y="25" width="65" height="4" rx="2" transform="rotate(0 47.5 26)" fill="#FFFFFF" opacity="0.8" />
+          <rect x="15" y="85" width="65" height="4" rx="2" transform="rotate(0 37.5 46)" fill="#FFFFFF" opacity="0.8" />
+        </g>
+      </g>
+    </svg>
+  );
+};
+
 const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimate}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -464,6 +525,16 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
           }}>
             {/* Logo Section */}
             <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+              <HelperLogo size={isMobile ? 30 : 40} darkMode={darkMode} />
+              {/* <img 
+                src="/helperLogo/favicon.svg" 
+                alt="Helper Logo" 
+                style={{ 
+                  width: isMobile ? 30 : 40, 
+                  height: isMobile ? 30 : 40,
+                  marginRight: 4 // Add some margin between logo and text
+                }} 
+              /> */}
               <Typography
                 variant={isMobile ? "h6" : "h5"}
                 component="div"
@@ -474,7 +545,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.3s ease', ml: 1,
                   '&:hover': {
                     transform: 'scale(1.05)',
                   }
