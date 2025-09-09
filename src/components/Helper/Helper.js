@@ -1845,7 +1845,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
                       }} />
                       {/* Status Badge */}
-                      {/* <Chip
+                      <Chip
                         label={post.postStatus}
                         size="small"
                         sx={{
@@ -1857,7 +1857,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           fontWeight: 600,
                           fontSize: '0.75rem'
                         }}
-                      /> */}
+                      />
                       {/* Full Time Badge */}
                       {post.isFullTime && (
                         <Chip
@@ -1920,7 +1920,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               }}
                             />
                           }
-                          {post.postType !== 'HelpRequest' &&
+                          {/* {post.postType !== 'HelpRequest' &&
                             <Chip
                               // icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
                               label={`${post.postStatus}`}
@@ -1935,7 +1935,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 transition: 'transform 0.2s ease'
                               }}
                             />
-                          }
+                          } */}
                         </Box>
                         {/* <Typography variant="body1" style={{ display: 'inline-block', float: 'right', fontWeight: '500', color: 'white' }}>
                           Price: ₹{post.price}
@@ -1972,16 +1972,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               {post.peopleCount && (
                                 <Chip 
                                   label={`${post.peopleCount} ${post.gender || 'People'}`}
-                                  variant="outlined" 
+                                  // variant="outlined" 
                                   size="small" 
-                                  sx={{ 
-                                    color: '#fff', 
-                                    borderColor: 'rgba(255,255,255,0.5)',
-                                    fontSize: '0.75rem'
+                                  // sx={{ 
+                                  //   color: '#fff', 
+                                  //   borderColor: 'rgba(255,255,255,0.5)',
+                                  //   fontSize: '0.75rem'
+                                  // }}
+                                  sx={{
+                                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                    color: '#90caf9',
+                                    fontSize: '0.7rem',
+                                    height: '20px'
                                   }}
                                 />
                               )}
-                              <Chip
+                              {/* <Chip
                                 label={`Status: ${post.postStatus}`}
                                 variant="outlined"
                                 size="small"
@@ -1990,7 +1996,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   borderColor: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5',
                                   fontSize: '0.75rem'
                                 }}
-                              />
+                              /> */}
                             </Box>
                           </Box>
                         ) : (

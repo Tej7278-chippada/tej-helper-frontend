@@ -8,7 +8,8 @@ import {
   Paper, 
   Slide,
   Typography,
-  IconButton
+  IconButton,
+  Grid
 } from '@mui/material';
 import LiveHelpRoundedIcon from '@mui/icons-material/LiveHelpRounded';
 import HomeRepairServiceRoundedIcon from '@mui/icons-material/HomeRepairServiceRounded';
@@ -46,17 +47,61 @@ const SliderThumb = styled(Box)(({ theme, position }) => ({
   zIndex: 0,
 }));
 
-const StyledChip = styled(Chip)(({ theme, customcolor, isselected }) => ({
-  backgroundColor: isselected === 'true' ? customcolor : 'transparent',
-  color: isselected === 'true' ? 'white' : customcolor,
-  border: `1px solid ${customcolor}`,
-  fontWeight: 500,
+// const StyledChip = styled(Chip)(({ theme, customcolor, isselected }) => ({
+//   backgroundColor: isselected === 'true' ? customcolor : 'transparent',
+//   color: isselected === 'true' ? 'white' : customcolor,
+//   border: `1px solid ${customcolor}`,
+//   fontWeight: 500,
+//   transition: 'all 0.2s ease',
+//   '&:hover': {
+//     backgroundColor: customcolor,
+//     color: 'white',
+//     transform: 'scale(1.05)',
+//   }
+// }));
+
+const CategoryItem = styled(Box)(({ theme, isselected, customcolor }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '8px',
+  borderRadius: '12px',
+  cursor: 'pointer',
   transition: 'all 0.2s ease',
+  backgroundColor: isselected === 'true' 
+    ? theme.palette.mode === 'dark' 
+      ? `${customcolor}30` 
+      : `${customcolor}20`
+    : 'transparent',
+  border: isselected === 'true' 
+    ? `2px solid ${customcolor}` 
+    // : '2px solid transparent',
+    : theme.palette.mode === 'dark' 
+      ? '2px solid rgba(255, 255, 255, 0.1)'
+      : '2px solid rgba(0, 0, 0, 0.05)',
   '&:hover': {
-    backgroundColor: customcolor,
-    color: 'white',
-    transform: 'scale(1.05)',
+     backgroundColor: theme.palette.mode === 'dark' 
+      ? `${customcolor}20` 
+      : `${customcolor}15`, // 15% opacity on hover
+    transform: 'translateY(-2px)',
+    boxShadow: theme.shadows[2],
   }
+}));
+
+const CategoryImage = styled('img')(({ theme }) => ({
+  width: '104px',
+  height: '64px',
+  objectFit: 'cover',
+  borderRadius: '8px',
+  marginBottom: '8px',
+}));
+
+const CategoryName = styled(Typography)(({ theme, customcolor, isselected }) => ({
+  textAlign: 'center',
+  fontSize: '0.8rem',
+  fontWeight: isselected === 'true' ? 600 : 500,
+  color: isselected === 'true' ? customcolor : theme.palette.text.primary,
 }));
 
 const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMobile }) => {
@@ -65,6 +110,30 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
   const [showServiceCategories, setShowServiceCategories] = useState(false);
   const [animationDirection, setAnimationDirection] = useState('right');
   const categoryRef = useRef(null);
+
+  // image mapping for categories and services
+  const categoryImages = {
+    '': '/categoryBar/all.png' || 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=120&fit=crop&auto=format',
+    'Paid': '/categoryBar/paid.png' || 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=200&h=120&fit=crop&auto=format',
+    'UnPaid': '/categoryBar/volunteer.png' || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200&h=120&fit=crop&auto=format',
+    'Emergency': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
+    'Friends': '/categoryBar/friends.png',
+    'ParkingSpace': '/categoryBar/parking.png' || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop&auto=format',
+    'VehicleRental': '/categoryBar/vehiclesRental.png' || 'https://images.unsplash.com/photo-1549924231-f129b911e442?w=200&h=120&fit=crop&auto=format',
+    'FurnitureRental': '/categoryBar/furnitureRentals.png' || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=120&fit=crop&auto=format',
+    'Laundry': '/categoryBar/laundry.png' || 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=200&h=120&fit=crop&auto=format',
+    'Events': '/categoryBar/events.png' || 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=200&h=120&fit=crop&auto=format',
+    'Playgrounds': '/categoryBar/playgrounds.png' || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=200&h=120&fit=crop&auto=format',
+    'Cleaning': '/categoryBar/cleaning.png' || 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&h=120&fit=crop&auto=format',
+    'Cooking': '/categoryBar/cooking.png' || 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=120&fit=crop&auto=format',
+    'Tutoring': '/categoryBar/tutoring.png' || 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=200&h=120&fit=crop&auto=format',
+    'PetCare': '/categoryBar/petCare.png' || 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=200&h=120&fit=crop&auto=format',
+    'Delivery': '/categoryBar/delivery.png' || 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=200&h=120&fit=crop&auto=format',
+    'Maintenance': '/categoryBar/maintance.png' || 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200&h=120&fit=crop&auto=format',
+    'HouseSaleLease': '/categoryBar/house.png',
+    'LandSaleLease': '/categoryBar/land.png',
+    'Other': '/categoryBar/others.png' || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=120&fit=crop&auto=format'
+  };
 
   const handleTypeChange = (event, newType) => {
     // Prevent default to avoid auto-scrolling
@@ -296,17 +365,31 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
               >
                 <CloseIcon />
               </IconButton>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+              <Grid container spacing={1} justifyContent="center" mt={2}>
                 {helpCategories.map((category) => (
-                  <StyledChip
-                    key={category.value}
-                    label={category.label}
-                    customcolor={category.color}
-                    isselected={(selectedCategory === category.value).toString()}
-                    onClick={() => handleHelpCategorySelect(category.value)}
-                  />
+                  <Grid item xs={6} sm={4} key={category.value}>
+                    <CategoryItem
+                      isselected={(selectedCategory === category.value).toString()}
+                      customcolor={category.color}
+                      onClick={() => handleHelpCategorySelect(category.value)}
+                    >
+                      <CategoryImage 
+                        src={categoryImages[category.value]} 
+                        alt={category.label}
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=120&fit=crop&auto=format';
+                        }}
+                      />
+                      <CategoryName 
+                        customcolor={category.color}
+                        isselected={(selectedCategory === category.value).toString()}
+                      >
+                        {category.label}
+                      </CategoryName>
+                    </CategoryItem>
+                  </Grid>
                 ))}
-              </Box>
+              </Grid>
             </Paper>
           </Slide>
         </Box>
@@ -334,12 +417,11 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
             <Paper
               sx={{
                 mt: 1,
-                p: 2,
+                py: 2, px: 1,
                 borderRadius: '12px',
                 minWidth: isMobile ? '100%' : '300px',
                 maxWidth: isMobile ? '100%' : '80%',
-                maxHeight: '60vh',
-                overflowY: 'auto',
+                
                 ...getGlassmorphismStyle(darkMode),
               }}
             >
@@ -365,16 +447,32 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
               >
                 <CloseIcon />
               </IconButton>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
+              <Box sx={{maxHeight: '60vh', overflowY: 'auto', pt: 2, px: 1}}>
+              <Grid container spacing={1} justifyContent="center">
                 {serviceCategories.map((service) => (
-                  <StyledChip
-                    key={service.value}
-                    label={service.label}
-                    customcolor={service.color}
-                    isselected={(selectedCategory === service.value).toString()}
-                    onClick={() => handleServiceCategorySelect(service.value)}
-                  />
+                  <Grid item xs={6} sm={4} key={service.value}>
+                    <CategoryItem
+                      isselected={(selectedCategory === service.value).toString()}
+                      customcolor={service.color}
+                      onClick={() => handleServiceCategorySelect(service.value)}
+                    >
+                      <CategoryImage 
+                        src={categoryImages[service.value]} 
+                        alt={service.label}
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=120&fit=crop&auto=format';
+                        }}
+                      />
+                      <CategoryName 
+                        customcolor={service.color}
+                        isselected={(selectedCategory === service.value).toString()}
+                      >
+                        {service.label}
+                      </CategoryName>
+                    </CategoryItem>
+                  </Grid>
                 ))}
+              </Grid>
               </Box>
             </Paper>
           </Slide>
