@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Public pages -->
+  <url>
+    <loc>https://helper.net.in/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <url>
+    <loc>https://helper.net.in/login</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://helper.net.in/register</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://helper.net.in/forgot-password</loc>
+    <priority>0.4</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://helper.net.in/terms-conditions</loc>
+    <priority>0.3</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://helper.net.in/privacy-policy</loc>
+    <priority>0.3</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <!-- Service Categories -->
+  <url><loc>https://helper.net.in/services/ParkingSpace</loc></url>
+  <url><loc>https://helper.net.in/services/VehicleRental</loc></url>
+  <url><loc>https://helper.net.in/services/FurnitureRental</loc></url>
+  <url><loc>https://helper.net.in/services/Laundry</loc></url>
+  <url><loc>https://helper.net.in/services/Events</loc></url>
+  <url><loc>https://helper.net.in/services/Playgrounds</loc></url>
+  <url><loc>https://helper.net.in/services/Cleaning</loc></url>
+  <url><loc>https://helper.net.in/services/Cooking</loc></url>
+  <url><loc>https://helper.net.in/services/Tutoring</loc></url>
+  <url><loc>https://helper.net.in/services/PetCare</loc></url>
+  <url><loc>https://helper.net.in/services/Delivery</loc></url>
+  <url><loc>https://helper.net.in/services/Maintenance</loc></url>
+  <url><loc>https://helper.net.in/services/HouseSaleLease</loc></url>
+  <url><loc>https://helper.net.in/services/LandSaleLease</loc></url>
+  <url><loc>https://helper.net.in/services/Other</loc></url>
+
+</urlset>

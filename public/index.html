@@ -13,11 +13,52 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <!-- <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" /> -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none" />
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <meta
-      name="description"
-      content="Help others with their needs and get paid for your services." 
-    /> <!-- Web site created using create-react-app -->
+    
+    <!-- ✅ SEO Meta Tags -->
+    <title>Helper – Find & Offer Local Help, Jobs & Services</title>
+    <meta 
+      name="description" 
+      content="Helper is a community-driven platform connecting people who need help with those willing to offer it—whether for paid work, volunteering, or emergencies." 
+    />
+    <meta 
+      name="keywords" 
+      content="Helper, helper.net.in, local services, community help, jobs, volunteering, emergency support, tutoring, delivery, cleaning, parking, rental, pet care" 
+    />
+    <link rel="canonical" href="https://helper.net.in/" />
+
+    <!-- ✅ Open Graph / Facebook -->
+    <meta property="og:title" content="Helper – Find & Offer Local Help, Jobs & Services" />
+    <meta property="og:description" content="Need help or want to offer services? From tutoring to urgent requests, Helper makes it simple and fast." />
+    <meta property="og:url" content="https://helper.net.in/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://helper.net.in/logo192.png" />
+
+    <!-- ✅ Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Helper – Find & Offer Local Help, Jobs & Services" />
+    <meta name="twitter:description" content="Post your needs or offer your skills—Helper connects communities for jobs, volunteering, and emergencies." />
+    <meta name="twitter:image" content="https://helper.net.in/logo192.png" />
+
+    <!-- ✅ Structured Data (JSON-LD for Google Rich Results) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Helper",
+      "url": "https://helper.net.in/",
+      "description": "Helper is a community-driven platform connecting people who need help with those willing to offer it.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://helper.net.in/search?query={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- ✅ Categories Metadata (Helps Google understand offerings) -->
+    <meta name="category" content="ParkingSpace, VehicleRental, FurnitureRental, Laundry, Events, Playgrounds, Cleaning, Cooking, Tutoring, PetCare, Delivery, Maintenance, HouseSaleLease, LandSaleLease, Other" />
+    
+     <!-- Web site created using create-react-app -->
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
@@ -33,7 +74,12 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>Helper</title>
+    <!-- <title>Helper</title> -->
+
+    <!-- Google Sign-in -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- ✅ Dark mode preload -->
     <script>
       // Check for dark mode preference before React loads
       const savedMode = localStorage.getItem('darkMode');
