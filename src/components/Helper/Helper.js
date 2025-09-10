@@ -1949,6 +1949,17 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               }}
                             />
                           }
+                          {post.postType !== 'HelpRequest' &&
+                            <Chip
+                              label={post.distance < 1 ? `${Math.round(post.distance * 1000)} m away` : `${post.distance.toFixed(1)} km away`}
+                              variant="outlined" size="small"
+                              sx={{
+                                color: '#fff',
+                                px: 0.5, py: 0.5,
+                                transition: 'transform 0.2s ease'
+                              }}
+                            />
+                          }
                           {/* {post.postType !== 'HelpRequest' &&
                             <Chip
                               // icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
@@ -2008,6 +2019,18 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   //   borderColor: 'rgba(255,255,255,0.5)',
                                   //   fontSize: '0.75rem'
                                   // }}
+                                  sx={{
+                                    backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                    color: '#90caf9',
+                                    fontSize: '0.7rem',
+                                    height: '20px'
+                                  }}
+                                />
+                              )}
+                              {post.distance && (
+                                <Chip 
+                                  label={post.distance < 1 ? `${Math.round(post.distance * 1000)} m away` : `${post.distance.toFixed(1)} km away`}
+                                  size="small" 
                                   sx={{
                                     backgroundColor: 'rgba(33, 150, 243, 0.2)',
                                     color: '#90caf9',
