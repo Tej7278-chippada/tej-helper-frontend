@@ -773,6 +773,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // Define the bounds of the world
   const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
 
+  const recenterUserLocation = () => {
+    if (mapRef.current && userLocation) {
+      mapRef.current.flyTo([userLocation.latitude, userLocation.longitude], 15, {
+        duration: 0.5
+      });
+    }
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* Demo Posts Banner Section */}
@@ -939,8 +947,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 position: 'absolute',
                 top: isMobile ? '62px' : '72px',
                 left: '1px',
-                width: '95%',
-                maxWidth: isMobile ? '400px' : '600px',
+                // width: '95%',
+                minWidth: isMobile ? '100%' : '600px',
+                maxWidth: isMobile ? '100%' : '600px',
                 zIndex: 1000,
                 borderRadius: '12px',
                 boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
@@ -958,7 +967,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </Box>
                 <Box display="flex" justifyContent="start" mb={2} mt={1}>
                 <LocationOnIcon color='primary'/>
-                <Typography variant="body1" sx={{marginLeft:'8px', color:'grey' }}>
+                <Typography variant="body1" sx={{marginLeft:'8px', color:'grey', cursor: 'pointer', '&:hover': { color: theme.palette.success.main } }} onClick={recenterUserLocation}>
                   {currentAddress || "Fetching location..."}
                   {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
                 </Typography>
@@ -1038,8 +1047,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
                 {/* Locate Me Button */}
                 <Box display="flex" justifyContent="space-between" marginTop="1rem">
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <IconButton
+                {/* <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> */}
+                  {/* <IconButton
                     style={{
                       // display: 'inline-block',
                       // float: 'right',
@@ -1055,20 +1064,19 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   </IconButton>
                   <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
                     {mapMode === 'normal' ? 'Normal' : 'Salellite'}
-                  </Typography>
-                </Box>
-                  {locationDetails && (
-                  <Box sx={{mx:'10px'}}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Accuracy (meters):
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {locationDetails.accuracy}
-                    </Typography>
-                  </Box>
-                  )}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <IconButton
+                  </Typography> */}
+                  <Button
+                    variant="outlined"
+                    startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon />}
+                    onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
+                    sx={{ borderRadius: 3, textTransform: 'none'}}
+                  >
+                    {mapMode === 'normal' ? 'Satellite' : 'Normal'}
+                  </Button>
+                {/* </Box> */}
+                  
+                  {/* <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> */}
+                    {/* <IconButton
                       onClick={fetchUserLocation}
                       disabled={loadingLocation}
                       sx={{
@@ -1084,9 +1092,28 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     </IconButton>
                     <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
                       Locate Me
+                    </Typography> */}
+                    <Button
+                      variant="outlined"
+                      startIcon={loadingLocation ? <CircularProgress size={16} /> : <MyLocationRoundedIcon />}
+                      onClick={fetchUserLocation}
+                      disabled={loadingLocation}
+                      sx={{ borderRadius: 3, textTransform: 'none' }}
+                    >
+                      Locate Me
+                    </Button>
+                  {/* </Box> */}
+                </Box>
+                {locationDetails && (
+                  <Box sx={{m:'10px'}}>
+                    {/* <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Accuracy (meters):
+                    </Typography> */}
+                    <Typography variant="body2" color="textSecondary">
+                      * Your location accuracy is approximately <strong>{locationDetails.accuracy}m</strong>.
                     </Typography>
                   </Box>
-                </Box>
+                )}
               </CardContent>
             </Card>
           )}
@@ -1245,6 +1272,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               right: '1px', ml: '4px',
               // width: '90%',
               // maxWidth: '400px',
+              minWidth: isMobile ? '100%' : 'auto',
+              maxWidth: isMobile ? '100%' : 'auto',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px', backdropFilter: 'blur(10px)',
               /* boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', */  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
               // background: 'rgba(255, 255, 255, 0.9)',
@@ -1415,7 +1444,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </Typography> */}
               </Box>
               <Divider/>
-              <Box sx={{maxWidth: '450px'}}>
+              <Box sx={{minWidth: isMobile ? '100%' : '450px', maxWidth: isMobile ? '100%' : '450px'}}>
                 {/* Filter Card */}
                 <Box sx={{
                   m: 0,
@@ -1425,7 +1454,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 }}>
                    <Box sx={{ display: 'flex', flexGrow: 1, float: 'inline-end', margin:1 }}>
                     <Button
-                      variant="outlined" size="small" sx={{borderRadius: '8px'}}
+                      variant="outlined" size="small" sx={{borderRadius: '8px', textTransform: 'none'}}
                       onClick={() => setIsExtraFiltersOpen((prev) => !prev)}
                     >
                       {isExtraFiltersOpen ? 'Close Extra Filters' : 'Show Extra Filters'}
@@ -1541,7 +1570,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           variant="outlined"
                           onClick={handleResetFilters}
                           disabled={isDefaultFilters}
-                          fullWidth sx={{ borderRadius:'8px' }}
+                          fullWidth sx={{ borderRadius:'8px', textTransform: 'none' }}
                         >
                           Reset
                         </Button>
@@ -1549,7 +1578,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           variant="contained" 
                           onClick={handleApplyFilters}
                           disabled={isDefaultFilters}
-                          fullWidth sx={{ borderRadius:'8px'}}
+                          fullWidth sx={{ borderRadius:'8px', textTransform: 'none'}}
                         >
                           Apply
                         </Button>
