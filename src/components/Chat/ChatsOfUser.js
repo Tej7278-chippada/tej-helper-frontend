@@ -58,7 +58,7 @@ const SearchContainer = styled(Box)(({ theme }) => ({
   transition: 'all 0.3s ease',
 }));
 
-const SearchTextField = styled(TextField)(({ theme, expanded }) => ({
+const SearchTextField = styled(TextField, { shouldForwardProp: (prop) => prop !== "expanded", })(({ theme, expanded }) => ({
   transition: 'all 0.3s ease',
   width: expanded ? '100%' : '40px',
   overflow: 'hidden',
