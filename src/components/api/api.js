@@ -101,14 +101,15 @@ export const fetchUserPosts = () => {
 };
 
 // export const fetchPosts = () => API.get('/api/posts');
-export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '') => {
+export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '', sortBy = 'nearest') => {
   const params = { skip, limit,
     categories: filters.categories,
     serviceType: filters.serviceType,
     gender: filters.gender,
     postStatus: filters.postStatus,
     price: `${filters.priceRange[0]}-${filters.priceRange[1]}`,
-    postType: filters.serviceType ? 'ServiceOffering' : 'HelpRequest' // added this line for only shows the Helper posts on ALL section
+    postType: filters.serviceType ? 'ServiceOffering' : 'HelpRequest', // added this line for only shows the Helper posts on ALL section
+    sortBy: sortBy
   };
 
   // Add search query parameter

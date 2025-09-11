@@ -1,6 +1,6 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery, ListItemIcon} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -38,6 +38,7 @@ import WorkIcon from '@mui/icons-material/Work';
 import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
 import { formatPrice } from '../../utils/priceFormatter';
 import MenuCard from './MenuCard';
+import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -51,6 +52,7 @@ const globalCache = {
 
 // Default filter values
 const DEFAULT_FILTERS = {
+  sortBy: 'nearest',
   categories: 'Paid',
   serviceType: '',
   gender: '',
@@ -222,8 +224,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const [selectedCategory, setSelectedCategory] = useState(() => {
     const savedFilters = localStorage.getItem('helperFilters');
     return savedFilters 
-      ? JSON.parse(savedFilters).categories || JSON.parse(savedFilters).serviceType || '' 
-      : '';
+      ? JSON.parse(savedFilters).categories || JSON.parse(savedFilters).serviceType || 'Paid' 
+      : 'Paid';
   });
   // useEffect to sync selectedCategory with filters
   // useEffect(() => {
@@ -261,12 +263,42 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const handleResetFilters = () => {
     setLocalFilters(DEFAULT_FILTERS);
     setFilters(DEFAULT_FILTERS);
-    setSelectedCategory(''); // for category bar 'ALL' selection 
+    setSelectedCategory('Paid'); // for category bar 'ALL' selection 
+    setSortBy('nearest');
     setSkip(0);
     setPosts([]);
     // Clear cache for the old filter combination
     globalCache.lastCacheKey = null;
     localStorage.removeItem('helperFilters');
+    setShowDistanceRanges(false);
+  };
+
+  const [sortBy, setSortBy] = useState(() => {
+    const savedFilters = localStorage.getItem('helperFilters');
+    return savedFilters 
+      ? JSON.parse(savedFilters).sortBy
+      : 'nearest';
+  }); // 'latest' or 'nearest'
+  // const [showSortMenu, setShowSortMenu] = useState(false);
+
+  // function to handle sort change
+  const handleSortChange = (sortType) => {
+    setSortBy(sortType);
+    // setShowSortMenu(false);
+    setShowDistanceRanges(false);
+    // Update filters
+    const newFilters = { 
+      ...filters,
+      sortBy: sortType
+    };
+
+    setFilters(newFilters);
+    setLocalFilters(newFilters);
+    setSkip(0);
+    // Clear cache to force refetch with new sort order
+    globalCache.lastCacheKey = null;
+    // Ensure filters are saved to localStorage
+    localStorage.setItem('helperFilters', JSON.stringify(newFilters));
   };
 
   // Custom marker icon
@@ -510,7 +542,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               return;
             }
           // No valid cache - fetch fresh data
-          const response = await fetchPosts(0, 12, userLocation, distanceRange, filters, searchQuery);
+          const response = await fetchPosts(0, 12, userLocation, distanceRange, filters, searchQuery, sortBy);
           const newPosts = response.data.posts || [];
           setTotalPosts(response.data.totalCount);
           globalCache.totalPostsCount = (response.data.totalCount);
@@ -547,7 +579,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     if (userLocation && distanceRange) {
       fetchData();
     }
-  }, [userLocation, distanceRange, filters, generateCacheKey, searchQuery]); // Add distanceRange as dependency
+  }, [userLocation, distanceRange, filters, generateCacheKey, searchQuery, sortBy]); // Add distanceRange as dependency
 
   // Load more posts function
   const loadMorePosts = async () => {
@@ -555,7 +587,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     
     try {
       setLoadingMore(true);
-      const response = await fetchPosts(skip, 12, userLocation, distanceRange, filters, searchQuery);
+      const response = await fetchPosts(skip, 12, userLocation, distanceRange, filters, searchQuery, sortBy);
       const newPosts = response.data.posts || [];
       
       if (newPosts.length > 0) {
@@ -1230,12 +1262,73 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             )}
           </IconButton>}
           <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-6px', marginLeft:'8px'}}>
+            {/* Sort Button */}
+            {/* <Button
+              variant="outlined"
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              startIcon={<SortIcon />}
+              sx={{
+                borderRadius: "12px",
+                textTransform: 'none',
+                fontWeight: 600,
+                borderColor: 'primary.main',
+                color: 'primary.main',
+                '&:hover': {
+                  borderColor: 'primary.dark',
+                  backgroundColor: 'primary.light',
+                }
+              }}
+            >
+              Sort
+            </Button> */}
+
+            {/* Sort Menu */}
+            {/* {showSortMenu && (
+              <Card
+                sx={{
+                  position: 'absolute',
+                  top: isMobile ? '62px' : '72px',
+                  right: '8px',
+                  zIndex: 1001,
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  minWidth: '200px'
+                }}
+              >
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, px: 1 }}>
+                    Sort by
+                  </Typography>
+                  <MenuItem 
+                    onClick={() => handleSortChange('latest')}
+                    selected={sortBy === 'latest'}
+                    sx={{ borderRadius: '8px', mb: 0.5 }}
+                  >
+                    <ListItemIcon>
+                      {sortBy === 'latest' && <CheckIcon fontSize="small" />}
+                    </ListItemIcon>
+                    Latest posts first
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSortChange('nearest')}
+                    selected={sortBy === 'nearest'}
+                    sx={{ borderRadius: '8px' }}
+                  >
+                    <ListItemIcon>
+                      {sortBy === 'nearest' && <CheckIcon fontSize="small" />}
+                    </ListItemIcon>
+                    Nearest posts first
+                  </MenuItem>
+                </Box>
+              </Card>
+            )} */}
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
           <Button
             variant="contained"
             // onClick={handleDistanceMenuOpen}
-            onClick={() => setShowDistanceRanges(true)}
+            onClick={() => setShowDistanceRanges(!showDistanceRanges)}
             startIcon={<ShareLocationRoundedIcon />}
             sx={{
               // backgroundColor: "#1976d2",
@@ -1442,6 +1535,32 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 >
                   *Distance range {isMobile ? '\n' : ' '} upto 1000km
                 </Typography> */}
+              </Box>
+              <Divider/>
+              <Box sx={{ p: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, px: 1 }}>
+                  Sort by
+                </Typography>
+                <MenuItem 
+                  onClick={() => handleSortChange('nearest')}
+                  selected={sortBy === 'nearest'}
+                  sx={{ borderRadius: '8px' }}
+                >
+                  <ListItemIcon>
+                    {sortBy === 'nearest' && <CheckRoundedIcon fontSize="small" color="success" />}
+                  </ListItemIcon>
+                  Nearest posts first
+                </MenuItem>
+                <MenuItem 
+                  onClick={() => handleSortChange('latest')}
+                  selected={sortBy === 'latest'}
+                  sx={{ borderRadius: '8px', mb: 0.5 }}
+                >
+                  <ListItemIcon>
+                    {sortBy === 'latest' && <CheckRoundedIcon fontSize="small" color="success" />}
+                  </ListItemIcon>
+                  Latest posts first
+                </MenuItem>
               </Box>
               <Divider/>
               <Box sx={{minWidth: isMobile ? '100%' : '450px', maxWidth: isMobile ? '100%' : '450px'}}>

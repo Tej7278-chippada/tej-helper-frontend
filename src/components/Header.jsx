@@ -381,7 +381,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
     localStorage.removeItem('userLocation');
     localStorage.removeItem('distanceRange');
     localStorage.removeItem('tokenProfilePic');
-    // localStorage.clear();
+    localStorage.clear();
     navigate('/login');
   };
 
