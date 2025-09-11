@@ -76,7 +76,7 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
 
 const SearchContainer = styled(Box)(({ theme }) => ({
   display: 'flex', 
-  justifyContent: 'flex-end', 
+  justifyContent: 'center', 
   transition: 'all 0.3s ease',
 }));
 
@@ -457,7 +457,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     return savedSearch || '';
   });
   const [isSearching, setIsSearching] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(() => {
+  const savedSearch = localStorage.getItem('helperSearchQuery');
+    return savedSearch ? true : false;
+  });
   const inputRef = useRef(null);
 
   const handleSearchClick = () => {
@@ -1808,7 +1811,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           />
         </Box></>)} */}
         {/* Search Bar */}
-         {isMobile && expanded &&  <SearchContainer sx={{mx : 2}}>
+         {isMobile && expanded &&  <SearchContainer sx={{mx : 1, width: '350px'}}>
             <Box>
             <SearchTextField
               variant="outlined"
