@@ -139,7 +139,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   priceRange: [0, 10000],
   // });
   const [userLocation, setUserLocation] = useState(null);
-  const [currentAddress, setCurrentAddress] = useState('');
+  const [currentAddress, setCurrentAddress] = useState(() => {
+    const savedAddress = localStorage.getItem('userAddress');
+    return savedAddress 
+      ? savedAddress
+      : '';
+  });
   const [distanceRange, setDistanceRange] = useState(10); // Default distance range in km
   // const [anchorEl, setAnchorEl] = useState(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -429,12 +434,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   useEffect(() => {
     const storedLocation = localStorage.getItem("userLocation");
     const savedDistance = localStorage.getItem('distanceRange');
+    const savedAddress = localStorage.getItem('userAddress');
 
     if (storedLocation) {
       // Use the stored location
       const { latitude, longitude } = JSON.parse(storedLocation);
       setUserLocation({ latitude, longitude });
-      fetchAddress(latitude, longitude);
+      // fetchAddress(latitude, longitude);
+      setCurrentAddress(savedAddress);
       if (savedDistance) {
         setDistanceRange(Number(savedDistance));
       }
@@ -659,6 +666,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
       const data = await response.json();
       setCurrentAddress(data.display_name);
+      localStorage.setItem('userAddress', data.display_name);
     } catch (error) {
       console.error("Error fetching address:", error);
     }
