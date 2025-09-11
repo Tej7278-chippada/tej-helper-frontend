@@ -108,7 +108,8 @@ import {
   VolunteerActivismRounded as FreeIcon,
   EmergencyRounded as EmergencyRoundedIcon,
   LocalParkingRounded as ParkingIcon,
-  TwoWheelerRounded as RentalIcon
+  TwoWheelerRounded as RentalIcon,
+  PinDropRounded as PinDropIcon
 } from '@mui/icons-material';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
@@ -529,6 +530,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         type: 'Point',
         address: editingProduct.location.address,
       });
+      // setKeepPreviousLocation(true);
+      // setProtectLocation(editingProduct.location.isProtected || false);
       
       // Set date and time fields if they exist
       if (editingProduct.serviceDate) {
@@ -981,12 +984,14 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
     fetchPostsData();
     const storedLocation = localStorage.getItem("userLocation");
+    const savedAddress = localStorage.getItem('userAddress');
     if (storedLocation) {
       // Use the stored location
       const { latitude, longitude } = JSON.parse(storedLocation);
       // setUserLocation({ latitude, longitude });
       setCurrentLocation({ latitude, longitude });
-      fetchAddress(latitude, longitude);
+      // fetchAddress(latitude, longitude);
+      setCurrentAddress(savedAddress);
       setLocationDetails({
         latitude,
         longitude,
@@ -1014,6 +1019,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
       const data = await response.json();
       setCurrentAddress(data.display_name);
+      localStorage.setItem('userAddress', data.display_name);
     } catch (error) {
       console.error("Error fetching address:", error);
     }
@@ -1122,6 +1128,18 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     }
   };
 
+  const [keepPreviousLocation, setKeepPreviousLocation] = useState(false);
+
+  const toggleKeepPreviousLocation = (e) => {
+    const isChecked = e.target.checked;
+    setKeepPreviousLocation(isChecked);
+    if (isChecked) {
+      setSnackbar({ open: true, message: 'Using previous location data from post', severity: 'info' });
+    } else {
+      setSnackbar({ open: true, message: 'Using current location data', severity: 'info' });
+    }
+  };
+
   const offsetCoordinates = (lat, lng, distanceMeters) => {
     // Earth's radius in meters
     const earthRadius = 6378137;
@@ -1158,10 +1176,18 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   // Apply location offset if privacy protection is enabled
   let finalLocation = {
     latitude: currentLocation.latitude,
-    longitude: currentLocation.longitude
+    longitude: currentLocation.longitude,
+    address: currentAddress
   };
 
-  if (protectLocation) {
+  if (keepPreviousLocation && editingProduct) {
+    // Use the original post's location
+    finalLocation = {
+      latitude: editingProduct.location.latitude,
+      longitude: editingProduct.location.longitude,
+      address: editingProduct.location.address
+    };
+  } else if (protectLocation) {
     finalLocation = offsetCoordinates(
       currentLocation.latitude,
       currentLocation.longitude,
@@ -1307,7 +1333,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       // state: locationDetails.state,
       // nation: locationDetails.nation,
       // pincode: locationDetails.pincode,
-      address: fakeAddress ? fakeAddress : currentAddress,
+      address: fakeAddress ? fakeAddress : finalLocation.address,
       coordinates: [finalLocation.longitude, finalLocation.latitude],
       type: 'Point',
       isProtected: protectLocation,
@@ -1805,7 +1831,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 variant="outlined"
                 startIcon={mapMode === 'normal' ? <SatelliteIcon /> : <MapIcon />}
                 onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
-                sx={{ borderRadius: 3 }}
+                sx={{ borderRadius: 3, textTransform: 'none' }}
               >
                 {mapMode === 'normal' ? 'Satellite' : 'Normal'}
               </Button>
@@ -1813,7 +1839,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 variant="outlined"
                 startIcon={loadingLocation ? <CircularProgress size={16} /> : <MyLocationIcon />}
                 disabled={loadingLocation} onClick={locateUser}
-                sx={{ borderRadius: 3 }}
+                sx={{ borderRadius: 3, textTransform: 'none' }}
               >
                 Locate Me
               </Button>
@@ -1907,7 +1933,37 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 </>
                 }
               </Box>
-
+              {editingProduct && (
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    p: isMobile ? 1 : 2, 
+                    bgcolor: 'rgba(255, 255, 255, 0.7)',
+                    borderRadius: 2,
+                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                    mb: 1
+                  }}
+                >
+                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                    <Box display="flex" alignItems="center">
+                      <PinDropIcon sx={{ color: 'info.main', mr: 2 }} />
+                      <Box>
+                        <Typography variant="body1" fontWeight={500}>
+                          Use Previous Location
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Keep the previous location data from this post
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Switch
+                      checked={keepPreviousLocation}
+                      onChange={toggleKeepPreviousLocation}
+                      color="primary"
+                    />
+                  </Box>
+                </Paper>
+              )}
               {/* Privacy Protection Toggle */}
               <Paper 
                 elevation={0}
@@ -1999,7 +2055,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   startIcon={<AutoAwesomeIcon />}
                   onClick={() => fetchUnsplashImages(formData.title)}
                   disabled={loadingGeneration || !formData.title}
-                  sx={{ borderRadius: 2, px: isMobile ? '24px' : 'null'  }}
+                  sx={{ borderRadius: 2, px: isMobile ? '24px' : 'null', textTransform: 'none', background: 'linear-gradient(135deg, #1976d2 0%, #9c27b0 100%)', color: '#fff' }}
                 >
                   Generate Images
                 </Button>
@@ -2145,7 +2201,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 variant="outlined"
                 component="label"
                 startIcon={<AddPhotoAlternateRoundedIcon />}
-                sx={{ borderRadius: 2, mb: 2, bgcolor: 'rgba(24, 170, 248, 0.07)'}}
+                sx={{ borderRadius: 2, mb: 2, bgcolor: 'rgba(24, 170, 248, 0.07)', textTransform: 'none'}}
                 fullWidth={isMobile} 
                 // variant="text"
     //                 component="label" size="small"
@@ -2162,7 +2218,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               </Typography>
               {/* <PhotoCameraIcon sx={{ color: 'white' }} /> */}
               {newMedia.length > 0 && (
-                <Box sx={{ display: 'flex', gap: '4px', p:'6px', borderRadius: '12px', overflowX: 'auto', scrollbarWidth: 'thin', scrollbarColor: '#888 transparent', bgcolor:'#f5f5f5' }}>
+                <Box sx={{ display: 'flex', gap: '4px', p:'6px', borderRadius: '12px', overflowX: 'auto', scrollbarWidth: 'thin', scrollbarColor: '#888 transparent', bgcolor: 'rgba(25, 118, 210, 0.05)' }}>
                   {newMedia.map((file, index) => (
                     <Box key={index} style={{ display: 'flex', position: 'relative', alignItems: 'flex-start', flexDirection: 'column' }}>
                       <img
@@ -2196,10 +2252,10 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               )}
 
               {editingProduct &&
-                <Box sx={{ mt: 1, p: '6px', bgcolor: '#f5f5f5', borderRadius: '12px'}} >
+                <Box sx={{ mt: 1, p: '6px', bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: '12px'}} >
                   {/* Existing media with delete option */}
-                  <Typography variant="subtitle1">Images previously posted</Typography>
-                  <Box sx={{ display: 'flex', borderRadius: '8px', gap: '4px', overflowX: 'scroll', scrollbarWidth: 'thin', scrollbarColor: '#888 transparent' }}>
+                  <Typography variant="subtitle1" mb={1}>Images previously posted</Typography>
+                  <Box sx={{ display: 'flex', borderRadius: '8px', gap: '4px', overflowX: 'scroll', pb: 1 }}>
                     {loadingMedia ?
                       <Box display="flex" justifyContent="center" alignItems="center" flexDirection="row" m={2} gap={1} flex={1}>
                         <CircularProgress size={24} />
