@@ -206,10 +206,10 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
       : '0 8px 32px rgba(0, 0, 0, 0.2)',
   });
 
-  const getGlassmorphismMenuStyle = (darkMode) => ({
-    background: 'rgba(0, 0, 0, 0)',
-    backdropFilter: 'blur(1px)',
-  });
+  // const getGlassmorphismMenuStyle = (darkMode) => ({
+  //   background: 'rgba(0, 0, 0, 0)',
+  //   backdropFilter: 'blur(1px)',
+  // });
 
   const helpCategories = [
     { value: 'Paid', label: 'Paid', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.1)' },
@@ -239,7 +239,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
     <Box
       ref={categoryRef}
       sx={{
-        ...getGlassmorphismMenuStyle(darkMode),
+        // ...getGlassmorphismMenuStyle(darkMode),
         m: '8px 4px',
         p: isMobile ? '8px' : '8px',
         borderRadius: '12px', 

@@ -1846,6 +1846,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   <Typography variant="h6" gutterBottom >
                     Filters
                   </Typography>
+                  <IconButton
+                    onClick={() => setIsExtraFiltersOpen(false)}
+                    sx={{
+                      position: 'absolute',
+                      top: '6px',
+                      right: '6px'
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
                   
                   <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
 
