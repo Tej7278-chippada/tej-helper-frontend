@@ -42,6 +42,7 @@ import MenuCard from './MenuCard';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+// import LayersIcon from '@mui/icons-material/Layers';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -1314,8 +1315,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               right: 0,
               bottom: 0,
               zIndex: 2,
-              //   background: 'linear-gradient(to bottom, rgba(238, 204, 67, 0.85) 0%, rgba(163, 143, 12, 0.85) 50%, transparent 100%)',
-              background: 'linear-gradient(to bottom, rgba(67, 97, 238, 0.85) 0%, rgba(58, 12, 163, 0.85) 50%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(238, 204, 67, 0.85) 0%, rgba(163, 143, 12, 0.85) 50%, transparent 100%)',
+              // background: 'linear-gradient(0deg,rgba(155, 39, 176, 0.8) 0%, rgba(57, 12, 163, 0.8) 50%, transparent 100%)', // 'linear-gradient(to bottom, rgba(67, 97, 238, 0.85) 0%, rgba(58, 12, 163, 0.85) 50%, transparent 100%)',
               color: 'white',
               padding: isMobile ? '1.5rem 1rem' : '2rem',
               pt: '6rem',
@@ -1338,7 +1339,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 zIndex: -1
               },
               '&:hover': {
-                background: 'linear-gradient(to bottom, rgba(67, 97, 238, 0.85) 0%, rgba(58, 12, 163, 0.85) 50%, transparent 100%)',
+                background: 'linear-gradient(to bottom, rgba(238, 204, 67, 0.85) 0%, rgba(163, 143, 12, 0.85) 50%, transparent 100%)',
               }
             }}
             onClick={hideOverlay}
@@ -1471,7 +1472,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
             Posts
           </Typography> */}
-          <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '6px', marginLeft: isMobile ? '-12px' : '-14px'}}>
+          {/* <Box display="flex" justifyContent="flex-start" sx={{flexGrow: 1, marginRight: '6px', marginLeft: isMobile ? '-12px' : '-14px'}}>
           <IconButton  onClick={() => setShowMap(true)}sx={{
               borderRadius: '12px',
               padding: '8px 12px',
@@ -1491,25 +1492,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap'
               }}>
-              {/* {currentAddress || "Fetching location..."} */}
               {(currentAddress.split(" ").length > (isMobile ? 2 : 3) ? `${currentAddress.split(" ").slice(0, (isMobile ? 2 : 3)).join(" ")}...` : currentAddress) || "Fetching location..."}
             </Typography>
           </IconButton>
           </Box>
-          <Box>
-          {/* <IconButton color="primary" onClick={() => setShowMap(true)}>
-            <LocationOnIcon />
-            <Typography variant="body1" sx={{marginLeft:'8px' }}>
-              {currentAddress || "Fetching location..."}
-              {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."}
-            </Typography>
-          </IconButton> */}
-          {/* <IconButton color="primary">
-            <RefreshIcon onClick={refreshLocation} />
-          </IconButton> */}
+          <Box> */}
           
           {/* Floating Map Card */}
-          {showMap && (
+          {/* {showMap && (
             <Card
               sx={{
                 position: 'absolute',
@@ -1526,7 +1516,6 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               }}
             >
               <CardContent>
-                {/* Close Button */}
                 <Box display="flex" justifyContent="space-between" alignItems="center">
                   <Typography variant="h6">Your Location</Typography>
                   <IconButton onClick={() => setShowMap(false)}>
@@ -1537,13 +1526,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 <LocationOnIcon color='primary'/>
                 <Typography variant="body1" sx={{marginLeft:'8px', color:'grey', cursor: 'pointer', '&:hover': { color: theme.palette.success.main } }} onClick={recenterUserLocation}>
                   {currentAddress || "Fetching location..."}
-                  {/* {(currentAddress.split(" ").length > 3 ? `${currentAddress.split(" ").slice(0, 3).join(" ")}...` : currentAddress) || "Fetching location..."} */}
                 </Typography>
-                </Box>
+                </Box> */}
 
                 {/* Map */}
-                <Box sx={{ height: '300px', borderRadius: '8px', overflow: 'hidden' }}>
-                {/* {userLocation && ( */}
+                {/* <Box sx={{ height: '300px', borderRadius: '8px', overflow: 'hidden' }}>
                   <MapContainer
                     center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
                     zoom={getZoomLevel(distanceRange)}
@@ -1562,7 +1549,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
                       noWrap={true} // Disable infinite wrapping
                     />
-                    {/* Labels and Roads Layer (Overlay) */}
+                    Labels and Roads Layer (Overlay)
                     {mapMode === 'satellite' && (
                       <TileLayer
                         url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
@@ -1574,7 +1561,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         <Popup>Your Current Location</Popup>
                       </Marker>
                     )}
-                    {/* Distance Circles */}
+                    Distance Circles
                     {userLocation && distanceValues.map((radius) => (
                       <Circle
                         key={radius}
@@ -1593,10 +1580,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         //   },
                         // }}
                       >
-                        {/* <Popup>{distanceRange} km</Popup> */}
+                        //<Popup>{distanceRange} km</Popup>
                       </Circle>
                     ))}
-                    {/* Render a circle for custom distances (if it's not in distanceValues) */}
+                    Render a circle for custom distances (if it's not in distanceValues)
                     {userLocation && !distanceValues.includes(distanceRange) && (
                       <Circle
                         center={[userLocation.latitude, userLocation.longitude]}
@@ -1610,29 +1597,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       />
                     )}
                   </MapContainer>
-                {/* )} */}
-                </Box>
+                </Box> */}
 
                 {/* Locate Me Button */}
-                <Box display="flex" justifyContent="space-between" marginTop="1rem">
-                {/* <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> */}
-                  {/* <IconButton
-                    style={{
-                      // display: 'inline-block',
-                      // float: 'right',
-                      fontWeight: '500', width: '60px', borderRadius: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                      boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px'
-                    }}
-                    onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
-                  >
-                    <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
-                      <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
-                    </Tooltip>
-                  </IconButton>
-                  <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
-                    {mapMode === 'normal' ? 'Normal' : 'Salellite'}
-                  </Typography> */}
+                {/* <Box display="flex" justifyContent="space-between" marginTop="1rem">
                   <Button
                     variant="outlined"
                     startIcon={mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon />}
@@ -1641,26 +1609,6 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   >
                     {mapMode === 'normal' ? 'Satellite' : 'Normal'}
                   </Button>
-                {/* </Box> */}
-                  
-                  {/* <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}> */}
-                    {/* <IconButton
-                      onClick={fetchUserLocation}
-                      disabled={loadingLocation}
-                      sx={{
-                        width: '60px', borderRadius: '10px',
-                        backgroundColor: 'rgba(255, 255, 255, 0.26)',
-                        boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)', marginLeft: '0px',
-                        // height: '50px',
-                      }}
-                    >
-                      <Tooltip title={loadingLocation ? 'Fetching location...' : 'Locate me on Map'}>
-                        <>{loadingLocation ? <CircularProgress size={24} /> : <MyLocationRoundedIcon />}</>
-                      </Tooltip>
-                    </IconButton>
-                    <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
-                      Locate Me
-                    </Typography> */}
                     <Button
                       variant="outlined"
                       startIcon={loadingLocation ? <CircularProgress size={16} /> : <MyLocationRoundedIcon />}
@@ -1670,13 +1618,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     >
                       Locate Me
                     </Button>
-                  {/* </Box> */}
                 </Box>
                 {locationDetails && (
                   <Box sx={{m:'10px'}}>
-                    {/* <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Accuracy (meters):
-                    </Typography> */}
                     <Typography variant="body2" color="textSecondary">
                       * Your location accuracy is approximately <strong>{locationDetails.accuracy}m</strong>.
                     </Typography>
@@ -1685,7 +1629,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </CardContent>
             </Card>
           )}
-          </Box>
+          </Box> */}
           {/* Search Bar */}
           {!isMobile && <SearchContainer>
             <Box>
