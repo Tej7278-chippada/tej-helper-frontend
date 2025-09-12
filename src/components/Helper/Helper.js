@@ -43,6 +43,8 @@ import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 // import LayersIcon from '@mui/icons-material/Layers';
+import SortRoundedIcon from '@mui/icons-material/SortRounded';
+import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -312,13 +314,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       ? JSON.parse(savedFilters).sortBy
       : 'nearest';
   }); // 'latest' or 'nearest'
-  // const [showSortMenu, setShowSortMenu] = useState(false);
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
   // function to handle sort change
   const handleSortChange = (sortType) => {
     setSortBy(sortType);
-    // setShowSortMenu(false);
-    setShowDistanceRanges(false);
+    setShowSortMenu(false);
+    // setShowDistanceRanges(false);
     // Update filters
     const newFilters = { 
       ...filters,
@@ -1459,8 +1461,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         }}
       >
         <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
-      <Toolbar sx={{display:'flex', justifyContent:'space-between',
-      //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
+        <Toolbar sx={{display:'flex', justifyContent:'space-between',
+          //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
           borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
@@ -1746,7 +1748,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             {/* <Button
               variant="outlined"
               onClick={() => setShowSortMenu(!showSortMenu)}
-              startIcon={<SortIcon />}
+              startIcon={<SortRoundedIcon />}
               sx={{
                 borderRadius: "12px",
                 textTransform: 'none',
@@ -1761,9 +1763,19 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             >
               Sort
             </Button> */}
+            <IconButton 
+              onClick={() => setShowSortMenu(!showSortMenu)}
+              sx={{
+                minWidth: '40px',
+                minHeight: '40px',
+                mr: '4px',
+              }}
+            >
+              <SortRoundedIcon />
+            </IconButton>
 
             {/* Sort Menu */}
-            {/* {showSortMenu && (
+            {showSortMenu && (
               <Card
                 sx={{
                   position: 'absolute',
@@ -1781,31 +1793,139 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     Sort by
                   </Typography>
                   <MenuItem 
-                    onClick={() => handleSortChange('latest')}
-                    selected={sortBy === 'latest'}
-                    sx={{ borderRadius: '8px', mb: 0.5 }}
-                  >
-                    <ListItemIcon>
-                      {sortBy === 'latest' && <CheckIcon fontSize="small" />}
-                    </ListItemIcon>
-                    Latest posts first
-                  </MenuItem>
-                  <MenuItem 
                     onClick={() => handleSortChange('nearest')}
                     selected={sortBy === 'nearest'}
                     sx={{ borderRadius: '8px' }}
                   >
                     <ListItemIcon>
-                      {sortBy === 'nearest' && <CheckIcon fontSize="small" />}
+                      {sortBy === 'nearest' && <CheckRoundedIcon fontSize="small" color="success" />}
                     </ListItemIcon>
                     Nearest posts first
                   </MenuItem>
+                  <MenuItem 
+                    onClick={() => handleSortChange('latest')}
+                    selected={sortBy === 'latest'}
+                    sx={{ borderRadius: '8px', mb: 0.5 }}
+                  >
+                    <ListItemIcon>
+                      {sortBy === 'latest' && <CheckRoundedIcon fontSize="small" color="success" />}
+                    </ListItemIcon>
+                    Latest posts first
+                  </MenuItem>
                 </Box>
               </Card>
-            )} */}
+            )}
+            {/* filters card */}
+            <IconButton 
+              onClick={() => setIsExtraFiltersOpen((prev) => !prev)}
+              sx={{
+                minWidth: '40px',
+                minHeight: '40px',
+              }}
+            >
+              <FilterListRoundedIcon />
+            </IconButton>
+            {isExtraFiltersOpen &&  (
+              <Card
+                sx={{
+                  position: 'absolute',
+                  top: isMobile ? '62px' : '72px',
+                  right: '1px', ml: '4px',
+                  // width: '90%',
+                  // maxWidth: '400px',
+                  minWidth: isMobile ? '100%' : 'auto',
+                  maxWidth: isMobile ? '100%' : 'auto',
+                  zIndex: 1001,
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  minWidth: '200px'
+                }}
+              >
+                <CardContent>
+                  <Typography variant="h6" gutterBottom >
+                    Filters
+                  </Typography>
+                  
+                  <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
+
+                    {/* Gender Filter */}
+                    <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                      <InputLabel>Gender</InputLabel>
+                      <Select
+                        name="gender"
+                        value={localFilters.gender}
+                        onChange={handleFilterChange}
+                        label="Gender"
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="Male">Male</MenuItem>
+                        <MenuItem value="Female">Female</MenuItem>
+                        <MenuItem value="Kids">Kids</MenuItem>
+                        <MenuItem value="Everyone">Everyone</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    {/* Status Filter */}
+                    <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        name="postStatus"
+                        value={localFilters.postStatus}
+                        onChange={handleFilterChange}
+                        label="Status"
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        <MenuItem value="Active">Active</MenuItem>
+                        <MenuItem value="InActive">InActive</MenuItem>
+                        <MenuItem value="Closed">Closed</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    {/* Price Range */}
+                    <Box display="flex" gap={2} flex="1 1 auto">
+                      <TextField
+                        label="Min Price"
+                        type="number" size='small'
+                        value={localFilters.priceRange[0]}
+                        onChange={(e) => handlePriceChange(e, 'min')}
+                        fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
+                      />
+                      <TextField
+                        label="Max Price"
+                        type="number" size='small'
+                        value={localFilters.priceRange[1]}
+                        onChange={(e) => handlePriceChange(e, 'max')}
+                        fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
+                      />
+                    </Box>
+                  </Box>
+
+                  {/* Action Buttons */}
+                  <Box gap={2} mt={3} sx={{display:'flex'}}>
+                    <Button
+                      variant="outlined"
+                      onClick={handleResetFilters}
+                      disabled={isDefaultFilters}
+                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none' }}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      variant="contained" 
+                      onClick={handleApplyFilters}
+                      disabled={isDefaultFilters}
+                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none'}}
+                    >
+                      Apply
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            )}
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
-          <Button
+          {/* <Button
             variant="contained"
             // onClick={handleDistanceMenuOpen}
             onClick={() => setShowDistanceRanges(!showDistanceRanges)}
@@ -1832,10 +1952,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             }}
           >
             {distanceRange} km
-          </Button>
+          </Button> */}
 
           {/* Distance Range Menu */}
-          {showDistanceRanges && (
+          {/* {showDistanceRanges && (
           <Card
             // anchorEl={anchorEl}
             // open={Boolean(anchorEl)}
@@ -1848,13 +1968,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               minWidth: isMobile ? '100%' : 'auto',
               maxWidth: isMobile ? '100%' : 'auto',
               zIndex: 1000,  '& .MuiPaper-root': { borderRadius:'12px'}, borderRadius: '10px', backdropFilter: 'blur(10px)',
-              /* boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', */  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
               // background: 'rgba(255, 255, 255, 0.9)',
               background: 'rgba(255, 255, 255, 0.95)',
               '& .MuiCardContent-root': {padding: '10px' },  }}
           >
-            <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>
-              <Box sx={{ m: 0, borderRadius:'8px'}}>
+            <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}> */}
+              {/* <Box sx={{ m: 0, borderRadius:'8px'}}>
                 <Box
                   sx={{
                     px: isMobile ? '8px' : '10px', py: '12px',
@@ -1864,7 +1984,6 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     // minWidth: isMobile ? "60px" : "250px", borderRadius:'10px'
                   }}
                 >
-                  {/* Selected Distance Label */}
                   <Box sx={{mb: 1, display: isMobile ? 'inline': 'flex', justifyContent: isMobile ? 'normal' : 'unset'}}>
                   <Typography
                     sx={{
@@ -1876,58 +1995,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   >
                     Distance Range: {distanceRange} km
                   </Typography>
-                  {/* <Typography
-                    sx={{
-                      fontSize: "16px",
-                      fontWeight: "bold",
-                      marginBottom: isMobile ? "20px" : "10px", marginLeft:'10px',
-                      textAlign: "center",
-                    }}
-                  >
-                    {distanceRange} km
-                  </Typography> */}
-                  {/* {!isMobile && ( */}
                     <Box sx={{ position: 'absolute', top: '10px', right: '10px', marginLeft: 'auto', display:'flex', alignItems:'center' }}>
-                      {/* <TextField
-                        label="custom input (km)"
-                        type="number"
-                        value={distanceRange}
-                        onChange={(e) => {
-                          let value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numeric values
-                      
-                          if (value === '') {
-                            setDistanceRange('');
-                            // localStorage.removeItem("distanceRange"); // Clear storage when empty
-                            return;
-                          }
-                      
-                          const numericValue = Number(value);
-                          
-                          if (numericValue >= 1 && numericValue <= 1000) {
-                            setDistanceRange(numericValue);
-                            localStorage.setItem("distanceRange", numericValue);
-                            
-                            if (mapRef.current && userLocation) {
-                              mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(numericValue));
-                            }
-                          }
-                        }}
-                        fullWidth={isMobile}
-                        sx={{
-                          width: isMobile ? "80px" : "80px", marginRight:'4px',
-                          "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 12px', scrollbarWidth: 'none',  },
-                          
-                        }}
-                        inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
-                        InputLabelProps={{
-                          sx: {
-                            // fontSize: "14px", // Custom label font size
-                            // fontWeight: "bold", // Make label bold
-                            color: "primary.main", // Apply theme color
-                          },
-                          shrink: true, // Keep label always visible
-                        }}
-                      /> */}
                       <IconButton
                         onClick={() => setShowDistanceRanges(false)}
                         variant="text"
@@ -1935,14 +2003,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         <CloseIcon/>
                       </IconButton>
                     </Box>
-                  {/* )} */}
                   </Box>
-                  {/* Distance Slider */}
                   <DistanceSlider distanceRange={distanceRange} setDistanceRange={setDistanceRange} userLocation={userLocation} mapRef={mapRef} isMobile={isMobile} getZoomLevel={getZoomLevel} distanceValues={distanceValues} />
 
                   
                 </Box>
-                {/* {isMobile && ( */}
                 <Box sx={{ padding: '4px 8px', mt: isMobile ? 2 : 1, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
                   <Typography 
                     variant="body2" 
@@ -1993,31 +2058,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       shrink: true, // Keep label always visible
                     }}
                   />
-                  {/* <IconButton
-                    onClick={() => setShowDistanceRanges(false)}
-                    variant="text" 
-                  >
-                    <CloseIcon/>
-                  </IconButton> */}
-                  {/* <Button sx={{borderRadius:'1rem', bgcolor:'rgba(0, 85, 255, 0.07)'}} onClick={() => setShowDistanceRanges(false)} fullWidth variant="text">
-                    Close
-                  </Button> */}
                 </Box>
-                {/* )} */}
-                {/* <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    margin: '4px 10px', 
-                    color: 'grey', 
-                    whiteSpace: isMobile ? 'pre-line' : 'nowrap', 
-                    textAlign: isMobile ? 'center' : 'inherit'
-                  }}
-                >
-                  *Distance range {isMobile ? '\n' : ' '} upto 1000km
-                </Typography> */}
               </Box>
-              <Divider/>
-              <Box sx={{ p: 1 }}>
+              <Divider/> */}
+              {/* <Box sx={{ p: 1 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, px: 1 }}>
                   Sort by
                 </Typography>
@@ -2042,9 +2086,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   Latest posts first
                 </MenuItem>
               </Box>
-              <Divider/>
-              <Box sx={{minWidth: isMobile ? '100%' : '450px', maxWidth: isMobile ? '100%' : '450px'}}>
-                {/* Filter Card */}
+              <Divider/> */}
+              {/* <Box sx={{minWidth: isMobile ? '100%' : '450px', maxWidth: isMobile ? '100%' : '450px'}}>
                 <Box sx={{
                   m: 0,
                   // bgcolor: '#f5f5f5',
@@ -2065,7 +2108,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         Filters
                       </Typography>
                       
-                      <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
+                      <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}> */}
                         {/* Category Filter */}
                         {/* <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px', } }}>
                           <InputLabel>Category</InputLabel>
@@ -2112,7 +2155,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         </FormControl> */}
 
                         {/* Gender Filter */}
-                        <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                        {/* <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
                           <InputLabel>Gender</InputLabel>
                           <Select
                             name="gender"
@@ -2126,10 +2169,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="Kids">Kids</MenuItem>
                             <MenuItem value="Everyone">Everyone</MenuItem>
                           </Select>
-                        </FormControl>
+                        </FormControl> */}
 
                         {/* Status Filter */}
-                        <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                        {/* <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
                           <InputLabel>Status</InputLabel>
                           <Select
                             name="postStatus"
@@ -2142,10 +2185,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <MenuItem value="InActive">InActive</MenuItem>
                             <MenuItem value="Closed">Closed</MenuItem>
                           </Select>
-                        </FormControl>
+                        </FormControl> */}
 
                         {/* Price Range */}
-                        <Box display="flex" gap={2} flex="1 1 auto">
+                        {/* <Box display="flex" gap={2} flex="1 1 auto">
                           <TextField
                             label="Min Price"
                             type="number" size='small'
@@ -2161,10 +2204,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
                           />
                         </Box>
-                      </Box>
+                      </Box> */}
 
                       {/* Action Buttons */}
-                      <Box gap={2} mt={3} sx={{display:'flex'}}>
+                      {/* <Box gap={2} mt={3} sx={{display:'flex'}}>
                         <Button
                           variant="outlined"
                           onClick={handleResetFilters}
@@ -2188,7 +2231,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </Box>
             </Box>
           </Card>
-          )}
+          )} */}
           {/* <Button
             variant="contained"
             onClick={handleFilterToggle}
