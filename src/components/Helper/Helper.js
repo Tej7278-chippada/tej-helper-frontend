@@ -1,6 +1,7 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery, ListItemIcon} from '@mui/material';
+import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery, ListItemIcon,
+  Fade, Fab } from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -16,7 +17,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 // import RefreshIcon from '@mui/icons-material/Refresh';
 import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
@@ -39,6 +40,19 @@ import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
 import { formatPrice } from '../../utils/priceFormatter';
 import MenuCard from './MenuCard';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ZoomOutIcon from '@mui/icons-material/ZoomOut';
+
+// Component to handle map events
+function MapEvents({ setMap }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    setMap(map);
+  }, [map, setMap]);
+  
+  return null;
+}
 
 // Create a cache outside the component to persist between mounts
 const globalCache = {
@@ -65,6 +79,17 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
     ? 'rgba(30, 30, 30, 0.85)' 
     : 'rgba(255, 255, 255, 0.15)',
+  backdropFilter: 'blur(20px)',
+  border: darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: darkMode 
+    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+});
+
+const getGlassmorphismCardStyle = (theme, darkMode) => ({
+  background: 'rgba(205, 201, 201, 0.15)',
   backdropFilter: 'blur(20px)',
   border: darkMode 
     ? '1px solid rgba(255, 255, 255, 0.1)' 
@@ -151,6 +176,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const [showMap, setShowMap] = useState(false);
   const mapRef = useRef(null);
   const [mapMode, setMapMode] = useState('normal');
+  const [mapInstance, setMapInstance] = useState(null);
+  const [overlayVisible, setOverlayVisible] = useState(true);
   const [locationDetails, setLocationDetails] = useState(null);
   // const distanceOptions = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
@@ -311,6 +338,37 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
   //   iconSize: [30, 30],
   // });
+
+  // Function to center map on user location
+  // const centerMapOnUser = () => {
+  //     if (userLocation && mapInstance) {
+  //     mapInstance.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(distanceRange));
+  //     }
+  // };
+
+  // Function to handle zoom in
+  const zoomIn = () => {
+    if (mapInstance) {
+      mapInstance.zoomIn();
+    }
+  };
+
+  // Function to handle zoom out
+  const zoomOut = () => {
+    if (mapInstance) {
+      mapInstance.zoomOut();
+    }
+  };
+
+  // Function to hide the overlay
+  const hideOverlay = () => {
+    setOverlayVisible(false);
+  };
+
+  // Function to show the overlay
+  // const showOverlay = () => {
+  //   setOverlayVisible(true);
+  // };
 
   const customIcon = new L.Icon({
     iconUrl: markerIcon,
@@ -827,7 +885,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* Demo Posts Banner Section */}
-      <Box sx={{                              // to top
+      {/* <Box sx={{                              // to top
         background: isMobile ? 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)' : 'linear-gradient(310deg, #4361ee 0%, #3a0ca3 50%, transparent 100%)',
         color: 'white',
         padding: isMobile ? '1.5rem 1rem' : '2rem', pt: '6rem',
@@ -866,9 +924,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           lineHeight: 1.6
         }}>
           Help others with their needs and get paid for your services.
-           {/* Find opportunities in your area and make a difference while earning. */}
+           Find opportunities in your area and make a difference while earning.
         </Typography>
-        {/* <Box sx={{
+        <Box sx={{
           display: 'flex',
           justifyContent: 'center',
           mt: 2,
@@ -894,8 +952,467 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           >
             Explore Opportunities
           </Button>
-        </Box> */}
+        </Box>
         <DemoPosts isMobile={isMobile} postId={'685bee5458f2f12cad780008'} />
+      </Box> */}
+      <Box sx={{
+        position: 'fixed',
+        height: isMobile ? '400px' : '500px',
+        width: '100%',
+        overflow: 'hidden',
+        // borderRadius: '0 0 16px 16px',
+        mt: -8,
+        boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+      }}>
+        {/* Map Container */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0
+        }}>
+          <MapContainer
+            center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
+            zoom={getZoomLevel(distanceRange)}
+            style={{ height: '100%', width: '100%' }}
+            attributionControl={false}
+            ref={mapRef}
+            // whenCreated={setMapInstance}
+            whenCreated={(map) => (mapRef.current = map)}
+            maxBounds={worldBounds} // Restrict the map to the world bounds
+            maxBoundsViscosity={1.0} // Prevents the map from being dragged outside the bounds
+            zoomControl={false} // default zoom controls disabled
+          >
+            <ChangeView center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
+              zoom={getZoomLevel(distanceRange)} />
+            <MapEvents setMap={setMapInstance} /> {/*  map custum controls like zoomControl */}
+            <TileLayer
+              url={mapMode === 'normal'
+                ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
+              noWrap={true} // Disable infinite wrapping
+            />
+            {/* Labels and Roads Layer (Overlay) */}
+            {mapMode === 'satellite' && (
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
+                opacity={0.8} // Make it semi-transparent if needed
+              />
+            )}
+            {userLocation && (
+              <Marker position={[userLocation.latitude, userLocation.longitude]} icon={customIcon}>
+                <Popup>Your Current Location</Popup>
+              </Marker>
+            )}
+            {/* Distance Circles */}
+            {userLocation && distanceValues.map((radius) => (
+              <Circle
+                key={radius}
+                center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
+                radius={radius * 1000}
+                pathOptions={{
+                  color: radius === distanceRange ? "#1976d2" : "rgba(10, 30, 110, 0)", //#1976d2 #999
+                  fillColor: radius === distanceRange ? "rgba(10, 30, 110, 0.05) " : "rgba(10, 30, 110, 0) ",
+                  fillOpacity: 0.2,
+                  weight: radius === distanceRange ? 1 : 1,
+                }}
+              // eventHandlers={{
+              //   click: () => {
+              //     setDistanceRange(radius);
+              //     mapRef.current.setView([userLocation.latitude, userLocation.longitude], radius > 100 ? 9 : radius > 50 ? 10 : 11);
+              //   },
+              // }}
+              >
+                {/* <Popup>{distanceRange} km</Popup> */}
+              </Circle>
+            ))}
+            {/* Render a circle for custom distances (if it's not in distanceValues) */}
+            {userLocation && !distanceValues.includes(distanceRange) && (
+              <Circle
+                center={[userLocation.latitude, userLocation.longitude]}
+                radius={distanceRange * 1000}
+                pathOptions={{
+                  color: "#ff9800", // Orange color for custom distance
+                  fillColor: "rgba(255, 152, 0, 0.2)",
+                  fillOpacity: 0.2,
+                  weight: 1,
+                }}
+              />
+            )}
+          </MapContainer>
+        </Box>
+
+        {/* Floating Map Card */}
+        <Box display="flex" justifyContent="flex-start" sx={{
+          position: 'absolute',
+          bottom: isMobile ? 20 : 20,
+          left: 10,
+          zIndex: 2, flexGrow: 1, marginRight: '6px', marginLeft: isMobile ? '-12px' : '-14px'
+        }}>
+          <IconButton onClick={() => setShowMap(true)} sx={{
+            borderRadius: '12px',
+            padding: '8px 12px',
+            // background: 'rgba(67, 97, 238, 0.1)',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              background: 'rgba(67, 97, 238, 0.1)',
+              transform: 'translateY(-2px)',
+            }
+          }}>
+            <LocationOnIcon sx={{ color: '#4361ee' }} />
+            <Typography variant="body1" sx={{
+              color: '#4361ee',
+              fontWeight: 600,
+              maxWidth: isMobile ? '120px' : '200px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}>
+              {(currentAddress.split(" ").length > (isMobile ? 2 : 3) ? `${currentAddress.split(" ").slice(0, (isMobile ? 2 : 3)).join(" ")}...` : currentAddress) || "Fetching location..."}
+            </Typography>
+          </IconButton>
+        </Box>
+        {showMap && (
+          <Card
+            sx={{
+              position: 'absolute',
+              bottom: isMobile ? 25 : 25,
+              left: '10px',
+              // width: '95%',
+              minWidth: isMobile ? '95%' : '600px',
+              maxWidth: isMobile ? '95%' : '600px',
+              zIndex: 1000,
+              borderRadius: '12px',
+              boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(10px)',
+              // backgroundColor: '#fff', 
+              '& .MuiCardContent-root': { padding: '10px' },
+            }}
+          >
+            <CardContent>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography variant="h6">Your Location</Typography>
+                <IconButton onClick={() => setShowMap(false)}>
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+              <Box display="flex" justifyContent="start" mb={2} mt={1}>
+                <LocationOnIcon color='primary' />
+                <Typography variant="body1" sx={{ marginLeft: '8px', color: 'grey', cursor: 'pointer', '&:hover': { color: theme.palette.success.main } }} onClick={recenterUserLocation}>
+                  {currentAddress || "Fetching location..."}
+                </Typography>
+              </Box>
+              {locationDetails && (
+                <Box sx={{ m: '10px' }}>
+                  <Typography variant="body2" color="textSecondary">
+                    * Your location accuracy is approximately <strong>{locationDetails.accuracy}m</strong>.
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Map Controls */}
+        <Box sx={{
+          position: 'absolute',
+          top: isMobile ? 80 : 80,
+          right: isMobile ? 10 : 20,
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1
+        }}>
+          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={zoomIn}>
+            <ZoomInIcon />
+          </Fab>
+          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={zoomOut}>
+            <ZoomOutIcon />
+          </Fab>
+        </Box>
+        <Box sx={{
+          position: 'absolute',
+          bottom: isMobile ? 75 : 75,
+          right: isMobile ? 10 : 20,
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 1
+        }}>
+          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={fetchUserLocation} disabled={loadingLocation}>
+            {loadingLocation ? <CircularProgress size={16} /> : <MyLocationRoundedIcon />}
+          </Fab>
+          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')} >
+            {mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon />}
+          </Fab>
+        </Box>
+
+
+        {/* Distance Range Menu */}
+        <Box sx={{
+          position: 'absolute',
+          bottom: isMobile ? 25 : 25,
+          right: isMobile ? 10 : 20,
+          zIndex: 2,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 1
+        }}>
+          <Fab size="small" sx={{ width: '90px', borderRadius: '20px', ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={() => setShowDistanceRanges(!showDistanceRanges)} >
+            <ShareLocationRoundedIcon sx={{ mr: '2px' }} /> {distanceRange} km
+          </Fab>
+        </Box>
+        {showDistanceRanges && (
+          <Card
+            // anchorEl={anchorEl}
+            // open={Boolean(anchorEl)}
+            // onClose={handleDistanceMenuClose}
+            sx={{
+              position: 'absolute',
+              bottom: isMobile ? 25 : 25,
+              right: '10px',
+              // width: '90%',
+              // maxWidth: '400px',
+              minWidth: isMobile ? '95%' : 'auto',
+              maxWidth: isMobile ? '95%' : 'auto',
+              zIndex: 1000, '& .MuiPaper-root': { borderRadius: '12px' }, borderRadius: '10px', backdropFilter: 'blur(10px)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+              // background: 'rgba(255, 255, 255, 0.9)',
+              background: 'rgba(255, 255, 255, 0.95)',
+              '& .MuiCardContent-root': { padding: '10px' },
+            }}
+          >
+            <Box sx={{ m: 1, display: 'flex', flexDirection: isMobile ? 'column' : 'column', gap: 1 }}>
+              <Box sx={{ m: 0, borderRadius: '8px' }}>
+                <Box
+                  sx={{
+                    px: isMobile ? '8px' : '10px', py: '12px',
+                    display: "flex",
+                    flexDirection: isMobile ? "column" : "column",
+                    alignItems: 'flex-start',
+                    // minWidth: isMobile ? "60px" : "250px", borderRadius:'10px'
+                  }}
+                >
+                  {/* Selected Distance Label */}
+                  <Box sx={{ mb: 1, display: isMobile ? 'inline' : 'flex', justifyContent: isMobile ? 'normal' : 'unset' }}>
+                    <Typography
+                      sx={{
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        // marginBottom: isMobile ? "20px" : "10px",
+                        textAlign: "center",
+                      }}
+                    >
+                      Distance Range: {distanceRange} km
+                    </Typography>
+                    <Box sx={{ position: 'absolute', top: '10px', right: '10px', marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+
+                      <IconButton
+                        onClick={() => setShowDistanceRanges(false)}
+                        variant="text"
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                  {/* Distance Slider */}
+                  <DistanceSlider distanceRange={distanceRange} setDistanceRange={setDistanceRange} userLocation={userLocation} mapRef={mapRef} isMobile={isMobile} getZoomLevel={getZoomLevel} distanceValues={distanceValues} />
+
+
+                </Box>
+                {/* {isMobile && ( */}
+                <Box sx={{ padding: '4px 8px', mt: isMobile ? 2 : 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      margin: '4px 10px',
+                      color: 'grey',
+                      // whiteSpace: isMobile ? 'pre-line' : 'nowrap', 
+                      textAlign: isMobile ? 'center' : 'inherit'
+                    }}
+                  >
+                    *Custom range (1-1000km)
+                  </Typography>
+                  <TextField
+                    // label="custom range (km)"
+                    type="number"
+                    value={distanceRange}
+                    onChange={(e) => {
+                      let value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numeric values
+
+                      if (value === '') {
+                        setDistanceRange('');
+                        // localStorage.removeItem("distanceRange"); // Clear storage when empty
+                        return;
+                      }
+
+                      const numericValue = Number(value);
+
+                      if (numericValue >= 1 && numericValue <= 1000) {
+                        setDistanceRange(numericValue);
+                        localStorage.setItem("distanceRange", numericValue);
+
+                        if (mapRef.current && userLocation) {
+                          mapRef.current.setView([userLocation.latitude, userLocation.longitude], getZoomLevel(numericValue));
+                        }
+                      }
+                    }}
+                    sx={{
+                      width: "100px",
+                      "& .MuiOutlinedInput-root": { borderRadius: "8px" }, '& .MuiInputBase-input': { padding: '6px 14px', },
+                    }}
+                    inputProps={{ min: 1, max: 1000 }} // Restrict values in number input UI
+                    InputLabelProps={{
+                      sx: {
+                        // fontSize: "14px", // Custom label font size
+                        // fontWeight: "bold", // Make label bold
+                        color: "primary.main", // Apply theme color
+                      },
+                      shrink: true, // Keep label always visible
+                    }}
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </Card>
+        )}
+
+        {/* Distance Slider */}
+        {/* <Box sx={{
+                position: 'absolute',
+                bottom: isMobile ? 20 : 20,
+                right: '2px',
+                transform: 'translateX(-50%)',
+                zIndex: 2,
+                width: isMobile ? '80%' : '40%',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                padding: 2,
+                borderRadius: 2,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
+            }}>
+                <Typography variant="body2" gutterBottom>
+                Search within {distanceRange} km
+                </Typography>
+                <Slider
+                value={distanceRange}
+                onChange={(e, newValue) => setDistanceRange(newValue)}
+                valueLabelDisplay="auto"
+                step={1}
+                marks={distanceValues.map(value => ({ value, label: `${value}km` }))}
+                min={1}
+                max={50}
+                />
+            </Box> */}
+        {/* Content Overlay with animation */}
+        <Fade in={overlayVisible} timeout={500}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 2,
+              //   background: 'linear-gradient(to bottom, rgba(238, 204, 67, 0.85) 0%, rgba(163, 143, 12, 0.85) 50%, transparent 100%)',
+              background: 'linear-gradient(to bottom, rgba(67, 97, 238, 0.85) 0%, rgba(58, 12, 163, 0.85) 50%, transparent 100%)',
+              color: 'white',
+              padding: isMobile ? '1.5rem 1rem' : '2rem',
+              pt: '6rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'opacity 0.5s ease-in-out',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backdropFilter: 'blur(8px)',
+                background: 'radial-gradient(circle at 70% 30%, rgba(255,255,255,0.15) 0%, transparent 70%)',
+                zIndex: -1
+              },
+              '&:hover': {
+                background: 'linear-gradient(to bottom, rgba(67, 97, 238, 0.85) 0%, rgba(58, 12, 163, 0.85) 50%, transparent 100%)',
+              }
+            }}
+            onClick={hideOverlay}
+          >
+            {/* <IconButton
+                        sx={{
+                            position: 'absolute',
+                            top: 116,
+                            right: 16,
+                            color: 'white',
+                            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                            '&:hover': {
+                                backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                            }
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            hideOverlay();
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton> */}
+
+            <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
+              fontWeight: 700,
+              mb: 2,
+              textShadow: '0 2px 8px rgba(0,0,0,0.6)'
+            }}>
+              Help Others, Earn Money
+            </Typography>
+            <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
+              maxWidth: '800px',
+              margin: '0 auto 2rem',
+              opacity: 0.95,
+              lineHeight: 1.6,
+              textShadow: '0 1px 3px rgba(0,0,0,0.6)'
+            }}>
+              Help others with their needs and get paid for your services.
+            </Typography>
+
+            <Chip
+              label="Click anywhere to explore the map"
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                color: 'white',
+                fontWeight: 500,
+                backdropFilter: 'blur(10px)',
+                animation: 'pulse 2s infinite',
+                '@keyframes pulse': {
+                  '0%': { opacity: 0.7 },
+                  '50%': { opacity: 1 },
+                  '100%': { opacity: 0.7 }
+                }
+              }}
+            />
+          </Box>
+        </Fade>
+
+        {/* Show Overlay Button (only when overlay is hidden) */}
+        {/* {!overlayVisible && (
+            <Fab
+                color="primary"
+                size="small"
+                onClick={showOverlay}
+                sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    zIndex: 2,
+                }}
+            >
+                <LayersIcon />
+            </Fab>
+            )} */}
       </Box>
       {/* <Paper
         sx={{
@@ -931,8 +1448,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         </Typography>
       </Paper> */}
       {/* <CategoryBar selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} darkMode={darkMode} isMobile={isMobile}/> */}
-      <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
-      <Box>
+      {/* <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/> */}
+      <Box 
+        sx={{ background: darkMode 
+          ? 'rgba(30, 30, 30, 0.95)' 
+          : 'rgba(255, 255, 255, 0.27)', backdropFilter: 'blur(20px)', borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
+          mt: isMobile ? '320px' : '420px', 
+          position: 'relative', zIndex: 1050, 
+        }}
+      >
+        <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
       <Toolbar sx={{display:'flex', justifyContent:'space-between',
       //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
