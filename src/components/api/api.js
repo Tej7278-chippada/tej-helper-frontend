@@ -127,6 +127,27 @@ export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRa
   return API.get('/api/posts', { params });
 };
 
+// all posts locations data
+export const fetchPostLocations = (userLocation, distanceRange, filters = {}, searchQuery = '') => {
+  const params = {
+    userLat: userLocation.latitude,
+    userLng: userLocation.longitude,
+    distance: distanceRange,
+    categories: filters.categories,
+    serviceType: filters.serviceType,
+    gender: filters.gender,
+    postStatus: filters.postStatus,
+    price: `${filters.priceRange[0]}-${filters.priceRange[1]}`,
+    postType: filters.serviceType ? 'ServiceOffering' : 'HelpRequest',
+  };
+
+  if (searchQuery && searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
+
+  return API.get('/api/posts/locations', { params });
+};
+
 export const fetchPostById = async (id) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};

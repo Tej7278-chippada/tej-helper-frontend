@@ -1,7 +1,10 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery, ListItemIcon,
-  Fade, Fab } from '@mui/material';
+  Fade, Fab, 
+  Dialog,
+  DialogContent,
+  DialogTitle} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -10,7 +13,7 @@ import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
-import API, { fetchPosts } from '../api/api';
+import API, { fetchPostById, fetchPostLocations, fetchPosts } from '../api/api';
 import { useNavigate } from 'react-router-dom';
 // import FilterPosts from './FilterPosts';
 import CloseIcon from '@mui/icons-material/Close';
@@ -573,6 +576,135 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     globalCache.lastCacheKey = null;
   };
 
+  // Posts locations mapping code starts here
+  const [postMarkers, setPostMarkers] = useState([]);
+  const [allPostLocations, setAllPostLocations] = useState([]);
+  // const [selectedPost, setSelectedPost] = useState(null);
+  const [postDetails, setPostDetails] = useState(null);
+  const [loadingPostDetails, setLoadingPostDetails] = useState(false);
+  const [showPostDialog, setShowPostDialog] = useState(false);
+
+  // createPostMarkers function to handle different location formats
+  const createPostMarkers = useCallback((locationsData) => {
+    if (!locationsData || locationsData.length === 0) {
+      setPostMarkers([]);
+      return;
+    }
+
+    const markers = locationsData.map(post => {
+      let latitude, longitude;
+      
+      if (post.location && post.location.coordinates) {
+        [longitude, latitude] = post.location.coordinates;
+      } else if (post.location && post.location.latitude && post.location.longitude) {
+        latitude = post.location.latitude;
+        longitude = post.location.longitude;
+      } else {
+        return null;
+      }
+
+      if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+        return null;
+      }
+
+      return {
+        id: post._id,
+        position: [latitude, longitude],
+        title: post.title,
+        price: post.price,
+        postType: post.postType,
+        categories: post.categories,
+        serviceType: post.serviceType,
+        distance: post.distance,
+        postStatus: post.postStatus
+      };
+    }).filter(marker => marker !== null);
+
+    setPostMarkers(markers);
+  }, []);
+
+  // useEffect to use allPostLocations
+  useEffect(() => {
+    if (allPostLocations.length > 0) {
+      createPostMarkers(allPostLocations);
+    } else {
+      setPostMarkers([]);
+    }
+  }, [allPostLocations, createPostMarkers]);
+
+  // Custom marker icon for posts
+  const postIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  // Custom icon for service offerings
+  const serviceIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  // Custom icon for emergency posts
+  const emergencyIcon = new L.Icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  // Add this useEffect to fetch all post locations
+  useEffect(() => {
+    const fetchAllPostLocations = async () => {
+      if (!userLocation || !distanceRange) return;
+
+      try {
+        const response = await fetchPostLocations(userLocation, distanceRange, filters, searchQuery);
+        setAllPostLocations(response.data.locations || []);
+        console.log('all posts locations fetched', response.data.locations);
+      } catch (error) {
+        console.error("Error fetching post locations:", error);
+      }
+    };
+
+    fetchAllPostLocations();
+  }, [userLocation, distanceRange, filters, searchQuery]);
+
+  // Add this function to fetch post details
+  const fetchPostDetails = async (postId) => {
+    setLoadingPostDetails(true);
+    try {
+      setShowPostDialog(true);
+      const response = await fetchPostById(postId);
+      setPostDetails(response.data);
+    } catch (error) {
+      console.error("Error fetching post details:", error);
+      setSnackbar({ open: true, message: 'Failed to fetch post details', severity: 'error' });
+    } finally {
+      setLoadingPostDetails(false);
+    }
+  };
+
+  // function to handle marker click
+  // const handleMarkerClick = (post) => {
+  //   setSelectedPost(post);
+  //   // Optional: Auto-fly to the marker
+  //   if (mapRef.current) {
+  //     mapRef.current.flyTo(post.position, 15, {
+  //       duration: 1
+  //     });
+  //   }
+  // };
+
   // Fetch posts data
   useEffect(() => {
     if (!distanceRange || !userLocation) {
@@ -1010,6 +1142,89 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 <Popup>Your Current Location</Popup>
               </Marker>
             )}
+            {/* posts locations mapping code */}
+            {postMarkers.map(marker => {
+              let icon = postIcon;
+              
+              // Choose icon based on post type/category
+              if (marker.postType === 'ServiceOffering') {
+                icon = serviceIcon;
+              } else if (marker.categories === 'Emergency') {
+                icon = emergencyIcon;
+              }
+
+              return (
+                <Marker
+                  key={marker.id}
+                  position={marker.position}
+                  icon={icon}
+                  // eventHandlers={{
+                  //   click: () => {
+                      // const postElement = document.getElementById(`post-${marker.id}`);
+                      // if (postElement) {
+                      //   postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      //   postElement.style.transition = 'all 0.3s ease';
+                      //   postElement.style.boxShadow = '0 0 20px rgba(67, 97, 238, 0.5)';
+                      //   setTimeout(() => {
+                      //     postElement.style.boxShadow = '';
+                      //   }, 2000);
+                      // }
+                    // }
+                  // }}
+                >
+                  {/*  popup content to show more information */}
+                  <Popup>
+                    <Box sx={{ minWidth: '180px' }}>
+                      <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        {marker.title}
+                      </Typography>
+                      
+                      <Box sx={{ mb: 1, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Chip 
+                          label={marker.postType === 'HelpRequest' 
+                            ? (marker.categories || 'Help') 
+                            : (marker.serviceType || 'Service')}
+                          size="small" 
+                          color={marker.postType === 'HelpRequest' ? 'primary' : 'success'}
+                          sx={{ fontSize: '0.7rem', height: '20px' }}
+                        />
+                        {marker.price > 0 && (
+                          <Chip 
+                            label={formatPrice(marker.price)}
+                            icon={<CurrencyRupeeRoundedIcon />}
+                            size="small" variant="outlined"
+                          />
+                        )}
+                      </Box>
+                      {marker.distance && (
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                            {marker.distance < 1 
+                              ? `${Math.round(marker.distance * 1000)}m away` 
+                              : `${marker.distance.toFixed(1)}km away`
+                            }
+                          </Typography>
+                        </Box>
+                      )}
+
+                      <Button 
+                        variant="outlined" 
+                        size="small" 
+                        fullWidth 
+                        sx={{ mt: 1, fontSize: '0.75rem', borderRadius: '8px', textTransform: 'none' }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          fetchPostDetails(marker.id);
+                        }}
+                      >
+                        View Details
+                      </Button>
+                    </Box>
+                  </Popup>
+                </Marker>
+              );
+            })}
             {/* Wave Animation Circles */}
             <WaveAnimationCircles 
               center={userLocation ? [userLocation.latitude, userLocation.longitude] : null}
@@ -2998,6 +3213,84 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           onClose={handleFilterToggle}
         />
       )} */}
+
+      {/* Post details dialog */}
+      <Dialog open={showPostDialog} onClose={() => setShowPostDialog(false)} fullWidth
+        sx={{  minWidth: '350px', maxWidth: isMobile ? '400px' : '500px', margin: 'auto', '& .MuiPaper-root': { backdropFilter: 'blur(20px)',borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },}}
+        >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6">Post Details</Typography>
+          <IconButton onClick={() => setShowPostDialog(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {loadingPostDetails ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+              <CircularProgress />
+            </Box>
+          ) : postDetails ? (
+            <>
+              <Typography variant="h6" gutterBottom>
+                {postDetails.title}
+              </Typography>
+              
+              <Box sx={{ mb: 2, alignItems: 'center' }}>
+                <Chip 
+                  label={postDetails.postType === 'HelpRequest' 
+                    ? postDetails.categories 
+                    : postDetails.serviceType}
+                  color="primary"
+                  sx={{ mb: 1 }}
+                />
+                {postDetails.postStatus && (
+                  <Chip 
+                    label={postDetails.postStatus}
+                    color={postDetails.postStatus === 'Active' ? 'success' : 'default'}
+                    sx={{ ml: 1 }}
+                  />
+                )}
+              </Box>
+
+              {postDetails.price > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <CurrencyRupeeRoundedIcon color="success" />
+                  <Typography variant="h6" color="success.main" sx={{ ml: 1 }}>
+                    {formatPrice(postDetails.price)}
+                  </Typography>
+                </Box>
+              )}
+
+              <Typography variant="body1" paragraph>
+                {postDetails.description}
+              </Typography>
+
+              {postDetails.media && postDetails.media.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <LazyImage
+                    base64Image={postDetails.media[0]}
+                    alt={postDetails.title}
+                    style={{ width: '100%', borderRadius: '8px' }}
+                  />
+                </Box>
+              )}
+
+              <Button 
+                variant="contained" sx={{borderRadius: '8px'}}
+                fullWidth
+                onClick={() => {
+                  setShowPostDialog(false);
+                  navigate(`/post/${postDetails._id}`);
+                }}
+              >
+                Open Full Post
+              </Button>
+            </>
+          ) : (
+            <Typography color="error">Failed to load post details</Typography>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}
