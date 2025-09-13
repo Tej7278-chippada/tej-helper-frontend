@@ -45,6 +45,7 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 // import LayersIcon from '@mui/icons-material/Layers';
 import SortRoundedIcon from '@mui/icons-material/SortRounded';
 import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
+import { WaveAnimationCircles } from '../Maps/WaveAnimation';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -1009,6 +1010,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 <Popup>Your Current Location</Popup>
               </Marker>
             )}
+            {/* Wave Animation Circles */}
+            <WaveAnimationCircles 
+              center={userLocation ? [userLocation.latitude, userLocation.longitude] : null}
+              loading={loading}
+              distanceRange={distanceRange}
+            />
             {/* Distance Circles */}
             {userLocation && distanceValues.map((radius) => (
               <Circle
