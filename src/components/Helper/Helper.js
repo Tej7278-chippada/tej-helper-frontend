@@ -1640,7 +1640,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           )}
           </Box> */}
           {/* Search Bar */}
-          {!isMobile && <SearchContainer>
+          { <SearchContainer>  {/* {!isMobile && <SearchContainer> */}
             <Box>
             <SearchTextField
               variant="outlined"
@@ -1736,7 +1736,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             />
           </Box>
             </>)} */}
-          {isMobile && !expanded && <IconButton 
+          {/* {isMobile && !expanded && <IconButton 
             onClick={!expanded ? handleSearchClick : undefined}
             sx={{
               minWidth: '40px',
@@ -1749,7 +1749,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             ) : (
               <SearchIcon color="action" />
             )}
-          </IconButton>}
+          </IconButton>} */}
           <Box sx={{display:'flex', justifyContent:'space-between', marginRight:'-6px', marginLeft:'8px'}}>
             {/* Sort Button */}
             {/* <Button
@@ -2340,7 +2340,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           />
         </Box></>)} */}
         {/* Search Bar */}
-         {isMobile && expanded &&  <SearchContainer sx={{mx : 1, width: '350px'}}>
+         {/* {isMobile && expanded &&  <SearchContainer sx={{mx : 1, width: '350px'}}>
             <Box>
             <SearchTextField
               variant="outlined"
@@ -2388,7 +2388,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             />
             
             </Box>
-          </SearchContainer> }
+          </SearchContainer> } */}
 
         {/* Friends profile visibility */}
         {selectedCategory === 'Friends' && (
