@@ -68,7 +68,10 @@ const globalCache = {
   lastScrollPosition: 0,
   lastViewedPostId: null,
   lastFilters: null,
-  totalPostsCount: 0
+  totalPostsCount: 0,
+  locationsData: {}, // Separate cache for locations
+  lastLocationsCacheKey: null, // Separate cache key for locations
+  totalLocationsCount: 0 // Separate count for locations
 };
 
 // Default filter values
@@ -578,7 +581,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // Posts locations mapping code starts here
   const [postMarkers, setPostMarkers] = useState([]);
-  const [allPostLocations, setAllPostLocations] = useState([]);
+  // const [allPostLocations, setAllPostLocations] = useState([]);
   // const [selectedPost, setSelectedPost] = useState(null);
   const [postDetails, setPostDetails] = useState(null);
   const [loadingPostDetails, setLoadingPostDetails] = useState(false);
@@ -624,13 +627,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   }, []);
 
   // useEffect to use allPostLocations
-  useEffect(() => {
-    if (allPostLocations.length > 0) {
-      createPostMarkers(allPostLocations);
-    } else {
-      setPostMarkers([]);
-    }
-  }, [allPostLocations, createPostMarkers]);
+  // useEffect(() => {
+  //   if (allPostLocations.length > 0) {
+  //     createPostMarkers(allPostLocations);
+  //   } else {
+  //     setPostMarkers([]);
+  //   }
+  // }, [allPostLocations, createPostMarkers]);
 
   // Custom marker icon for posts
   const postIcon = new L.Icon({
@@ -662,22 +665,60 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     shadowSize: [41, 41]
   });
 
-  // Add this useEffect to fetch all post locations
+  // to fetch all post locations
   useEffect(() => {
     const fetchAllPostLocations = async () => {
       if (!userLocation || !distanceRange) return;
 
+      const currentLocationsCacheKey = generateCacheKey('locations');
+    
+      // Check if we have valid cached locations data
+      if (globalCache.locationsData[currentLocationsCacheKey] && 
+          globalCache.lastLocationsCacheKey === currentLocationsCacheKey &&
+          JSON.stringify(globalCache.lastFilters) === JSON.stringify(filters)) {
+        
+        const { locations: cachedLocations, totalCount: cachedTotalCount } = globalCache.locationsData[currentLocationsCacheKey];
+        
+        // setAllPostLocations(cachedLocations);
+        globalCache.totalLocationsCount = cachedTotalCount;
+        createPostMarkers(cachedLocations);
+        return;
+      }
+
       try {
         const response = await fetchPostLocations(userLocation, distanceRange, filters, searchQuery);
-        setAllPostLocations(response.data.locations || []);
-        console.log('all posts locations fetched', response.data.locations);
+        const locationsData = response.data.locations || [];
+        const totalCount = response.data.totalCount || 0;
+
+        // Update global cache for locations
+        globalCache.locationsData[currentLocationsCacheKey] = {
+          locations: locationsData,
+          totalCount: totalCount,
+          timestamp: Date.now()
+        };
+        globalCache.lastLocationsCacheKey = currentLocationsCacheKey;
+        globalCache.totalLocationsCount = totalCount;
+        globalCache.lastFilters = {...filters};
+
+        // Clean up old cache entries (older than 1 hour)
+        Object.keys(globalCache.locationsData).forEach(key => {
+          if (Date.now() - globalCache.locationsData[key].timestamp > 3600000) {
+            delete globalCache.locationsData[key];
+          }
+        });
+
+        // setAllPostLocations(locationsData);
+        createPostMarkers(locationsData);
+
+        console.log(`Fetched ${locationsData.length} post locations within ${distanceRange}km`);
+
       } catch (error) {
         console.error("Error fetching post locations:", error);
       }
     };
 
     fetchAllPostLocations();
-  }, [userLocation, distanceRange, filters, searchQuery]);
+  }, [userLocation, distanceRange, filters, searchQuery, generateCacheKey, createPostMarkers]);
 
   // Add this function to fetch post details
   const fetchPostDetails = async (postId) => {
@@ -711,7 +752,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setPosts([]);
       return;
     }
-    const currentCacheKey = generateCacheKey();
+    const currentCacheKey = generateCacheKey('posts');
     const fetchData = async () => {
         // setLoading(true);
         // localStorage.setItem('currentPage', currentPage); // Persist current page to localStorage
@@ -796,7 +837,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       
       if (newPosts.length > 0) {
         const updatedPosts = [...posts, ...newPosts];
-        const currentCacheKey = generateCacheKey();
+        const currentCacheKey = generateCacheKey('posts');
         
         // Update global cache
         if (globalCache.data[currentCacheKey]) {
