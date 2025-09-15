@@ -71,7 +71,11 @@ const globalCache = {
   totalPostsCount: 0,
   locationsData: {}, // Separate cache for locations
   lastLocationsCacheKey: null, // Separate cache key for locations
-  totalLocationsCount: 0 // Separate count for locations
+  totalLocationsCount: 0, // Separate count for locations
+  lastMapCenter: null,
+  lastMapZoom: null,
+  lastClickedMarkerId: null,
+  lastMapBounds: null
 };
 
 // Default filter values
@@ -187,7 +191,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const mapRef = useRef(null);
   const [mapMode, setMapMode] = useState('normal');
   const [mapInstance, setMapInstance] = useState(null);
-  const [overlayVisible, setOverlayVisible] = useState(true);
+  const [overlayVisible, setOverlayVisible] = useState(() => {
+    const markerId = localStorage.getItem('lastClickedMarkerId');
+    return markerId ? false : true;
+    }
+  );
   const [locationDetails, setLocationDetails] = useState(null);
   // const distanceOptions = [2, 5, 10, 20, 30, 50, 70, 100, 120, 150, 200];
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' }); // Snackbar state
@@ -390,15 +398,15 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // const [map, setMap] = useState(null);
 
-  const ChangeView = ({ center, getZoomLevel }) => {
-    // const map = useMap();
-    useEffect(() => {
-      if (mapRef.current && userLocation && center) {
-        mapRef.current.setView(center, getZoomLevel);
-      }
-    }, [center, getZoomLevel]);
-    return null;
-  };
+  // const ChangeView = ({ center, getZoomLevel }) => {
+  //   // const map = useMap();
+  //   useEffect(() => {
+  //     if (mapRef.current && userLocation && center) {
+  //       mapRef.current.setView(center, getZoomLevel);
+  //     }
+  //   }, [center, getZoomLevel, userLocation]);
+  //   return null;
+  // };
 
   // Auto-zoom and center map on selected distance
   const getZoomLevel = (distance) => {
@@ -445,6 +453,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           if (savedDistance) {
             setDistanceRange(Number(savedDistance));
           }
+          // Clear saved map state when user explicitly recenters
+          globalCache.lastMapCenter = null;
+          globalCache.lastMapZoom = null;
+          globalCache.lastClickedMarkerId = null;
+          localStorage.removeItem('lastMapCenter');
+          localStorage.removeItem('lastMapZoom');
+          localStorage.removeItem('lastClickedMarkerId');
         },
         (error) => {
           console.error('Error fetching location:', error);
@@ -745,6 +760,114 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //     });
   //   }
   // };
+
+  // function to save map state
+  const handleMarkerClick = (marker) => {
+    // setSelectedPost(marker);
+    
+    // Save map state to cache
+    if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      const zoom = mapRef.current.getZoom();
+      const bounds = mapRef.current.getBounds();
+      
+      globalCache.lastMapCenter = [center.lat, center.lng];
+      globalCache.lastMapZoom = zoom;
+      globalCache.lastMapBounds = bounds;
+      globalCache.lastClickedMarkerId = marker.id;
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
+      localStorage.setItem('lastMapZoom', zoom.toString());
+      localStorage.setItem('lastClickedMarkerId', marker.id);
+    }
+    
+    // Optional: Auto-fly to the marker with smooth animation
+    if (mapRef.current) {
+      mapRef.current.flyTo(marker.position, 15, {
+        duration: 1
+      });
+    }
+  };
+
+  // useEffect to restore map state on component mount
+  useEffect(() => {
+    const restoreMapState = () => {
+      if (!mapRef.current) return;
+      
+      // Check if we have cached map state
+      const hasCachedState = globalCache.lastMapCenter && globalCache.lastMapZoom;
+      const hasLocalStorageState = localStorage.getItem('lastMapCenter') && localStorage.getItem('lastMapZoom');
+      
+      if (hasCachedState || hasLocalStorageState) {
+        let center, zoom, clickedMarkerId;
+        
+        // Prefer cache over localStorage
+        if (hasCachedState) {
+          center = globalCache.lastMapCenter;
+          zoom = globalCache.lastMapZoom;
+          clickedMarkerId = globalCache.lastClickedMarkerId;
+        } else {
+          center = JSON.parse(localStorage.getItem('lastMapCenter'));
+          zoom = Number(localStorage.getItem('lastMapZoom'));
+          clickedMarkerId = localStorage.getItem('lastClickedMarkerId');
+          
+          // Update cache from localStorage
+          globalCache.lastMapCenter = center;
+          globalCache.lastMapZoom = zoom;
+          globalCache.lastClickedMarkerId = clickedMarkerId;
+        }
+        
+        // Restore map view with smooth transition
+        setTimeout(() => {
+          if (mapRef.current) {
+            mapRef.current.flyTo(center, zoom, {
+              duration: 1,
+              animate: true
+            });
+          }
+        }, 300);
+        
+        // If we have a clicked marker, highlight it
+        if (clickedMarkerId) {
+          setTimeout(() => {
+            const markerElement = document.querySelector(`[data-marker-id="${clickedMarkerId}"]`);
+            if (markerElement) {
+              markerElement.style.transition = 'all 0.3s ease';
+              markerElement.style.transform = 'scale(1.2)';
+              markerElement.style.zIndex = '1000';
+              
+              // Remove highlight after 2 seconds
+              setTimeout(() => {
+                if (markerElement) {
+                  markerElement.style.transform = 'scale(1)';
+                  markerElement.style.zIndex = '';
+                }
+              }, 2000);
+            }
+          }, 500);
+        }
+      } else {
+        // Default behavior: center on user location
+        if (userLocation) {
+          mapRef.current.setView(
+            [userLocation.latitude, userLocation.longitude],
+            getZoomLevel(distanceRange)
+          );
+        }
+      }
+    };
+    
+    // Wait for map to be initialized
+    const mapCheckInterval = setInterval(() => {
+      if (mapRef.current) {
+        clearInterval(mapCheckInterval);
+        restoreMapState();
+      }
+    }, 100);
+    
+    return () => clearInterval(mapCheckInterval);
+  }, [userLocation, distanceRange]);
 
   // Fetch posts data
   useEffect(() => {
@@ -1162,8 +1285,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             maxBoundsViscosity={1.0} // Prevents the map from being dragged outside the bounds
             zoomControl={false} // default zoom controls disabled
           >
-            <ChangeView center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
-              zoom={getZoomLevel(distanceRange)} />
+            {/* <ChangeView center={userLocation ? [userLocation.latitude, userLocation.longitude] : [0, 0]}
+              zoom={getZoomLevel(distanceRange)} /> */}
             <MapEvents setMap={setMapInstance} /> {/*  map custum controls like zoomControl */}
             <TileLayer
               url={mapMode === 'normal'
@@ -1199,6 +1322,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   key={marker.id}
                   position={marker.position}
                   icon={icon}
+                  eventHandlers={{
+                    click: () => handleMarkerClick(marker)
+                  }}
+                  data-marker-id={marker.id}
                   // eventHandlers={{
                   //   click: () => {
                       // const postElement = document.getElementById(`post-${marker.id}`);
