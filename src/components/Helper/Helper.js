@@ -30,10 +30,10 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import DistanceSlider from './DistanceSlider';
 import LazyBackgroundImage from './LazyBackgroundImage';
 import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
-import DemoPosts from '../Banners/DemoPosts';
+// import DemoPosts from '../Banners/DemoPosts';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import CategoryBar from './CategoryBar';
+// import CategoryBar from './CategoryBar';
 import Friends from '../Friends/Friends';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
@@ -89,18 +89,18 @@ const DEFAULT_FILTERS = {
   postType: 'HelpRequest' // added this line for only shows the Helper posts on ALL section
 };
 
-const getGlassmorphismStyle = (theme, darkMode) => ({
-  background: darkMode 
-    ? 'rgba(30, 30, 30, 0.85)' 
-    : 'rgba(255, 255, 255, 0.15)',
-  backdropFilter: 'blur(20px)',
-  border: darkMode 
-    ? '1px solid rgba(255, 255, 255, 0.1)' 
-    : '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: darkMode 
-    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
-    : '0 8px 32px rgba(0, 0, 0, 0.1)',
-});
+// const getGlassmorphismStyle = (theme, darkMode) => ({
+//   background: darkMode 
+//     ? 'rgba(30, 30, 30, 0.85)' 
+//     : 'rgba(255, 255, 255, 0.15)',
+//   backdropFilter: 'blur(20px)',
+//   border: darkMode 
+//     ? '1px solid rgba(255, 255, 255, 0.1)' 
+//     : '1px solid rgba(255, 255, 255, 0.2)',
+//   boxShadow: darkMode 
+//     ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+//     : '0 8px 32px rgba(0, 0, 0, 0.1)',
+// });
 
 const getGlassmorphismCardStyle = (theme, darkMode) => ({
   background: 'rgba(205, 201, 201, 0.15)',
@@ -162,6 +162,7 @@ const SearchTextField = styled(TextField, { shouldForwardProp: (prop) => prop !=
 
 const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const tokenUsername = localStorage.getItem('tokenUsername');
+  const userProfilePic = localStorage.getItem('tokenProfilePic');
   // const [loading, setLoading] = useState(false);
   const [posts, setPosts] = useState([]);
   const theme = useTheme();
@@ -395,6 +396,78 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     iconAnchor: [12, 41], // Position relative to the point
     popupAnchor: [1, -34],
   });
+
+  const userMappingIcon = (profilePic, username) => {
+    const size = 40;
+    const borderWidth = 2;
+    const totalSize = size + borderWidth * 2;
+    
+    const html = `
+      <div style="
+        width: ${totalSize}px;
+        height: ${totalSize}px;
+        border-radius: 50%;
+        border: ${borderWidth}px solid ${darkMode ? 'rgba(168, 168, 168, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
+        background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      ">
+        ${profilePic && profilePic !== 'null' 
+          ? `<img src="data:image/jpeg;base64,${profilePic}" 
+              style="width: ${size}px; height: ${size}px; object-fit: cover; border-radius: 50%;" 
+              onerror="this.style.display='none'; this.parentNode.innerHTML='<div style=\\'color: white; font-weight: bold; font-size: 16px;\\'>${username[0]?.toUpperCase() || 'U'}</div>'" 
+            />`
+          : `<div style="color: white; font-weight: bold; font-size: 16px;">
+              ${username[0]?.toUpperCase() || 'U'}
+            </div>`
+        }
+      </div>
+    `;
+    
+    return L.divIcon({
+      html: html,
+      iconSize: [totalSize, totalSize],
+      iconAnchor: [totalSize / 2, totalSize / 2],
+      popupAnchor: [0, -totalSize / 2],
+      className: 'user-location-marker'
+    });
+  };
+
+  const postsMappingIcon = ( title, color ) => {
+    const size = 30;
+    const borderWidth = 2;
+    const totalSize = size + borderWidth * 2;
+    
+    const html = `
+      <div style="
+        width: ${totalSize}px;
+        height: ${totalSize}px;
+        border-radius: 50%;
+        border: ${borderWidth}px solid ${darkMode ? 'rgba(168, 168, 168, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
+        background: ${color};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+      ">
+        <div style="color: white; font-weight: bold; font-size: 16px;">
+          ${title[0]?.toUpperCase() || 'A'}
+        </div>
+      </div>
+    `;
+    
+    return L.divIcon({
+      html: html,
+      iconSize: [totalSize, totalSize],
+      iconAnchor: [totalSize / 2, totalSize / 2],
+      popupAnchor: [0, -totalSize / 2],
+      className: 'user-location-marker'
+    });
+  };
 
   // const [map, setMap] = useState(null);
 
@@ -651,34 +724,34 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // }, [allPostLocations, createPostMarkers]);
 
   // Custom marker icon for posts
-  const postIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-    shadowUrl: markerShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+  // const postIcon = new L.Icon({
+  //   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+  //   shadowUrl: markerShadow,
+  //   iconSize: [25, 41],
+  //   iconAnchor: [12, 41],
+  //   popupAnchor: [1, -34],
+  //   shadowSize: [41, 41]
+  // });
 
-  // Custom icon for service offerings
-  const serviceIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-    shadowUrl: markerShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+  // // Custom icon for service offerings
+  // const serviceIcon = new L.Icon({
+  //   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  //   shadowUrl: markerShadow,
+  //   iconSize: [25, 41],
+  //   iconAnchor: [12, 41],
+  //   popupAnchor: [1, -34],
+  //   shadowSize: [41, 41]
+  // });
 
-  // Custom icon for emergency posts
-  const emergencyIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-    shadowUrl: markerShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+  // // Custom icon for emergency posts
+  // const emergencyIcon = new L.Icon({
+  //   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+  //   shadowUrl: markerShadow,
+  //   iconSize: [25, 41],
+  //   iconAnchor: [12, 41],
+  //   popupAnchor: [1, -34],
+  //   shadowSize: [41, 41]
+  // });
 
   // to fetch all post locations
   useEffect(() => {
@@ -1180,6 +1253,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         duration: 0.5
       });
     }
+    // Clear saved map state when user explicitly recenters
+    globalCache.lastMapCenter = null;
+    globalCache.lastMapZoom = null;
+    globalCache.lastClickedMarkerId = null;
+    localStorage.removeItem('lastMapCenter');
+    localStorage.removeItem('lastMapZoom');
+    localStorage.removeItem('lastClickedMarkerId');
   };
 
   return (
@@ -1302,28 +1382,48 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               />
             )}
             {userLocation && (
-              <Marker position={[userLocation.latitude, userLocation.longitude]} icon={customIcon}>
+              <Marker position={[userLocation.latitude, userLocation.longitude]} icon={userMappingIcon(userProfilePic, tokenUsername) || customIcon}
+                // zIndexOffset={1000} // Ensure user marker is on top
+                eventHandlers={{
+                  mouseover: (e) => {
+                    e.target.setZIndexOffset(1000); // Bring to front on hover
+                  },
+                  mouseout: (e) => {
+                    e.target.setZIndexOffset(0); // Reset on mouseout
+                  }
+                }}
+              >
                 <Popup>Your Current Location</Popup>
               </Marker>
             )}
             {/* posts locations mapping code */}
             {postMarkers.map(marker => {
-              let icon = postIcon;
+              let color = '#4CAF50';
               
-              // Choose icon based on post type/category
+              // Choose icon color based on post type/category
               if (marker.postType === 'ServiceOffering') {
-                icon = serviceIcon;
+                color = '#2196F3';
+              } else if (marker.categories === 'Paid') {
+                color = '#4CAF50';
+              } else if (marker.categories === 'UnPaid') {
+                color = '#FF9800';
               } else if (marker.categories === 'Emergency') {
-                icon = emergencyIcon;
+                color = '#E91E63';
               }
 
               return (
                 <Marker
                   key={marker.id}
                   position={marker.position}
-                  icon={icon}
+                  icon={postsMappingIcon(marker.title, color)}
                   eventHandlers={{
-                    click: () => handleMarkerClick(marker)
+                    click: () => handleMarkerClick(marker),
+                    mouseover: (e) => {
+                      e.target.setZIndexOffset(1000); // Bring to front on hover
+                    },
+                    mouseout: (e) => {
+                      e.target.setZIndexOffset(0); // Reset on mouseout
+                    }
                   }}
                   data-marker-id={marker.id}
                   // eventHandlers={{
@@ -1342,7 +1442,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 >
                   {/*  popup content to show more information */}
                   <Popup>
-                    <Box sx={{ minWidth: '180px' }}>
+                    <Box sx={{ minWidth: '180px', maxWidth: isMobile ? '250px' : '300px' }}>
                       <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
                         {marker.title}
                       </Typography>
@@ -1443,7 +1543,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           bottom: isMobile ? 20 : 20,
           left: 10,
           zIndex: 2, flexGrow: 1, marginRight: '6px', marginLeft: isMobile ? '-12px' : '-14px'
-        }}>
+        }} onClick={recenterUserLocation}
+        >
           <IconButton onClick={() => setShowMap(true)} sx={{
             borderRadius: '12px',
             padding: '8px 12px',
