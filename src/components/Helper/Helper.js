@@ -856,11 +856,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     }
     
     // Optional: Auto-fly to the marker with smooth animation
-    if (mapRef.current) {
-      mapRef.current.flyTo(marker.position, 15, {
-        duration: 1
-      });
-    }
+    // if (mapRef.current) {
+    //   mapRef.current.flyTo(marker.position, 15, {
+    //     duration: 1
+    //   });
+    // }
   };
 
   // useEffect to restore map state on component mount
