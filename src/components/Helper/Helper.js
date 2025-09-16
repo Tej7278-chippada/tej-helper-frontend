@@ -671,9 +671,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const [postMarkers, setPostMarkers] = useState([]);
   // const [allPostLocations, setAllPostLocations] = useState([]);
   // const [selectedPost, setSelectedPost] = useState(null);
-  const [postDetails, setPostDetails] = useState(null);
-  const [loadingPostDetails, setLoadingPostDetails] = useState(false);
-  const [showPostDialog, setShowPostDialog] = useState(false);
+  // const [postDetails, setPostDetails] = useState(null);
+  // const [loadingPostDetails, setLoadingPostDetails] = useState(false);
+  // const [showPostDialog, setShowPostDialog] = useState(false);
 
   // createPostMarkers function to handle different location formats
   const createPostMarkers = useCallback((locationsData) => {
@@ -773,6 +773,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         return;
       }
 
+      // Clear saved map state when user explicitly recenters
+      globalCache.lastMapCenter = null;
+      globalCache.lastMapZoom = null;
+      globalCache.lastClickedMarkerId = null;
+      localStorage.removeItem('lastMapCenter');
+      localStorage.removeItem('lastMapZoom');
+      localStorage.removeItem('lastClickedMarkerId');
+
       try {
         const response = await fetchPostLocations(userLocation, distanceRange, filters, searchQuery);
         const locationsData = response.data.locations || [];
@@ -810,16 +818,33 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // Add this function to fetch post details
   const fetchPostDetails = async (postId) => {
-    setLoadingPostDetails(true);
+    // setLoadingPostDetails(true);
+    // Save map state to cache
+    if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      const zoom = mapRef.current.getZoom();
+      const bounds = mapRef.current.getBounds();
+      
+      globalCache.lastMapCenter = [center.lat, center.lng];
+      globalCache.lastMapZoom = zoom;
+      globalCache.lastMapBounds = bounds;
+      globalCache.lastClickedMarkerId = postId;
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
+      localStorage.setItem('lastMapZoom', zoom.toString());
+      localStorage.setItem('lastClickedMarkerId', postId);
+    }
     try {
-      setShowPostDialog(true);
-      const response = await fetchPostById(postId);
-      setPostDetails(response.data);
+      // setShowPostDialog(true);
+      // const response = await fetchPostById(postId);
+      // setPostDetails(response.data);
+      navigate(`/post/${postId}`);
     } catch (error) {
       console.error("Error fetching post details:", error);
       setSnackbar({ open: true, message: 'Failed to fetch post details', severity: 'error' });
-    } finally {
-      setLoadingPostDetails(false);
+    // } finally {
+    //   setLoadingPostDetails(false);
     }
   };
 
@@ -835,33 +860,33 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // };
 
   // function to save map state
-  const handleMarkerClick = (marker) => {
-    // setSelectedPost(marker);
+  // const handleMarkerClick = (marker) => {
+  //   // setSelectedPost(marker);
     
-    // Save map state to cache
-    if (mapRef.current) {
-      const center = mapRef.current.getCenter();
-      const zoom = mapRef.current.getZoom();
-      const bounds = mapRef.current.getBounds();
+  //   // Save map state to cache
+  //   if (mapRef.current) {
+  //     const center = mapRef.current.getCenter();
+  //     const zoom = mapRef.current.getZoom();
+  //     const bounds = mapRef.current.getBounds();
       
-      globalCache.lastMapCenter = [center.lat, center.lng];
-      globalCache.lastMapZoom = zoom;
-      globalCache.lastMapBounds = bounds;
-      globalCache.lastClickedMarkerId = marker.id;
+  //     globalCache.lastMapCenter = [center.lat, center.lng];
+  //     globalCache.lastMapZoom = zoom;
+  //     globalCache.lastMapBounds = bounds;
+  //     globalCache.lastClickedMarkerId = marker.id;
       
-      // Also save to localStorage as backup
-      localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
-      localStorage.setItem('lastMapZoom', zoom.toString());
-      localStorage.setItem('lastClickedMarkerId', marker.id);
-    }
+  //     // Also save to localStorage as backup
+  //     localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
+  //     localStorage.setItem('lastMapZoom', zoom.toString());
+  //     localStorage.setItem('lastClickedMarkerId', marker.id);
+  //   }
     
-    // Optional: Auto-fly to the marker with smooth animation
-    // if (mapRef.current) {
-    //   mapRef.current.flyTo(marker.position, 15, {
-    //     duration: 1
-    //   });
-    // }
-  };
+  //   // Optional: Auto-fly to the marker with smooth animation
+  //   // if (mapRef.current) {
+  //   //   mapRef.current.flyTo(marker.position, 15, {
+  //   //     duration: 1
+  //   //   });
+  //   // }
+  // };
 
   // useEffect to restore map state on component mount
   useEffect(() => {
@@ -1417,7 +1442,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   position={marker.position}
                   icon={postsMappingIcon(marker.title, color)}
                   eventHandlers={{
-                    click: () => handleMarkerClick(marker),
+                    // click: () => handleMarkerClick(marker),
                     mouseover: (e) => {
                       e.target.setZIndexOffset(1000); // Bring to front on hover
                     },
@@ -1711,7 +1736,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     </Box>
                   </Box>
                   {/* Distance Slider */}
-                  <DistanceSlider distanceRange={distanceRange} setDistanceRange={setDistanceRange} userLocation={userLocation} mapRef={mapRef} isMobile={isMobile} getZoomLevel={getZoomLevel} distanceValues={distanceValues} />
+                  <DistanceSlider distanceRange={distanceRange} setDistanceRange={setDistanceRange} userLocation={userLocation} mapRef={mapRef} isMobile={isMobile} getZoomLevel={getZoomLevel} distanceValues={distanceValues} setShowDistanceRanges={setShowDistanceRanges} />
 
 
                 </Box>
@@ -3484,7 +3509,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       )} */}
 
       {/* Post details dialog */}
-      <Dialog open={showPostDialog} onClose={() => setShowPostDialog(false)} fullWidth
+      {/* <Dialog open={showPostDialog} onClose={() => setShowPostDialog(false)} fullWidth
         sx={{  minWidth: '350px', maxWidth: isMobile ? '400px' : '500px', margin: 'auto', '& .MuiPaper-root': { backdropFilter: 'blur(20px)',borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },}}
         >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -3559,7 +3584,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             <Typography color="error">Failed to load post details</Typography>
           )}
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <Snackbar
         open={snackbar.open}

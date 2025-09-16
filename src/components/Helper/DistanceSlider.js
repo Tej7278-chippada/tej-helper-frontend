@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import Slider from '@mui/material/Slider';
 
-const DistanceSlider = ({ distanceRange, setDistanceRange, userLocation, mapRef, isMobile, getZoomLevel, distanceValues }) => {
+const DistanceSlider = ({ distanceRange, setDistanceRange, userLocation, mapRef, isMobile, getZoomLevel, distanceValues, setShowDistanceRanges }) => {
   const lastPlayedRef = useRef(null);
   const timeoutRef = useRef(null);
 
@@ -75,6 +75,7 @@ const DistanceSlider = ({ distanceRange, setDistanceRange, userLocation, mapRef,
     timeoutRef.current = setTimeout(() => {
       provideFeedback();
     }, 150);
+    setShowDistanceRanges(false);
   };
 
   // Cleanup on unmount
