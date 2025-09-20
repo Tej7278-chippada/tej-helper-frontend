@@ -409,7 +409,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
           }}
         >
           <Slide 
-            direction={animationDirection === 'right' ? 'right' : 'right'} 
+            direction={animationDirection === 'right' ? 'left' : 'left'} 
             in={showServiceCategories} 
             mountOnEnter 
             unmountOnExit
