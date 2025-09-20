@@ -592,7 +592,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     const savedDistance = localStorage.getItem('distanceRange');
     const savedAddress = localStorage.getItem('userAddress');
 
-    if (storedLocation) {
+    if (storedLocation && savedAddress) {
       // Use the stored location
       const { latitude, longitude } = JSON.parse(storedLocation);
       setUserLocation({ latitude, longitude });

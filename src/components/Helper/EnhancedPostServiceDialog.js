@@ -916,8 +916,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   };
 
   const locateUser = useCallback(async () => {
+    setLoadingLocation(true);
     if (navigator.geolocation) {
-      setLoadingLocation(true);
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
@@ -976,6 +976,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     } else {
       console.error('Geolocation is not supported by this browser.');
       setSnackbar({ open: true, message: 'Geolocation is not supported by this browser.', severity: 'error' });
+      setLoadingLocation(false);
     }
   }, []);
 
@@ -985,7 +986,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     fetchPostsData();
     const storedLocation = localStorage.getItem("userLocation");
     const savedAddress = localStorage.getItem('userAddress');
-    if (storedLocation) {
+    if (storedLocation && savedAddress) {
       // Use the stored location
       const { latitude, longitude } = JSON.parse(storedLocation);
       // setUserLocation({ latitude, longitude });

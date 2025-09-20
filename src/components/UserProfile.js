@@ -8,19 +8,19 @@ import API, { deleteProfilePicture, updateProfilePicture, updateUserProfile } fr
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 // import { Marker, TileLayer } from 'leaflet';
-import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
-import MapRoundedIcon from '@mui/icons-material/MapRounded';
+// import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
+// import L from 'leaflet';
+// import 'leaflet/dist/leaflet.css';
+// import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
+// import MapRoundedIcon from '@mui/icons-material/MapRounded';
 // Fix for Leaflet marker icon issue
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
-import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
+// import markerIcon from 'leaflet/dist/images/marker-icon.png';
+// import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+// import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
+// import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
 // import StarRoundedIcon from '@mui/icons-material/StarRounded';
 // import CloseIcon from '@mui/icons-material/Close';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
+// import LocationOnIcon from '@mui/icons-material/LocationOn';
 import RateUserDialog from './Helper/RateUserDialog';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,32 +30,32 @@ import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 
 
 // Set default icon manually
-const customIcon = new L.Icon({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-  iconSize: [25, 41], // Default size
-  iconAnchor: [12, 41], // Position relative to the point
-  popupAnchor: [1, -34],
-});
+// const customIcon = new L.Icon({
+//   iconUrl: markerIcon,
+//   shadowUrl: markerShadow,
+//   iconSize: [25, 41], // Default size
+//   iconAnchor: [12, 41], // Position relative to the point
+//   popupAnchor: [1, -34],
+// });
 
 // Move map when user location is updated
-const ChangeView = ({ center }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (center) {
-      map.setView(center, 13);
-    }
-  }, [center, map]);
-  return null;
-};
+// const ChangeView = ({ center }) => {
+//   const map = useMap();
+//   useEffect(() => {
+//     if (center) {
+//       map.setView(center, 13);
+//     }
+//   }, [center, map]);
+//   return null;
+// };
 
 // Fix for default marker icon in Leaflet
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-  iconUrl: require('leaflet/dist/images/marker-icon.png'),
-  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-});
+// delete L.Icon.Default.prototype._getIconUrl;
+// L.Icon.Default.mergeOptions({
+//   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+//   iconUrl: require('leaflet/dist/images/marker-icon.png'),
+//   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+// });
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -82,15 +82,15 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
   // const [successMessage, setSuccessMessage] = useState('');
-  const [mapMode, setMapMode] = useState('normal');
-  const [currentLocation, setCurrentLocation] = useState(null);
+  // const [mapMode, setMapMode] = useState('normal');
+  // const [currentLocation, setCurrentLocation] = useState(null);
   // const [locationDetails, setLocationDetails] = useState(null);
-  const [loadingLocation, setLoadingLocation] = useState(false);
+  // const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
-  const [savingLocation, setSavingLocation] = useState(false);
+  // const [savingLocation, setSavingLocation] = useState(false);
   // const [showRatings, setShowRatings] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
-  const [currentAddress, setCurrentAddress] = useState('');
+  // const [currentAddress, setCurrentAddress] = useState('');
   // states for profile editing
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
@@ -115,7 +115,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
           headers: { Authorization: `Bearer ${authToken}` },
         });
         setUserData(response.data);
-        fetchAddress(response.data.location.latitude, response.data.location.longitude);
+        // fetchAddress(response.data.location.latitude, response.data.location.longitude);
         
       } catch (err) {
         // setError('Failed to fetch User details. Please try again later.');
@@ -156,101 +156,101 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     setDeleteDialogOpen(false);
   };
 
-  const locateUser = async () => {
-    if (navigator.geolocation) {
-      setLoadingLocation(true);
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          setCurrentLocation({ lat: latitude, lng: longitude });
+  // const locateUser = async () => {
+  //   if (navigator.geolocation) {
+  //     setLoadingLocation(true);
+  //     navigator.geolocation.getCurrentPosition(
+  //       async (position) => {
+  //         const { latitude, longitude } = position.coords;
+  //         setCurrentLocation({ lat: latitude, lng: longitude });
 
-          // Set location details manually using lat/lng
-          // setLocationDetails({
-          //   latitude,
-          //   longitude,
-          //   accuracy: position.coords.accuracy, // GPS accuracy in meters
-          // });
-          fetchAddress(latitude, longitude);
-          // console.log("User's current location:", latitude, longitude);
-          setLoadingLocation(false);
-          // Fetch location details using an IP geolocation API
-          // try {
-          //   const response = await fetch(`https://ipapi.co/${latitude},${longitude}/json/`);
-          //   const data = await response.json();
-          //   setLocationDetails({
-          //     ip: data.ip,
-          //     street: data.street || 'Not available',
-          //     area: data.area || 'Not available',
-          //     city: data.city,
-          //     state: data.region,
-          //     nation: data.country_name,
-          //     pincode: data.postal,
-          //     accuracy: position.coords.accuracy, // GPS accuracy in meters
-          //   });
-            // 🌍 Fetch location details using OpenStreetMap's Nominatim API
-          // try {
-          //   const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-          //   const data = await response.json();
+  //         // Set location details manually using lat/lng
+  //         // setLocationDetails({
+  //         //   latitude,
+  //         //   longitude,
+  //         //   accuracy: position.coords.accuracy, // GPS accuracy in meters
+  //         // });
+  //         fetchAddress(latitude, longitude);
+  //         // console.log("User's current location:", latitude, longitude);
+  //         setLoadingLocation(false);
+  //         // Fetch location details using an IP geolocation API
+  //         // try {
+  //         //   const response = await fetch(`https://ipapi.co/${latitude},${longitude}/json/`);
+  //         //   const data = await response.json();
+  //         //   setLocationDetails({
+  //         //     ip: data.ip,
+  //         //     street: data.street || 'Not available',
+  //         //     area: data.area || 'Not available',
+  //         //     city: data.city,
+  //         //     state: data.region,
+  //         //     nation: data.country_name,
+  //         //     pincode: data.postal,
+  //         //     accuracy: position.coords.accuracy, // GPS accuracy in meters
+  //         //   });
+  //           // 🌍 Fetch location details using OpenStreetMap's Nominatim API
+  //         // try {
+  //         //   const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+  //         //   const data = await response.json();
 
-          //   setLocationDetails({
-          //     street: data.address.road || 'Not available',
-          //     area: data.address.neighbourhood || 'Not available',
-          //     city: data.address.city || data.address.town || 'Not available',
-          //     state: data.address.state || 'Not available',
-          //     nation: data.address.country || 'Not available',
-          //     pincode: data.address.postcode || 'Not available',
-          //   });
-          // } catch (err) {
-          //   console.error('Error fetching location details:', err);
-          //   setError('Failed to fetch location details. Please try again later.');
-          // }
-        },
-        (error) => {
-          console.error('Error getting location:', error);
-          // setError('Failed to fetch your current location. Please enable location access.');
-          setLoadingLocation(false);
-          setSnackbar({ open: true, message: 'Failed to fetch your current location. Please enable the location permission or try again.', severity: 'error' });
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-    }
-  };
+  //         //   setLocationDetails({
+  //         //     street: data.address.road || 'Not available',
+  //         //     area: data.address.neighbourhood || 'Not available',
+  //         //     city: data.address.city || data.address.town || 'Not available',
+  //         //     state: data.address.state || 'Not available',
+  //         //     nation: data.address.country || 'Not available',
+  //         //     pincode: data.address.postcode || 'Not available',
+  //         //   });
+  //         // } catch (err) {
+  //         //   console.error('Error fetching location details:', err);
+  //         //   setError('Failed to fetch location details. Please try again later.');
+  //         // }
+  //       },
+  //       (error) => {
+  //         console.error('Error getting location:', error);
+  //         // setError('Failed to fetch your current location. Please enable location access.');
+  //         setLoadingLocation(false);
+  //         setSnackbar({ open: true, message: 'Failed to fetch your current location. Please enable the location permission or try again.', severity: 'error' });
+  //       },
+  //       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy mode
+  //     );
+  //   } else {
+  //     console.error('Geolocation is not supported by this browser.');
+  //   }
+  // };
 
-  const saveLocation = async () => {
-    setSavingLocation(true);
-    try {
-      const authToken = localStorage.getItem('authToken');
-      await API.put(`/api/auth/${id}/location`, {
-        location: {
-          latitude: currentLocation.lat,
-          longitude: currentLocation.lng,
-        },
-      }, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      // setSuccessMessage('Location saved successfully.');
-      setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
-      setSavingLocation(false);
-    } catch (err) {
-      // setError('Failed to save location. Please try again later.');
-      setSnackbar({ open: true, message: 'Failed to save location. Please try again later.', severity: 'error' });
-      setSavingLocation(false);
-    }
-  };
+  // const saveLocation = async () => {
+  //   setSavingLocation(true);
+  //   try {
+  //     const authToken = localStorage.getItem('authToken');
+  //     await API.put(`/api/auth/${id}/location`, {
+  //       location: {
+  //         latitude: currentLocation.lat,
+  //         longitude: currentLocation.lng,
+  //       },
+  //     }, {
+  //       headers: { Authorization: `Bearer ${authToken}` },
+  //     });
+  //     // setSuccessMessage('Location saved successfully.');
+  //     setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
+  //     setSavingLocation(false);
+  //   } catch (err) {
+  //     // setError('Failed to save location. Please try again later.');
+  //     setSnackbar({ open: true, message: 'Failed to save location. Please try again later.', severity: 'error' });
+  //     setSavingLocation(false);
+  //   }
+  // };
 
   // Fetch address from latitude and longitude
-  const fetchAddress = async (latitude, longitude) => {
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-      const data = await response.json();
-      setCurrentAddress(data.display_name);
-      console.log("address fetched");
-    } catch (error) {
-      console.error("Error fetching address:", error);
-    }
-  };
+  // const fetchAddress = async (latitude, longitude) => {
+  //   try {
+  //     const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+  //     const data = await response.json();
+  //     setCurrentAddress(data.display_name);
+  //     console.log("address fetched");
+  //   } catch (error) {
+  //     console.error("Error fetching address:", error);
+  //   }
+  // };
   
   // if (loading || !userData) {
   //   return (
@@ -783,17 +783,14 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               </Card>
             )} */}
           </Box>
-          <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode),
-            /* bgcolor: 'rgba(0, 0, 0, 0.07)' */ }}>
+          {/* <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode),
+            }}>
             <Box sx={{ height: '300px', marginTop: '1rem', padding: '10px' }}>
               <Box display="flex" justifyContent="start" sx={{ marginBottom: isMobile ? '6px' : '8px' }}>
-                {/* <IconButton color="primary" sx={{borderRadius: 6, px: 0.5, py: 0.5,  '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' }}}> */}
                 <LocationOnIcon color="primary" />
                 <Typography variant="body1" sx={{ color: 'grey', }}>
-                  {/* {currentAddress || "Fetching location..."} */}
                   <strong>Your current address :</strong> {(currentAddress) || "Fetching location..."}
                 </Typography>
-                {/* </IconButton> */}
               </Box>
               <MapContainer
                 center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [userData.location.latitude, userData.location.longitude]}
@@ -807,7 +804,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
                     : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'}
                 />
-                {/* Labels and Roads Layer (Overlay) */}
+                Labels and Roads Layer (Overlay)
                 {mapMode === 'satellite' && (
                   <TileLayer
                     url="https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png"
@@ -835,7 +832,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   justifyContent: 'space-between',
                   width: '100%' // Ensure buttons take full width
                 }}>
-                  {/* Map Mode Button */}
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <IconButton
                       sx={{
@@ -893,7 +889,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 </Box>
               </Box>
             </Box>
-          </Box>
+          </Box> */}
         </Box>
       }
         {/* <Box mt={1} sx={{ borderRadius:3, bgcolor:'rgba(0, 0, 0, 0.07)'}}>
