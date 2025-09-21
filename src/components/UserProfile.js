@@ -1,7 +1,7 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import API, { deleteProfilePicture, updateProfilePicture, updateUserProfile } from './api/api';
@@ -27,6 +27,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import Cropper from 'react-easy-crop';
 import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
+import ReviewsRoundedIcon from '@mui/icons-material/ReviewsRounded';
+import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
 
 
 // Set default icon manually
@@ -75,12 +77,12 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const { id } = useParams(); // Extract sellerId from URL
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [hoveredId, setHoveredId] = useState(null);
+  // const [hoveredId, setHoveredId] = useState(null);
   // const [successMessage, setSuccessMessage] = useState('');
   // const [mapMode, setMapMode] = useState('normal');
   // const [currentLocation, setCurrentLocation] = useState(null);
@@ -277,6 +279,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       email: userData.email,
       phone: userData.phone || ''
     });
+    setError('');
     setEditProfileOpen(true);
   };
 
@@ -289,8 +292,39 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   };
 
   const handleUpdateProfile = async () => {
-    try {
+    try { 
       setUpdating(true);
+      // Username rules:
+      // - Start with a capital letter
+      // - Length: 6 to 12 characters total
+      // - Can include letters, numbers, @ _ -
+      // - Must contain at least one number
+      const usernameRegex = /^(?=.*\d)[A-Z][A-Za-z0-9@_-]{5,11}$/;
+
+      if (!usernameRegex.test(profileForm.username)) {
+        setError(
+          'Username must start with a capital letter, be 6–12 characters long, contain at least one number, and can include @ _ - (spaces not allowed).'
+        );
+        return;
+      }
+      // Email validation
+      if (!profileForm.email.includes('@') || !profileForm.email.endsWith('.com')) {
+        setError('Invalid mail id.');
+        return;
+      }
+
+      // Phone validation
+      if (!profileForm.phone) {
+        setError('Phone number is required.');
+        return;
+      }
+
+      // Phone validation
+      if (profileForm.phone.length !== 10 || !/^\d+$/.test(profileForm.phone)) {
+        setError('Invalid mobile number.');
+        return;
+      }
+
       const response = await updateUserProfile(id, profileForm);
       setUserData(prev => ({
         ...prev,
@@ -305,6 +339,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         message: 'Profile updated successfully!', 
         severity: 'success' 
       });
+      setError('');
     } catch (error) {
       console.error('Error updating profile:', error);
       setSnackbar({ 
@@ -483,7 +518,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
           <Box
             display="flex"
             flexDirection={isMobile ? "column" : "row"}
-            gap={2} sx={{  borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px', ...getGlassmorphismStyle(theme, darkMode) }} // bgcolor: '#f5f5f5',
+            gap={2} 
+            // sx={{  borderRadius: '10px', padding: '6px', paddingBottom: '10px', paddingTop: '10px', ...getGlassmorphismStyle(theme, darkMode) }} // bgcolor: '#f5f5f5',
           >
             <Box sx={{
               flex: 1,
@@ -503,7 +539,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   alignItems: isMobile ? "center" : "flex-start",
                 }}
               >
-                <Box sx={{ position: 'relative', display: 'inline-block' }}>
+                <Box sx={{ position: 'relative', display: 'inline-block', width: isMobile ? '160px' : '100%', objectFit: 'contain',  }}>
                   <Avatar
                     alt={userData.username}
                     src={
@@ -511,7 +547,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                         ? `data:image/jpeg;base64,${userData.profilePic}`
                         : 'https://placehold.co/200x200?text=No+Image'
                     }
-                    sx={{ width: isMobile ? '160px' : 'auto', height: isMobile ? '160px' : 'auto', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer' }} // fit-content
+                    sx={{ width: isMobile ? '160px' : '100%', height: isMobile ? '160px' : '100%', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer' }} // fit-content
                     onClick={() => setProfilePicDialog(true)}
                   />
                   <IconButton
@@ -545,9 +581,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               position: 'relative', // To enable absolute positioning of the button
               // height: 'calc(100vh - 16px)', // Adjust height as needed
             }}>
-              <Box flex={isMobile ? "1" : "0 0 70%"} mb={6}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6">Profile Information</Typography>
+              <Box flex={isMobile ? "1" : "0 0 70%"} >
+                {/* <Box display="flex" alignItems="center" mb={2}>
+                  <Avatar sx={{ bgcolor: 'warning.main', mr: 1, height: '32px', width: '32px' }}>
+                    <AccountCircleRoundedIcon fontSize="small" />
+                  </Avatar>
+                  <Typography variant="h6" >
+                    Personal Details
+                  </Typography>
+                </Box> */}
+                {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6">Personal Details</Typography>
                   <Button
                     variant="outlined"
                     size="small"
@@ -557,7 +601,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   >
                     Edit Profile
                   </Button>
-                </Box>
+                </Box> */}
                 <Grid container spacing={2}>
 
                   <Grid item xs={6} sm={4}>
@@ -586,13 +630,19 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   </Grid>
                   <Grid item xs={12} sm={12}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      User Email:
+                      User Email: 
+                      <Chip
+                        label={userData?.emailVerified === true ? 'Verified' : 'Not Verified'} 
+                        color={userData?.emailVerified === true ? 'success' : 'warning' }
+                        sx={{ height: '24px', ml: 1 }} variant="outlined"
+                      />
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {userData?.email}
                     </Typography>
+                    
                   </Grid>
-                  <Grid item xs={6} sm={4}>
+                  {/* <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Account Status:
                     </Typography>
@@ -631,7 +681,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     <Typography variant="body2" color="textSecondary">
                       {new Date(userData?.lastProfilePicUpdate).toLocaleString() || 'Invalid date'}
                     </Typography>
-                  </Grid>
+                  </Grid> */}
                   {/* <Grid item xs={12} sm={12}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Address:
@@ -645,7 +695,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 </Grid>
               </Box>
 
-              <Box>
+              {/* <Box sx={{pt: 2}}>
                 <Toolbar sx={{
                   position: 'absolute',
                   bottom: 0,
@@ -656,13 +706,10 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   boxShadow: '0 -2px 5px rgba(0, 0, 0, 0.1)',
                   display: 'flex',
                   justifyContent: 'right',
-                  marginTop: '1rem',
+                  // marginTop: '1rem',
                 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', flex: 1, alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      {/* <Button variant="text" size="small" onClick={() => setShowRatings(true)}>
-                        Ratings
-                      </Button> */}
                       <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px'}} onClick={handleOpenRateDialog}>
                         Profile Ratings
                       </Button>
@@ -700,7 +747,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     </IconButton>
                   </Box>
                 </Toolbar>
-              </Box>
+              </Box> */}
             </Box>
             {/* {showRatings && (
               <Card
@@ -782,6 +829,89 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 </CardContent>
               </Card>
             )} */}
+          </Box>
+          <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box display="flex" alignItems="center">
+                <Avatar sx={{ bgcolor: 'primary.main', mr: 1, height: '32px', width: '32px' }}>
+                  <ReviewsRoundedIcon fontSize="small" />
+                </Avatar>
+                <Typography variant="h6" >
+                  Trust Level
+                </Typography>
+              </Box>
+              <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none'}} onClick={handleOpenRateDialog}>
+                View Ratings
+              </Button>
+            </Box>
+            <Box sx={{display: 'flex',justifyContent:'center', gap: '20px', alignItems:'center', p: 2,
+              // ...getGlassmorphismStyle(theme, darkMode),
+               borderRadius: '12px' }}>
+              <Rating value={userData?.trustLevel || 0} precision={0.5} readOnly />
+              <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
+                {/* {isFetching ? (
+                <CircularProgress size={20} />
+                  ) : ( */}
+                  <Typography variant="body2" color="textPrimary"> {userData?.trustLevel || "N/A"} </Typography>
+                {/* )} */}
+                {/* <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography> */}
+              </Box>
+            </Box>
+          </Box>
+          <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box display="flex" alignItems="center">
+                <Avatar sx={{ bgcolor: 'warning.main', mr: 1, height: '32px', width: '32px' }}>
+                  <ManageAccountsRoundedIcon fontSize="small" />
+                </Avatar>
+                <Typography variant="h6" >
+                  Account Management
+                </Typography>
+              </Box>
+              {/* <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none'}} onClick={handleOpenRateDialog}>
+                View Ratings
+              </Button> */}
+            </Box>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="body1" style={{ fontWeight: 500 }}>
+                  Account created at:
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {new Date(userData?.accountCreatedAt).toLocaleString() || 'Not Found'}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="body1" style={{ fontWeight: 500 }}>
+                  Last login at:
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {new Date(userData?.lastLoginAt).toLocaleString() || 'Not Found'}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} >
+                <Button
+                    variant="text"
+                    size="small"
+                    onClick={handleEditProfile}
+                    startIcon={<EditIcon />}
+                    sx={{ borderRadius: '12px', textTransform: 'none' }}
+                  >
+                    Edit Profile Details
+                  </Button>
+              </Grid>
+              <Grid item xs={12} >
+                <Button
+                    variant="text"
+                    size="small" color="error"
+                    onClick={handleOpenDeleteDialog}
+                    startIcon={<DeleteForeverRoundedIcon />}
+                    sx={{ borderRadius: '12px', textTransform: 'none' }}
+                  >
+                    Permanently Delete Account
+                  </Button>
+              </Grid>
+            </Grid>
           </Box>
           {/* <Box sx={{ paddingBottom: isMobile ? '14rem' : '10rem', marginBottom: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode),
             }}>
@@ -1014,7 +1144,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       <Dialog
         open={editProfileOpen}
         onClose={() => setEditProfileOpen(false)}
-        maxWidth="sm"
+        maxWidth="xs"
         fullWidth
         PaperProps={{
           sx: {
@@ -1022,6 +1152,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             overflow: 'visible'
           }
         }}
+        sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, }}
       >
         <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent>
@@ -1029,16 +1160,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             <TextField
               fullWidth
               label="Username"
+              placeholder="Format ex: Abc1234"
               name="username"
               value={profileForm.username}
               onChange={handleProfileChange}
               margin="normal"
               required
-              size="small"
+              // size="small"
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
+                  // backgroundColor: '#ffffff',
                   '&:hover .MuiOutlinedInput-notchedOutline': {
                     borderColor: '#1976d2',
                   },
@@ -1057,11 +1189,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               onChange={handleProfileChange}
               margin="normal"
               required
-              size="small"
+              // size="small"
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
+                  // backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.05)',
                   '&:hover .MuiOutlinedInput-notchedOutline': {
                     borderColor: '#1976d2',
                   },
@@ -1075,14 +1207,22 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               fullWidth
               label="Phone Number"
               name="phone"
+              type="number"
               value={profileForm.phone}
               onChange={handleProfileChange}
               margin="normal"
-              size="small"
+              // size="small"
+              InputProps={{
+                startAdornment: <InputAdornment position="start">+91</InputAdornment>,
+                inputProps: { 
+                  style: { paddingLeft: 8 }, 
+                  maxLength: 10 // restrict to 10 digits after +91 if needed
+                },
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',
-                  backgroundColor: '#ffffff',
+                  // backgroundColor: '#ffffff',
                   '&:hover .MuiOutlinedInput-notchedOutline': {
                     borderColor: '#1976d2',
                   },
@@ -1094,7 +1234,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             />
           </Box>
         </DialogContent>
+        {error && <Alert  
+            sx={{ mx: 2 , borderRadius: '12px', color: darkMode ? 'error.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(244, 67, 54, 0.3)' : '1px solid rgba(244, 67, 54, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(244, 67, 54, 0.15)' : '0 2px 8px rgba(244, 67, 54, 0.1)', }} 
+          severity="error">{error}</Alert>}
         <DialogActions sx={{p: 2}}>
+          
           <Button sx={{borderRadius: '12px', textTransform: 'none'}} onClick={() => setEditProfileOpen(false)}>Cancel</Button>
           <Button 
             onClick={handleUpdateProfile} 

@@ -119,12 +119,17 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
     // setPincodeValidation(''); // Reset pincode validation message
 
     // Validate username and password
-    const usernameRegex = /^[A-Z][A-Za-z0-9@_-]{5,}$/;
+    // Username rules:
+    // - Start with a capital letter
+    // - Length: 6 to 12 characters total
+    // - Can include letters, numbers, @ _ -
+    // - Must contain at least one number
+    const usernameRegex = /^[A-Z][A-Za-z0-9@_-]{5,11}$/;
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*@).{8,}$/;
 
     if (!usernameRegex.test(username)) {
       setError(
-        'Username must start with a capital letter, be at least 6 characters long, contain at least one number, and can include @ _ - and spaces not allowed.'
+        'Username must start with a capital letter, be 6–12 characters long, contain at least one number, and can include @ _ - and spaces not allowed.'
       );
       setLoading(false);
       return;
@@ -159,7 +164,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
     }
 
     // Phone validation
-    if (phone.length < 10 || !/^\d+$/.test(phone)) {
+    if (phone.length !== 10 || !/^\d+$/.test(phone)) {
       setError('Invalid mobile number.');
       setLoading(false);
       return;
@@ -363,7 +368,8 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   Enter your unique User Name 
                 </Typography>
                 <TextField
-                  label="Username (Format ex: Abc1234)"
+                  label="Username"
+                  placeholder="Format ex: Abc1234"
                   variant="outlined"
                   fullWidth 
                   // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, maxWidth: '280px' }}
@@ -580,9 +586,16 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                     // },
                   }}
                 />
-                <TextField label="Phone" fullWidth 
+                <TextField label="Phone" fullWidth type="number"
                   // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
                   margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} required
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">+91</InputAdornment>,
+                    inputProps: { 
+                      style: { paddingLeft: 8 }, 
+                      maxLength: 10 // restrict to 10 digits after +91 if needed
+                    },
+                  }}
                   sx={{ 
                     '& .MuiOutlinedInput-root': { 
                       borderRadius: '12px',
