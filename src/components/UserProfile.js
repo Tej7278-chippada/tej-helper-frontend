@@ -1,7 +1,7 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import API, { deleteProfilePicture, updateProfilePicture, updateUserProfile } from './api/api';
@@ -1120,6 +1120,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         onClose={handleCloseDeleteDialog}
         aria-labelledby="delete-dialog-title" 
         sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'up' }}
       >
         <DialogTitle id="delete-dialog-title" >
           Are you sure you want to delete your account permanently?
@@ -1152,6 +1154,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             overflow: 'visible'
           }
         }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'up' }}
         sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, }}
       >
         <DialogTitle>Edit Profile</DialogTitle>
@@ -1266,6 +1270,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
             overflow: 'visible'
           }
         }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'up' }}
       >
         <DialogTitle>Update Profile Picture</DialogTitle>
         <DialogContent sx={{ scrollbarWidth: 'thin' }}>

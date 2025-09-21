@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide } from '@mui/material';
 import API from '../api/api';
 import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
@@ -207,7 +207,10 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ margin: isMobile ? '10px' : '0px',
         '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '4px',  }
-        }}>
+        }}
+      TransitionComponent={Slide}
+      TransitionProps={{ direction: 'up' }}
+        >
       <DialogTitle>
         {/* Rate this User */}
         {/* Show existing rating */}
