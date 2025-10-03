@@ -554,6 +554,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         location: {
           latitude: latitude,
           longitude: longitude,
+          address: currentAddress
         },
       }, {
         headers: { Authorization: `Bearer ${authToken}` },
