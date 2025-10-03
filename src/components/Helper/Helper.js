@@ -1975,6 +1975,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           : 'rgba(255, 255, 255, 0.27)', backdropFilter: 'blur(20px)', borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
           mt: isMobile ? '320px' : '420px', 
           position: 'relative', zIndex: 1050, 
+          height: isMobile ? '90vh' : '88vh', // Set height to 90% of viewport height
+          maxHeight: isMobile ? '90vh' : '88vh', // Ensure it doesn't exceed 90% of viewport
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
@@ -1983,9 +1987,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
           borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
-          position: 'relative', //sticky
+          // position: 'relative', //sticky
           top: 0,
           zIndex: 1000, 
+          position: 'sticky', // Make it sticky
+          flexShrink: 0 // Prevent shrinking
           // ...getGlassmorphismStyle(0.1, 10),
           }}> 
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
@@ -2902,7 +2908,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
         {/* Friends profile visibility */}
         {selectedCategory === 'Friends' && (
-          <>
+           <Box sx={{ 
+              flex: 1, 
+              overflow: 'auto',
+              maxHeight: 'calc(90vh - 140px)' // Adjust based on your header heights
+            }}>
           {/* <Box sx={{display: 'flex', justifyContent: 'center', m: '12px', alignItems: 'center', gap: '4px'}}>
             <Typography color="text.secondary">Do u want ot visible your profile to nearby Friends!</Typography>
             <Switch
@@ -2912,11 +2922,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             />
           </Box> */}
           <Friends isMobile={isMobile} darkMode={darkMode} setSnackbar={setSnackbar} />
-          </>
+          </Box>
         )}
 
 
-        {selectedCategory !== 'Friends' && (<Box mb={1} sx={{ paddingTop: '1rem', paddingBottom: '2rem', mx: isMobile ? '4px' : '8px', paddingInline: isMobile ? '4px' : '6px', borderRadius: '10px' }} > {/* sx={{ p: 2 }} */}
+        {selectedCategory !== 'Friends' && (
+          <Box
+            sx={{ 
+              flex: 1, 
+              overflow: 'auto',
+              paddingTop: '1rem', 
+              paddingBottom: '2rem', 
+              mx: isMobile ? '4px' : '8px', mb: '8px',
+              paddingInline: isMobile ? '4px' : '6px', 
+              borderRadius: '10px',
+              maxHeight: 'calc(90vh - 140px)' // Adjusts based on header heights
+            }}
+          >
           {loadingLocation || loading ? (
               <SkeletonCards/>
             ) : 
