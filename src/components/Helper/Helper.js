@@ -2933,9 +2933,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               overflow: 'auto',
               paddingTop: '1rem', 
               paddingBottom: '2rem', 
-              mx: isMobile ? '4px' : '8px', mb: '8px',
+              mx: isMobile ? '4px' : '8px', 
+              // mb: '8px',
               paddingInline: isMobile ? '4px' : '6px', 
-              borderRadius: '10px',
+              // borderRadius: '10px',
+              scrollbarWidth: 'none',
               maxHeight: 'calc(90vh - 140px)' // Adjusts based on header heights
             }}
           >
