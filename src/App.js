@@ -366,7 +366,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
           <Route path="/notifications" element={
             <PrivateRoute>
-              <NotificationsPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
+              <NotificationsPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} setUnreadCount={setUnreadCount} shouldAnimate={shouldAnimate}/>
             </PrivateRoute>
           } />
           <Route path="/chatsOfUser" element={

@@ -47,7 +47,7 @@ const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-function NotificationsPage({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
+function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCount, shouldAnimate}) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -141,6 +141,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, shouldAnimate
       try {
         setLoadingView(notification._id);
         await markNotificationAsRead(notification._id);
+        setUnreadCount(prev => prev - 1);
         setNotifications(notifications.map(n => 
           n._id === notification._id ? { ...n, isRead: true } : n
         ));
@@ -246,6 +247,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, shouldAnimate
     try {
       await clearAllNotifications();
       setNotifications([]);
+      setUnreadCount(0);
       // Emit event to update badge count
       // if (socket) {
       //   socket.emit('allNotificationsRead', userId);
