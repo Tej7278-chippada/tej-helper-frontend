@@ -218,6 +218,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   }, [loading, hasMore, loadingMore]);
   const userId = localStorage.getItem('userId');
   const [totalPosts, setTotalPosts] = useState(0);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const scrollTimeoutRef = useRef(null);
+  const lastScrollTopRef = useRef(0);
+  const postsContainerRef = useRef(null);
+
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(() => {
   const savedFilters = localStorage.getItem('helperFilters');
@@ -607,6 +612,50 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       fetchUserLocation();
     }
   }, [fetchUserLocation]);
+
+  // Optimized scroll handler with throttling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollTimeoutRef.current) {
+        return; // Skip if already processing
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        const currentScrollTop = postsContainerRef.current?.scrollTop || 0;
+        const scrollDirection = currentScrollTop > lastScrollTopRef.current ? 'down' : 'up';
+        
+        // Show header when scrolling up or at the top
+        if (scrollDirection === 'up' || currentScrollTop <= 10) {
+          setIsHeaderVisible(true);
+        } 
+        // Hide header when scrolling down past threshold
+        else if (scrollDirection === 'down' && currentScrollTop > 100) {
+          setIsHeaderVisible(false);
+        }
+        
+        lastScrollTopRef.current = currentScrollTop;
+        scrollTimeoutRef.current = null;
+      }, 16); // ~60fps throttle
+    };
+
+    const postsContainer = postsContainerRef.current;
+    if (postsContainer) {
+      postsContainer.addEventListener('scroll', handleScroll, { passive: true });
+      return () => {
+        if (postsContainer) {
+          postsContainer.removeEventListener('scroll', handleScroll);
+        }
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+      };
+    }
+  }, []);
+
+  // Toggle header visibility
+  // const toggleHeader = () => {
+  //   setIsHeaderVisible(prev => !prev);
+  // };
 
   // Add search state at the top with other state declarations
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -1978,20 +2027,81 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           height: isMobile ? '90vh' : '88vh', // Set height to 90% of viewport height
           maxHeight: isMobile ? '90vh' : '88vh', // Ensure it doesn't exceed 90% of viewport
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          overflow: 'hidden' // Prevent container scroll
         }}
       >
+        {/* Handler Bar - shown when header is hidden */}
+        {/* {!isHeaderVisible && (
+          <Box 
+            sx={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 1000,
+              display: 'flex',
+              justifyContent: 'center',
+              padding: '8px',
+              // background: darkMode 
+              //   ? 'rgba(30, 30, 30, 0.9)' 
+              //   : 'rgba(255, 255, 255, 0.9)',
+              // backdropFilter: 'blur(10px)',
+              // borderBottom: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+              cursor: 'pointer',
+              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: isHeaderVisible ? 'translateY(-100%)' : 'translateY(0)',
+              opacity: isHeaderVisible ? 0 : 1,
+              flexShrink: 0,
+              pointerEvents: isHeaderVisible ? 'none' : 'auto'
+            }}
+            onClick={toggleHeader}
+          >
+            <Box 
+              sx={{
+                width: '40px',
+                height: '4px',
+                borderRadius: '2px',
+                background: darkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.4)',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  background: darkMode ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.6)',
+                  transform: 'scale(1.2)'
+                }
+              }}
+            />
+          </Box>
+        )} */}
+        
         <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
+        <Box 
+          sx={{
+            transition: 'transform 0.3s ease, opacity 0.3s ease',
+            transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+            opacity: isHeaderVisible ? 1 : 0,
+            height: isHeaderVisible ? 'auto' : '0px',
+            // overflow: 'hidden',
+            position: 'sticky',
+            top: 0,
+            zIndex: 999,
+            // background: darkMode 
+            //   ? 'rgba(30, 30, 30, 0.95)' 
+            //   : 'rgba(255, 255, 255, 0.95)',
+            // backdropFilter: 'blur(20px)',
+            // pointerEvents: isHeaderVisible ? 'auto' : 'none',
+            flexShrink: 0,
+            // transformOrigin: 'top center',
+            willChange: 'transform' // Performance optimization
+          }}
+        >
         <Toolbar sx={{display:'flex', justifyContent:'space-between',
           //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
           borderRadius: '12px', 
           padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
           // position: 'relative', //sticky
-          top: 0,
-          zIndex: 1000, 
-          position: 'sticky', // Make it sticky
-          flexShrink: 0 // Prevent shrinking
+          // top: 0,
+          // zIndex: 1000, 
+          // position: 'sticky', // Make it sticky
+          // flexShrink: 0 // Prevent shrinking
           // ...getGlassmorphismStyle(0.1, 10),
           }}> 
           {/* <Typography variant="h6" style={{ flexGrow: 1, marginRight: '2rem' }}>
@@ -2808,6 +2918,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </Box>
           
         </Toolbar>
+        </Box>
         {/* Search Bar */}
         {/* {isMobile && (<>
         <Box sx={{ 
@@ -2928,17 +3039,33 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
         {selectedCategory !== 'Friends' && (
           <Box
+            ref={postsContainerRef}
             sx={{ 
               flex: 1, 
               overflow: 'auto',
+              WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+              // // Remove any custom scrollbars that might cause lag
+              // '&::-webkit-scrollbar': {
+              //   width: '6px',
+              // },
+              // '&::-webkit-scrollbar-track': {
+              //   background: 'transparent',
+              // },
+              // '&::-webkit-scrollbar-thumb': {
+              //   background: darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
+              //   borderRadius: '3px',
+              // },
+              // '&::-webkit-scrollbar-thumb:hover': {
+              //   background: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.4)',
+              // },
               paddingTop: '1rem', 
               paddingBottom: '2rem', 
-              mx: isMobile ? '4px' : '8px', 
+              mx: isMobile ? '8px' : '14px', 
               // mb: '8px',
-              paddingInline: isMobile ? '4px' : '6px', 
-              // borderRadius: '10px',
+              // paddingInline: isMobile ? '4px' : '6px', 
+              borderRadius: '10px',
               scrollbarWidth: 'none',
-              maxHeight: 'calc(90vh - 140px)' // Adjusts based on header heights
+              // maxHeight: 'calc(90vh - 140px)' // Adjusts based on header heights
             }}
           >
           {loadingLocation || loading ? (
@@ -2958,7 +3085,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       backgroundColor: 'rgba(255, 255, 255, 0.15)',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        // transform: 'translateY(-8px)',
+                        transform: 'translateY(-8px)',
                         boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.15)}`,
                         '& .card-actions': {
                           opacity: 1,
@@ -2981,14 +3108,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       overflow: 'hidden',
                     }}
                       onClick={() => openPostDetail(post)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
-                        e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
-                        e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
-                      }} 
+                      // onMouseEnter={(e) => {
+                      //   e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
+                      //   e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
+                      // }}
+                      // onMouseLeave={(e) => {
+                      //   e.currentTarget.style.transform = 'scale(1)'; // Revert zoom
+                      //   e.currentTarget.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)'; // Revert shadow
+                      // }} 
                       // onTouchStart={(e) => {
                       //   if (e.currentTarget) {
                       //     e.currentTarget.style.transform = 'scale(1.03)';

@@ -246,6 +246,21 @@ body.dark-mode::before {
   background: rgba(0, 0, 0, 0.3);
 }
 
+/* Dark Mode */
+html.dark-mode ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+html.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
 
 
 /* Add these to your existing App.css */
