@@ -3084,6 +3084,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       borderRadius: 3,
                       backgroundColor: 'rgba(255, 255, 255, 0.15)',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                      WebkitTouchCallout: 'none', // Disable iOS callout
+                      WebkitUserSelect: 'none', // Disable text selection
+                      userSelect: 'none',
+                      '&:active': {
+                        transform: 'scale(0.98)', // Add press feedback instead
+                        transition: 'transform 0.1s ease',
+                      },
                       '&:hover': {
                         transform: 'translateY(-8px)',
                         boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.15)}`,
