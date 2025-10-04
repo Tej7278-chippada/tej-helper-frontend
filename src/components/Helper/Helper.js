@@ -49,6 +49,7 @@ import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import SortRoundedIcon from '@mui/icons-material/SortRounded';
 import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
 import { WaveAnimationCircles } from '../Maps/WaveAnimation';
+import CompareRoundedIcon from '@mui/icons-material/CompareRounded';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -222,6 +223,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const scrollTimeoutRef = useRef(null);
   const lastScrollTopRef = useRef(0);
   const postsContainerRef = useRef(null);
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedPosts, setSelectedPosts] = useState([]);
+  const [compareDialogOpen, setCompareDialogOpen] = useState(false);
 
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(() => {
@@ -685,6 +689,36 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     }
   };
 
+  // handlePostSelection function
+  const handlePostSelection = (post) => {
+    setSelectedPosts(prev => {
+      const isSelected = prev.some(p => p._id === post._id);
+      if (isSelected) {
+        return prev.filter(p => p._id !== post._id);
+      } else if (prev.length < 3) {
+        return [...prev, post];
+      } else {
+        setSnackbar({ 
+          open: true, 
+          message: 'Maximum 3 posts can be compared at a time', 
+          severity: 'warning' 
+        });
+        return prev;
+      }
+    });
+  };
+
+  const closePostsCompare = () => {
+    setCompareMode(false);
+    setSelectedPosts([]);
+  }
+
+  // Reset compare mode when changing categories or filters
+  // useEffect(() => {
+  //   setCompareMode(false);
+  //   setSelectedPosts([]);
+  // }, [selectedCategory, filters, searchQuery]);
+
   // Generate a cache key based on current filters/location/searchQuery
   const generateCacheKey = useCallback(() => {
     return JSON.stringify({
@@ -1030,6 +1064,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         try {
           setLoading(true);
           setIsSearching(!!searchQuery); // Set searching state based on query
+          setCompareMode(false);
+          setSelectedPosts([]);
           // if (globalCache.lastSearchQuery) {
           //   setSearchQuery(globalCache.lastSearchQuery);
           //   // // Trigger a search if we have a cached query
@@ -2402,6 +2438,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 minWidth: '40px',
                 minHeight: '40px',
                 mr: '4px',
+                backgroundColor: showSortMenu ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
               }}
             >
               <SortRoundedIcon />
@@ -2453,7 +2490,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               onClick={() => setIsExtraFiltersOpen((prev) => !prev)}
               sx={{
                 minWidth: '40px',
-                minHeight: '40px',
+                minHeight: '40px', mr: '4px',
+                backgroundColor: isExtraFiltersOpen ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
               }}
             >
               <FilterListRoundedIcon />
@@ -2566,6 +2604,20 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </CardContent>
               </Card>
             )}
+
+          {/* Compare Icon Button */}
+          <IconButton 
+            onClick={() => setCompareMode(!compareMode)}
+            sx={{
+              minWidth: '40px',
+              minHeight: '40px',
+              mr: '4px',
+              // color: compareMode ? 'primary.main' : 'inherit',
+              backgroundColor: compareMode ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
+            }}
+          >
+            <CompareRoundedIcon />
+          </IconButton>
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
           {/* <Button
@@ -3035,6 +3087,29 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           <Friends isMobile={isMobile} darkMode={darkMode} setSnackbar={setSnackbar} />
           </Box>
         )}
+        {/* compare floating buttons */}
+        {selectedPosts.length > 0 && compareMode && (
+          <Box sx={{ display: 'flex', flexDirection: 'row', position: 'fixed', gap: 1, bottom: 16, right: 16, zIndex: 1100 }} >
+            <Fab
+              variant="extended"
+              color="primary" size="small"
+              onClick={() => setCompareDialogOpen(true)}
+              // disabled={selectedPosts.length <= 1}
+              sx={{ height: '35px', width: '120px', borderRadius: '20px' }}
+            >
+              {/* <CompareRoundedIcon sx={{ mr: 1 }} /> */}
+              Compare ({selectedPosts.length})
+            </Fab>
+            <Fab
+              variant="extended"
+              color="primary" size="small"
+              onClick={closePostsCompare}
+              sx={{ height: '35px', width: '35px', borderRadius: '20px' }}
+            >
+              <CloseIcon  />
+            </Fab>
+          </Box>
+        )}
 
 
         {selectedCategory !== 'Friends' && (
@@ -3088,6 +3163,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       WebkitTouchCallout: 'none', // Disable iOS callout
                       WebkitUserSelect: 'none', // Disable text selection
                       userSelect: 'none',
+                      border: selectedPosts.some(p => p._id === post._id) ? '2px solid #1976d2' : 'none',
                       '&:active': {
                         transform: 'scale(0.98)', // Add press feedback instead
                         transition: 'transform 0.1s ease',
@@ -3115,7 +3191,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       height: isMobile ? '300px' : '340px', // Fixed height for consistency
                       overflow: 'hidden',
                     }}
-                      onClick={() => openPostDetail(post)}
+                      onClick={() => {
+                        if (compareMode) {
+                          handlePostSelection(post);
+                        } else {
+                          openPostDetail(post);
+                        }
+                      }}
                       // onMouseEnter={(e) => {
                       //   e.currentTarget.style.transform = 'scale(1.02)'; // Slight zoom on hover
                       //   e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.2)'; // Enhance shadow
@@ -3142,6 +3224,32 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       //   }
                       // }}
                       >
+                        {/* Selection Checkbox in Compare Mode */}
+                        {compareMode && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              top: 8,
+                              right: 8,
+                              zIndex: 10,
+                              width: 24,
+                              height: 24,
+                              borderRadius: '50%',
+                              backgroundColor: selectedPosts.some(p => p._id === post._id) 
+                                ? '#4361ee' 
+                                : 'rgba(255, 255, 255, 0.8)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '2px solid white',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                            }}
+                          >
+                            {selectedPosts.some(p => p._id === post._id) && (
+                              <CheckRoundedIcon sx={{ fontSize: 16, color: 'white' }} />
+                            )}
+                          </Box>
+                        )}                
                       {/* CardMedia for Images with Scroll */}
                       {/* <CardMedia mx={isMobile ? "-12px" : "-2px"} sx={{ margin: '0rem 0', borderRadius: '8px', overflow: 'hidden', height: '160px', backgroundColor: '#f5f5f5' }}>
                         <div style={{
@@ -3657,6 +3765,58 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
 
       </Box>
+      {/* Compare Dialog */}
+      <Dialog
+        open={compareDialogOpen}
+        onClose={() => setCompareDialogOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        scroll="paper"
+      >
+        <DialogTitle>
+          Compare Posts
+          <IconButton
+            onClick={() => setCompareDialogOpen(false)}
+            sx={{ position: 'absolute', right: 8, top: 8 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={3}>
+            {selectedPosts.map((post, index) => (
+              <Grid item xs={12} md={4} key={post._id}>
+                <Card sx={{ height: '100%' }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      {post.title}
+                    </Typography>
+                    <Typography color="textSecondary" gutterBottom>
+                      {post.postType === 'HelpRequest' ? post.categories : post.serviceType}
+                    </Typography>
+                    {post.price > 0 && (
+                      <Typography variant="h6" color="primary" gutterBottom>
+                        {formatPrice(post.price)}
+                      </Typography>
+                    )}
+                    <Typography variant="body2" paragraph>
+                      {post.description}
+                    </Typography>
+                    {post.distance && (
+                      <Typography variant="caption" color="textSecondary">
+                        {post.distance < 1 
+                          ? `${Math.round(post.distance * 1000)}m away` 
+                          : `${post.distance.toFixed(1)}km away`
+                        }
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </DialogContent>
+      </Dialog>
       {/* Filter Floating Card */}
       {/* {filterOpen && (
         <FilterPosts
