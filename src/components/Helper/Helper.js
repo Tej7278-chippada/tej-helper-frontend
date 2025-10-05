@@ -120,7 +120,7 @@ const SearchContainer = styled(Box)(({ theme }) => ({
   transition: 'all 0.3s ease',
 }));
 
-const SearchTextField = styled(TextField, { shouldForwardProp: (prop) => prop !== "expanded" && prop !== "darkMode", })(({ theme, expanded, darkMode }) => ({
+const SearchTextField = styled(TextField, { shouldForwardProp: (prop) => prop !== "expanded" && prop !== "darkMode", })(({ theme, expanded, darkMode, isMobile }) => ({
   transition: 'all 0.3s ease',
   width: expanded ? '100%' : '40px',
   overflow: 'hidden',
@@ -147,7 +147,11 @@ const SearchTextField = styled(TextField, { shouldForwardProp: (prop) => prop !=
   '& .MuiInputBase-input': {
     opacity: expanded ? 1 : 0,
     transition: 'opacity 0.2s ease',
-    padding: expanded ? '6px 12px 6px 12px' : '6px 0',
+    padding: expanded
+      ? isMobile
+        ? '6px 2px 6px 2px'
+        : '6px 12px 6px 12px'
+      : '6px 0',
     cursor: expanded ? 'text' : 'pointer',
     // ...getGlassmorphismStyle(),
   },
@@ -2312,10 +2316,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               onFocus={() => setExpanded(true)}
               onBlur={handleBlur}
               inputRef={inputRef}
-              expanded={expanded} darkMode={darkMode}
+              expanded={expanded} darkMode={darkMode} isMobile={isMobile}
               InputProps={{
                 startAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position="start" sx={{ mr: 0 }}>
                     <IconButton 
                       onClick={!expanded ? handleSearchClick : undefined}
                       sx={{
@@ -2325,7 +2329,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       }}
                     >
                       {isSearching ? (
-                        <CircularProgress size={16} />
+                        <CircularProgress size={20} />
                       ) : (
                         <SearchIcon color="action" />
                       )}
@@ -3092,19 +3096,28 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           <Box sx={{ display: 'flex', flexDirection: 'row', position: 'fixed', gap: 1, bottom: 16, right: 16, zIndex: 1100 }} >
             <Fab
               variant="extended"
-              color="primary" size="small"
+              size="small"
               onClick={() => setCompareDialogOpen(true)}
               // disabled={selectedPosts.length <= 1}
-              sx={{ height: '35px', width: '120px', borderRadius: '20px' }}
+              sx={{ height: '35px', width: '120px', borderRadius: '20px', backgroundColor: '#4361ee', color: '#fff',
+                '&:hover': {
+                  backgroundColor: '#3651c9', // slightly darker shade or same as normal
+                  color: '#fff'
+                }
+              }}
             >
               {/* <CompareRoundedIcon sx={{ mr: 1 }} /> */}
               Compare ({selectedPosts.length})
             </Fab>
             <Fab
               variant="extended"
-              color="primary" size="small"
+              size="small"
               onClick={closePostsCompare}
-              sx={{ height: '35px', width: '35px', borderRadius: '20px' }}
+              sx={{ height: '35px', width: '35px', borderRadius: '20px', backgroundColor: '#fff', color: 'grey',
+                '&:hover': {
+                  backgroundColor: '#f0f0f0' // subtle gray for hover
+                }
+               }}
             >
               <CloseIcon  />
             </Fab>
