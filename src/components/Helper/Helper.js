@@ -583,6 +583,48 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     }
   };
 
+  // this useEffect to style Leaflet popups
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .leaflet-popup-content-wrapper {
+        background: ${darkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)'} !important;
+        backdrop-filter: blur(20px) !important;
+        border-radius: 12px !important;
+        border: ${darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'} !important;
+        box-shadow: ${darkMode ? '0 8px 32px rgba(0, 0, 0, 0.3)' : '0 8px 32px rgba(0, 0, 0, 0.1)'} !important;
+        color: ${darkMode ? 'white' : 'inherit'} !important;
+      }
+      
+      .leaflet-popup-tip {
+        background: ${darkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)'} !important;
+        backdrop-filter: blur(20px) !important;
+        border: ${darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)'} !important;
+      }
+      
+      .leaflet-popup-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        color: ${darkMode ? 'white' : 'inherit'} !important;
+      }
+      
+      .leaflet-popup-close-button {
+        color: ${darkMode ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.5)'} !important;
+        padding: 2px 2px 0 0 !important;
+        font-size: 20px !important;
+      }
+      
+      .leaflet-popup-close-button:hover {
+        color: ${darkMode ? 'white' : 'black'} !important;
+        background: transparent !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, [darkMode]);
   // useEffect(() => {
   //   fetchUserLocation();
   // }, [fetchUserLocation]);
@@ -1508,7 +1550,15 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   }
                 }}
               >
-                <Popup>Your Current Location</Popup>
+                <Popup className="custom-popup" closeButton={true}>
+                  <Box sx={{ p: 1.5}}>
+                    <Typography variant="subtitle1" sx={{ 
+                      color: darkMode ? 'white' : 'text.primary'
+                    }}>
+                      Your Current Location
+                    </Typography>
+                  </Box>
+                </Popup>
               </Marker>
             )}
             {/* posts locations mapping code */}
@@ -1556,33 +1606,107 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   // }}
                 >
                   {/*  popup content to show more information */}
-                  <Popup>
-                    <Box sx={{ minWidth: '180px', maxWidth: isMobile ? '250px' : '300px' }}>
-                      <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                  <Popup 
+                    className="custom-popup"
+                    closeButton={true}
+                  >
+                    <Box sx={{ 
+                      minWidth: '180px', 
+                      maxWidth: isMobile ? '250px' : '300px',
+                      p: 1.5,
+                    }}>
+                      <Typography variant="subtitle1" gutterBottom sx={{ 
+                        fontWeight: 'bold',
+                        color: darkMode ? 'white' : 'text.primary'
+                      }}>
                         {marker.title}
                       </Typography>
                       
-                      <Box sx={{ mb: 1, display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Chip 
-                          label={marker.postType === 'HelpRequest' 
-                            ? (marker.categories || 'Help') 
-                            : (marker.serviceType || 'Service')}
-                          size="small" 
-                          color={marker.postType === 'HelpRequest' ? 'primary' : 'success'}
-                          sx={{ fontSize: '0.7rem', height: '20px' }}
-                        />
+                      <Box sx={{ 
+                        mb: 1, 
+                        display: 'flex', 
+                        flexDirection: 'row', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center' 
+                      }}>
+                        <Box >
+                          <Chip 
+                            label={marker.postType === 'HelpRequest' 
+                              ? (marker.categories || 'Help') 
+                              : (marker.serviceType || 'Service')}
+                            size="small" 
+                            color={marker.postType === 'HelpRequest' ? 'primary' : 'success'}
+                            sx={{ fontSize: '0.7rem', height: '20px', mr: 0.8,
+                              // fontWeight: '600',
+                              backgroundColor: marker.postType === 'HelpRequest' 
+                                ? (marker.categories === 'Paid' 
+                                    ? darkMode ? '#065f46' : '#10b981'
+                                    : marker.categories === 'UnPaid'
+                                    ? darkMode ? '#854d0e' : '#f59e0b'
+                                    : marker.categories === 'Emergency'
+                                    ? darkMode ? '#991b1b' : '#dc2626'
+                                    : darkMode ? '#374151' : '#6b7280'
+                                  )
+                                : (darkMode ? '#1e3a8a' : '#3b82f6'),
+                              color: 'white',
+                              '& .MuiChip-label': {
+                                px: 1
+                              }
+                            }}
+                          />
+                          {/* Post Status Chip */}
+                          <Chip
+                            label={marker.postStatus || 'Active'}
+                            size="small"
+                            sx={{
+                              fontSize: '0.65rem',
+                              height: '20px',
+                              // fontWeight: '600',
+                              backgroundColor: marker.postStatus === 'Active' 
+                                ? (darkMode ? '#065f46' : '#10b981')
+                                : marker.postStatus === 'InActive'
+                                ? (darkMode ? '#6b7280' : '#9ca3af')
+                                : marker.postStatus === 'Closed'
+                                ? (darkMode ? '#991b1b' : '#dc2626')
+                                : (darkMode ? '#854d0e' : '#f59e0b'),
+                              color: 'white',
+                              '& .MuiChip-label': {
+                                px: 1
+                              }
+                            }}
+                          />
+                        </Box>
                         {marker.price > 0 && (
                           <Chip 
                             label={formatPrice(marker.price)}
-                            icon={<CurrencyRupeeRoundedIcon />}
-                            size="small" variant="outlined"
+                            icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: '14px', color: 'inherit' }} />}
+                            size="small" 
+                            variant="filled"
+                            sx={{
+                              // fontSize: '0.7rem',
+                              height: '20px',
+                              // fontWeight: '600',
+                              backgroundColor: darkMode 
+                                ? (marker.price > 1000 ? '#7c2d12' : '#365314')
+                                : (marker.price > 1000 ? '#fed7aa' : '#d9f99d'),
+                              color: darkMode 
+                                ? (marker.price > 1000 ? '#fdba74' : '#a3e635')
+                                : (marker.price > 1000 ? '#9a3412' : '#3f6212'),
+                              border: 'none',
+                              '& .MuiChip-label': {
+                                px: 0.5, mr: 1,
+                              }
+                            }}
                           />
                         )}
                       </Box>
                       {marker.distance && (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <LocationOnIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-                          <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                          <LocationOnIcon sx={{ 
+                            fontSize: 16, mr: 0.5,
+                            color: darkMode ? '#60a5fa' : '#3b82f6',
+                          }} />
+                          <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
                             {marker.distance < 1 
                               ? `${Math.round(marker.distance * 1000)}m away` 
                               : `${marker.distance.toFixed(1)}km away`
@@ -1595,7 +1719,29 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         variant="outlined" 
                         size="small" 
                         fullWidth 
-                        sx={{ mt: 1, fontSize: '0.75rem', borderRadius: '8px', textTransform: 'none' }}
+                        sx={{ 
+                          mt: 1, 
+                          fontSize: '0.75rem', 
+                          borderRadius: '8px', 
+                          textTransform: 'none',
+                          fontWeight: '600',
+                          color: darkMode 
+                            ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
+                            : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                          // boxShadow: darkMode 
+                          //   ? '0 4px 14px rgba(59, 130, 246, 0.4)'
+                          //   : '0 4px 14px rgba(37, 99, 235, 0.3)',
+                          '&:hover': {
+                            color: darkMode 
+                              ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
+                              : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                            boxShadow: darkMode 
+                              ? '0 6px 20px rgba(59, 130, 246, 0.6)'
+                              : '0 6px 20px rgba(37, 99, 235, 0.4)',
+                            transform: 'translateY(-1px)'
+                          },
+                          transition: 'all 0.2s ease'
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           fetchPostDetails(marker.id);
@@ -3099,11 +3245,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               size="small"
               onClick={() => setCompareDialogOpen(true)}
               // disabled={selectedPosts.length <= 1}
-              sx={{ height: '35px', width: '120px', borderRadius: '20px', backgroundColor: '#4361ee', color: '#fff',
+              sx={{ height: '35px', width: '120px', borderRadius: '20px', color: '#fff',
+                background: darkMode 
+                  ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
+                  : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                boxShadow: darkMode 
+                  ? '0 4px 14px rgba(59, 130, 246, 0.4)'
+                  : '0 4px 14px rgba(37, 99, 235, 0.3)',
                 '&:hover': {
-                  backgroundColor: '#3651c9', // slightly darker shade or same as normal
-                  color: '#fff'
-                }
+                  background: darkMode 
+                    ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
+                    : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                  boxShadow: darkMode 
+                    ? '0 6px 20px rgba(59, 130, 246, 0.6)'
+                    : '0 6px 20px rgba(37, 99, 235, 0.4)',
+                  transform: 'translateY(-1px)'
+                },
+                transition: 'all 0.2s ease'
               }}
             >
               {/* <CompareRoundedIcon sx={{ mr: 1 }} /> */}
@@ -3113,10 +3271,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               variant="extended"
               size="small"
               onClick={closePostsCompare}
-              sx={{ height: '35px', width: '35px', borderRadius: '20px', backgroundColor: '#fff', color: 'grey',
+              sx={{ height: '35px', width: '35px', borderRadius: '20px', color: 'grey',
                 '&:hover': {
-                  backgroundColor: '#f0f0f0' // subtle gray for hover
-                }
+                  backgroundColor: '#f0f0f0', // subtle gray for hover
+                  transform: 'translateY(-1px)'
+                },
+                transition: 'all 0.2s ease'
                }}
             >
               <CloseIcon  />
@@ -3782,52 +3942,391 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       <Dialog
         open={compareDialogOpen}
         onClose={() => setCompareDialogOpen(false)}
-        maxWidth="lg"
-        fullWidth
+        maxWidth="xl"
+        fullWidth fullScreen={isMobile ? true : false}
         scroll="paper"
+        sx={{
+          '& .MuiDialog-paper': {
+            borderRadius: '16px',
+            background: darkMode 
+              ? 'rgba(30, 30, 30, 0.95)' 
+              : 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(20px)',
+          }
+        }}
       >
-        <DialogTitle>
-          Compare Posts
+        <DialogTitle sx={{ 
+          borderBottom: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <CompareRoundedIcon color="primary" />
+            <Typography variant="h6" component="span">
+              Compare Posts
+            </Typography>
+            {/* <Typography variant="caption" color="text.secondary">
+              People
+            </Typography> */}
+            <Chip 
+              label={`${selectedPosts.length}/3 selected`} 
+              size="small" 
+              // color="primary" 
+              variant="outlined"
+            />
+          </Box>
           <IconButton
             onClick={() => setCompareDialogOpen(false)}
-            sx={{ position: 'absolute', right: 8, top: 8 }}
+            sx={{ 
+              color: 'text.secondary',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' }
+            }}
           >
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3}>
+        
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            overflow: 'auto',
+            minHeight: '60vh',
+            '&::-webkit-scrollbar': { height: '8px' },
+            '&::-webkit-scrollbar-thumb': { 
+              background: darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
+              borderRadius: '4px'
+            }
+          }}>
             {selectedPosts.map((post, index) => (
-              <Grid item xs={12} md={4} key={post._id}>
-                <Card sx={{ height: '100%' }}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
+              <Box 
+                key={post._id}
+                sx={{ 
+                  minWidth: isMobile ? '100%' : '350px',
+                  maxWidth: isMobile ? '100%' : '350px',
+                  borderRight: index < selectedPosts.length - 1 ? 
+                    `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}` : 'none',
+                  position: 'relative'
+                }}
+              >
+                {/* Close button for individual post */}
+                <IconButton
+                  size="small"
+                  onClick={() => setSelectedPosts(prev => prev.filter(p => p._id !== post._id))}
+                  sx={{
+                    position: 'absolute',
+                    top: 8,
+                    right: 8,
+                    zIndex: 10,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    color: 'white',
+                    '&:hover': { backgroundColor: 'rgba(0,0,0,0.7)' }
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+
+                {/* Media Section */}
+                <Box sx={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
+                  {post.media?.[0] ? (
+                    <LazyBackgroundImage
+                      base64Image={post.media[0]}
+                      alt={post.title}
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                      }}
+                    />
+                  ) : (
+                    <Box
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      <Typography color="white" variant="h6">
+                        No Image
+                      </Typography>
+                    </Box>
+                  )}
+                  
+                  {/* Status and Type Overlay */}
+                  <Box sx={{ 
+                    position: 'absolute', 
+                    top: 12, 
+                    left: 12, 
+                    display: 'flex', 
+                    gap: 1,
+                    flexWrap: 'wrap'
+                  }}>
+                    <Chip
+                      label={post.postStatus}
+                      size="small"
+                      sx={{
+                        backgroundColor: post.postStatus === 'Active' ? 'success.main' : 'error.main',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.7rem'
+                      }}
+                    />
+                    <Chip
+                      label={post.postType === 'HelpRequest' ? (post.categories || 'Help') : (post.serviceType || 'Service')}
+                      size="small"
+                      color={post.postType === 'HelpRequest' ? 'primary' : 'secondary'}
+                      sx={{ fontSize: '0.7rem', fontWeight: 600 }}
+                    />
+                  </Box>
+                </Box>
+
+                {/* Content Section */}
+                <Box sx={{ p: 2, mb: 4 }}>
+                  {/* Title and Price */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 'bold',
+                      flex: 1,
+                      mr: 1
+                    }}>
                       {post.title}
                     </Typography>
-                    <Typography color="textSecondary" gutterBottom>
-                      {post.postType === 'HelpRequest' ? post.categories : post.serviceType}
-                    </Typography>
                     {post.price > 0 && (
-                      <Typography variant="h6" color="primary" gutterBottom>
-                        {formatPrice(post.price)}
-                      </Typography>
+                      <Chip
+                        icon={<CurrencyRupeeRoundedIcon sx={{mr: 0}}/>}
+                        label={formatPrice(post.price)}
+                        color="white"
+                        variant="filled"
+                        sx={{
+                          backgroundColor: 'success.main',
+                          color: '#fff',
+                          px: 0.5, py: 0.1,
+                          fontWeight: 500,
+                          fontSize: '0.875rem',
+                          transition: 'transform 0.2s ease',
+                          '& .MuiChip-label': {
+                            px: '4px', mr: '4px'
+                          },
+                          '& .MuiChip-icon': {
+                            marginLeft: '0px',
+                            height: '16px'
+                          },
+                        }}
+                      />
                     )}
-                    <Typography variant="body2" paragraph>
-                      {post.description}
-                    </Typography>
-                    {post.distance && (
-                      <Typography variant="caption" color="textSecondary">
+                  </Box>
+
+                  {/* Full Time Badge */}
+                  {post.isFullTime && (
+                    <Chip
+                      icon={<WorkIcon sx={{ fontSize: 16 }} />}
+                      label="Full Time"
+                      size="small"
+                      color="info"
+                      sx={{ mb: 2 }}
+                    />
+                  )}
+
+                  {/* Basic Info Grid */}
+                  <Grid container spacing={1} sx={{ mb: 2 }}>
+                    <Grid item xs={6}>
+                      <Typography variant="caption" color="text.secondary">
+                        Distance
+                      </Typography>
+                      <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <LocationOnIcon fontSize="small" />
                         {post.distance < 1 
-                          ? `${Math.round(post.distance * 1000)}m away` 
-                          : `${post.distance.toFixed(1)}km away`
+                          ? `${Math.round(post.distance * 1000)}m` 
+                          : `${post.distance.toFixed(1)}km`
                         }
                       </Typography>
+                    </Grid>
+                    {post.peopleCount && (
+                      <Grid item xs={6}>
+                        <Typography variant="caption" color="text.secondary">
+                          People
+                        </Typography>
+                        <Typography variant="body2">
+                          {post.peopleCount} {post.gender || 'People'}
+                        </Typography>
+                      </Grid>
                     )}
-                  </CardContent>
-                </Card>
-              </Grid>
+                    {post.gender && !post.peopleCount && (
+                      <Grid item xs={6}>
+                        <Typography variant="caption" color="text.secondary">
+                          Gender
+                        </Typography>
+                        <Typography variant="body2">
+                          {post.gender}
+                        </Typography>
+                      </Grid>
+                    )}
+                  </Grid>
+
+                  {/* Service Specific Details */}
+                  {post.postType === 'ServiceOffering' && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                        Service Details
+                      </Typography>
+                      
+                      {/* Availability */}
+                      {post.availability?.isAlwaysAvailable ? (
+                        <Chip 
+                          label="Available 24/7" 
+                          size="small"
+                          color="success"
+                          variant="outlined"
+                          sx={{ mb: 1 }}
+                        />
+                      ) : post.availability?.days && post.availability.days.length > 0 && (
+                        <Box sx={{ mb: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Available Days:
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                            {post.availability.days.slice(0, 3).map(day => (
+                              <Chip 
+                                key={day} 
+                                label={day.slice(0, 3)} 
+                                size="small" 
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            ))}
+                            {post.availability.days.length > 3 && (
+                              <Chip 
+                                label={`+${post.availability.days.length - 3}`} 
+                                size="small" 
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Service Features */}
+                      {post.serviceFeatures && post.serviceFeatures.length > 0 && (
+                        <Box sx={{ mb: 1 }}>
+                          <Typography variant="caption" color="text.secondary">
+                            Features:
+                          </Typography>
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
+                            {post.serviceFeatures.slice(0, 3).map((feature, idx) => (
+                              <Chip
+                                key={idx}
+                                label={feature}
+                                size="small"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            ))}
+                            {post.serviceFeatures.length > 3 && (
+                              <Chip 
+                                label={`+${post.serviceFeatures.length - 3}`} 
+                                size="small" 
+                                variant="outlined"
+                                sx={{ fontSize: '0.7rem' }}
+                              />
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Capacity */}
+                      {post.capacity && (
+                        <Typography variant="caption" color="text.secondary">
+                          Capacity: <Typography variant="caption" component="span">{post.capacity} slots</Typography>
+                        </Typography>
+                      )}
+                    </Box>
+                  )}
+
+                  {/* Help Request Specific Details */}
+                  {post.postType === 'HelpRequest' && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                        Request Details
+                      </Typography>
+                      <Grid container spacing={1}>
+                        {post.serviceDate && (
+                          <Grid item xs={12}>
+                            <Typography variant="caption" color="text.secondary">
+                              Service Date:
+                            </Typography>
+                            <Typography variant="body2">
+                              {new Date(post.serviceDate).toLocaleDateString()}
+                            </Typography>
+                          </Grid>
+                        )}
+                        {post.serviceDays && (
+                          <Grid item xs={12}>
+                            <Typography variant="caption" color="text.secondary">
+                              Service Days:
+                            </Typography>
+                            <Typography variant="body2">
+                              {post.serviceDays} days
+                            </Typography>
+                          </Grid>
+                        )}
+                      </Grid>
+                    </Box>
+                  )}
+
+                  {/* Description */}
+                  <Typography variant="caption" color="text.secondary">
+                    Description
+                  </Typography>
+                  <Typography variant="body2" sx={{ mb: 2, lineHeight: 1.6 }}>
+                    {post.description}
+                  </Typography>
+
+                </Box>
+                
+                {/* Action Buttons */}
+                <Box sx={{ display: 'flex', gap: 1, p: 2, mt: 2, position: 'absolute', bottom: 0, left: 0, right: 0, }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth
+                    onClick={() => openPostDetail(post)}
+                    sx={{ borderRadius: '8px', textTransform: 'none',
+                      color: darkMode 
+                        ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
+                        : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                      // boxShadow: darkMode 
+                      //   ? '0 4px 14px rgba(59, 130, 246, 0.4)'
+                      //   : '0 4px 14px rgba(37, 99, 235, 0.3)',
+                      '&:hover': {
+                        color: darkMode 
+                          ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
+                          : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                        boxShadow: darkMode 
+                          ? '0 6px 20px rgba(59, 130, 246, 0.6)'
+                          : '0 6px 20px rgba(37, 99, 235, 0.4)',
+                        transform: 'translateY(-1px)'
+                      },
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    View Details
+                  </Button>
+                  {/* <Button
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    onClick={() => openPostDetail(post)}
+                    sx={{ borderRadius: '8px', textTransform: 'none' }}
+                  >
+                    Contact
+                  </Button> */}
+                </Box>
+              </Box>
             ))}
-          </Grid>
+          </Box>
         </DialogContent>
       </Dialog>
       {/* Filter Floating Card */}
