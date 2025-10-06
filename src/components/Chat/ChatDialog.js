@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, 
   // lazy, Suspense
    } from 'react';
-import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar, Badge, styled, Button } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, TextField, IconButton, Box, Typography, useMediaQuery, useTheme, DialogActions, Tooltip, Chip, CircularProgress, Avatar, Badge, styled, Button, Slide } from '@mui/material';
 import axios from 'axios';
 import CloseIcon from '@mui/icons-material/Close';
 import SendRoundedIcon from '@mui/icons-material/SendRounded';
@@ -474,11 +474,13 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"  fullScreen={isMobile} sx={{
-        margin: isMobile ? '10px' : '0px',
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"  fullScreen={isMobile} sx={{
+        // margin: isMobile ? '10px' : '0px',
         '& .MuiPaper-root': { borderRadius: '14px',/*  background: darkMode  ? 'rgb(0, 0, 0)'  : 'rgb(255, 255, 255)', */  } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }
-      }}>
+      }}
+      TransitionComponent={Slide}
+      TransitionProps={{ direction: 'left' }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
    }}> 
         <Box sx={{ display: 'flex', alignItems:'center', gap:2 }}>

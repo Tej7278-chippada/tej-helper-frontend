@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, IconButton, Box,} from '@mui/material';
+import { Dialog, DialogContent, IconButton, Box, Slide,} from '@mui/material';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ZoomOutIcon from '@mui/icons-material/ZoomOut';
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIosRoundedIcon from '@mui/icons-material/ArrowBackIosRounded';
 import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 
-const ImageZoomDialog = ({ selectedImage, handleCloseImageModal, images }) => {
+const ImageZoomDialog = ({ selectedImage, handleCloseImageModal, images, isMobile }) => {
     const [zoomLevel, setZoomLevel] = useState(1);
     const [offset, setOffset] = useState({ x: 0, y: 0 }); // Offset for panning
     const [isDragging, setIsDragging] = useState(false);
@@ -95,10 +95,13 @@ const ImageZoomDialog = ({ selectedImage, handleCloseImageModal, images }) => {
             open={!!selectedImage}
             onClose={handleCloseImageModal}
             maxWidth="md"
-            fullWidth fullScreen={true} sx={{ margin: '1rem',
+            fullWidth fullScreen={isMobile} sx={{ 
+                // margin: '1rem',
                 '& .MuiPaper-root': { // Target the dialog paper
                   borderRadius: '16px', // Apply border radius
                 }, }}
+            TransitionComponent={Slide}
+            TransitionProps={{ direction: 'right' }}
         >
             <DialogContent
                 style={{

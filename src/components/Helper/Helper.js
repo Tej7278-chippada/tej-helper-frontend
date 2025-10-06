@@ -4,7 +4,8 @@ import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularP
   Fade, Fab, 
   Dialog,
   DialogContent,
-  DialogTitle} from '@mui/material';
+  DialogTitle,
+  Slide} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -582,6 +583,28 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       console.error('Error saving location:', err);
     }
   };
+
+  // Handle browser back button
+  useEffect(() => {
+    if (!compareDialogOpen) return;
+
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      setCompareDialogOpen(false);
+    };
+
+    // Add event listener when dialog opens
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    // Clean up event listener when dialog closes
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      if (window.history.state === null) {
+        window.history.back();
+      }
+    };
+  }, [compareDialogOpen, setCompareDialogOpen]);
 
   // this useEffect to style Leaflet popups
   useEffect(() => {
@@ -3954,6 +3977,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             backdropFilter: 'blur(20px)',
           }
         }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'right' }}
       >
         <DialogTitle sx={{ 
           borderBottom: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,

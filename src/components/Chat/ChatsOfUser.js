@@ -250,6 +250,28 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     setOpenDialog(false);
   };
 
+  // Handle browser back button
+  useEffect(() => {
+    if (!openDialog) return;
+
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      setOpenDialog(false);
+    };
+
+    // Add event listener when dialog opens
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    // Clean up event listener when dialog closes
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      if (window.history.state === null) {
+        window.history.back();
+      }
+    };
+  }, [openDialog, setOpenDialog]);
+
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };

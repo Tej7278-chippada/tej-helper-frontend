@@ -141,6 +141,10 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                         backgroundColor: 'background.paper',
                         border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                        WebkitTouchCallout: 'none', // Disable iOS callout
+                        WebkitUserSelect: 'none', // Disable text selection
+                        userSelect: 'none',
                         '&:hover': {
                           transform: 'translateY(-8px)',
                           boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.15)}`,

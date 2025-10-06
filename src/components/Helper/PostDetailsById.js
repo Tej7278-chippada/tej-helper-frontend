@@ -161,7 +161,31 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   
     fetchPostDetails();
   }, [id]);
-  
+
+  // Handle browser back button
+  useEffect(() => {
+    if (!routeMapDialogOpen && !chatDialogOpen && !commentPopupOpen && !selectedImage) return;
+
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      setRouteMapDialogOpen(false);
+      setChatDialogOpen(false);
+      setCommentPopupOpen(false);
+      setSelectedImage(null);
+    };
+
+    // Add event listener when dialog opens
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    // Clean up event listener when dialog closes
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      if (window.history.state === null) {
+        window.history.back();
+      }
+    };
+  }, [routeMapDialogOpen, setRouteMapDialogOpen, chatDialogOpen, setChatDialogOpen, commentPopupOpen, setCommentPopupOpen, selectedImage, setSelectedImage]);
 
   useEffect(() => {
     const checkWishlistStatus = async () => {
@@ -1438,6 +1462,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             selectedImage={selectedImage}
             handleCloseImageModal={handleCloseImageModal}
             images={post.media} // Pass the full media array
+            isMobile={isMobile}
           />
           <CommentPopup
             open={commentPopupOpen}

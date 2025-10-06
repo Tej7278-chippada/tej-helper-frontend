@@ -1,6 +1,6 @@
 // src/components/Helper/RouteMapDialog.js
 import React, { useEffect, useRef, useState } from 'react';
-import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Tooltip, Alert, Snackbar, Switch } from '@mui/material';
+import { Dialog, DialogContent, Typography, IconButton, CircularProgress, Box, useMediaQuery, Tooltip, Alert, Snackbar, Switch, Slide } from '@mui/material';
 // import { addComment } from '../../api/api';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -397,11 +397,15 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isFullscreen ? true : isMobile ? true : false} sx={{
-      margin: isMobile ? '10px' : '10px', '& .MuiPaper-root': { // Target the dialog paper
+      // margin: isMobile ? '10px' : '10px',
+       '& .MuiPaper-root': { // Target the dialog paper
         borderRadius: '14px', // Apply border radius
         backdropFilter: 'blur(12px)',
       },
-    }} >
+    }} 
+    TransitionComponent={Slide}
+    TransitionProps={{ direction: 'right' }}
+    >
       <DialogContent style={{ position: 'sticky', height: 'auto', scrollbarWidth: 'none', paddingInline: isMobile ? '8px' : '1rem' }}>
         {/* Close button */}
         <IconButton

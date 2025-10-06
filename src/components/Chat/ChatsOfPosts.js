@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfPosts.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, Backdrop, CircularProgress, } from '@mui/material';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, Backdrop, CircularProgress, Slide, } from '@mui/material';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -152,6 +152,28 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+
+  // Handle browser back button
+  useEffect(() => {
+    if (!openDialog) return;
+
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      setOpenDialog(false);
+    };
+
+    // Add event listener when dialog opens
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    // Clean up event listener when dialog closes
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      if (window.history.state === null) {
+        window.history.back();
+      }
+    };
+  }, [openDialog, setOpenDialog]);
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
@@ -454,9 +476,11 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
         maxWidth="sm"
         fullWidth
         sx={{
-          margin: isMobile ? '10px' : '0px',
+          // margin: isMobile ? '10px' : '0px',
           '& .MuiPaper-root': { borderRadius: '14px',  } //maxHeight: isMobile ? '300px' : 'auto'
         }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'left' }}
       >
         {/* <DialogContent> */}
           {/* <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>

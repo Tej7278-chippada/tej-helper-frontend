@@ -315,6 +315,29 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
     }
   };
 
+  // Handle browser back button
+  useEffect(() => {
+    if (!openDialog) return;
+
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      setEditingProduct(null);
+      setOpenDialog(false);
+    };
+
+    // Add event listener when dialog opens
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    // Clean up event listener when dialog closes
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      if (window.history.state === null) {
+        window.history.back();
+      }
+    };
+  }, [openDialog, setOpenDialog]);
+
 
     return (
         <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
@@ -462,6 +485,10 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                 backgroundColor: 'rgba(255, 255, 255, 0.15)',
                 // border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                WebkitTouchCallout: 'none', // Disable iOS callout
+                WebkitUserSelect: 'none', // Disable text selection
+                userSelect: 'none',
                 '&:hover': {
                   // transform: 'translateY(-8px)',
                   boxShadow: `0 20px 40px ${alpha(theme.palette.common.black, 0.15)}`,

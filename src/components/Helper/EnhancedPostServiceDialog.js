@@ -37,7 +37,8 @@ import {
   Grid,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Slide
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -4080,6 +4081,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       //     margin: isMobile ? '1rem' : '1rem',
       //   },
       }}
+      TransitionComponent={Slide}
+      TransitionProps={{ direction: 'left' }}
     >
       <DialogTitle
         component="div"  // <-- avoid rendering an <h2>

@@ -1,6 +1,6 @@
 // src/components/CommentPopup.js
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent, Typography, TextField, Button, IconButton, CircularProgress, Box, useMediaQuery } from '@mui/material';
+import { Dialog, DialogContent, Typography, TextField, Button, IconButton, CircularProgress, Box, useMediaQuery, Slide } from '@mui/material';
 // import { addComment } from '../../api/api';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -79,10 +79,15 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage, da
   // };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md"  fullWidth fullScreen={ isMobile ? true : false} sx={{margin: isMobile ? '10px' : '0px', '& .MuiPaper-root': { // Target the dialog paper
-                  borderRadius: '14px', // Apply border radius
-                  backdropFilter: 'blur(12px)',
-                },}} >
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isMobile ? true : false} sx={{
+      // margin: isMobile ? '10px' : '0px',
+      '& .MuiPaper-root': { // Target the dialog paper
+        borderRadius: '14px', // Apply border radius
+        backdropFilter: 'blur(12px)',
+      },
+    }}
+      TransitionComponent={Slide}
+      TransitionProps={{ direction: 'left' }} >
       <DialogContent style={{ position: 'sticky', height: 'auto', scrollbarWidth: 'thin' }}>
         {/* Close button */}
         <IconButton

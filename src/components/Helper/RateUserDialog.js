@@ -73,6 +73,28 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     }
   };
 
+  // Handle browser back button
+  useEffect(() => {
+    if (!open) return;
+
+    const handleBackButton = (e) => {
+      e.preventDefault();
+      onClose(false);
+    };
+
+    // Add event listener when dialog opens
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    // Clean up event listener when dialog closes
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+      if (window.history.state === null) {
+        window.history.back();
+      }
+    };
+  }, [open, onClose]);
+
   // const fetchUserRatings = async () => {
   //   setIsFetching(true);
   //   try {
@@ -204,7 +226,8 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   );
 
   return (
-    <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ margin: isMobile ? '10px' : '0px',
+    <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ 
+      // margin: isMobile ? '10px' : '0px',
         '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '4px',  }
         }}
