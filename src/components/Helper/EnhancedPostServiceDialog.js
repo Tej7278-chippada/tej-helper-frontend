@@ -1681,6 +1681,42 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           //     errorSteps.delete(2);
           //   }
           // }
+
+          // Availability validation for Service Offering
+          if (formData.postType === 'ServiceOffering' && !availability.isAlwaysAvailable) {
+            if (!availability.days || availability.days.length === 0) {
+              errors.availability = 'Please select at least one available day';
+              errorSteps.add(2);
+            } else {
+              // Check if time slots are properly set for selected days
+              const daysWithoutTimeSlots = availability.days.filter(day => {
+                const timeSlot = availability.timeSlots.find(slot => slot.day === day);
+                return !timeSlot || !timeSlot.from || !timeSlot.to;
+              });
+              
+              if (daysWithoutTimeSlots.length > 0) {
+                errors.availability = `Please set time slots for: ${daysWithoutTimeSlots.join(', ')}`;
+                errorSteps.add(2);
+              // } else {
+              //   // Validate time range for each day
+              //   const invalidTimeSlots = availability.timeSlots.filter(slot => {
+              //     if (!slot.from || !slot.to) return false;
+              //     const fromTime = convertTimeToDate(slot.from);
+              //     const toTime = convertTimeToDate(slot.to);
+              //     return fromTime >= toTime;
+              //   });
+                
+              //   if (invalidTimeSlots.length > 0) {
+              //     errors.availability = `End time must be after start time for: ${invalidTimeSlots.map(slot => slot.day).join(', ')}`;
+              //     errorSteps.add(2);
+              //   } else {
+              //     errorSteps.delete(2);
+              //   }
+              }
+            }
+          } else if (formData.postType === 'ServiceOffering') {
+            errorSteps.delete(2);
+          }
           // Add other field validations for step 2...
           break;
           
@@ -1701,6 +1737,20 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       return Object.keys(errors).length === 0;
     };
 
+    // Add helper function to convert time string to Date object for comparison
+    // const convertTimeToDate = (timeString) => {
+    //   const [time, period] = timeString.split(' ');
+    //   const [hours, minutes] = time.split(':');
+    //   let hour = parseInt(hours);
+      
+    //   if (period === 'PM' && hour !== 12) hour += 12;
+    //   if (period === 'AM' && hour === 12) hour = 0;
+      
+    //   const date = new Date();
+    //   date.setHours(hour, parseInt(minutes), 0, 0);
+    //   return date;
+    // };
+
     const clearStepErrors = (stepIndex) => {
       const errorsToRemove = [];
       
@@ -1712,7 +1762,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           errorsToRemove.push('title','media');
           break;
         case 2:
-          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo');
+          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo', 'availability');
           break;
         case 3:
           errorsToRemove.push( 'description');
@@ -3100,13 +3150,24 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           days: newDays
         };
       });
+      // Clear error when selecting
+      if (validationErrors.availability) {
+        setValidationErrors(prev => ({ ...prev, availability: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     const handleAlwaysAvailableToggle = (e) => {
+      const isChecked = e.target.checked;
       setAvailability(prev => ({
         ...prev,
-        isAlwaysAvailable: e.target.checked
+        isAlwaysAvailable: isChecked
       }));
+      // Clear availability error when toggling 24/7
+      if (validationErrors.availability) {
+        setValidationErrors(prev => ({ ...prev, availability: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     const handleTimeSlotChange = (day, from, to) => {
@@ -3149,7 +3210,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             </Typography>
           </Box>
 
-          <FormGroup sx={{ mb: 2 }}>
+          <FormGroup sx={{ mb: 1, alignItems: 'center' }}>
             <FormControlLabel
               control={
                 <Switch
@@ -3164,6 +3225,17 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
 
           {!availability.isAlwaysAvailable && (
             <>
+              <Box sx={{ 
+                display: { xs: 'flex', sm: 'flex' }, 
+                alignItems: 'center', 
+                // my: 2,
+                width: '100%',
+                //  maxWidth: isMobile ? '220px' : '300px',
+              }}>
+                <Divider sx={{ flexGrow: 1 }} />
+                <Typography variant="caption" sx={{ px: 2, color: 'text.secondary' }}>or</Typography>
+                <Divider sx={{ flexGrow: 1 }} />
+              </Box>
               <Typography variant="subtitle1" gutterBottom>
                 Select Available Days
               </Typography>
@@ -3179,6 +3251,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   />
                 ))}
               </Box>
+
+              {validationErrors.availability && (
+                <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+                  {validationErrors.availability}
+                </Typography>
+              )}
 
               <Typography variant="subtitle1" gutterBottom>
                 Set Time Slots
