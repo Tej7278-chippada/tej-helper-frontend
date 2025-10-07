@@ -114,7 +114,6 @@ import {
 } from '@mui/icons-material';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
-// const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
 
 // Custom glassmorphism styling
 const getGlassmorphismStyle = (theme, darkMode) => ({
@@ -906,14 +905,29 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   // Add these handlers to manage date and time changes
   const handleDateChange = (date) => {
     setSelectedDate(date);
+    // Clear validation error when date is selected
+    if (validationErrors.selectedDate) {
+      setValidationErrors(prev => ({ ...prev, selectedDate: undefined }));
+      setStepsWithErrors(prev => prev.filter(step => step !== 2));
+    }
   };
 
   const handleTimeFromChange = (time) => {
     setTimeFrom(time);
+    // Clear validation error when time is selected
+    if (validationErrors.timeFrom) {
+      setValidationErrors(prev => ({ ...prev, timeFrom: undefined }));
+      setStepsWithErrors(prev => prev.filter(step => step !== 2));
+    }
   };
 
   const handleTimeToChange = (time) => {
     setTimeTo(time);
+    // Clear validation error when time is selected
+    if (validationErrors.timeTo) {
+      setValidationErrors(prev => ({ ...prev, timeTo: undefined }));
+      setStepsWithErrors(prev => prev.filter(step => step !== 2));
+    }
   };
 
   const locateUser = useCallback(async () => {
@@ -1592,18 +1606,81 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           } else {
             errorSteps.delete(2);
           }
+          // People Count validation
           if (formData.postType === 'HelpRequest' && !formData.peopleCount) {
             errors.peopleCount = 'People count is required';
             errorSteps.add(2);
+          } else if (formData.postType === 'HelpRequest' && formData.peopleCount) {
+            const peopleCount = parseInt(formData.peopleCount);
+            if (peopleCount < 1 || peopleCount > 10000) {
+              errors.peopleCount = 'People count must be between 1 and 10000';
+              errorSteps.add(2);
+            } else {
+              errorSteps.delete(2);
+            }
           } else {
             errorSteps.delete(2);
           }
+          // Service Days validation
           if (formData.postType === 'HelpRequest' && !formData.serviceDays) {
             errors.serviceDays = 'Service Days is required';
+            errorSteps.add(2);
+          } else if (formData.postType === 'HelpRequest' && formData.serviceDays) {
+            const serviceDays = parseInt(formData.serviceDays);
+            if (serviceDays < 1 || serviceDays > 365) {
+              errors.serviceDays = 'Service days must be between 1 and 365';
+              errorSteps.add(2);
+            } else {
+              errorSteps.delete(2);
+            }
+          } else {
+            errorSteps.delete(2);
+          }
+          // Date and Time validations
+          if (formData.postType === 'HelpRequest' && !selectedDate) {
+            errors.selectedDate = 'Service Date is required';
+            errorSteps.add(2);
+          } else if (formData.postType === 'HelpRequest' && selectedDate) {
+            // Check if date is in the past (except for emergency)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const selected = new Date(selectedDate);
+            selected.setHours(0, 0, 0, 0);
+            
+            if (selected < today && formData.categories !== 'Emergency') {
+              errors.selectedDate = 'Service date cannot be in the past';
+              errorSteps.add(2);
+            } else {
+              errorSteps.delete(2);
+            }
+          } else {
+            errorSteps.delete(2); 
+          }
+          
+          // Time validations - required for all categories, but especially for Emergency
+          if (formData.postType === 'HelpRequest' && !timeFrom) {
+            errors.timeFrom = 'Start time is required';
             errorSteps.add(2);
           } else {
             errorSteps.delete(2);
           }
+          
+          if (formData.postType === 'HelpRequest' && !timeTo) {
+            errors.timeTo = 'End time is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
+          
+          // Validate time range
+          // if (formData.postType === 'HelpRequest' && timeFrom && timeTo) {
+          //   if (timeFrom >= timeTo) {
+          //     errors.timeTo = 'End time must be after start time';
+          //     errorSteps.add(2);
+          //   } else {
+          //     errorSteps.delete(2);
+          //   }
+          // }
           // Add other field validations for step 2...
           break;
           
@@ -1635,7 +1712,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           errorsToRemove.push('title','media');
           break;
         case 2:
-          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime');
+          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo');
           break;
         case 3:
           errorsToRemove.push( 'description');
@@ -1660,6 +1737,22 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         dialogContent.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
+
+    // useEffect to handle emergency category logic
+    useEffect(() => {
+      if (formData.postType === 'HelpRequest' && formData.categories === 'Emergency') {
+        // Set selectedDate to today's date for emergency
+        const today = new Date();
+        setSelectedDate(today);
+        
+        // Set default time range for emergency (current time to 2 hours later)
+        const now = new Date();
+        const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+        
+        setTimeFrom(now);
+        setTimeTo(twoHoursLater);
+      }
+    }, [formData.categories, formData.postType]);
 
     const renderLocationStep = () => (
       <Fade in timeout={300}>
@@ -2666,8 +2759,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     label="Service Date" sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 5, } }}
                     value={selectedDate} format="dd MM yyyy" // Formats date as "14 03 2025"
                     onChange={handleDateChange}
+                    disabled={formData.categories === 'Emergency'} // Disable date selection for emergency
                     slotProps={{
-                      textField: { fullWidth: true, sx: { mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
+                      textField: { fullWidth: true, sx: { mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } },
+                      error: !!validationErrors.selectedDate,
+                      helperText: validationErrors.selectedDate, required: true }
                     }}
                     InputLabelProps={{ shrink: true }}
                   />
@@ -2694,7 +2790,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       value={timeFrom}
                       onChange={handleTimeFromChange}
                       slotProps={{
-                        textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
+                        textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } },
+                        error: !!validationErrors.timeFrom,
+                        helperText: validationErrors.timeFrom, required: true }
                       }}
                     />
                   </LocalizationProvider>
@@ -2705,11 +2803,21 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       value={timeTo}
                       onChange={handleTimeToChange}
                       slotProps={{
-                        textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } } }
+                        textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: 2 } },
+                        error: !!validationErrors.timeTo,
+                        helperText: validationErrors.timeTo, required: true }
                       }}
                     />
                   </LocalizationProvider>
                 </Box>
+
+                {formData.categories === 'Emergency' && (
+                  <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(255, 0, 0, 0.05)', borderRadius: 2, border: '1px solid rgba(255, 0, 0, 0.2)' }}>
+                    <Typography variant="body2" color="error" fontWeight={500}>
+                      ⚠️ Emergency Service: Date is automatically set to today and cannot be changed. Please ensure timing is accurate.
+                    </Typography>
+                  </Box>
+                )}
               </CardContent>
             </Card>
           ) : ( formData.serviceType && 

@@ -40,7 +40,6 @@ import WorkIcon from '@mui/icons-material/Work';
 import { formatPrice } from '../../utils/priceFormatter';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
-// const UnsplashAccessKey = "sqHFnHOp1xZakVGb7Om7qsRP0rO9G8GDzTRn0X1cH_k"; // Replace with your Unsplash API key
 
 
 // Enhanced glassmorphism styles

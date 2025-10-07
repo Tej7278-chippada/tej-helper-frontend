@@ -701,10 +701,10 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                   sx={{
                     cursor: 'pointer',
                     borderRadius: '16px',
-                    bgcolor: theme.palette.grey[200],
-                    '&:hover': {
-                      bgcolor: theme.palette.grey[300],
-                    }
+                    // bgcolor: theme.palette.grey[200],
+                    // '&:hover': {
+                    //   bgcolor: theme.palette.grey[300],
+                    // }
                   }}
                 />
               ))}
