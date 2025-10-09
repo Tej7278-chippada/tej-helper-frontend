@@ -38,7 +38,8 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Slide
+  Slide,
+  AlertTitle
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -1717,6 +1718,30 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           } else if (formData.postType === 'ServiceOffering') {
             errorSteps.delete(2);
           }
+
+          // Pricing validation for Service Offering
+          if (formData.postType === 'ServiceOffering') {
+            let pricingErrors = [];
+            
+            switch (formData.serviceType) {
+              case 'ParkingSpace':
+                pricingErrors = validateParkingPricing();
+                break;
+              case 'VehicleRental':
+                pricingErrors = validateVehicleRentalPricing();
+                break;
+              default:
+                pricingErrors = validateGeneralServicePricing();
+                break;
+            }
+            
+            if (pricingErrors.length > 0) {
+              errors.pricing = pricingErrors.join(', ');
+              errorSteps.add(2);
+            } else {
+              errorSteps.delete(2);
+            }
+          }
           // Add other field validations for step 2...
           break;
           
@@ -1751,6 +1776,162 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     //   return date;
     // };
 
+    // Pricing validation functions
+    const validateParkingPricing = () => {
+      const errors = [];
+      
+      if (parkingVehicleTypes.length === 0) {
+        errors.push('At least one vehicle type is required');
+        return errors;
+      }
+      
+      parkingVehicleTypes.forEach((vehicle, index) => {
+        const vehicleNumber = index + 1;
+        
+        // Validate vehicle type
+        if (!vehicle.type) {
+          errors.push(`Vehicle type ${vehicleNumber}: Vehicle type is required`);
+        }
+        
+        if (vehicle.type === 'custom' && !vehicle.customType) {
+          errors.push(`Vehicle type ${vehicleNumber}: Custom vehicle type name is required`);
+        }
+        
+        // Validate at least one rate is provided
+        const hasRate = vehicle.hourlyRate || vehicle.dailyRate || vehicle.weeklyRate || vehicle.monthlyRate;
+        if (!hasRate) {
+          errors.push(`Vehicle type ${vehicleNumber}: At least one rate (hourly, daily, weekly, or monthly) is required`);
+        }
+        
+        // Validate rate values
+        if (vehicle.hourlyRate && parseFloat(vehicle.hourlyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Hourly rate must be greater than 0`);
+        }
+        if (vehicle.dailyRate && parseFloat(vehicle.dailyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Daily rate must be greater than 0`);
+        }
+        if (vehicle.weeklyRate && parseFloat(vehicle.weeklyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Weekly rate must be greater than 0`);
+        }
+        if (vehicle.monthlyRate && parseFloat(vehicle.monthlyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Monthly rate must be greater than 0`);
+        }
+        
+        // Validate slots available
+        if (!vehicle.slotsAvailable) {
+          errors.push(`Vehicle type ${vehicleNumber}: Slots available is required`);
+        } else if (parseInt(vehicle.slotsAvailable) < 1) {
+          errors.push(`Vehicle type ${vehicleNumber}: Slots available must be at least 1`);
+        }
+      });
+      
+      return errors;
+    };
+
+    const validateVehicleRentalPricing = () => {
+      const errors = [];
+      
+      if (vehicleTypes.length === 0) {
+        errors.push('At least one vehicle type is required');
+        return errors;
+      }
+      
+      vehicleTypes.forEach((vehicle, index) => {
+        const vehicleNumber = index + 1;
+        
+        // Validate vehicle type
+        if (!vehicle.type) {
+          errors.push(`Vehicle type ${vehicleNumber}: Vehicle type is required`);
+        }
+        
+        if (vehicle.type === 'custom' && !vehicle.customType) {
+          errors.push(`Vehicle type ${vehicleNumber}: Custom vehicle type name is required`);
+        }
+        
+        // Validate at least one rate is provided
+        const hasRate = vehicle.hourlyRate || vehicle.dailyRate || vehicle.weeklyRate || vehicle.monthlyRate;
+        if (!hasRate) {
+          errors.push(`Vehicle type ${vehicleNumber}: At least one rate (hourly, daily, weekly, or monthly) is required`);
+        }
+        
+        // Validate rate values
+        if (vehicle.hourlyRate && parseFloat(vehicle.hourlyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Hourly rate must be greater than 0`);
+        }
+        if (vehicle.dailyRate && parseFloat(vehicle.dailyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Daily rate must be greater than 0`);
+        }
+        if (vehicle.weeklyRate && parseFloat(vehicle.weeklyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Weekly rate must be greater than 0`);
+        }
+        if (vehicle.monthlyRate && parseFloat(vehicle.monthlyRate) <= 0) {
+          errors.push(`Vehicle type ${vehicleNumber}: Monthly rate must be greater than 0`);
+        }
+        
+        // Validate quantity
+        if (!vehicle.quantity) {
+          errors.push(`Vehicle type ${vehicleNumber}: Number of vehicles available is required`);
+        } else if (parseInt(vehicle.quantity) < 1) {
+          errors.push(`Vehicle type ${vehicleNumber}: Number of vehicles available must be at least 1`);
+        }
+      });
+      
+      return errors;
+    };
+
+    const validateGeneralServicePricing = () => {
+      const errors = [];
+      
+      if (serviceItems.length === 0) {
+        errors.push('At least one service item is required');
+        return errors;
+      }
+      
+      serviceItems.forEach((service, index) => {
+        const serviceNumber = index + 1;
+        
+        // Validate service name
+        if (!service.name) {
+          errors.push(`Service item ${serviceNumber}: Service name is required`);
+        }
+        
+        // Validate price
+        if (!service.price) {
+          errors.push(`Service item ${serviceNumber}: Price is required`);
+        } else if (parseFloat(service.price) <= 0) {
+          errors.push(`Service item ${serviceNumber}: Price must be greater than 0`);
+        }
+        
+        // Validate quantity
+        if (!service.quantity) {
+          errors.push(`Service item ${serviceNumber}: Quantity/slots available is required`);
+        } else if (parseInt(service.quantity) < 1) {
+          errors.push(`Service item ${serviceNumber}: Quantity/slots available must be at least 1`);
+        }
+        
+        // Validate duration for time-based pricing models
+        if (['hourly', 'daily', 'weekly', 'monthly'].includes(service.pricingModel)) {
+          if (!service.minDuration) {
+            errors.push(`Service item ${serviceNumber}: Minimum duration is required for ${service.pricingModel} pricing`);
+          } else if (parseInt(service.minDuration) < 1) {
+            errors.push(`Service item ${serviceNumber}: Minimum duration must be at least 1`);
+          }
+          
+          if (!service.maxDuration) {
+            errors.push(`Service item ${serviceNumber}: Maximum duration is required for ${service.pricingModel} pricing`);
+          } else if (parseInt(service.maxDuration) < 1) {
+            errors.push(`Service item ${serviceNumber}: Maximum duration must be at least 1`);
+          }
+          
+          if (service.minDuration && service.maxDuration && parseInt(service.minDuration) > parseInt(service.maxDuration)) {
+            errors.push(`Service item ${serviceNumber}: Minimum duration cannot be greater than maximum duration`);
+          }
+        }
+      });
+      
+      return errors;
+    };
+
     const clearStepErrors = (stepIndex) => {
       const errorsToRemove = [];
       
@@ -1762,7 +1943,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           errorsToRemove.push('title','media');
           break;
         case 2:
-          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo', 'availability');
+          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo', 'availability', 'pricing');
           break;
         case 3:
           errorsToRemove.push( 'description');
@@ -3533,6 +3714,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       const updatedVehicleTypes = [...parkingVehicleTypes];
       updatedVehicleTypes[index][field] = value;
       setParkingVehicleTypes(updatedVehicleTypes);
+
+      // Clear pricing errors when data is updated
+      if (validationErrors.pricing) {
+        setValidationErrors(prev => ({ ...prev, pricing: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     const [vehicleTypes, setVehicleTypes] = useState([{
@@ -3576,6 +3763,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       const updatedVehicleTypes = [...vehicleTypes];
       updatedVehicleTypes[index][field] = value;
       setVehicleTypes(updatedVehicleTypes);
+
+      // Clear pricing errors when data is updated
+      if (validationErrors.pricing) {
+        setValidationErrors(prev => ({ ...prev, pricing: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     const [serviceItems, setServiceItems] = useState([
@@ -3615,20 +3808,39 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       const updatedItems = [...serviceItems];
       updatedItems[index][field] = value;
       setServiceItems(updatedItems);
+
+      // Clear pricing errors when data is updated
+      if (validationErrors.pricing) {
+        setValidationErrors(prev => ({ ...prev, pricing: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     // Add this function to render pricing section
     const renderPricingSection = () => {
       if (formData.postType !== 'ServiceOffering') return null;
 
-      switch (formData.serviceType) {
-        case 'ParkingSpace':
-          return renderParkingPricing();
-        case 'VehicleRental':
-          return renderVehicleRentalPricing();
-        default:
-          return renderGeneralServicePricing();
-      }
+      // return (
+      //   <Box>
+      //     {validationErrors.pricing && (
+      //       <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+      //         <AlertTitle>Pricing Errors</AlertTitle>
+      //         {validationErrors.pricing}
+      //       </Alert>
+      //     )}
+          
+      //     {(() => {
+            switch (formData.serviceType) {
+              case 'ParkingSpace':
+                return renderParkingPricing();
+              case 'VehicleRental':
+                return renderVehicleRentalPricing();
+              default:
+                return renderGeneralServicePricing();
+            }
+      //     })()}
+      //   </Box>
+      // );
     };
 
     const renderParkingPricing = () => (
@@ -3648,8 +3860,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               p: 2, 
               mb: 2, 
               border: '1px solid rgba(0, 0, 0, 0.1)', 
+              // border: validationErrors.pricing ? '2px solid' : '1px solid rgba(0, 0, 0, 0.1)', 
+              // borderColor: validationErrors.pricing ? 'error.main' : 'rgba(0, 0, 0, 0.1)',
               borderRadius: 2,
-              position: 'relative'
+              position: 'relative',
+              // bgcolor: validationErrors.pricing ? 'rgba(255, 0, 0, 0.02)' : 'transparent'
             }}>
               {parkingVehicleTypes.length > 1 && (
                 <IconButton
@@ -3673,7 +3888,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               </Typography>
 
               <Box sx={{ mb: 2 }}>
-                <FormControl fullWidth>
+                <FormControl fullWidth error={!vehicle.type && !!validationErrors.pricing}>
                   <InputLabel>Vehicle Type</InputLabel>
                   <Select
                     value={vehicle.type}
@@ -3703,6 +3918,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     onChange={(e) => updateParkingVehicleType(index, 'customType', e.target.value)}
                     sx={{ mt: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     placeholder="Enter your custom vehicle type name"
+                    error={!vehicle.customType && !!validationErrors.pricing}
+                    helperText={!vehicle.customType && !!validationErrors.pricing ? "Custom vehicle type name is required" : ""}
                   />
                 )}
               </Box>
@@ -3720,6 +3937,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />,
                       inputProps: { min: 0 }
                     }}
+                    error={!vehicle.hourlyRate && !vehicle.dailyRate && !vehicle.weeklyRate && !vehicle.monthlyRate && !!validationErrors.pricing}
+                    helperText={!vehicle.hourlyRate && !vehicle.dailyRate && !vehicle.weeklyRate && !vehicle.monthlyRate && !!validationErrors.pricing ? "At least one rate is required" : ""}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
@@ -3779,6 +3998,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       inputProps: { min: 1, max: 1000 }
                     }}
                     helperText="Number of parking slots available for this vehicle type"
+                    error={!vehicle.slotsAvailable && !!validationErrors.pricing}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -3860,8 +4080,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               p: 2, 
               mb: 2, 
               border: '1px solid rgba(0, 0, 0, 0.1)', 
+              // border: validationErrors.pricing ? '2px solid' : '1px solid rgba(0, 0, 0, 0.1)', 
+              // borderColor: validationErrors.pricing ? 'error.main' : 'rgba(0, 0, 0, 0.1)',
               borderRadius: 2,
-              position: 'relative'
+              position: 'relative',
+              // bgcolor: validationErrors.pricing ? 'rgba(255, 0, 0, 0.02)' : 'transparent'
             }}>
               {vehicleTypes.length > 1 && (
                 <IconButton
@@ -3885,7 +4108,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               </Typography>
 
               <Box sx={{ mb: 2 }}>
-                <FormControl fullWidth >
+                <FormControl fullWidth error={!vehicle.type && !!validationErrors.pricing} >
                   <InputLabel>Vehicle Type</InputLabel>
                   <Select
                     value={vehicle.type}
@@ -3919,6 +4142,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     onChange={(e) => updateVehicleType(index, 'customType', e.target.value)}
                     sx={{ mt: 1, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     placeholder="Enter your custom vehicle type name"
+                    error={!vehicle.customType && !!validationErrors.pricing}
+                    helperText={!vehicle.customType && !!validationErrors.pricing ? "Custom vehicle type name is required" : ""}
                   />
                 )}
               </Box>
@@ -3935,6 +4160,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     InputProps={{
                       startAdornment: <CurrencyRupeeIcon sx={{ mr: 1, color: 'text.secondary' }} />
                     }}
+                    error={!vehicle.hourlyRate && !vehicle.dailyRate && !vehicle.weeklyRate && !vehicle.monthlyRate && !!validationErrors.pricing}
+                    helperText={!vehicle.hourlyRate && !vehicle.dailyRate && !vehicle.weeklyRate && !vehicle.monthlyRate && !!validationErrors.pricing ? "At least one rate is required" : ""}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -3990,6 +4217,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       inputProps: { min: 1, max: 1000 }
                     }}
                     helperText="Number of vehicles available for this vehicle type"
+                    error={!vehicle.quantity && !!validationErrors.pricing}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -4090,6 +4318,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                     placeholder={`e.g., ${getRandomExamples(formData.serviceType)}`}
                     helperText={formData.serviceType ? `Examples: ${getServiceTypeExamples(formData.serviceType).slice(0, 3).join(', ')}...` : 'Enter the name of your service or item'}
                     required
+                    error={!service.name && !!validationErrors.pricing}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -4104,6 +4333,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       inputProps: { min: 1, max: 1000 }
                     }}
                     helperText="Number of items or slots available for this item or service  type"
+                    error={!service.quantity && !!validationErrors.pricing}
                   />
                 </Grid>
               </Grid>
@@ -4121,6 +4351,8 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                       inputProps: { min: 0 }
                     }}
                     required
+                    error={!service.price && !!validationErrors.pricing}
+                    helperText={!service.price && !!validationErrors.pricing ? "Price is required" : ""}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -4162,6 +4394,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                         inputProps: { min: 1 }
                       }}
                       helperText={`Minimum ${service.pricingModel.replace('ly', '')}s`}
+                      error={!service.minDuration && !!validationErrors.pricing}
                     />
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -4176,8 +4409,18 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                         inputProps: { min: 1 }
                       }}
                       helperText={`Maximum ${service.pricingModel.replace('ly', '')}s`}
+                      error={!service.maxDuration && !!validationErrors.pricing}
                     />
                   </Grid>
+                  {/* Show specific duration validation error */}
+                  {['hourly', 'daily', 'weekly', 'monthly'].includes(service.pricingModel) && 
+                    service.minDuration && service.maxDuration && 
+                    parseInt(service.minDuration) > parseInt(service.maxDuration) && 
+                    validationErrors.pricing && (
+                    <Typography variant="body2" color="error" sx={{ mt: 1, mx: 3 }}>
+                      Minimum duration cannot be greater than maximum duration
+                    </Typography>
+                  )}
                 </Grid>
               )}
 
