@@ -93,8 +93,8 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
     setIsFullscreen(!isFullscreen);
   };
 
-  const iconButtonStyle = {
-    color: '#fff',
+  const iconButtonStyle = (mapMode) => ({
+    color: mapMode === 'satellite' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     backdropFilter: 'blur(5px)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -105,7 +105,7 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
         transform: 'scale(1.05)',
     },
     transition: 'all 0.2s ease',
-  };
+  });
 
   // this useEffect to handle fullscreen changes
   useEffect(() => {
@@ -451,7 +451,7 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
                   color:'grey',
                   cursor: 'pointer',
                   '&:hover': {
-                    textDecoration: 'underline',
+                    // textDecoration: 'underline',
                     color: theme.palette.primary.main
                   }
                 }}
@@ -474,7 +474,7 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
                     color:'grey',
                     cursor: 'pointer',
                     '&:hover': {
-                      textDecoration: 'underline',
+                      // textDecoration: 'underline',
                       color: theme.palette.success.main
                     }
                   }}
@@ -501,7 +501,7 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
             })
            }}>
             <MapContainer 
-              key={isFullscreen ? 'fullscreen' : 'normal'} // Force re-render on fullscreen change
+              // key={isFullscreen ? 'fullscreen' : 'normal'} // Force re-render on fullscreen change
               whenCreated={(map) => {
                 mapRef.current = map;
                 map.on('unload', () => {
@@ -559,7 +559,7 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
               <Tooltip title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
                 <IconButton
                   onClick={handleFullscreen}
-                  sx={iconButtonStyle}
+                  sx={iconButtonStyle(mapMode)}
                 >
                   {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
                 </IconButton>
@@ -600,11 +600,11 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
                       onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')}
                     >
                       <Tooltip title={mapMode === 'normal' ? 'Switch to Satellite View' : 'Switch to Normal View'} arrow placement="right">
-                        <>{mapMode === 'normal' ? <MapRoundedIcon /> : <SatelliteAltRoundedIcon />}</>
+                        <>{mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon /> }</>
                       </Tooltip>
                     </IconButton>
                     <Typography variant="caption" sx={{ mt: 0.5, textAlign: 'center', color:'grey' }}>
-                      {mapMode === 'normal' ? 'Normal' : 'Salellite'}
+                      {mapMode === 'normal' ? 'Satellite' : 'Normal'}
                     </Typography>
                   </Box>
               {/* {currentLocation && (
