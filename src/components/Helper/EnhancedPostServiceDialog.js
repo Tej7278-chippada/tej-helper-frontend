@@ -1742,6 +1742,14 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               errorSteps.delete(2);
             }
           }
+
+          // Service Features validation for Service Offering
+          if (formData.postType === 'ServiceOffering' && selectedFeatures.length === 0) {
+            errors.features = '⚠️ Atleast one service feature is required';
+            errorSteps.add(2);
+          } else {
+            errorSteps.delete(2);
+          }
           // Add other field validations for step 2...
           break;
           
@@ -1943,7 +1951,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           errorsToRemove.push('title','media');
           break;
         case 2:
-          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo', 'availability', 'pricing');
+          errorsToRemove.push('categories', 'serviceType', 'gender', 'peopleCount', 'serviceDays', 'price', 'serviceDate', 'serviceTime', 'selectedDate', 'timeFrom', 'timeTo', 'availability', 'pricing', 'features');
           break;
         case 3:
           errorsToRemove.push( 'description');
@@ -3307,6 +3315,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         setCustomFeature('');
         setShowCustomFeatureInput(false);
       }
+      // Clear error when selecting
+      if (validationErrors.features) {
+        setValidationErrors(prev => ({ ...prev, features: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     const handleCancelCustomFeature = () => {
@@ -3376,6 +3389,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           ? prev.filter(f => f !== feature)
           : [...prev, feature]
       );
+      // Clear error when selecting
+      if (validationErrors.features) {
+        setValidationErrors(prev => ({ ...prev, features: undefined }));
+        setStepsWithErrors(prev => prev.filter(step => step !== 2));
+      }
     };
 
     // Add this function to render the availability section
@@ -3542,6 +3560,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   </Box>
                 </Box>
               )}
+              {validationErrors.features && (
+                <Typography variant="body2" color="error" sx={{ mb: 2 }}>
+                  {validationErrors.features}
+                </Typography>
+              )}
 
               {/* Available Features */}
               <Typography variant="subtitle2" gutterBottom>
@@ -3570,7 +3593,13 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   <TextField
                     fullWidth
                     value={customFeature}
-                    onChange={(e) => setCustomFeature(e.target.value)}
+                    // onChange={(e) => setCustomFeature(e.target.value)}
+                    onChange={(e) => {
+                      const maxLength = 30; // Set character limit
+                      if (e.target.value.length <= maxLength) {
+                        setCustomFeature(e.target.value);
+                      }
+                    }}
                     placeholder="Enter your custom feature"
                     sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     autoFocus
@@ -3579,7 +3608,11 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                         handleAddCustomFeature();
                       }
                     }}
+                    inputProps={{ maxLength: 30 }} // Ensures no more than 20 characters can be typed
                   />
+                  <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+                    {customFeature.length}/30 characters
+                  </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button
                       variant="contained"
