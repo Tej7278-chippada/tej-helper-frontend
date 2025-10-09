@@ -84,6 +84,46 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
   const [directionsCard, setDirectionsCard] = useState(false);
   const [showingRoute, setShowingRoute] = useState(true);
 
+  // Define the bounds of the world
+  const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  const iconButtonStyle = {
+    color: '#fff',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(5px)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    width: isMobile ? 40 : 44,
+    height: isMobile ? 40 : 44,
+    '&:hover': {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        transform: 'scale(1.05)',
+    },
+    transition: 'all 0.2s ease',
+  };
+
+  // this useEffect to handle fullscreen changes
+  useEffect(() => {
+    if (mapRef.current) {
+      // Use setTimeout to ensure the DOM has updated before invalidating the map
+      setTimeout(() => {
+        mapRef.current.invalidateSize();
+        
+        // Also trigger a refresh of tile layers
+        mapRef.current.eachLayer((layer) => {
+          if (layer.redraw) {
+            layer.redraw();
+          }
+        });
+      }, 100);
+    }
+  }, [isFullscreen]);
+
   // Automatically fetch location and show route when dialog opens
   useEffect(() => {
     if (open) {
@@ -372,34 +412,12 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
-  // Define the bounds of the world
-  const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
-
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const handleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
-  const iconButtonStyle = {
-    color: '#fff',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(5px)',
-    border: '1px solid rgba(255, 255, 255, 0.2)',
-    width: isMobile ? 40 : 44,
-    height: isMobile ? 40 : 44,
-    '&:hover': {
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-        transform: 'scale(1.05)',
-    },
-    transition: 'all 0.2s ease',
-  };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isFullscreen ? true : isMobile ? true : false} sx={{
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth fullScreen={isFullscreen || isMobile} sx={{
       // margin: isMobile ? '10px' : '10px',
        '& .MuiPaper-root': { // Target the dialog paper
-        borderRadius: '14px', // Apply border radius
+        borderRadius: isFullscreen ? '0' : '14px', // Apply border radius
         backdropFilter: 'blur(12px)',
       },
     }} 
@@ -468,7 +486,7 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
             </Box>
           )}
 
-          <Box sx={{ height: isMobile ? '350px' : '400px', padding: '10px',  position: 'relative',
+          <Box sx={{ height: isFullscreen ? '100vh' : (isMobile ? '350px' : '400px'), padding: isFullscreen ? '0' : '10px', position: 'relative',
             ...(isFullscreen && {
               position: 'fixed',
               top: 0,
@@ -477,18 +495,20 @@ function RouteMapDialog({ open, onClose, post , darkMode}) {
               bottom: 0,
               zIndex: 9999,
               backgroundColor: 'white',
-              padding: 0,
-              height: '100%',
+              // padding: 0,
+              // height: '100%',
               width: '100%'
             })
            }}>
-            <MapContainer  whenCreated={(map) => {
-                            mapRef.current = map;
-                            map.on('unload', () => {
-                              // Clean up references when map is unloaded
-                              mapRef.current = null;
-                            });
-                          }}
+            <MapContainer 
+              key={isFullscreen ? 'fullscreen' : 'normal'} // Force re-render on fullscreen change
+              whenCreated={(map) => {
+                mapRef.current = map;
+                map.on('unload', () => {
+                  // Clean up references when map is unloaded
+                  mapRef.current = null;
+                });
+              }}
               center={currentLocation ? [currentLocation.lat, currentLocation.lng] : [post.location.latitude, post.location.longitude]}
               zoom={13}
               style={{ height: '100%', width: '100%', borderRadius: '8px', }}
