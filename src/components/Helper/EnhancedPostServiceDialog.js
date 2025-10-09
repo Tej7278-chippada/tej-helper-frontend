@@ -3051,7 +3051,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 </Box>
 
                 {formData.categories === 'Emergency' && (
-                  <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(255, 0, 0, 0.05)', borderRadius: 2, border: '1px solid rgba(255, 0, 0, 0.2)' }}>
+                  <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(255, 98, 0, 0.05)', borderRadius: 2, border: '1px solid rgba(255, 132, 0, 0.2)' }}>
                     <Typography variant="body2" color="error" fontWeight={500}>
                       ⚠️ Emergency Service: Date is automatically set to today and cannot be changed. Please ensure timing is accurate.
                     </Typography>
@@ -3176,7 +3176,10 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                           
                           return (
                             <Typography key={index} variant="body2" sx={{ ml: 2 }}>
-                              • {displayType}: ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day
+                              • {displayType}:
+                               {/* ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day */}
+                              {vehicle.hourlyRate && `, ₹${vehicle.hourlyRate}/hour`}
+                              {vehicle.dailyRate && `, ₹${vehicle.dailyRate}/day`}
                               {vehicle.weeklyRate && `, ₹${vehicle.weeklyRate}/week`}
                               {vehicle.monthlyRate && `, ₹${vehicle.monthlyRate}/month`}
                               {vehicle.slotsAvailable && ` (${vehicle.slotsAvailable} slots available)`}
@@ -3209,7 +3212,10 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                             
                             return (
                               <Typography key={index} variant="body2" sx={{ ml: 2 }}>
-                                • {displayType}: ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day
+                                • {displayType}: 
+                                {/* ₹{vehicle.hourlyRate}/hr, ₹{vehicle.dailyRate}/day */}
+                                {vehicle.hourlyRate && `, ₹${vehicle.hourlyRate}/hour`}
+                                {vehicle.dailyRate && `, ₹${vehicle.dailyRate}/day`}
                                 {vehicle.weeklyRate && `, ₹${vehicle.weeklyRate}/week`}
                                 {vehicle.monthlyRate && `, ₹${vehicle.monthlyRate}/month`}
                                 {vehicle.quantity && ` (${vehicle.quantity} vehicles available)`}
@@ -4618,7 +4624,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
         <Button
           onClick={handleCloseDialog}
           variant="outlined"
-          sx={{ borderRadius: 2 }}
+          sx={{ borderRadius: 2, textTransform: 'none', }}
           disabled={loadingSubmit}
         >
           Cancel
@@ -4630,7 +4636,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           <Button
             onClick={handleBack}
             variant="outlined"
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 2, textTransform: 'none', }}
             disabled={loadingSubmit}
           >
             Back
@@ -4641,7 +4647,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
           <Button
             onClick={handleNext}
             variant="contained"
-            sx={{ borderRadius: 2, minWidth: 100 }}
+            sx={{ borderRadius: 2, minWidth: 100, textTransform: 'none', }}
             disabled={loadingSubmit}
           >
             Next
@@ -4652,6 +4658,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             variant="contained"
             sx={{ 
               borderRadius: 2, px: isMobile ? '3rem' : '8px',
+              textTransform: 'none',
               minWidth: 120,
               background: 'linear-gradient(135deg, #4caf50 0%, #8bc34a 100%)',
               '&:hover': {
@@ -4659,7 +4666,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
               }
             }}
             disabled={loadingSubmit}
-            startIcon={loadingSubmit ? <CircularProgress size={16} color="inherit" /> : null}
+            startIcon={loadingSubmit ? <CircularProgress size={16} color="inherit" sx={{ml: 1}}/> : null}
           >
             {loadingSubmit ? 'Publishing...' : (editingProduct ? 'Update Post' : 'Publish Post')}
           </Button>

@@ -1,7 +1,7 @@
 // components/Chat/ChatsOfPosts.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, Backdrop, CircularProgress, Slide, } from '@mui/material';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, Backdrop, CircularProgress, Slide, Chip, } from '@mui/material';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
 import Layout from '../Layout';
@@ -31,6 +31,7 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
 const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const tokenUsername = localStorage.getItem('tokenUsername');
   const navigate = useNavigate();
+  const location = useLocation();
   const { postId } = useParams();
   // const [chats, setChats] = useState([]);
   const [buyers, setBuyers] = useState([]);
@@ -39,9 +40,10 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
   const [chatDetailsById, setChatDetailsById] = useState(null);
   const [loading, setLoading] = useState(true); // Track loading state
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
-  const [postTitle, setPostTitle] = useState(""); // Store post title
-  const [postImage, setPostImage] = useState("");
-  const [postStatus, setPoststatus] = useState("");
+  // const [postTitle, setPostTitle] = useState(""); // Store post title
+  // const [postImage, setPostImage] = useState("");
+  // const [postStatus, setPoststatus] = useState("");
+  const postData = location.state?.post;
   const [openDialog, setOpenDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [loadingSelectedChat, setLoadingSelectedChat] = useState(false);
@@ -58,9 +60,9 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
       // setBuyers(response.data.posts.find(post => post._id === postId)?.buyers || []);
       const post = response.data.posts.find(post => post._id === postId);
       setBuyers(post?.buyers || []);
-      setPostTitle(post?.title || ""); // Store post title
-      setPostImage(post?.media?.length ? post.media[0] : "");
-      setPoststatus(post?.postStatus || "");
+      // setPostTitle(post?.title || ""); // Store post title
+      // setPostImage(post?.media?.length ? post.media[0] : "");
+      // setPoststatus(post?.postStatus || "");
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.error('Unauthorized user, redirecting to login');
@@ -207,26 +209,24 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                   padding: '8px 16px', // Padding for a clean look
                 }}
               >
-                <Box display="flex" alignItems="center" mb={0}>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Avatar
                     src={
-                      postImage
-                        ? `data:image/jpeg;base64,${postImage}`
+                      // postImage
+                      postData.media[0]
+                        ? `data:image/jpeg;base64,${postData.media[0]}`
                         : 'https://placehold.co/56x56?text=No+Image'
                     }
-                    alt={postTitle[0]}
+                    alt={postData.title[0]}
                     sx={{ width: 50, height: 50, mr: 2, borderRadius: 2 }}
                   />
 
                   <Box>
-                    <Box sx={{display:'flex'}}>
+                    {/* <Box sx={{display:'flex'}}> */}
                       <Typography variant="body2" color="text.secondary">
                         Chats of
                       </Typography>
-                      <Typography variant="body2" color={postStatus === 'Active' ? 'green' : 'rgba(194, 28, 28, 0.89)'} sx={{marginLeft:'auto'}}>
-                        {postStatus}
-                      </Typography>
-                    </Box>
+                    {/* </Box> */}
                     <Typography
                       variant="h6"
                       sx={{
@@ -242,9 +242,29 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                         // color: 'black',
                       }}
                     >
-                      {postTitle}
+                      {/* {postTitle} */}
+                      {postData.title}
                     </Typography>
                   </Box>
+                  {postData.postStatus && (
+                    <Chip
+                      label={postData.postStatus}
+                      size="small"
+                      sx={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 12,
+                        backgroundColor: postData.postStatus === 'Active' ? 'success.main' : postData.postStatus === 'InActive' ? 'warning.main' : 'error.main',
+                        color: 'white',
+                        fontWeight: 600,
+                        fontSize: '0.75rem',
+                        '& .MuiChip-icon': {
+                          marginLeft: '6px',
+                          height: '16px'
+                        },
+                      }}
+                    />
+                  )}
                 </Box>
               </Box>
               <Box 
@@ -456,7 +476,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} isAuthenticated={isAuthenticated} darkMode={darkMode}/>  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData.title} isAuthenticated={isAuthenticated} darkMode={darkMode}/>  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
@@ -489,7 +509,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postTitle} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} />
+            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData.title} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} />
           )}
         {/* </DialogContent> */}
       </Dialog>

@@ -1275,7 +1275,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                           // color="primary"
                           // onClick={() => openRouteMapDialog(post)}
                           // disabled={stockCountId === 0}
-                          sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }}
+                          sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', color: '#fff' }}
                           startIcon={<ForumRoundedIcon />}
                           onClick={handleOpenChatDialog}
                         >
@@ -1326,7 +1326,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   // color="primary"
                   variant="outlined"
                   onClick={handleLike}
-                  sx={{px: 1, fontWeight: 500, fontSize: '1rem',
+                  sx={{pl: 1, fontWeight: 500, fontSize: '1rem', 
                     background: darkMode 
                       ? 'rgba(30, 30, 30, 0.85)' 
                       : 'rgba(255, 255, 255, 0.15)',
@@ -1351,7 +1351,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   // color="primary"
                   variant="outlined" size="small" 
                   onClick={() => openComments(post)}
-                  sx={{px: 1, ml: 0.5, fontWeight: 500, fontSize: '1rem',
+                  sx={{px: 1, ml: 0.5, fontWeight: 500, fontSize: '1rem', 
                     background: darkMode 
                       ? 'rgba(30, 30, 30, 0.85)' 
                       : 'rgba(255, 255, 255, 0.15)',

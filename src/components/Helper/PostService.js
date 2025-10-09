@@ -273,7 +273,12 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const handleChatsOpen = (post) => {
     // setGroupDetailsId(post._id);
     // if (isMobile) {
-      navigate(`/chatsOfPost/${post._id}`);
+      navigate(`/chatsOfPost/${post._id}`, { 
+        state: { 
+          post,
+          // selectedSizeCount,
+        }
+      });
     // }
   };
 
@@ -854,9 +859,12 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                       }
                     }}
                   >
-                    <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', '&:hover': {
-                      background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
-                      transform: 'translateY(-2px)' }, transition: 'all 0.3s ease', }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}
+                    <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
+                        transform: 'translateY(-2px)' 
+                      },
+                      transition: 'all 0.3s ease', color: '#fff' }} onClick={(e) => { e.stopPropagation(); handleChatsOpen(post);}}
                     >Chats</Button>
                   </Badge>
                 </CardActions>
