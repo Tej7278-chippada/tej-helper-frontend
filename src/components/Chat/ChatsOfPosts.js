@@ -40,9 +40,9 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
   const [chatDetailsById, setChatDetailsById] = useState(null);
   const [loading, setLoading] = useState(true); // Track loading state
   // const [chatDialogOpen, setChatDialogOpen] = useState(false);
-  // const [postTitle, setPostTitle] = useState(""); // Store post title
-  // const [postImage, setPostImage] = useState("");
-  // const [postStatus, setPoststatus] = useState("");
+  const [postTitle, setPostTitle] = useState(""); // Store post title
+  const [postImage, setPostImage] = useState("");
+  const [postStatus, setPoststatus] = useState("");
   const postData = location.state?.post;
   const [openDialog, setOpenDialog] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
@@ -60,9 +60,9 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
       // setBuyers(response.data.posts.find(post => post._id === postId)?.buyers || []);
       const post = response.data.posts.find(post => post._id === postId);
       setBuyers(post?.buyers || []);
-      // setPostTitle(post?.title || ""); // Store post title
-      // setPostImage(post?.media?.length ? post.media[0] : "");
-      // setPoststatus(post?.postStatus || "");
+      setPostTitle(post?.title || ""); // Store post title
+      setPostImage(post?.media?.length ? post.media[0] : "");
+      setPoststatus(post?.postStatus || "");
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.error('Unauthorized user, redirecting to login');
@@ -157,11 +157,13 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
 
   // Handle browser back button
   useEffect(() => {
-    if (!openDialog) return;
+    if (!openDialog && !isRateDialogOpen) return;
 
     const handleBackButton = (e) => {
       e.preventDefault();
       setOpenDialog(false);
+      setRateDialogOpen(false);
+      setSelectedUserId(null);
     };
 
     // Add event listener when dialog opens
@@ -175,7 +177,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
         window.history.back();
       }
     };
-  }, [openDialog, setOpenDialog]);
+  }, [openDialog, setOpenDialog, isRateDialogOpen, setRateDialogOpen ]);
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
@@ -213,11 +215,11 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                   <Avatar
                     src={
                       // postImage
-                      postData.media[0]
-                        ? `data:image/jpeg;base64,${postData.media[0]}`
+                      (postData?.media[0] || postImage)
+                        ? `data:image/jpeg;base64,${(postData?.media[0] || postImage)}`
                         : 'https://placehold.co/56x56?text=No+Image'
                     }
-                    alt={postData.title[0]}
+                    alt={postData?.title[0] || postTitle}
                     sx={{ width: 50, height: 50, mr: 2, borderRadius: 2 }}
                   />
 
@@ -243,18 +245,18 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                       }}
                     >
                       {/* {postTitle} */}
-                      {postData.title}
+                      {postData?.title || postTitle}
                     </Typography>
                   </Box>
-                  {postData.postStatus && (
+                  {(postData?.postStatus || postStatus) && (
                     <Chip
-                      label={postData.postStatus}
+                      label={postData?.postStatus || postStatus}
                       size="small"
                       sx={{
                         position: 'absolute',
                         top: 8,
                         right: 12,
-                        backgroundColor: postData.postStatus === 'Active' ? 'success.main' : postData.postStatus === 'InActive' ? 'warning.main' : 'error.main',
+                        backgroundColor: (postData?.postStatus || postStatus) === 'Active' ? 'success.main' : (postData?.postStatus || postStatus) === 'InActive' ? 'warning.main' : 'error.main',
                         color: 'white',
                         fontWeight: 600,
                         fontSize: '0.75rem',
@@ -476,7 +478,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData.title} isAuthenticated={isAuthenticated} darkMode={darkMode}/>  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData?.title || postTitle} isAuthenticated={isAuthenticated} darkMode={darkMode}/>  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
@@ -509,7 +511,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData.title} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} />
+            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData?.title || postTitle} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} />
           )}
         {/* </DialogContent> */}
       </Dialog>

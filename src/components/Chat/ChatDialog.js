@@ -35,9 +35,9 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
   // border: darkMode 
   //   ? '1px solid rgba(255, 255, 255, 0.1)' 
   //   : '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: darkMode 
-    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
-    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+  // boxShadow: darkMode 
+  //   ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+  //   : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
 
@@ -56,7 +56,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   // const prevMessagesLength = useRef(0);
   // const [loading, setLoading] = useState(false);
   // const [isPickerLoaded, setIsPickerLoaded] = useState(false); // Track if loaded
-  const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const bottomRef = useRef(null); // Reference to the last message
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -89,7 +89,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       const data = await response.json();
       setMessages(data.messages || []);
     } catch (error) {
-      console.error('Error fetching chat history:', error);
+      // console.error('Error fetching chat history:', error);
+      setSnackbar({ open: true, message: "Failed to fetch messages.", severity: "warning" });
     } finally {
       setIsFetching(false);
     }
@@ -104,7 +105,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
 
   useEffect(() => {
     if (!open) return;
-    if (open) {
+    if (open && isAuthenticated) {
       fetchChatHistory();
       const room = `post_${post._id}_user_${userId}_user_${post.user.id}`; // Ensure unique room name
       // Join the specific room when component mounts
@@ -194,7 +195,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       });
 
     } catch (error) {
-      console.error('Error marking messages as seen:', error);
+      // console.error('Error marking messages as seen:', error);
+      setSnackbar({ open: true, message: "Error marking messages as seen.", severity: "warning" });
     }
   }, [post._id, userId, post.user.id, authToken, chatData?.chatId]); // Adjust dependencies for ChatHistory.js
 
@@ -267,7 +269,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
 
     // Prevent sending messages if post isInActive or closed & user is not a helper
     if (post.postStatus === 'InActive' || post.user.id === userId || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
-      console.warn('You cannot send messages as this post is closed or InActive.');
+      // console.warn('You cannot send messages as this post is closed or InActive.');
       setSnackbar({ open: true, message: `${ post.user.id === userId ? 'You cant send message' : `You cannot send messages as this post is ${post.postStatus === 'Closed' ? 'Closed' :  'InActive'}` }`, severity: "warning" });
       // alert('u cant send');
       return;
@@ -275,7 +277,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
 
     // 🚨 Check if the user is offline
     if (!navigator.onLine) {
-      console.warn('User is offline. Message not sent.');
+      // console.warn('User is offline. Message not sent.');
       setSnackbar({ open: true, message: "Network is offline.", severity: "warning" });
       return; // Do not proceed with sending
     }
@@ -335,8 +337,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   
       // ✅ Real-time socket will handle replacing the message, so no need to update manually here.
     } catch (error) {
-      console.error('Error sending message:', error);
-      
+      // console.error('Error sending message:', error);
+      setSnackbar({ open: true, message: "Failed to sending message.", severity: "warning" });
       // Remove the temporary message if the request fails
       setMessages((prevMessages) => prevMessages.filter((msg) => msg._id !== tempMessageId));
     } 
@@ -476,7 +478,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"  fullScreen={isMobile} sx={{
         // margin: isMobile ? '10px' : '0px',
-        '& .MuiPaper-root': { borderRadius: '14px',/*  background: darkMode  ? 'rgb(0, 0, 0)'  : 'rgb(255, 255, 255)', */  } , //maxHeight: isMobile ? '300px' : 'auto'
+        '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', /*  background: darkMode  ? 'rgb(0, 0, 0)'  : 'rgb(255, 255, 255)', */  } , //maxHeight: isMobile ? '300px' : 'auto'
         '& .MuiDialogTitle-root': { padding: '14px',  }
       }}
       TransitionComponent={Slide}
@@ -559,8 +561,10 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         </Box>
         
       </DialogTitle>
-    <DialogContent onScroll={handleScroll} sx={{padding: 0, scrollbarWidth:'thin', /* bgcolor:'#f5f5f5', */ 
-      scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
+    <DialogContent onScroll={handleScroll} sx={{padding: 0, 
+    // scrollbarWidth:'thin', 
+    /* bgcolor:'#f5f5f5', */ 
+      // scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
      }}>
         {post.helperIds.includes(userId) && (
           <Box sx={{
@@ -569,7 +573,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             left: '0px', right: '0px',
             // width: '100%', 
             zIndex: 10000,
-            backgroundColor: 'rgba(244, 238, 238, 0.24)',
+            backgroundColor: darkMode ? 'rgb(21, 20, 20)' : 'rgb(244, 238, 238)',
             boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
             borderRadius: '12px',
             p: 1
@@ -600,6 +604,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                 }}
                 error={!!verificationError}
                 helperText={verificationError}
+                inputProps={{ maxLength: 10 }} // Ensures no more than 10 characters can be typed
               />
               
               <Button
@@ -626,7 +631,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             Object.entries(groupedMessages).map(([date, msgs], dateIndex) => (
               <Box key={`date-${dateIndex}`} sx={{ textAlign: "center", mt: 2 }}>
                 {/* Date Header in the Middle */}
-                <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 1, display: "inline-block",  ...getGlassmorphismStyle(theme, darkMode) }}> {/*  bgcolor: theme.palette.grey[200], */}
+                <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 3, display: "inline-block",  ...getGlassmorphismStyle(theme, darkMode) }}> {/*  bgcolor: theme.palette.grey[200], */}
                   {format(new Date(date), "EEEE, MMM dd, yyyy")}
                 </Typography>
 
@@ -797,7 +802,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             borderRadius: '24px',
             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
             display: 'flex',
-            alignItems: 'center', 
+            alignItems: 'center', backdropFilter: 'blur(12px)', 
             //  backgroundColor:'#f5f5f5', 
             justifyContent: 'center',
             padding: '6px 10px', // Reduce padding to shrink button size
@@ -814,7 +819,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             sx={{
               fontSize: isMobile ? '12px' : '14px',
               marginRight: '6px', // Space between text and icon
-              color: 'grey',
+              color: darkMode ? '#fff' : 'grey',
             }}
           >
             Scroll to bottom

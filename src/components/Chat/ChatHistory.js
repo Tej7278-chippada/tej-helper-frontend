@@ -31,9 +31,9 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
   // border: darkMode 
   //   ? '1px solid rgba(255, 255, 255, 0.1)' 
   //   : '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: darkMode 
-    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
-    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+  // boxShadow: darkMode 
+  //   ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+  //   : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
 const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthenticated, darkMode }) => {
@@ -610,22 +610,23 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
     <Box onScroll={handleScroll} height={isMobile ? 'calc(82vh - 44px)' : 'calc(66vh - 64px)'} /* bgcolor="#f5f5f5" */
       sx={{
       overflowY: 'auto', backdropFilter: isMobile ? 'blur(12px)' : null,
-      padding: '0px', scrollbarWidth:'thin', 
-      scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
+      // padding: '0px', scrollbarWidth:'thin', 
+      // scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
     }}>
       {isHelper && (
         <Box sx={{
           position: 'sticky',
-          top: '5px',
-          left: '0%',
-          width:'100%', zIndex: 10000,
-          backgroundColor:'rgba(244, 238, 238, 0.24)',
+          top: '0px',
+          left: '0px', right: '0px',
+          // width:'100%', 
+          zIndex: 10000, p: 1,
+          backgroundColor: darkMode ? 'rgb(21, 20, 20)' : 'rgb(244, 238, 238)',
           boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-          borderRadius:'12px'
+          borderRadius:'8px'
           }} >
-          <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
+          <Typography color="success" align="center" sx={{fontSize: isMobile ? '12px' : '14px', mb: 1}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
           {/* Helper Code Section */}
-          <Typography color="success" align="center" margin={1} sx={{fontSize: isMobile ? '12px' : '14px'}}>
+          <Typography color="success" align="center" margin={0} sx={{fontSize: isMobile ? '12px' : '14px'}}>
             { helperCodeVerified ? 'Helper code verified!' : helperCode ? 
               `Please share the helper code ${helperCode} once the service is complete.` : 
               'Give code only after the service is done.'} 
@@ -658,7 +659,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
              Object.entries(groupedMessages).map(([date, msgs], dateIndex) => (
             <Box key={`date-${dateIndex}`} sx={{ textAlign: "center", mt: 2 }}>
               {/* Date Header in the Middle */}
-              <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 1, display: "inline-block" , backdropFilter: 'blur(12px)', ...getGlassmorphismStyle(theme, darkMode)}}> {/* bgcolor: theme.palette.grey[200], */}
+              <Typography variant="body2" sx={{  px: 2, py: 1, borderRadius: 3, display: "inline-block" , backdropFilter: 'blur(12px)', ...getGlassmorphismStyle(theme, darkMode)}}> {/* bgcolor: theme.palette.grey[200], */}
                 {format(new Date(date), "EEEE, MMM dd, yyyy")}
               </Typography>
 
@@ -823,7 +824,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
             sx={{
               fontSize: isMobile ? '12px' : '14px',
               marginRight: '6px', // Space between text and icon
-              color: 'grey',
+              color: darkMode ? '#fff' : 'grey',
             }}
           >
             Scroll to bottom
