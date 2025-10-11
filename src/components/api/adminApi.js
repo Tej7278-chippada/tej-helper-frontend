@@ -106,3 +106,39 @@ export const imageGenerationBanner = (query) => {
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
   return API.get(`/api/banner/generate-images?query=${query}`, { headers });
 };
+
+// Post Status Management APIs
+export const triggerPostStatusUpdate = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.post('/api/admin/post-status/trigger-update', {}, { headers });
+};
+
+export const getPostStatusStats = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/admin/post-status/stats', { headers });
+};
+
+export const getPendingUpdates = (page = 1, limit = 50, postType = '') => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+  if (postType) params.append('postType', postType);
+  
+  return API.get(`/api/admin/post-status/pending-updates?${params.toString()}`, { headers });
+};
+
+export const getUpdateHistory = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/admin/post-status/update-history', { headers });
+};

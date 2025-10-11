@@ -21,6 +21,7 @@ import {
   Campaign as BannerIcon,
   AdminPanelSettings as AdminIcon
 } from "@mui/icons-material";
+import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 
 const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
   const theme = useTheme();
@@ -43,6 +44,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       color: "#4caf50",
       route: "/userFeedbacks",
       bgGradient: "linear-gradient(135deg, #4caf50 0%, #8bc34a 100%)"
+    },
+    {
+      title: "Post Status Management",
+      description: "Monitor and manually trigger automatic post status updates",
+      icon: <WorkHistoryRoundedIcon sx={{ fontSize: 40 }} />,
+      color: "#9c27b0",
+      route: "/post-status-management",
+      bgGradient: "linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)"
     },
     {
       title: "Admin Banners",

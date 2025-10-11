@@ -29,6 +29,7 @@ import Feedbacks from './components/Admin/Feedbacks';
 import UserManagement from './components/Admin/UserManagement';
 import TermsConditions from './components/TermsAndPolicies/TermsConditions';
 import PrivacyPolicy from './components/TermsAndPolicies/PrivacyPolicy';
+import PostStatusManagement from './components/Admin/PostStatusManagement';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -397,6 +398,11 @@ function App() {
           <Route path="/adminPage" element={
             <PrivateRoute adminOnly>
               <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+            </PrivateRoute>
+          } />
+          <Route path="/post-status-management" element={
+            <PrivateRoute adminOnly>
+              <PostStatusManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
             </PrivateRoute>
           } />
           <Route path="/terms-conditions" element={<TermsConditions />} />
