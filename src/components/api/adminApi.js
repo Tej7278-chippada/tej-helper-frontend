@@ -142,3 +142,20 @@ export const getUpdateHistory = () => {
   };
   return API.get('/api/admin/post-status/update-history', { headers });
 };
+
+// System Health APIs
+export const getSystemHealth = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/admin/post-status/system-health', { headers });
+};
+
+export const getNotificationStats = (days = 7) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get(`/api/admin/post-status/notification-stats?days=${days}`, { headers });
+};

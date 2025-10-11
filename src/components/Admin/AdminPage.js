@@ -22,6 +22,7 @@ import {
   AdminPanelSettings as AdminIcon
 } from "@mui/icons-material";
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
+import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
 
 const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
   const theme = useTheme();
@@ -52,6 +53,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       color: "#9c27b0",
       route: "/post-status-management",
       bgGradient: "linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)"
+    },
+    {
+      title: "System Health",
+      description: "Monitor system performance, database status, and notifications",
+      icon: <MemoryRoundedIcon sx={{ fontSize: 40 }} />,
+      color: "#00bcd4",
+      route: "/system-health",
+      bgGradient: "linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)"
     },
     {
       title: "Admin Banners",
@@ -105,6 +114,10 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
                   display: 'flex', borderRadius: '12px',
                   flexDirection: 'column',
                   cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                  WebkitTouchCallout: 'none', // Disable iOS callout
+                  WebkitUserSelect: 'none', // Disable text selection
+                  userSelect: 'none',
                   transition: 'all 0.3s ease',
                   '&:hover': {
                     transform: 'translateY(-4px)',

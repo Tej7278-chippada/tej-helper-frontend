@@ -274,10 +274,36 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
                 </CardContent>
               </Card>
             </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Typography color="text.secondary" gutterBottom>
+                    Notifications Sent
+                  </Typography>
+                  <Typography variant="h4" component="div" color="info.main">
+                    {stats?.jobStats?.notificationStats?.totalNotifications?.toLocaleString() || 0}
+                  </Typography>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
+                    <Chip 
+                      size="small" 
+                      label={`${stats?.jobStats?.notificationStats?.readNotifications || 0} read`} 
+                      color="success" 
+                      variant="outlined"
+                    />
+                    <Chip 
+                      size="small" 
+                      label={`${stats?.jobStats?.notificationStats?.unreadNotifications || 0} unread`} 
+                      color="warning" 
+                      variant="outlined"
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
 
           {/* Control Section */}
-          <Card sx={{ mb: 4 }}>
+          <Card sx={{ mb: 2 }}>
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
                 <Box>
