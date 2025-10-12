@@ -33,7 +33,9 @@ import {
   FormControlLabel,
   TextField,
   MenuItem,
-  InputAdornment
+  InputAdornment,
+  Slide,
+  Skeleton
 } from "@mui/material";
 import {
   PlayArrow as RunIcon,
@@ -46,8 +48,11 @@ import {
   Settings as SettingsIcon,
   ToggleOn as ToggleOnIcon,
   ToggleOff as ToggleOffIcon,
-  AccessTime as TimeIcon
+  AccessTime as TimeIcon,
+  History as HistoryIcon,
 } from "@mui/icons-material";
+import BuildRoundedIcon from '@mui/icons-material/BuildRounded';
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
 import { 
   triggerPostStatusUpdate, 
   getPostStatusStats, 
@@ -55,7 +60,8 @@ import {
   getUpdateHistory,
   getAdminPreferences,
   updateAdminPreferences,
-  getServiceStatus
+  getServiceStatus,
+  getActivityLogs
 } from "../api/adminApi";
 import Layout from "../Layout";
 
@@ -76,6 +82,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
   const [selectedPostType, setSelectedPostType] = useState("all");
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const [activityLogs, setActivityLogs] = useState([]);
   
   // Preferences state
   const [preferences, setPreferences] = useState(null);
@@ -100,12 +107,13 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
     setLoading(true);
     setError("");
     try {
-      const [statsResponse, pendingResponse, historyResponse, prefsResponse, statusResponse] = await Promise.all([
+      const [statsResponse, pendingResponse, historyResponse, prefsResponse, statusResponse, activityResponse] = await Promise.all([
         getPostStatusStats(),
         getPendingUpdates(1, 100, selectedPostType === "all" ? "" : selectedPostType),
         getUpdateHistory(),
         getAdminPreferences(),
-        getServiceStatus()
+        getServiceStatus(),
+        getActivityLogs(7, 20),
       ]);
 
       setStats(statsResponse.data.data);
@@ -113,6 +121,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
       setUpdateHistory(historyResponse.data.data);
       setPreferences(prefsResponse.data.data);
       setServiceStatus(statusResponse.data.data);
+      setActivityLogs(activityResponse.data.data);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load data");
       console.error("Error loading post status data:", err);
@@ -234,6 +243,44 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
     return new Date(nextRun).toLocaleString();
   };
 
+  const getActivityColor = (activityType) => {
+    switch (activityType) {
+      case 'scheduled_update': return 'success';
+      case 'manual_update': return 'secondary';
+      case 'preferences_change': return 'info';
+      case 'system_event': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'success': return 'success';
+      case 'failed': return 'error';
+      case 'running': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  const LoadingSkeleton = () => (
+    <Grid container spacing={isMobile ? 1 : 2} >
+      {[...Array(6)].map((_, index) => (
+        <Grid item xs={12} sm={6} md={3} lg={3} key={index}>
+        <Card key={index} sx={{ mb: 0, p: 2, borderRadius: '8px' }}>
+          <Box sx={{ mb: 2 }}>
+              <Skeleton variant="text" width="50%" />
+          </Box>
+          <Skeleton variant="rectangular" height={40} />
+          <Box sx={{ mt: 2, display: 'flex', gap: 1, flexDirection: 'row' }}>
+            <Skeleton variant="rectangular" width={60} height={20} />
+            <Skeleton variant="rectangular" width={60} height={20} />
+          </Box>
+        </Card>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
   return (
     <Layout
       darkMode={darkMode} 
@@ -242,33 +289,32 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
       shouldAnimate={shouldAnimate} 
       userName={userName}
     >
+      {/* Header */}
+      <Box sx={{ mb: 0, p: isMobile ? 1 : 3 }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+          <Box>
+            <Typography variant="h4" gutterBottom fontWeight="bold">
+              Post Status Management
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Automatically update post statuses based on service dates and activity
+            </Typography>
+          </Box>
+          <Button
+            variant="outlined"
+            startIcon={<SettingsIcon />} sx={{ borderRadius: '12px', textTransform: 'none'}}
+            onClick={() => setPreferencesDialogOpen(true)}
+          >
+            Settings
+          </Button>
+        </Box>
+      </Box>
       {(loading && !stats) ?
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-          <CircularProgress />
+        <Box sx={{ p: isMobile ? 1 : 3 }}>
+          <LoadingSkeleton />
         </Box> 
         :
-        <Box sx={{ p: isMobile ? 1 : 3 }}>
-          {/* Header */}
-          <Box sx={{ mb: 4 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
-              <Box>
-                <Typography variant="h4" gutterBottom fontWeight="bold">
-                  Post Status Management
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Automatically update post statuses based on service dates and activity
-                </Typography>
-              </Box>
-              <Button
-                variant="outlined"
-                startIcon={<SettingsIcon />}
-                onClick={() => setPreferencesDialogOpen(true)}
-              >
-                Settings
-              </Button>
-            </Box>
-          </Box>
-
+        <Box sx={{ p: isMobile ? 1 : 3 }}> 
           {/* Alerts */}
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
@@ -284,7 +330,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
           {/* Stats Cards */}
           <Grid container spacing={isMobile ? 1 : 2} sx={{ mb: 4 }}>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
+              <Card sx={{ borderRadius: '8px' }}>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
                     Total Posts
@@ -300,7 +346,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
+              <Card sx={{ borderRadius: '8px' }}>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
                     Pending Updates
@@ -327,7 +373,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
+              <Card sx={{ borderRadius: '8px' }}>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
                     Service Status
@@ -367,7 +413,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
+              <Card sx={{ borderRadius: '8px' }}>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
                     Next Scheduled Run
@@ -389,7 +435,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
             </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
+              <Card sx={{ borderRadius: '8px' }}>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
                     Recent Activity
@@ -404,7 +450,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
               </Card>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
-              <Card>
+              <Card sx={{ borderRadius: '8px' }}>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
                     Notifications Sent
@@ -432,7 +478,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
           </Grid>
 
           {/* Control Section */}
-          <Card sx={{ mb: 2 }}>
+          <Card sx={{ mb: 2, borderRadius: '8px' }}>
             <CardContent>
               <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
                 <Box>
@@ -446,7 +492,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
                 <Button
                   variant="contained"
                   startIcon={updating ? <CircularProgress size={20} /> : <RunIcon />}
-                  onClick={handleRunUpdate}
+                  onClick={handleRunUpdate} sx={{ borderRadius: '12px'}}
                   disabled={updating || stats?.jobStats?.isRunning}
                   size="large"
                 >
@@ -569,8 +615,179 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
             </CardContent>
           </Card>
 
+          {/* Recent Activity */}
+          <Card sx={{ mt: 3 }}>
+            <CardContent>
+              <Box display="flex" alignItems="center" gap={1} sx={{ mb: 2 }}>
+                <HistoryIcon color="primary" />
+                <Typography variant="h6">Recent Activity</Typography>
+              </Box>
+
+              {activityLogs.length > 0 ? (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Type</TableCell>
+                        <TableCell>Activity</TableCell>
+                        <TableCell>Details</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Date</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {activityLogs.slice(0, 25).map((activity) => (
+                        <TableRow
+                          key={activity._id}
+                          hover
+                          sx={{
+                            '&:hover': { backgroundColor: 'action.hover' },
+                            borderLeft: `4px solid ${
+                              activity.status === 'failed'
+                                ? '#f44336'
+                                : activity.status === 'running'
+                                ? '#ff9800'
+                                : '#4caf50'
+                            }`,
+                          }}
+                        >
+                          {/* Activity Type */}
+                          <TableCell>
+                            <Chip
+                              icon={
+                                activity.activityType === 'scheduled_update'
+                                  ? <ScheduleIcon />
+                                  : activity.activityType === 'manual_update'
+                                  ? <BuildRoundedIcon />
+                                  : activity.activityType === 'preferences_change'
+                                  ? <TuneRoundedIcon />
+                                  : <SettingsIcon />
+                              }
+                              label={activity.activityType.replace('_', ' ')}
+                              color={getActivityColor(activity.activityType)}
+                              size="small"
+                              sx={{ textTransform: 'capitalize' }}
+                            />
+                          </TableCell>
+
+                          {/* Description */}
+                          <TableCell>
+                            <Tooltip title={activity.description}>
+                              <Typography
+                                variant="body2"
+                                noWrap
+                                sx={{ maxWidth: 220, fontWeight: 500 }}
+                              >
+                                {activity.description}
+                              </Typography>
+                            </Tooltip>
+                            <Typography variant="caption" color="text.secondary">
+                              by {activity.performedBy?.username || 'System'}
+                            </Typography>
+                          </TableCell>
+
+                          {/* Details */}
+                          <TableCell>
+                            {activity.activityType === 'preferences_change' ? (
+                              <>
+                                <Typography variant="body2" sx={{ mb: 0.5 }}>
+                                  Preferences Changed:
+                                </Typography>
+                                <Box display="flex" flexWrap="wrap" gap={0.5}>
+                                  {activity.details.preferencesChanged?.length > 0 ? (
+                                    activity.details.preferencesChanged.map((pref, idx) => (
+                                      <Chip
+                                        key={idx}
+                                        label={pref}
+                                        size="small"
+                                        variant="outlined"
+                                      />
+                                    ))
+                                  ) : (
+                                    <Typography variant="caption" color="text.secondary">
+                                      No details
+                                    </Typography>
+                                  )}
+                                </Box>
+                                {activity.details.error && (
+                                  <Typography
+                                    variant="body2"
+                                    color="error"
+                                    sx={{ mt: 0.5, fontWeight: 500 }}
+                                  >
+                                    ⚠ Error: {activity.details.error}
+                                  </Typography>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                <Typography variant="body2">
+                                  Updated Posts:{' '}
+                                  <b>{activity.details.postsUpdated ?? 0}</b>
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  Batch: {activity.details.batchSize ?? 0} | Duration:{' '}
+                                  {activity.details.duration ?? 0}s
+                                </Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Triggered by {activity.details?.triggeredBy || 'System'}
+                                </Typography>
+                                {activity.details.error && (
+                                  <Typography
+                                    variant="body2"
+                                    color="error"
+                                    sx={{ mt: 0.5, fontWeight: 500 }}
+                                  >
+                                    ⚠ Error: {activity.details.error}
+                                  </Typography>
+                                )}
+                              </>
+                            )}
+                          </TableCell>
+
+                          {/* Status */}
+                          <TableCell>
+                            <Chip
+                              label={activity.status}
+                              color={getStatusColor(activity.status)}
+                              size="small"
+                              sx={{ textTransform: 'capitalize' }}
+                            />
+                          </TableCell>
+
+                          {/* Date */}
+                          <TableCell>
+                            <Typography variant="caption">
+                              {formatDate(activity.performedAt)}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  textAlign="center"
+                  py={2}
+                >
+                  No recent activity
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+
+
           {/* Preferences Dialog */}
-          <Dialog open={preferencesDialogOpen} onClose={openConfirmDialog} maxWidth="md" fullWidth>
+          <Dialog open={preferencesDialogOpen} onClose={openConfirmDialog} maxWidth="md" fullWidth fullScreen={isMobile}
+            sx={{ 
+              '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }
+            }}
+            TransitionComponent={Slide}
+            TransitionProps={{ direction: 'up' }}
+          >
             <DialogTitle>
               <Box display="flex" alignItems="center" gap={1}>
                 <SettingsIcon color="primary" />
@@ -599,10 +816,10 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
                         )}
                       />
                     }
-                    label={getCurrentSetting('scheduledUpdatesEnabled') !== false ? 
-                      <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />
-                    }
-                    labelPlacement="start"
+                    // label={getCurrentSetting('scheduledUpdatesEnabled') !== false ? 
+                    //   <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />
+                    // }
+                    // labelPlacement="start"
                   />
                 </Box>
 
@@ -682,10 +899,10 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
                         )}
                       />
                     }
-                    label={getCurrentSetting('notificationsEnabled') !== false ? 
-                      <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />
-                    }
-                    labelPlacement="start"
+                    // label={getCurrentSetting('notificationsEnabled') !== false ? 
+                    //   <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />
+                    // }
+                    // labelPlacement="start"
                   />
                 </Box>
 
@@ -742,12 +959,13 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
               <Button onClick={() => {
                 setPendingChanges({});
                 setPreferencesDialogOpen(false);
-              }}>
+              }}
+              sx={{ borderRadius: '12px'}}>
                 Cancel
               </Button>
               <Button 
                 onClick={openConfirmDialog}
-                variant="contained"
+                variant="contained" sx={{ borderRadius: '12px'}}
                 disabled={Object.keys(pendingChanges).length === 0}
               >
                 Save Changes
@@ -756,7 +974,11 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
           </Dialog>
 
           {/* Confirm Changes Dialog */}
-          <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)} maxWidth="sm" fullWidth>
+          <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)} maxWidth="sm" fullWidth 
+            sx={{ 
+              '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }
+            }}
+          >
             <DialogTitle>Confirm Preference Changes</DialogTitle>
             <DialogContent>
               <Typography variant="body1" paragraph>
@@ -781,7 +1003,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
               )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setConfirmDialogOpen(false)} disabled={saving}>
+              <Button onClick={() => setConfirmDialogOpen(false)} disabled={saving} sx={{ borderRadius: '12px'}}>
                 Cancel
               </Button>
               <Button 
@@ -789,6 +1011,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
                 variant="contained" 
                 disabled={saving}
                 startIcon={saving ? <CircularProgress size={20} /> : null}
+                sx={{ borderRadius: '12px'}}
               >
                 {saving ? 'Saving...' : 'Confirm Changes'}
               </Button>
