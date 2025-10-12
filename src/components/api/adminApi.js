@@ -159,3 +159,36 @@ export const getNotificationStats = (days = 7) => {
   };
   return API.get(`/api/admin/post-status/notification-stats?days=${days}`, { headers });
 };
+
+// Admin Preferences APIs
+export const getAdminPreferences = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/admin/preferences', { headers });
+};
+
+export const updateAdminPreferences = (category, settings) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.put('/api/admin/preferences', { category, settings }, { headers });
+};
+
+export const getActivityLogs = (days = 7, limit = 50) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get(`/api/admin/preferences/activity?days=${days}&limit=${limit}`, { headers });
+};
+
+export const getServiceStatus = () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.get('/api/admin/preferences/service-status', { headers });
+};

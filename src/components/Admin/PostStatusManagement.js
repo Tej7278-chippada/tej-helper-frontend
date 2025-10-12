@@ -28,7 +28,12 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Switch,
+  FormControlLabel,
+  TextField,
+  MenuItem,
+  InputAdornment
 } from "@mui/material";
 import {
   PlayArrow as RunIcon,
@@ -37,14 +42,20 @@ import {
   Schedule as ScheduleIcon,
   CheckCircle as SuccessIcon,
   Error as ErrorIcon,
-  Visibility as ViewIcon
+  Visibility as ViewIcon,
+  Settings as SettingsIcon,
+  ToggleOn as ToggleOnIcon,
+  ToggleOff as ToggleOffIcon,
+  AccessTime as TimeIcon
 } from "@mui/icons-material";
-// import { getPostStatusStats } from "../api/adminApi";
 import { 
   triggerPostStatusUpdate, 
   getPostStatusStats, 
   getPendingUpdates,
-  getUpdateHistory 
+  getUpdateHistory,
+  getAdminPreferences,
+  updateAdminPreferences,
+  getServiceStatus
 } from "../api/adminApi";
 import Layout from "../Layout";
 
@@ -57,6 +68,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
   const [updateHistory, setUpdateHistory] = useState(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [page, setPage] = useState(0);
@@ -64,20 +76,43 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
   const [selectedPostType, setSelectedPostType] = useState("all");
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  
+  // Preferences state
+  const [preferences, setPreferences] = useState(null);
+  const [serviceStatus, setServiceStatus] = useState(null);
+  const [preferencesDialogOpen, setPreferencesDialogOpen] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState({});
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+  // Timezone options
+  const timezoneOptions = [
+    { value: 'Asia/Kolkata', label: 'India Standard Time (IST)' },
+    { value: 'UTC', label: 'Coordinated Universal Time (UTC)' },
+    { value: 'America/New_York', label: 'Eastern Time (ET)' },
+    { value: 'America/Los_Angeles', label: 'Pacific Time (PT)' },
+    { value: 'Europe/London', label: 'Greenwich Mean Time (GMT)' },
+    { value: 'Europe/Paris', label: 'Central European Time (CET)' },
+    { value: 'Asia/Tokyo', label: 'Japan Standard Time (JST)' },
+    { value: 'Australia/Sydney', label: 'Australian Eastern Time (AET)' }
+  ];
 
   const loadData = async () => {
     setLoading(true);
     setError("");
     try {
-      const [statsResponse, pendingResponse, historyResponse] = await Promise.all([
+      const [statsResponse, pendingResponse, historyResponse, prefsResponse, statusResponse] = await Promise.all([
         getPostStatusStats(),
         getPendingUpdates(1, 100, selectedPostType === "all" ? "" : selectedPostType),
-        getUpdateHistory()
+        getUpdateHistory(),
+        getAdminPreferences(),
+        getServiceStatus()
       ]);
 
       setStats(statsResponse.data.data);
       setPendingPosts(pendingResponse.data.data.posts);
       setUpdateHistory(historyResponse.data.data);
+      setPreferences(prefsResponse.data.data);
+      setServiceStatus(statusResponse.data.data);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load data");
       console.error("Error loading post status data:", err);
@@ -103,6 +138,54 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
       setError(err.response?.data?.message || "Failed to run post status update");
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handlePreferenceChange = (key, value) => {
+    setPendingChanges(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const openConfirmDialog = () => {
+    if (Object.keys(pendingChanges).length > 0) {
+      setConfirmDialogOpen(true);
+    } else {
+      setPreferencesDialogOpen(false);
+    }
+  };
+
+  const savePreferences = async () => {
+    setSaving(true);
+    setError("");
+    setSuccess("");
+    
+    try {
+      await updateAdminPreferences('post_status_updates', pendingChanges);
+      
+      // Update local state
+      setPreferences(prev => ({
+        ...prev,
+        post_status_updates: {
+          ...prev.post_status_updates,
+          ...pendingChanges
+        }
+      }));
+      
+      setSuccess('Preferences updated successfully');
+      setPendingChanges({});
+      setConfirmDialogOpen(false);
+      setPreferencesDialogOpen(false);
+      
+      // Reload service status to get updated schedule
+      const statusResponse = await getServiceStatus();
+      setServiceStatus(statusResponse.data.data);
+      
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update preferences");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -140,13 +223,16 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
     }
   };
 
-  // if (loading && !stats) {
-  //   return (
-  //     <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-  //       <CircularProgress />
-  //     </Box>
-  //   );
-  // }
+  const getCurrentSetting = (key) => {
+    const current = preferences?.post_status_updates?.[key];
+    const pending = pendingChanges[key];
+    return pending !== undefined ? pending : current;
+  };
+
+  const formatNextRun = (nextRun) => {
+    if (!nextRun) return 'Not scheduled';
+    return new Date(nextRun).toLocaleString();
+  };
 
   return (
     <Layout
@@ -164,12 +250,23 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
         <Box sx={{ p: isMobile ? 1 : 3 }}>
           {/* Header */}
           <Box sx={{ mb: 4 }}>
-            <Typography variant="h4" gutterBottom fontWeight="bold">
-              Post Status Management
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Automatically update post statuses based on service dates and activity
-            </Typography>
+            <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+              <Box>
+                <Typography variant="h4" gutterBottom fontWeight="bold">
+                  Post Status Management
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Automatically update post statuses based on service dates and activity
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                startIcon={<SettingsIcon />}
+                onClick={() => setPreferencesDialogOpen(true)}
+              >
+                Settings
+              </Button>
+            </Box>
           </Box>
 
           {/* Alerts */}
@@ -233,7 +330,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
               <Card>
                 <CardContent>
                   <Typography color="text.secondary" gutterBottom>
-                    Job Status
+                    Service Status
                   </Typography>
                   <Box display="flex" alignItems="center">
                     {stats?.jobStats?.isRunning ? (
@@ -252,8 +349,40 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
                       </>
                     )}
                   </Box>
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    Scheduled: Daily 2 AM
+                  <Stack direction="row" spacing={1} sx={{ mt: 1 }} flexWrap="wrap">
+                    <Chip 
+                      size="small" 
+                      label={`Sched: ${serviceStatus?.preferences?.scheduledUpdatesEnabled ? 'ON' : 'OFF'}`} 
+                      color={serviceStatus?.preferences?.scheduledUpdatesEnabled ? 'success' : 'error'} 
+                      variant="outlined"
+                    />
+                    <Chip 
+                      size="small" 
+                      label={`Notify: ${serviceStatus?.preferences?.notificationsEnabled ? 'ON' : 'OFF'}`} 
+                      color={serviceStatus?.preferences?.notificationsEnabled ? 'success' : 'error'} 
+                      variant="outlined"
+                    />
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Card>
+                <CardContent>
+                  <Typography color="text.secondary" gutterBottom>
+                    Next Scheduled Run
+                  </Typography>
+                  <Box display="flex" alignItems="center" gap={1} sx={{ mb: 1 }}>
+                    <TimeIcon color="primary" fontSize="small" />
+                    <Typography variant="h6" component="div">
+                      {serviceStatus?.schedule?.scheduledTime || '02:00'}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {serviceStatus?.schedule?.isScheduled ? 
+                      formatNextRun(serviceStatus?.schedule?.nextRun) : 
+                      'Not scheduled'
+                    }
                   </Typography>
                 </CardContent>
               </Card>
@@ -439,6 +568,232 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
               />
             </CardContent>
           </Card>
+
+          {/* Preferences Dialog */}
+          <Dialog open={preferencesDialogOpen} onClose={openConfirmDialog} maxWidth="md" fullWidth>
+            <DialogTitle>
+              <Box display="flex" alignItems="center" gap={1}>
+                <SettingsIcon color="primary" />
+                Post Status Update Settings
+              </Box>
+            </DialogTitle>
+            <DialogContent>
+              <Stack spacing={3} sx={{ mt: 1 }}>
+                {/* Scheduled Updates Toggle */}
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box>
+                    <Typography variant="body1" fontWeight="medium">
+                      Scheduled Updates
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Automatically update post statuses daily
+                    </Typography>
+                  </Box>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={getCurrentSetting('scheduledUpdatesEnabled') !== false}
+                        onChange={(e) => handlePreferenceChange(
+                          'scheduledUpdatesEnabled',
+                          e.target.checked
+                        )}
+                      />
+                    }
+                    label={getCurrentSetting('scheduledUpdatesEnabled') !== false ? 
+                      <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />
+                    }
+                    labelPlacement="start"
+                  />
+                </Box>
+
+                {/* Schedule Time Settings - Only show if scheduled updates are enabled */}
+                {getCurrentSetting('scheduledUpdatesEnabled') !== false && (
+                  <Box>
+                    <Typography variant="subtitle1" gutterBottom fontWeight="medium">
+                      Schedule Settings
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          label="Scheduled Time"
+                          type="time"
+                          value={getCurrentSetting('scheduledUpdateTime') || '02:00'}
+                          onChange={(e) => handlePreferenceChange(
+                            'scheduledUpdateTime',
+                            e.target.value
+                          )}
+                          fullWidth
+                          size="small"
+                          InputLabelProps={{ shrink: true }}
+                          inputProps={{ step: 300 }} // 5 minute steps
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <TimeIcon fontSize="small" />
+                              </InputAdornment>
+                            ),
+                          }}
+                          helperText="Daily execution time (24-hour)"
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          select
+                          label="Timezone"
+                          value={getCurrentSetting('scheduledUpdateTimezone') || 'Asia/Kolkata'}
+                          onChange={(e) => handlePreferenceChange(
+                            'scheduledUpdateTimezone',
+                            e.target.value
+                          )}
+                          fullWidth
+                          size="small"
+                          helperText="Time zone for scheduling"
+                        >
+                          {timezoneOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                )}
+
+                <Divider />
+
+                {/* Notifications Toggle */}
+                <Box display="flex" justifyContent="space-between" alignItems="center">
+                  <Box>
+                    <Typography variant="body1" fontWeight="medium">
+                      User Notifications
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Send notifications to post owners when status changes
+                    </Typography>
+                  </Box>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={getCurrentSetting('notificationsEnabled') !== false}
+                        onChange={(e) => handlePreferenceChange(
+                          'notificationsEnabled',
+                          e.target.checked
+                        )}
+                      />
+                    }
+                    label={getCurrentSetting('notificationsEnabled') !== false ? 
+                      <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />
+                    }
+                    labelPlacement="start"
+                  />
+                </Box>
+
+                <Divider />
+
+                {/* Advanced Settings */}
+                <Box>
+                  <Typography variant="subtitle1" gutterBottom fontWeight="medium">
+                    Advanced Settings
+                  </Typography>
+                  
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Batch Size"
+                        type="number"
+                        value={getCurrentSetting('batchSize') || 1000}
+                        onChange={(e) => handlePreferenceChange(
+                          'batchSize',
+                          parseInt(e.target.value)
+                        )}
+                        fullWidth
+                        size="small"
+                        inputProps={{ min: 100, max: 5000 }}
+                        helperText="Posts to process at once"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Max Concurrent Batches"
+                        type="number"
+                        value={getCurrentSetting('maxConcurrentBatches') || 3}
+                        onChange={(e) => handlePreferenceChange(
+                          'maxConcurrentBatches',
+                          parseInt(e.target.value)
+                        )}
+                        fullWidth
+                        size="small"
+                        inputProps={{ min: 1, max: 10 }}
+                        helperText="Parallel processing"
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                {Object.keys(pendingChanges).length > 0 && (
+                  <Alert severity="info">
+                    You have unsaved changes. Click "Save Changes" to apply them.
+                  </Alert>
+                )}
+              </Stack>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => {
+                setPendingChanges({});
+                setPreferencesDialogOpen(false);
+              }}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={openConfirmDialog}
+                variant="contained"
+                disabled={Object.keys(pendingChanges).length === 0}
+              >
+                Save Changes
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Confirm Changes Dialog */}
+          <Dialog open={confirmDialogOpen} onClose={() => setConfirmDialogOpen(false)} maxWidth="sm" fullWidth>
+            <DialogTitle>Confirm Preference Changes</DialogTitle>
+            <DialogContent>
+              <Typography variant="body1" paragraph>
+                Are you sure you want to save the following changes?
+              </Typography>
+              <Box sx={{ mt: 2 }}>
+                {Object.entries(pendingChanges).map(([key, value]) => (
+                  <Box key={key} display="flex" justifyContent="space-between" sx={{ mb: 1 }}>
+                    <Typography variant="body2">
+                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:
+                    </Typography>
+                    <Typography variant="body2" fontWeight="medium">
+                      {typeof value === 'boolean' ? (value ? 'Enabled' : 'Disabled') : value}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+              {(pendingChanges.scheduledUpdateTime || pendingChanges.scheduledUpdateTimezone) && (
+                <Alert severity="warning" sx={{ mt: 2 }}>
+                  Changing the schedule time will restart the scheduled job with the new timing.
+                </Alert>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setConfirmDialogOpen(false)} disabled={saving}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={savePreferences} 
+                variant="contained" 
+                disabled={saving}
+                startIcon={saving ? <CircularProgress size={20} /> : null}
+              >
+                {saving ? 'Saving...' : 'Confirm Changes'}
+              </Button>
+            </DialogActions>
+          </Dialog>
 
           {/* Post Details Dialog */}
           <Dialog
