@@ -330,3 +330,28 @@ export const deleteProfilePicture = async (userId) => {
   
   return await API.delete(`/api/auth/delete-profile-pic/${userId}`, { headers });
 };
+
+// Report a post
+export const reportPost = async (postId, reportTypes, comment) => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.post('/api/reports/report-post', {
+    postId,
+    reportTypes,
+    comment
+  }, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+};
+
+// Check if post is reported by user
+export const checkPostReported = async (postId) => {
+  const authToken = localStorage.getItem('authToken');
+  const response = await API.get(`/api/reports/check-reported/${postId}`, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return response.data.hasReported;
+};

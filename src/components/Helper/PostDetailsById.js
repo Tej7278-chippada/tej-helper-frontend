@@ -15,7 +15,7 @@ import { useTheme } from '@emotion/react';
 // import SkeletonProductDetail from './SkeletonProductDetail';
 // import ImageZoomDialog from './ImageZoomDialog';
 import ShareIcon from '@mui/icons-material/Share'; // Import the share icon
-import { addToWishlist, checkIfLiked, checkPostInWishlist, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
+import { addToWishlist, checkIfLiked, checkPostInWishlist, checkPostReported, fetchLikesCount, fetchPostById, likePost, removeFromWishlist } from '../api/api';
 import Layout from '../Layout';
 import SkeletonProductDetail from '../SkeletonProductDetail';
 import ImageZoomDialog from './ImageZoomDialog';
@@ -32,6 +32,8 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import EmergencyIcon from '@mui/icons-material/Emergency';
 import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, ChildCare, CleaningServices, Restaurant, School, Pets, LocalShipping, Handyman, HomeWork, Landscape, MoreHoriz, CurrencyRupee, Schedule } from '@mui/icons-material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
+import ReportPost from '../Reports/ReportPost';
 
 const getServiceIcon = (serviceType) => {
   switch (serviceType) {
@@ -116,8 +118,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const tokenUsername = localStorage.getItem('tokenUsername');
   const authToken = localStorage.getItem('authToken');
   const [chatData, setChatData] = useState({});
-  
-
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [checkingReport, setCheckingReport] = useState(false);
 
   
   useEffect(() => {
@@ -947,6 +949,42 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
     );
   };
 
+  // function to handle report button click
+  const handleReportClick = async () => {
+    if (!isAuthenticated) {
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    }
+
+    try {
+      setCheckingReport(true);
+      const response = await checkPostReported(post._id);
+      
+      if (response) {
+        setSnackbar({
+          open: true,
+          message: 'You have already reported this post.',
+          severity: 'info'
+        });
+      } else {
+        setReportDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error checking report status:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error checking report status. Please try again.',
+        severity: 'error'
+      });
+    } finally {
+      setCheckingReport(false);
+    }
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box>
@@ -1363,9 +1401,57 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                     height: '28px', minWidth: 'fit-content',
                     // flexShrink: 0,
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '& .MuiChip-icon': {
+                      height: '36px'
+                    },
                   }}
                 />
-                </Box>
+                {/* Repost post button */}
+                <Chip 
+                  icon={checkingReport ? <CircularProgress size={18} /> : <ReportGmailerrorredRoundedIcon />}
+                  variant="outlined" 
+                  size="small" 
+                  onClick={handleReportClick} disabled={checkingReport}
+                  aria-label="Report Post"
+                  title="Report Post" 
+                  color="error"
+                  sx={{px: 1, ml: 0.5, fontWeight: 500, fontSize: '1rem', 
+                    background: darkMode 
+                      ? 'rgba(30, 30, 30, 0.85)' 
+                      : 'rgba(255, 255, 255, 0.15)',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: darkMode 
+                      ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+                      : '0 8px 32px rgba(0, 0, 0, 0.1)', 
+                    border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
+                    height: '28px', minWidth: 'fit-content',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    '& .MuiChip-icon': {
+                      marginLeft: '4px',
+                      height: '36px'
+                    },
+                    '& .MuiChip-label': {
+                      px: '4px',
+                    },
+                  }}
+                />
+                {/* <IconButton
+                  style={{
+                    float: 'right',
+                    fontWeight: '500',
+                    boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                    marginLeft: '10px'
+                  }}
+                  onClick={handleReportClick} disabled={checkingReport}
+                  aria-label="Report Post"
+                  title="Report Post" 
+                  color="error"
+                >
+                  <CustomTooltip title="Report this post" arrow placement="right">
+                    {checkingReport ? <CircularProgress size={20} /> : <ReportGmailerrorredRoundedIcon />}
+                  </CustomTooltip>
+                </IconButton> */}
+              </Box>
               {/* </Grid2> */}
               </Box>
               <Box sx={{borderRadius:'8px', ...getGlassmorphismStyle(theme, darkMode), mt: '4px'}}> {/* bgcolor: '#f5f5f5', */}
@@ -1489,6 +1575,19 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             post={post}
             isMobile={isMobile}
             isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
+          />
+          <ReportPost
+            open={reportDialogOpen}
+            onClose={() => setReportDialogOpen(false)}
+            onReportSuccess={() => {
+              setSnackbar({
+                open: true,
+                message: 'Post reported successfully! Thank you for keeping our community safe.',
+                severity: 'success'
+              });
+            }}
+            post={post}
+            darkMode={darkMode}
           />
           </>
         }
