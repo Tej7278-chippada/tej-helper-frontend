@@ -192,3 +192,44 @@ export const getServiceStatus = () => {
   };
   return API.get('/api/admin/preferences/service-status', { headers });
 };
+
+// Get reports for admin
+export const getReports = (params = {}) => {
+  const authToken = localStorage.getItem('authToken');
+  const queryParams = new URLSearchParams(params).toString();
+  return API.get(`/api/reports/admin/reports?${queryParams}`, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Get report details for a specific post
+export const getReportDetails = (postId) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.get(`/api/reports/admin/reports/post/${postId}`, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Update report status
+export const updateReport = (reportId, data) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.put(`/api/reports/admin/reports/${reportId}`, data, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Suspend post from reports
+export const suspendPostFromReport = (reportId, data) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.post(`/api/reports/admin/reports/${reportId}/suspend-post`, data, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Get report statistics
+export const getReportStatistics = () => {
+  const authToken = localStorage.getItem('authToken');
+  return API.get('/api/reports/admin/statistics', {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};

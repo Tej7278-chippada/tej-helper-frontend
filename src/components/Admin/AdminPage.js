@@ -24,6 +24,7 @@ import {
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
 import SettingsInputComponentRoundedIcon from '@mui/icons-material/SettingsInputComponentRounded';
+import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
 
 const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
   const theme = useTheme();
@@ -38,6 +39,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       color: "#2196f3",
       route: "/userManagement",
       bgGradient: "linear-gradient(135deg, #2196f3 0%, #21cbf3 100%)"
+    },
+    {
+      title: "Reports Management",
+      description: "Review reported posts, take actions, and manage content moderation",
+      icon: <ReportGmailerrorredRoundedIcon sx={{ fontSize: 40 }} />,
+      color: "#f44336",
+      route: "/post-reports",
+      bgGradient: "linear-gradient(135deg, #f44336 0%, #e91e63 100%)"
     },
     {
       title: "User Feedback",
