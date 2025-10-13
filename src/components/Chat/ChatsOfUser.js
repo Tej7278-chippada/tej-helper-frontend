@@ -302,13 +302,13 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         > */}
           <ChatContainer sx={{
             flex: 1.5,
-            height: '80vh',
+            // height: '80vh',
             overflowY: 'auto',
             // bgcolor: 'rgba(0,0,0,0)',
             // borderRadius: 2,
             scrollbarWidth: 'none'
           }}>
-            <Box height={ "auto"} sx={{ padding: '0px' }}>
+            {/* <Box height={ "auto"} sx={{ padding: '0px' }}> */}
               <Box
                 position="sticky"
                 top={0}
@@ -667,7 +667,7 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   )}
                 </Box>
               </Box>
-            </Box>
+            {/* </Box> */}
           </ChatContainer>
 
           {/* {!isMobile && (<Card sx={{

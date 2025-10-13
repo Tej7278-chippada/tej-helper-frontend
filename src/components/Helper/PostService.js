@@ -592,6 +592,20 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                   height: '70%',
                   background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
                 }} />
+                {/* Status Badge */}
+                <Chip
+                  label={post.postStatus}
+                  size="small"
+                  sx={{
+                    position: 'absolute',
+                    top: 12,
+                    left: 12,
+                    backgroundColor: post.postStatus === 'Active' ? 'success.main' : post.postStatus === 'InActive' ? 'warning.main': 'error.main',
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '0.75rem'
+                  }}
+                />
                 {post.isFullTime && (
                   <Chip
                     icon={<WorkIcon sx={{ fontSize: 16 }} />}
@@ -651,7 +665,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                         }}
                       />
                     }
-                    {post.postType !== 'HelpRequest' &&
+                    {/* {post.postType !== 'HelpRequest' &&
                       <Chip
                         // icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
                         label={`${post.postStatus}`}
@@ -666,12 +680,34 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                           transition: 'transform 0.2s ease'
                         }}
                       />
+                    } */}
+                    {post.postType !== 'HelpRequest' && 
+                      <Chip 
+                        label={post.serviceType}
+                        variant="outlined" 
+                        size="small" 
+                        sx={{ 
+                          color: '#fff', 
+                          borderColor: 'rgba(255,255,255,0.5)',
+                          fontSize: '0.75rem'
+                        }}
+                      />
                     }
                   </Box>
                   {post.postType === 'HelpRequest' ? (
                     // Help Request specific content
                     <Box sx={{ mb: 1 }}>
                       <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                        <Chip 
+                          label={post.categories}
+                          variant="outlined" 
+                          size="small" 
+                          sx={{ 
+                            color: '#fff', 
+                            borderColor: 'rgba(255,255,255,0.5)',
+                            fontSize: '0.75rem'
+                          }}
+                        />
                         {post.peopleCount && (
                           <Chip 
                             label={`${post.peopleCount} ${post.gender || 'People'}`}
@@ -684,7 +720,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                             }}
                           />
                         )}
-                        <Chip
+                        {/* <Chip
                           label={`Status: ${post.postStatus}`}
                           variant="outlined"
                           size="small"
@@ -693,7 +729,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                             borderColor: post.postStatus === 'Active' ? '#a5ffa5' : '#ffa5a5',
                             fontSize: '0.75rem'
                           }}
-                        />
+                        /> */}
                       </Box>
                     </Box>
                   ) : (

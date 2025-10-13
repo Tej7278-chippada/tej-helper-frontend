@@ -269,7 +269,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                               position: 'absolute',
                               top: 12,
                               left: 12,
-                              backgroundColor: post.postStatus === 'Active' ? 'success.main' : 'error.main',
+                              backgroundColor: post.postStatus === 'Active' ? 'success.main' : post.postStatus === 'InActive' ? 'warning.main': 'error.main',
                               color: 'white',
                               fontWeight: 600,
                               fontSize: '0.75rem'
@@ -394,6 +394,18 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                     },
                                   }}
                                 />}
+                                {post.postType !== 'HelpRequest' && 
+                                  <Chip 
+                                    label={post.serviceType}
+                                    variant="outlined" 
+                                    size="small" 
+                                    sx={{ 
+                                      color: darkMode ? '#fff' : '#000', 
+                                      borderColor: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0, 0, 0, 0.5)',
+                                      fontSize: '0.75rem'
+                                    }}
+                                  />
+                                }
                               </Box>
 
                               {/* Category and People Count */}
@@ -424,6 +436,16 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                 // Help Request specific content
                                 <Box sx={{ mb: 1 }}>
                                   <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                                    <Chip 
+                                      label={post.categories}
+                                      variant="outlined" 
+                                      size="small" 
+                                      sx={{ 
+                                        color: darkMode ? '#fff' : '#000', 
+                                        // borderColor: darkMode ? 'rgba(255,255,255,0.5)' : 'rgba(0, 0, 0, 0.5)',
+                                        fontSize: '0.75rem'
+                                      }}
+                                    />
                                     {post.peopleCount && (
                                       <Chip 
                                         label={`${post.peopleCount} ${post.gender || 'People'}`}

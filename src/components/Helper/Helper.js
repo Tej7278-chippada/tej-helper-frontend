@@ -104,15 +104,47 @@ const DEFAULT_FILTERS = {
 //     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-const getGlassmorphismCardStyle = (theme, darkMode) => ({
-  background: 'rgba(205, 201, 201, 0.15)',
-  backdropFilter: 'blur(20px)',
-  border: darkMode 
+// const getGlassmorphismCardStyle = (theme, darkMode) => ({
+//   background: 'rgba(205, 201, 201, 0.15)',
+//   backdropFilter: 'blur(20px)',
+//   border: darkMode 
+//     ? '1px solid rgba(255, 255, 255, 0.1)' 
+//     : '1px solid rgba(255, 255, 255, 0.2)',
+//   boxShadow: darkMode 
+//     ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+//     : '0 8px 32px rgba(0, 0, 0, 0.1)',
+// });
+
+const getButtonStyle = (darkMode, button) => ({
+  background: button 
+    ?  (darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)') 
+    : 'transparent',
+  backdropFilter: button ? 'blur(10px)' : 'none',
+  border: button ? (darkMode 
     ? '1px solid rgba(255, 255, 255, 0.1)' 
-    : '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: darkMode 
-    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
-    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+    : '1px solid rgba(255, 255, 255, 0.2)') : 'transparent',
+  color: darkMode ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)',
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    border: button ? (darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)') : 'transparent',
+    transform: 'translateY(-1px)',
+  }
+});
+
+const mapButtonStyle = (mapMode, isMobile) => ({
+  color: mapMode === 'satellite' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(5px)',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  // width: isMobile ? 40 : 44,
+  // height: isMobile ? 40 : 44,
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    transform: 'scale(1.05)',
+  },
+  transition: 'all 0.2s ease',
 });
 
 const SearchContainer = styled(Box)(({ theme }) => ({
@@ -1926,10 +1958,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           flexDirection: 'column',
           gap: 1
         }}>
-          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={zoomIn}>
+          <Fab size="small" sx={mapButtonStyle(mapMode, isMobile)} onClick={zoomIn}>
             <ZoomInIcon />
           </Fab>
-          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={zoomOut}>
+          <Fab size="small" sx={mapButtonStyle(mapMode, isMobile)} onClick={zoomOut}>
             <ZoomOutIcon />
           </Fab>
         </Box>
@@ -1942,10 +1974,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           flexDirection: 'row',
           gap: 1
         }}>
-          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={fetchUserLocation} disabled={loadingLocation}>
+          <Fab size="small" sx={mapButtonStyle(mapMode, isMobile)} onClick={fetchUserLocation} disabled={loadingLocation}>
             {loadingLocation ? <CircularProgress size={16} /> : <MyLocationRoundedIcon />}
           </Fab>
-          <Fab size="small" sx={{ ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')} >
+          <Fab size="small" sx={mapButtonStyle(mapMode, isMobile)} onClick={() => setMapMode(mapMode === 'normal' ? 'satellite' : 'normal')} >
             {mapMode === 'normal' ? <SatelliteAltRoundedIcon /> : <MapRoundedIcon />}
           </Fab>
         </Box>
@@ -1961,7 +1993,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           flexDirection: 'row',
           gap: 1
         }}>
-          <Fab size="small" sx={{ width: '90px', borderRadius: '20px', ...getGlassmorphismCardStyle(theme, darkMode), color: 'rgba(0, 0, 0, 0.6)' }} onClick={() => setShowDistanceRanges(!showDistanceRanges)} >
+          <Fab size="small" sx={{ width: '90px', borderRadius: '20px', ...mapButtonStyle(mapMode, isMobile) }} onClick={() => setShowDistanceRanges(!showDistanceRanges)} >
             <ShareLocationRoundedIcon sx={{ mr: '2px' }} /> {distanceRange} km
           </Fab>
         </Box>
@@ -2182,7 +2214,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             </Typography>
 
             <Chip
-              label="Click anywhere to explore the map"
+              label="Click here to explore the map"
               sx={{
                 backgroundColor: 'rgba(255, 255, 255, 0.2)',
                 color: 'white',
@@ -2344,7 +2376,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         </Box>
         
         <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
-        <Box 
+        {/* <Box 
           sx={{
             transition: 'transform 0.3s ease, opacity 0.3s ease',
             transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
@@ -2363,10 +2395,18 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             // transformOrigin: 'top center',
             willChange: 'transform' // Performance optimization
           }}
-        >
+        > */}
         <Box sx={{display:'flex', justifyContent:'space-between', transition: 'transform 0.3s ease, opacity 0.3s ease',
           transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
           opacity: isHeaderVisible ? 1 : 0,
+          height: isHeaderVisible ? 'auto' : '0px',
+          // overflow: 'hidden',
+          position: 'sticky',
+          top: 0,
+          zIndex: 999,
+          flexShrink: 0,
+          // transformOrigin: 'top center',
+          willChange: 'transform', // Performance optimization
           //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
           borderRadius: '12px', 
@@ -2670,17 +2710,19 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             >
               Sort
             </Button> */}
-            <IconButton 
-              onClick={() => setShowSortMenu(!showSortMenu)}
-              sx={{
-                minWidth: '40px',
-                minHeight: '40px',
-                mr: '4px',
-                backgroundColor: showSortMenu ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
-              }}
-            >
-              <SortRoundedIcon />
-            </IconButton>
+            <Tooltip title="Sort" arrow>
+              <IconButton 
+                onClick={() => setShowSortMenu(!showSortMenu)}
+                sx={{
+                  minWidth: '40px',
+                  minHeight: '40px',
+                  mr: '4px', ...getButtonStyle(darkMode, showSortMenu),
+                  // backgroundColor: showSortMenu ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                }}
+              >
+                <SortRoundedIcon />
+              </IconButton>
+            </Tooltip>
 
             {/* Sort Menu */}
             {showSortMenu && (
@@ -2724,16 +2766,18 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </Card>
             )}
             {/* filters card */}
-            <IconButton 
-              onClick={() => setIsExtraFiltersOpen((prev) => !prev)}
-              sx={{
-                minWidth: '40px',
-                minHeight: '40px', mr: '4px',
-                backgroundColor: isExtraFiltersOpen ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
-              }}
-            >
-              <FilterListRoundedIcon />
-            </IconButton>
+            <Tooltip title="Filters" arrow>
+              <IconButton 
+                onClick={() => setIsExtraFiltersOpen((prev) => !prev)}
+                sx={{
+                  minWidth: '40px',
+                  minHeight: '40px', mr: '4px', ...getButtonStyle(darkMode, isExtraFiltersOpen),
+                  // backgroundColor: isExtraFiltersOpen ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                }}
+              >
+                <FilterListRoundedIcon />
+              </IconButton>
+            </Tooltip>
             {isExtraFiltersOpen &&  (
               <Card
                 sx={{
@@ -2844,18 +2888,20 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             )}
 
           {/* Compare Icon Button */}
-          <IconButton 
-            onClick={() => setCompareMode(!compareMode)}
-            sx={{
-              minWidth: '40px',
-              minHeight: '40px',
-              mr: '4px',
-              // color: compareMode ? 'primary.main' : 'inherit',
-              backgroundColor: compareMode ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
-            }}
-          >
-            <CompareRoundedIcon />
-          </IconButton>
+          <Tooltip title="Compare Posts" arrow>
+            <IconButton 
+              onClick={() => setCompareMode(!compareMode)}
+              sx={{
+                minWidth: '40px',
+                minHeight: '40px',
+                mr: '4px', ...getButtonStyle(darkMode, compareMode),
+                // color: compareMode ? 'primary.main' : 'inherit',
+                // backgroundColor: compareMode ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
+              }}
+            >
+              <CompareRoundedIcon />
+            </IconButton>
+          </Tooltip>
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
           {/* <Button
@@ -3208,7 +3254,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </Box>
           
         </Box>
-        </Box>
+        {/* </Box> */}
         {/* Search Bar */}
         {/* {isMobile && (<>
         <Box sx={{ 

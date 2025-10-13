@@ -70,7 +70,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [anchorEl, setAnchorEl] = useState(null);
-  const [loggedInUsers, setLoggedInUsers] = useState([]);
+  // const [loggedInUsers, setLoggedInUsers] = useState([]);
   const navigate = useNavigate();
   const [currentUsername, setCurrentUsername] = useState(username || '');
   const loggedUserData = userData();
@@ -294,23 +294,23 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
 
 
   // Load logged-in users from localStorage
-  useEffect(() => {
-    const users = JSON.parse(localStorage.getItem('loggedInUsers')) || [];
-    setLoggedInUsers(users);
+  // useEffect(() => {
+  //   const users = JSON.parse(localStorage.getItem('loggedInUsers')) || [];
+  //   setLoggedInUsers(users);
 
-    // Load the last active user from localStorage if available
-    const activeUser = (loggedUserData?.userName || '');
-    if (activeUser) {
-      const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-      const activeToken = tokens[username];
-      if (activeToken) {
-        localStorage.setItem('authToken', activeToken); // Ensure the correct token is set
-      }
-      setCurrentUsername(activeUser);
-      console.log('logged user:', currentUsername);
-    }
+  //   // Load the last active user from localStorage if available
+  //   const activeUser = (loggedUserData?.userName || '');
+  //   if (activeUser) {
+  //     const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
+  //     const activeToken = tokens[username];
+  //     if (activeToken) {
+  //       localStorage.setItem('authToken', activeToken); // Ensure the correct token is set
+  //     }
+  //     setCurrentUsername(activeUser);
+  //     console.log('logged user:', currentUsername);
+  //   }
 
-  }, [username]);
+  // }, [username]);
 
   // // Fetch initial notification count
   // useEffect(() => {
@@ -369,9 +369,9 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
     localStorage.setItem('authTokens', JSON.stringify(tokens));
 
     // Remove current user from logged-in users list
-    const updatedUsers = loggedInUsers.filter(user => user !== currentUsername);
-    localStorage.setItem('loggedInUsers', JSON.stringify(updatedUsers));
-    setLoggedInUsers(updatedUsers);
+    // const updatedUsers = loggedInUsers.filter(user => user !== currentUsername);
+    // localStorage.setItem('loggedInUsers', JSON.stringify(updatedUsers));
+    // setLoggedInUsers(updatedUsers);
     localStorage.removeItem('authToken'); // Clear current session token
     setAnchorEl(null);
     setCurrentUsername('');
@@ -561,6 +561,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
                       badgeContent={unreadCount}
                       color="error"
                       max={99}
+                      invisible={unreadCount < 1}
                       sx={{
                         '& .MuiBadge-badge': {
                           fontSize: '0.75rem',
