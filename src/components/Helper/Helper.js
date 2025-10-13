@@ -694,21 +694,44 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       }
 
       scrollTimeoutRef.current = setTimeout(() => {
-        const currentScrollTop = postsContainerRef.current?.scrollTop || 0;
+        const postsContainer = postsContainerRef.current;
+        if (!postsContainer) return;
+
+        const currentScrollTop = postsContainer.scrollTop;
+        const scrollHeight = postsContainer.scrollHeight;
+        const clientHeight = postsContainer.clientHeight;
+        
+        // Calculate scroll percentage
+        const scrollPercentage = (currentScrollTop / (scrollHeight - clientHeight)) * 100;
+        
+        // Check if we're at the very bottom (within 5% of bottom)
+        const isAtBottom = scrollPercentage >= 95;
+        
+        // Check if we're at the very top
+        const isAtTop = currentScrollTop <= 10;
+        
         const scrollDirection = currentScrollTop > lastScrollTopRef.current ? 'down' : 'up';
         
-        // Show header when scrolling up or at the top
-        if (scrollDirection === 'up' || currentScrollTop <= 10) {
+        // Always show header when at top
+        if (isAtTop) {
           setIsHeaderVisible(true);
         } 
-        // Hide header when scrolling down past threshold
-        else if (scrollDirection === 'down' && currentScrollTop > 100) {
+        // Always show header when at bottom and scrolling up
+        else if (isAtBottom && scrollDirection === 'up') {
+          setIsHeaderVisible(true);
+        }
+        // Hide header when scrolling down past threshold, but not at bottom
+        else if (scrollDirection === 'down' && currentScrollTop > 100 && !isAtBottom) {
           setIsHeaderVisible(false);
+        }
+        // Show header when scrolling up
+        else if (scrollDirection === 'up' && currentScrollTop > 100) {
+          setIsHeaderVisible(true);
         }
         
         lastScrollTopRef.current = currentScrollTop;
         scrollTimeoutRef.current = null;
-      }, 16); // ~60fps throttle
+      }, 50); // Increased throttle time for smoother detection
     };
 
     const postsContainer = postsContainerRef.current;
@@ -1135,6 +1158,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           setIsSearching(!!searchQuery); // Set searching state based on query
           setCompareMode(false);
           setSelectedPosts([]);
+          setIsHeaderVisible(true);
           // if (globalCache.lastSearchQuery) {
           //   setSearchQuery(globalCache.lastSearchQuery);
           //   // // Trigger a search if we have a cached query
@@ -2301,7 +2325,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             willChange: 'transform' // Performance optimization
           }}
         >
-        <Toolbar sx={{display:'flex', justifyContent:'space-between',
+        <Toolbar sx={{display:'flex', justifyContent:'space-between', transition: 'transform 0.3s ease, opacity 0.3s ease',
+          transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
+          opacity: isHeaderVisible ? 1 : 0,
           //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
           borderRadius: '12px', 
