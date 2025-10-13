@@ -39,7 +39,9 @@ import {
   Block as SuspendIcon,
   CheckCircle as ResolveIcon,
   Warning as WarningIcon,
-  ReportGmailerrorred as ReportIcon
+  ReportGmailerrorred as ReportIcon,
+  Refresh as RefreshIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 import { getReports, updateReport, suspendPostFromReport, getReportStatistics } from '../api/adminApi';
 import Layout from '../Layout';
@@ -69,15 +71,16 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     minReports: 1
   });
   const [statistics, setStatistics] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchReports();
     fetchStatistics();
   }, [pagination.page, filters]);
 
-  const fetchReports = async () => {
+  const fetchReports = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const params = {
         page: pagination.page,
         limit: 10,
@@ -95,7 +98,8 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     } catch (error) {
       console.error('Error fetching reports:', error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -110,6 +114,12 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchReports(false);
+    await fetchStatistics();
+  };
+
   const handleViewDetails = (report) => {
     setSelectedReport(report);
     setDetailDialogOpen(true);
@@ -118,35 +128,70 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
   const handleTakeAction = (report, actionType) => {
     setSelectedReport(report);
     setAction(actionType);
-    setAdminNotes('');
+    // Pre-fill existing admin notes when editing
+    setAdminNotes(report.adminNotes || '');
     setPostStatus('Suspended');
     setActionDialogOpen(true);
   };
 
   const handleSubmitAction = async () => {
     try {
+      let response;
+      
       if (action === 'suspend') {
-        const response = await suspendPostFromReport(selectedReport._id, {
+        response = await suspendPostFromReport(selectedReport._id, {
           postStatus,
           adminNotes
         });
-        if (response.data.success) {
-          await fetchReports();
-          setActionDialogOpen(false);
-        }
       } else {
-        const response = await updateReport(selectedReport._id, {
+        response = await updateReport(selectedReport._id, {
           status: action === 'resolve' ? 'Resolved' : 'UnderReview',
           adminNotes
         });
-        if (response.data.success) {
-          await fetchReports();
-          setActionDialogOpen(false);
+      }
+
+      if (response.data.success) {
+        // Update the specific report in state without refreshing entire page
+        setReports(prevReports => 
+          prevReports.map(report => 
+            report._id === selectedReport._id 
+              ? { 
+                  ...report, 
+                  status: response.data.report.status,
+                  adminNotes: response.data.report.adminNotes,
+                  post: {
+                    ...report.post,
+                    postStatus: response.data.report.postId?.postStatus || report.post.postStatus
+                  }
+                } 
+              : report
+          )
+        );
+
+        // Update statistics if needed
+        if (statistics) {
+          await fetchStatistics();
         }
+
+        setActionDialogOpen(false);
+        
+        // Show success message
+        setSelectedReport(prev => prev ? {
+          ...prev,
+          status: response.data.report.status,
+          adminNotes: response.data.report.adminNotes
+        } : null);
       }
     } catch (error) {
       console.error('Error taking action:', error);
     }
+  };
+
+  const handleEditAdminNotes = (report) => {
+    setSelectedReport(report);
+    setAction('edit');
+    setAdminNotes(report.adminNotes || '');
+    setActionDialogOpen(true);
   };
 
   const handlePageChange = (event, value) => {
@@ -183,18 +228,10 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     navigate(`/post/${postId}`);
   };
 
-//   if (loading && reports.length === 0) {
-//     return (
-//       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-//         <CircularProgress />
-//       </Box>
-//     );
-//   }
-
   const LoadingSkeleton = () => (
     <Grid container spacing={isMobile ? 1 : 2} >
       {[...Array(4)].map((_, index) => (
-        <Grid item xs={12} sm={6} md={3} lg={3} key={index}>
+        <Grid item xs={6} sm={6} md={3} lg={3} key={index}>
         <Card key={index} sx={{ mb: 0, p: 2, borderRadius: '8px' }}>
           <Box sx={{ mb: 2 }}>
               <Skeleton variant="text" width="50%" />
@@ -216,14 +253,31 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     >
     <Box sx={{ p: isMobile ? 1 : 3 }}>
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <ReportIcon color="error" />
-          Reported Posts Management
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Review and take action on reported posts
-        </Typography>
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant={isMobile ? 'h5' : 'h4'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ReportIcon color="error" />
+            Reported Posts Management
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Review and take action on reported posts
+          </Typography>
+        </Box>
+        <Tooltip title="Refresh Data">
+          <IconButton 
+            onClick={handleRefresh} 
+            disabled={refreshing}
+            color="primary"
+            sx={{ 
+              bgcolor: 'primary.main', 
+              color: 'white',
+              '&:hover': { bgcolor: 'primary.dark' },
+              '&:disabled': { bgcolor: 'action.disabled' }
+            }}
+          >
+            {refreshing ? <CircularProgress size={24} /> : <RefreshIcon />}
+          </IconButton>
+        </Tooltip>
       </Box>
 
         {(loading) ?
@@ -233,7 +287,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
             {/* Statistics */}
             {statistics && (
                 <Grid container spacing={ isMobile ? 1 : 2} sx={{ mb: 4 }}>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={6} sm={6} md={3}>
                         <Card sx={{ borderRadius: '8px' }}>
                         <CardContent>
                             <Typography color="text.secondary" gutterBottom>
@@ -245,7 +299,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                         </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={6} sm={6} md={3}>
                         <Card sx={{ borderRadius: '8px' }}>
                         <CardContent>
                             <Typography color="text.secondary" gutterBottom>
@@ -257,7 +311,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                         </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={6} sm={6} md={3}>
                         <Card sx={{ borderRadius: '8px' }}>
                         <CardContent>
                             <Typography color="text.secondary" gutterBottom>
@@ -269,7 +323,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                         </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={6} sm={6} md={3}>
                         <Card sx={{ borderRadius: '8px' }}>
                         <CardContent>
                             <Typography color="text.secondary" gutterBottom>
@@ -359,11 +413,13 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                         sx={{
                             '&:hover': { backgroundColor: 'action.hover' },
                             borderLeft: `4px solid ${
-                                report.post?.postStatus === 'Suspended'
+                                report.stats.severity === 'Critical'
                                 ? '#f44336'
-                                : report.post?.postStatus === 'Active'
-                                ? '#4caf50'
-                                : '#ff9800'
+                                : report.stats.severity === 'High'
+                                ? '#ff9800'
+                                : report.stats.severity === 'Medium'
+                                ? '#2196f3'
+                                : '#4caf50'
                             }`,
                         }}
                     >
@@ -387,6 +443,9 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                                 report.post?.postStatus === 'Active' ? 'success' : 'warning'
                             }>
                                 Status: {report.post?.postStatus}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                              {new Date(report.post?.createdAt).toLocaleString()}
                             </Typography>
                             </Box>
                         </Box>
@@ -444,6 +503,15 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                                 <ViewIcon />
                             </IconButton>
                             </Tooltip>
+                            <Tooltip title="Edit Admin Notes">
+                            <IconButton
+                                size="small"
+                                color="info"
+                                onClick={() => handleEditAdminNotes(report)}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            </Tooltip>
                             <Tooltip title="Suspend Post">
                             <IconButton
                                 size="small"
@@ -490,6 +558,15 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
         onClose={() => setDetailDialogOpen(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            background: darkMode 
+              ? 'rgba(30, 30, 30, 0.95)' 
+              : 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+          }
+        }}
       >
         <DialogTitle>
           Report Details
@@ -500,25 +577,30 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
               <Typography variant="h6" gutterBottom>
                 Post Information
               </Typography>
-              <Card sx={{ p: 2, mb: 2 }}>
+              <Card sx={{ p: 2, mb: 2, borderRadius: '12px' }}>
                 <Typography><strong>Title:</strong> {selectedReport.post?.title}</Typography>
                 <Typography><strong>Type:</strong> {selectedReport.post?.postType}</Typography>
                 <Typography><strong>Category:</strong> {selectedReport.post?.serviceType || selectedReport.post?.categories}</Typography>
-                <Typography><strong>Status:</strong> {selectedReport.post?.postStatus}</Typography>
+                <Typography color={
+                  selectedReport.post?.postStatus === 'Suspended' ? 'error' : 
+                  selectedReport.post?.postStatus === 'Active' ? 'success' : 'warning'
+                }>
+                  <strong>Status:</strong> {selectedReport.post?.postStatus}
+                </Typography>
                 <Typography><strong>Created:</strong> {new Date(selectedReport.post?.createdAt).toLocaleString()}</Typography>
               </Card>
 
               <Typography variant="h6" gutterBottom>
                 Report Statistics
               </Typography>
-              <Card sx={{ p: 2, mb: 2 }}>
+              <Card sx={{ p: 2, mb: 2, borderRadius: '12px' }}>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
                     <Typography><strong>Total Reports:</strong> {selectedReport.stats.totalReports}</Typography>
-                    <Typography><strong>Severity:</strong> {selectedReport.stats.severity}</Typography>
+                    <Typography color={getSeverityColor(selectedReport.stats.severity)}><strong>Severity:</strong> {selectedReport.stats.severity}</Typography>
                   </Grid>
                   <Grid item xs={6}>
-                    <Typography><strong>Status:</strong> {selectedReport.status}</Typography>
+                    <Typography color={getStatusColor(selectedReport.status)}><strong>Status:</strong> {selectedReport.status}</Typography>
                     <Typography><strong>Last Reported:</strong> {new Date(selectedReport.lastReportedAt).toLocaleString()}</Typography>
                   </Grid>
                 </Grid>
@@ -545,8 +627,8 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                   <Typography variant="h6" gutterBottom>
                     Admin Notes
                   </Typography>
-                  <Card sx={{ p: 2, bgcolor: 'grey.100' }}>
-                    <Typography>{selectedReport.adminNotes}</Typography>
+                  <Card sx={{ p: 2, bgcolor: 'grey.100', borderRadius: '12px' }}>
+                    <Typography whiteSpace="pre-wrap">{selectedReport.adminNotes}</Typography>
                   </Card>
                 </>
               )}
@@ -554,7 +636,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailDialogOpen(false)}>Close</Button>
+          <Button sx={{borderRadius: '12px'}} onClick={() => setDetailDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
@@ -564,13 +646,27 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
         onClose={() => setActionDialogOpen(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            background: darkMode 
+              ? 'rgba(30, 30, 30, 0.95)' 
+              : 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(20px)',
+            borderRadius: '16px',
+          }
+        }}
       >
-        <DialogTitle>
-          {action === 'suspend' ? 'Suspend Post' : 'Resolve Report'}
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {action === 'suspend' && <SuspendIcon color="error" />}
+          {action === 'resolve' && <ResolveIcon color="success" />}
+          {action === 'edit' && <EditIcon color="info" />}
+          {action === 'suspend' ? 'Suspend Post' : 
+           action === 'resolve' ? 'Resolve Report' : 
+           'Edit Admin Notes'}
         </DialogTitle>
         <DialogContent>
           {action === 'suspend' && (
-            <FormControl fullWidth sx={{ mt: 1, mb: 2 }}>
+            <FormControl fullWidth sx={{ mt: 1 }}>
               <InputLabel>Post Status</InputLabel>
               <Select
                 value={postStatus}
@@ -590,17 +686,34 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
             fullWidth
             value={adminNotes}
             onChange={(e) => setAdminNotes(e.target.value)}
-            placeholder="Add notes about the action taken..."
+            placeholder={selectedReport?.adminNotes ? "Update admin notes..." : "Add notes about the action taken..."}
+            helperText={`${adminNotes.length}/1000 characters`}
+            inputProps={{ maxLength: 1000 }}
+            sx={{ mt: 2,
+              '& .MuiOutlinedInput-root': { borderRadius: '12px', }
+            }}
           />
+          {selectedReport?.adminNotes && (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Previous notes will be replaced with the new content
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setActionDialogOpen(false)}>Cancel</Button>
+          <Button sx={{borderRadius: '12px'}} onClick={() => setActionDialogOpen(false)}>Cancel</Button>
           <Button
             onClick={handleSubmitAction}
-            variant="contained"
-            color={action === 'suspend' ? 'error' : 'success'}
+            variant="contained" 
+            sx={{borderRadius: '12px'}}
+            color={
+              action === 'suspend' ? 'error' : 
+              action === 'resolve' ? 'success' : 
+              'primary'
+            }
           >
-            {action === 'suspend' ? 'Suspend Post' : 'Resolve Report'}
+            {action === 'suspend' ? 'Suspend Post' : 
+             action === 'resolve' ? 'Resolve Report' : 
+             'Update Notes'}
           </Button>
         </DialogActions>
       </Dialog>
