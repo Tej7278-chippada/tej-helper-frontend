@@ -1541,7 +1541,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       </Box> */}
       <Box sx={{
         position: 'fixed',
-        height: isMobile ? '400px' : '500px',
+        height: isMobile ? '500px' : '500px',
         width: '100%',
         overflow: 'hidden',
         // borderRadius: '0 0 16px 16px',
@@ -2255,7 +2255,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         sx={{ background: darkMode 
           ? 'rgba(30, 30, 30, 0.95)' 
           : 'rgba(255, 255, 255, 0.27)', backdropFilter: 'blur(20px)', borderTopLeftRadius: '20px', borderTopRightRadius: '20px',
-          mt: isMobile ? '320px' : '420px', 
+          mt: isMobile ? '420px' : '420px', 
           position: 'relative', zIndex: 1050, 
           height: isMobile ? '90vh' : '88vh', // Set height to 90% of viewport height
           maxHeight: isMobile ? '90vh' : '88vh', // Ensure it doesn't exceed 90% of viewport
@@ -2303,6 +2303,45 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             />
           </Box>
         )} */}
+        {/* Draggable Handler for Mobile and Laptop */}
+        <Box
+          sx={{
+            position: 'sticky',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '24px',
+            zIndex: 1100,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            cursor: 'grab',
+            // touchAction: 'none',
+            background: 'transparent',
+            // userSelect: 'none',
+            '&:active': {
+              cursor: 'grabbing',
+            },
+            '&:hover': {
+              '& .drag-handle': {
+                backgroundColor: darkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+                width: '48px',
+              }
+            }
+          }}
+        >
+          {/* Drag handle indicator */}
+          <Box
+            className="drag-handle"
+            sx={{
+              width: '40px',
+              height: '4px',
+              borderRadius: '2px',
+              backgroundColor: darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+              transition: 'all 0.2s ease',
+            }}
+          />
+        </Box>
         
         <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
         <Box 
@@ -2325,13 +2364,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             willChange: 'transform' // Performance optimization
           }}
         >
-        <Toolbar sx={{display:'flex', justifyContent:'space-between', transition: 'transform 0.3s ease, opacity 0.3s ease',
+        <Box sx={{display:'flex', justifyContent:'space-between', transition: 'transform 0.3s ease, opacity 0.3s ease',
           transform: isHeaderVisible ? 'translateY(0)' : 'translateY(-100%)',
           opacity: isHeaderVisible ? 1 : 0,
           //  background: 'rgba(255,255,255,0.8)',  backdropFilter: 'blur(10px)',
           // boxShadow: '0 2px 10px rgba(0,0,0,0.05)', 
           borderRadius: '12px', 
-          padding: isMobile ? '2px 12px' : '2px 16px',  margin: '4px',
+          px: isMobile ? '12px' : '16px', pb: '8px',  mx: '4px',
           // position: 'relative', //sticky
           // top: 0,
           // zIndex: 1000, 
@@ -2648,7 +2687,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               <Card
                 sx={{
                   position: 'absolute',
-                  top: isMobile ? '62px' : '72px',
+                  top: isMobile ? '45px' : '45px',
                   right: '8px',
                   zIndex: 1001,
                   borderRadius: '12px',
@@ -2699,7 +2738,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               <Card
                 sx={{
                   position: 'absolute',
-                  top: isMobile ? '62px' : '72px',
+                  top: isMobile ? '45px' : '45px',
                   right: '1px', ml: '4px',
                   // width: '90%',
                   // maxWidth: '400px',
@@ -3168,7 +3207,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </Button> */}
           </Box>
           
-        </Toolbar>
+        </Box>
         </Box>
         {/* Search Bar */}
         {/* {isMobile && (<>

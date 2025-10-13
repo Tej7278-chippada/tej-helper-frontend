@@ -240,8 +240,9 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
       ref={categoryRef}
       sx={{
         // ...getGlassmorphismMenuStyle(darkMode),
-        m: '8px 4px',
-        p: isMobile ? '8px' : '8px',
+        mx: '4px', mb: '8px',
+        px: isMobile ? '8px' : '8px',
+        pb: isMobile ? '8px' : '8px',
         borderRadius: '12px', 
         position: 'relative',
         zIndex: 1050,
@@ -317,7 +318,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
         <Box
           sx={{
             position: 'fixed',
-            top: isMobile ? '60px' : '60px',
+            top: isMobile ? '80px' : '80px',
             left: '50%',
             transform: 'translateX(-50%)',
             width: isMobile ? '90%' : '400px',
@@ -398,7 +399,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
         <Box
           sx={{
             position: 'fixed',
-            top: isMobile ? '60px' : '60px',
+            top: isMobile ? '80px' : '80px',
             left: '50%',
             transform: 'translateX(-50%)',
             width: isMobile ? '90%' : '80%',
