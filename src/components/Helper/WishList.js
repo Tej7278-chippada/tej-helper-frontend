@@ -366,7 +366,7 @@ const WishList = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
                                       whiteSpace: 'nowrap',
                                       flex: 1,
                                       mr: 1,
-                                      color: 'text.primary'
+                                      color: 'text.primary', textTransform: 'capitalize'
                                     }}
                                   >
                                     {post.title}

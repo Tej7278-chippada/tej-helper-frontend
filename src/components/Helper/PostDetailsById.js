@@ -509,6 +509,10 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   };
 
   const handleOpenChatDialog = async () => {
+    if (post.postStatus === 'Suspended') {
+      setSnackbar({ open: true, message: `This post has been suspended and is no longer accessible.`, severity: 'warning' });
+      return;
+    }
     setChatDialogOpen(true);
     try {
       const response = await axios.post(

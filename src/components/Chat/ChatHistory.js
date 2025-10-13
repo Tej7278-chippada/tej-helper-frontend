@@ -36,7 +36,7 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
   //   : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthenticated, darkMode }) => {
+const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialog, isAuthenticated, darkMode }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
   const userId = localStorage.getItem('userId');
@@ -226,7 +226,7 @@ const ChatHistory = ({ chatData, postId, postTitle, handleCloseDialog, isAuthent
   const handleSendMessage = async () => {
     if (message.trim() === '') return;
 
-    if (!isAuthenticated)  return;
+    if (!isAuthenticated || postStatus === 'Suspended')  return;
     
 
     // setLoading(true);

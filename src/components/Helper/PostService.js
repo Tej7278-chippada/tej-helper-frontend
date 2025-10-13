@@ -146,6 +146,10 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
      
     
       const handleEdit = (post) => {
+        if (post.postStatus === 'Suspended') {
+          setSnackbar({ open: true, message: `This post '${post.title}' has been suspended and is no longer accessible.`, severity: 'warning' });
+          return;
+        }
         fetchPostMedia(post._id); // to fetch the post's entire media
         setEditingProduct(post);
         // setFormData({
@@ -271,6 +275,10 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
  
 
   const handleChatsOpen = (post) => {
+    if (post.postStatus === 'Suspended') {
+      setSnackbar({ open: true, message: `This post '${post.title}' has been suspended and is no longer accessible.`, severity: 'warning' });
+      return;
+    }
     // setGroupDetailsId(post._id);
     // if (isMobile) {
       navigate(`/chatsOfPost/${post._id}`, { 
@@ -639,7 +647,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                   } */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',}}>
                     <Tooltip title={post.title} placement="top" arrow>
-                      <Typography variant="h6" component="div" style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white' }}>
+                      <Typography variant="h6" component="div" style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white', textTransform: 'capitalize' }}>
                         {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                       </Typography>
                     </Tooltip>

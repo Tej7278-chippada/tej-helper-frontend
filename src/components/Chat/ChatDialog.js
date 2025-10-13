@@ -268,9 +268,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     }
 
     // Prevent sending messages if post isInActive or closed & user is not a helper
-    if (post.postStatus === 'InActive' || post.user.id === userId || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
+    if (post.postStatus === 'InActive' || post.postStatus === 'Suspended' || post.user.id === userId || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))) {
       // console.warn('You cannot send messages as this post is closed or InActive.');
-      setSnackbar({ open: true, message: `${ post.user.id === userId ? 'You cant send message' : `You cannot send messages as this post is ${post.postStatus === 'Closed' ? 'Closed' :  'InActive'}` }`, severity: "warning" });
+      setSnackbar({ open: true, message: `${ post.user.id === userId ? 'You cant send message' : `You cannot send messages as this post is ${post.postStatus}` }`, severity: "warning" });
       // alert('u cant send');
       return;
     }
