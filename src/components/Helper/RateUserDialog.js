@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide } from '@mui/material';
-import API from '../api/api';
+import API, { fetchProfilePosts, fetchProfileRating } from '../api/api';
 import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
+import { useNavigate } from 'react-router-dom';
 
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
@@ -20,6 +21,7 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
 });
 
 const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar, darkMode }) => {
+  const navigate = useNavigate();
   const [rating, setRating] = useState(3);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,11 +35,13 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   const theme = useTheme();
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' or 'services'
   const [serviceHistory, setServiceHistory] = useState([]);
+  const [posts, setPosts] = useState([]);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
     if (open) {
       fetchUserRating();
+      fetchUserPosts();
       // fetchUserRatings();
     }
     // if (post) {
@@ -45,10 +49,20 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     // }
   }, [open]);
 
+  const fetchUserPosts = async () => {
+    try {
+      const response = await fetchProfilePosts(userId);
+      setPosts(response.data.posts || []);
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+      setPosts([]);
+    }
+  };
+
   const fetchUserRating = async () => {
     setIsFetching(true);
     try {
-      const response = await API.get(`/api/auth/rating/${userId}`);
+      const response = await fetchProfileRating(userId);
       setAverageRating(response.data.averageRating);
       setTotalReviews(response.data.totalReviews);
       setRatings(response.data.ratings);
@@ -177,6 +191,18 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       >
         Service History ({serviceHistory.length})
       </Button>
+      <Button
+        onClick={() => setActiveTab('posts')}
+        sx={{
+          fontWeight: activeTab === 'posts' ? 'bold' : 'normal',
+          color: activeTab === 'posts' ? 'primary.main' : 'text.secondary',
+          borderBottom: activeTab === 'posts' ? '2px solid' : 'none',
+          borderColor: 'primary.main',
+          borderRadius: 0
+        }}
+      >
+        Posts ({posts.length})
+      </Button>
     </Box>
   );
 
@@ -222,6 +248,130 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
           Helper Code: {service.helperCode}
         </Typography>
       </Box> */}
+    </Box>
+  );
+
+  const openPostDetail = (postId) => {
+    navigate(`/post/${postId}`);
+  };
+
+  // Post item component
+  const renderPostItem = (post) => (
+    <Box
+      sx={{
+        margin: "0px",
+        padding: "12px",
+        borderRadius: "8px",
+        border: darkMode 
+          ? '1px solid rgba(255, 255, 255, 0.1)' 
+          : '1px solid rgba(0, 0, 0, 0.2)',
+        marginTop: "6px",
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+        }
+      }}
+      key={post._id}
+    >
+      <Box display="flex" alignItems="flex-start" gap={2} onClick={() => openPostDetail(post._id)}>
+        {/* Post First Image */}
+        {post.media && post.media.length > 0 ? (
+          <Box
+            sx={{
+              width: 60,
+              height: 60,
+              borderRadius: '8px',
+              overflow: 'hidden',
+              flexShrink: 0,
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <img
+              src={`data:image/jpeg;base64,${btoa(
+                String.fromCharCode(...new Uint8Array(post.media[0]?.data || []))
+              )}`}
+              alt="Post"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              width: 60,
+              height: 60,
+              borderRadius: '8px',
+              backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            <Typography 
+              variant="caption" 
+              color="textSecondary"
+              sx={{ textAlign: 'center', px: 1 }}
+            >
+              No Image
+            </Typography>
+          </Box>
+        )}
+        
+        {/* Post Details */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          {/* Post Title */}
+          <Typography 
+            variant="subtitle2" 
+            fontWeight="bold"
+            sx={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            {post.title}
+          </Typography>
+          
+          {/* Post Type and Status */}
+          <Box display="flex" alignItems="center" gap={1} mt={0.5}>
+            <Typography variant="caption" color="primary">
+              {post.postType === 'HelpRequest' ? 'Help Request' : 'Service Offering'}
+            </Typography>
+            <Typography variant="caption" color="textSecondary">
+              •
+            </Typography>
+            <Typography 
+              variant="caption" 
+              sx={{
+                color: post.postStatus === 'Active' ? 'success.main' : 
+                      post.postStatus === 'Closed' ? 'error.main' : 'text.secondary',
+                fontWeight: 'medium'
+              }}
+            >
+              {post.postStatus}
+            </Typography>
+          </Box>
+          
+          {/* Updated/Posted Date */}
+          <Typography variant="caption" color="textSecondary" sx={{ mt: 0.5 }}>
+            {post.updatedAt ? `Updated: ${new Date(post.updatedAt).toLocaleString()}` : 
+                            `Posted: ${new Date(post.createdAt).toLocaleString()}`}
+          </Typography>
+          
+          {/* Price if available */}
+          {/* {post.price && (
+            <Typography variant="caption" fontWeight="bold" color="primary" sx={{ mt: 0.5, display: 'block' }}>
+              ₹{post.price}
+            </Typography>
+          )} */}
+        </Box>
+      </Box>
     </Box>
   );
 
@@ -363,15 +513,22 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
             <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
               No Ratings available.
             </Typography>
-          )) : (
+          )) : activeTab === 'services' ? (
             serviceHistory.length ? (
               serviceHistory.map(renderServiceItem)
             ) : (
               <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
                 No Service History available.
               </Typography>
+            )) : activeTab === 'posts' ? (
+            posts.length ? (
+              posts.map(renderPostItem)
+            ) : (
+              <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
+                No Posts available.
+              </Typography>
             )
-          )}
+          ) : null}
         </Box>
       </DialogContent>
       { isRateUserOpen && (

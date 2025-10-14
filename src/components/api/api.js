@@ -355,3 +355,13 @@ export const checkPostReported = async (postId) => {
   });
   return response.data.hasReported;
 };
+
+// get user posts
+export const fetchProfilePosts = async (userId) => {
+  return await API.get(`/api/auth/user-posts/${userId}`);
+};
+
+// get user rating
+export const fetchProfileRating = async (userId) => {
+  return await API.get(`/api/auth/rating/${userId}`);
+};
