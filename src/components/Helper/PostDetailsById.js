@@ -113,8 +113,6 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [isRateDialogOpen, setRateDialogOpen] = useState(false);
 
-  const handleOpenRateDialog = () => setRateDialogOpen(true);
-  const handleCloseRateDialog = () => setRateDialogOpen(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
   const authToken = localStorage.getItem('authToken');
   const [chatData, setChatData] = useState({});
@@ -391,6 +389,19 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+
+  const handleOpenRateDialog = () => {
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    setRateDialogOpen(true);
+  };
+  const handleCloseRateDialog = () => setRateDialogOpen(false);
 
   // const saveLocation = async () => {
   //   try {
@@ -1506,8 +1517,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   </Grid>
                   {/* Rate User Button */}
                   <Grid item justifyContent="flex-end" mt={1}>
-                    <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px'}} onClick={handleOpenRateDialog}>
-                      User Ratings
+                    <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none'}} onClick={handleOpenRateDialog}>
+                      View Profile
                     </Button>
                   </Grid>
                 </Box>

@@ -4,7 +4,7 @@ import { useParams, useNavigate} from 'react-router-dom';
 import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import API, { deleteProfilePicture, updateProfilePicture, updateUserProfile } from './api/api';
+import API, { deleteProfilePicture, fetchUserProfile, updateProfilePicture, updateUserProfile } from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 // import { Marker, TileLayer } from 'leaflet';
@@ -107,16 +107,18 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [zoom, setZoom] = useState(1);
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [interests, setInterests] = useState('');
 
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
-        const authToken = localStorage.getItem('authToken');
-        const response = await API.get(`/api/auth/${id}`, {
-          headers: { Authorization: `Bearer ${authToken}` },
-        });
+        const response = await fetchUserProfile(id);
         setUserData(response.data);
+        setFollowerCount(response.data.followerCount);
+        setFollowingCount(response.data.followingCount);
         // fetchAddress(response.data.location.latitude, response.data.location.longitude);
         
       } catch (err) {
@@ -277,7 +279,9 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     setProfileForm({
       username: userData.username,
       email: userData.email,
-      phone: userData.phone || ''
+      phone: userData.phone || '',
+      profileDescription: userData.profileDescription || '',
+      interests: userData.interests || []
     });
     setError('');
     setEditProfileOpen(true);
@@ -325,12 +329,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         return;
       }
 
-      const response = await updateUserProfile(id, profileForm);
+      const response = await updateUserProfile(id, {
+        ...profileForm,
+        interests: Array.isArray(profileForm.interests) ? profileForm.interests : []
+      });
       setUserData(prev => ({
         ...prev,
         username: response.data.user.username,
         email: response.data.user.email,
-        phone: response.data.user.phone
+        phone: response.data.user.phone,
+        profileDescription: response.data.user.profileDescription,
+        interests: response.data.user.interests
       }));
       localStorage.setItem('tokenUsername', response.data.user.username);
       setEditProfileOpen(false);
@@ -642,6 +651,14 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     </Typography>
                     
                   </Grid>
+                  <Grid item xs={6} sm={4}>
+                    <Typography variant="body1" style={{ fontWeight: 500 }}>
+                      Profile Description:
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {userData?.profileDescription || 'No description added yet.'}
+                    </Typography>
+                  </Grid>
                   {/* <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Account Status:
@@ -694,6 +711,39 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   </Grid> */}
                 </Grid>
               </Box>
+
+              <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Typography variant="h6" gutterBottom>Network</Typography>
+                </Box>
+
+                {/* Follow stats */}
+                <Box sx={{ display: 'flex', gap: 3 }}>
+                  <Typography variant="body2">
+                    <strong>{followerCount}</strong> Followers
+                  </Typography>
+                  <Typography variant="body2">
+                    <strong>{followingCount}</strong> Following
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Interests Section */}
+              {userData?.interests && userData.interests.length > 0 && (
+                <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+                  <Typography variant="h6" gutterBottom>Interests</Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {userData.interests.map((interest, index) => (
+                      <Chip
+                        key={index}
+                        label={interest}
+                        variant="outlined"
+                        sx={{ borderRadius: '8px' }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
 
               {/* <Box sx={{pt: 2}}>
                 <Toolbar sx={{
@@ -1236,6 +1286,92 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 },
               }}
             />
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              label="Profile Description"
+              name="profileDescription"
+              placeholder="Tell us about yourself..."
+              value={profileForm.profileDescription}
+              onChange={handleProfileChange}
+              margin="normal"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                },
+              }}
+              inputProps={{ maxLength: 100 }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              {profileForm?.profileDescription?.length}/100 characters
+            </Typography>
+            <Box sx={{ mt: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <Typography variant="body2" gutterBottom>Interests</Typography>
+                <Typography variant="caption" color="textSecondary">
+                  {profileForm?.interests?.length}/10 added
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                {profileForm.interests?.map((interest, index) => (
+                  <Chip
+                    key={index}
+                    label={interest}
+                    onDelete={() => {
+                      const newInterests = [...profileForm.interests];
+                      newInterests.splice(index, 1);
+                      setProfileForm(prev => ({ ...prev, interests: newInterests }));
+                    }}
+                    sx={{ borderRadius: '8px' }}
+                  />
+                ))}
+              </Box>
+              <TextField
+                fullWidth
+                label="Add Interest"
+                value={interests}
+                onChange={(e) => setInterests(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && interests.trim()) {
+                    e.preventDefault();
+                    setProfileForm(prev => ({
+                      ...prev,
+                      interests: [...(prev.interests || []), interests.trim()]
+                    }));
+                    setInterests('');
+                  }
+                }}
+                placeholder="Type an interest and press Enter"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '8px',
+                  },
+                }}
+                inputProps={{ maxLength: 20 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <Button 
+                        onClick={() => {
+                          if (interests.trim()) {
+                            setProfileForm(prev => ({
+                              ...prev,
+                              interests: [...(prev.interests || []), interests.trim()]
+                            }));
+                            setInterests('');
+                          }
+                        }}
+                        disabled={!interests.trim() || profileForm?.interests?.length >= 10}
+                        sx={{ borderRadius: '8px' }}
+                      >
+                        Add
+                      </Button>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Box>
           </Box>
         </DialogContent>
         {error && <Alert  

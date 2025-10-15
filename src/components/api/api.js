@@ -358,10 +358,57 @@ export const checkPostReported = async (postId) => {
 
 // get user posts
 export const fetchProfilePosts = async (userId) => {
-  return await API.get(`/api/auth/user-posts/${userId}`);
+  const authToken = localStorage.getItem('authToken');
+  return await API.get(`/api/auth/user-posts/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
 };
 
 // get user rating
 export const fetchProfileRating = async (userId) => {
-  return await API.get(`/api/auth/rating/${userId}`);
+  const authToken = localStorage.getItem('authToken');
+  return await API.get(`/api/auth/rating/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+};
+
+// fetch logged in user profile
+export const fetchUserProfile = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  return await API.get(`/api/auth/profile/${userId}`, { headers });
+};
+
+// API functions for follow system
+export const followUser = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.post(`/api/auth/follow/${userId}`, {}, { headers });
+};
+
+export const unfollowUser = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.post(`/api/auth/unfollow/${userId}`, {}, { headers });
+};
+
+export const getUserProfile = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.get(`/api/auth/profile/${userId}`, { headers });
 };

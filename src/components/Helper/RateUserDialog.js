@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide } from '@mui/material';
-import API, { fetchProfilePosts, fetchProfileRating } from '../api/api';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip } from '@mui/material';
+import API, { fetchProfilePosts, fetchProfileRating, followUser, unfollowUser } from '../api/api';
 import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -36,6 +36,11 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' or 'services'
   const [serviceHistory, setServiceHistory] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [profile, setProfile] = useState(null);
+  const [loadingFollow, setLoadingFollow] = useState(false);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -63,6 +68,10 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     setIsFetching(true);
     try {
       const response = await fetchProfileRating(userId);
+      setProfile(response.data);
+      setIsFollowing(response.data.isFollowing || false);
+      setFollowerCount(response.data.followerCount);
+      setFollowingCount(response.data.followingCount);
       setAverageRating(response.data.averageRating);
       setTotalReviews(response.data.totalReviews);
       setRatings(response.data.ratings);
@@ -158,6 +167,51 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     }
   };
 
+  // Add follow/unfollow functions
+  const handleFollow = async () => {
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    try {
+      setLoadingFollow(true);
+      await followUser(userId);
+      setIsFollowing(true);
+      setFollowerCount(prev => prev + 1);
+      // setSnackbar({ open: true, message: 'Successfully followed user', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.message || 'Error following user', severity: 'error' });
+    } finally {
+      setLoadingFollow(false);
+    }
+  };
+
+  const handleUnfollow = async () => {
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    try {
+      setLoadingFollow(true);
+      await unfollowUser(userId);
+      setIsFollowing(false);
+      setFollowerCount(prev => prev - 1);
+      // setSnackbar({ open: true, message: 'Successfully unfollowed user', severity: 'success' });
+    } catch (error) {
+      setSnackbar({ open: true, message: error.response?.data?.message || 'Error unfollowing user', severity: 'error' });
+    } finally {
+      setLoadingFollow(false);
+    }
+  };
+
   // tab navigation component
   const renderTabNavigation = () => (
     <Box sx={{ 
@@ -168,7 +222,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       borderColor: 'divider'
     }}>
       <Button
-        onClick={() => setActiveTab('reviews')}
+        onClick={() => setActiveTab('reviews')} size="small"
         sx={{
           fontWeight: activeTab === 'reviews' ? 'bold' : 'normal',
           color: activeTab === 'reviews' ? 'primary.main' : 'text.secondary',
@@ -180,7 +234,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         Reviews ({totalReviews})
       </Button>
       <Button
-        onClick={() => setActiveTab('services')}
+        onClick={() => setActiveTab('services')} size="small"
         sx={{
           fontWeight: activeTab === 'services' ? 'bold' : 'normal',
           color: activeTab === 'services' ? 'primary.main' : 'text.secondary',
@@ -192,7 +246,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         Service History ({serviceHistory.length})
       </Button>
       <Button
-        onClick={() => setActiveTab('posts')}
+        onClick={() => setActiveTab('posts')} size="small"
         sx={{
           fontWeight: activeTab === 'posts' ? 'bold' : 'normal',
           color: activeTab === 'posts' ? 'primary.main' : 'text.secondary',
@@ -379,7 +433,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     <Dialog fullWidth open={open} onClose={onClose} fullScreen={isMobile} sx={{ 
       // margin: isMobile ? '10px' : '0px',
         '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', } , //maxHeight: isMobile ? '300px' : 'auto'
-        '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '4px',  }
+        '& .MuiDialogTitle-root': { padding: '14px',  }, '& .MuiDialogContent-root': { padding: '12px',  }
         }}
       TransitionComponent={Slide}
       TransitionProps={{ direction: 'up' }}
@@ -389,7 +443,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         {/* Show existing rating */}
         <Box display="flex" alignItems="center" gap={1}>
             <Box sx={{display: isMobile? 'flex' : 'flex', justifyContent:'space-between', gap:'10px'}}>
-              <Typography variant="h6">Profile Trust Level</Typography>
+              <Typography variant="h6">Profile Details</Typography>
               <IconButton
                 onClick={onClose}
                 style={{
@@ -404,21 +458,84 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
               </IconButton>
             </Box>
         </Box>
-        <Box sx={{display: 'flex',justifyContent:'center', gap: '20px', alignItems:'center', my: '10px', p: 2,
-          ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
-          <Rating value={averageRating || 0} precision={0.5} readOnly />
-          <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
-            {/* {isFetching ? (
-            <CircularProgress size={20} />
-              ) : ( */}
-              <Typography variant="body2" color="textPrimary"> {averageRating || "N/A"} </Typography>
-            {/* )} */}
-            <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography>
-          </Box>
-        </Box>
         
       </DialogTitle>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: isMobile ? '10px' : '14px', mb: 1}}>
+      
+      <DialogContent
+       sx={{scrollbarWidth:'none', scrollbarColor: '#aaa transparent', 
+        // ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px'
+      }}
+       > {/*  backgroundColor: "#f5f5f5", */}
+        <Box sx={{ p: 1}}>
+          <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1 }}>
+              <Avatar
+                src={`data:image/png;base64,${profile?.profilePic}`}
+                alt={profile?.username[0]}
+                sx={{ width: 60, height: 60, borderRadius: '50%', marginRight: 1 }}
+              />
+              <Box sx={{ width: '100%'}}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <Typography variant="h6" >{profile?.username}</Typography>
+                  {userId !== localStorage.getItem('userId') && (
+                    <Button
+                      variant={isFollowing ? "outlined" : "contained"} size="small"
+                      onClick={isFollowing ? handleUnfollow : handleFollow}
+                      sx={{ borderRadius: '12px', textTransform: 'none' }}
+                      disabled={!isAuthenticated || isFetching || loadingFollow} // Disable if not logged in
+                    >
+                      { loadingFollow ? <CircularProgress size={20} /> : isFollowing ? 'Unfollow' : 'Follow'}
+                    </Button>
+                  )}
+                </Box>
+                <Typography variant="body2">
+                  Bio: {profile?.description}
+                </Typography>
+                <Box sx={{ my: 1 }}>
+                  <Typography variant="body2" gutterBottom>Network:</Typography>
+                  <Box sx={{ display: 'flex', gap: 3 }}>
+                    <Typography variant="body2">
+                      <strong>{followerCount}</strong> Followers
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>{followingCount}</strong> Following
+                    </Typography>
+                  </Box>
+                </Box>
+                {profile?.interests && profile.interests.length > 0 && (
+                  <Box sx={{ my: 0,  }}>
+                    <Typography variant="body2" gutterBottom>Interests:</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {profile.interests.map((interest, index) => (
+                        <Chip
+                          key={index} size="small"
+                          label={interest}
+                          variant="outlined"
+                          sx={{ borderRadius: '12px' }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+            
+          </Box>
+          <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
+            ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <Typography variant="body1" gutterBottom>Trust Level:</Typography>
+                  </Box>
+            <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+              <Rating value={averageRating || 0} precision={0.5} readOnly /> 
+              <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px', justifyContent: 'center', alignItems: 'center'}}>
+                <Typography variant="body2" color="textPrimary"> {averageRating || "N/A"} </Typography>
+                <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: isMobile ? '10px' : '14px', mb: 1}}>
           <Typography variant="h6" >
             Users Reviews
           </Typography>
@@ -431,37 +548,37 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
             </Button>
           )}
         </Box>
-      {renderTabNavigation()}
-      <DialogContent sx={{scrollbarWidth:'thin', scrollbarColor: '#aaa transparent', mx:1, mb: 2, ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px'}}> {/*  backgroundColor: "#f5f5f5", */}
+        {renderTabNavigation()}
+
         <Box
           // bgcolor="#f5f5f5"
           sx={{
-            // height: isMobile ? "500px" : "300px",
+            height: isMobile ? "500px" : "300px",
             overflowY: "auto",
             // margin: "1rem 0",
-            borderRadius: "8px",
-            // Custom scrollbar styles
+            // borderRadius: "8px",
+            // // Custom scrollbar styles
             scrollbarWidth: "thin", // Firefox
-            scrollbarColor: "#aaa transparent", // Firefox (thumb & track)
-            "&::-webkit-scrollbar": {
-              width: "8px", // Thin scrollbar
-              height: "8px", // If horizontal scroll exists
-            },
-            "&::-webkit-scrollbar-track": {
-              background: "transparent", // Track color
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#aaa", // Thumb color
-              borderRadius: "4px",
-              background: "#aaa", // Scrollbar thumb color
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#888", // Darker on hover
-              background: "#888", // Darker on hover
-            },
-            "&::-webkit-scrollbar-button": {
-              display: "none", // Remove scrollbar arrows
-            },
+            // scrollbarColor: "#aaa transparent", // Firefox (thumb & track)
+            // "&::-webkit-scrollbar": {
+            //   width: "8px", // Thin scrollbar
+            //   height: "8px", // If horizontal scroll exists
+            // },
+            // "&::-webkit-scrollbar-track": {
+            //   background: "transparent", // Track color
+            // },
+            // "&::-webkit-scrollbar-thumb": {
+            //   backgroundColor: "#aaa", // Thumb color
+            //   borderRadius: "4px",
+            //   background: "#aaa", // Scrollbar thumb color
+            // },
+            // "&::-webkit-scrollbar-thumb:hover": {
+            //   backgroundColor: "#888", // Darker on hover
+            //   background: "#888", // Darker on hover
+            // },
+            // "&::-webkit-scrollbar-button": {
+            //   display: "none", // Remove scrollbar arrows
+            // },
           }}
         >
           {/* {post.user.ratings && post.user.ratings.length ? ( */}
