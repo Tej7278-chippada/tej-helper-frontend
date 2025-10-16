@@ -366,14 +366,24 @@ export const fetchProfilePosts = async (userId) => {
   });
 };
 
-// get user rating
-export const fetchProfileRating = async (userId) => {
+// get user's profile data
+export const fetchUserProfileData = async (userId) => {
   const authToken = localStorage.getItem('authToken');
-  return await API.get(`/api/auth/rating/${userId}`, {
+  return await API.get(`/api/auth/user-profile/${userId}`, {
     headers: {
       Authorization: `Bearer ${authToken}`,
     },
   });
+};
+
+// checking post owner already rated or not the helper
+export const checkExistingRating = async (userId, postId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.get(`/api/auth/check-rating/${userId}/${postId}`, { headers });
 };
 
 // fetch logged in user profile

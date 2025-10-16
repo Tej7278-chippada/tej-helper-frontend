@@ -4066,6 +4066,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   Current search range: {distanceRange} km
                 </Typography>
+                {searchQuery && <Typography variant="body2" color="text.secondary">
+                  and search of "{searchQuery}"
+                </Typography>}
               </Box>
             )}
           </Box>)}

@@ -21,7 +21,6 @@ import SkeletonProductDetail from './SkeletonProductDetail';
 // import StarRoundedIcon from '@mui/icons-material/StarRounded';
 // import CloseIcon from '@mui/icons-material/Close';
 // import LocationOnIcon from '@mui/icons-material/LocationOn';
-import RateUserDialog from './Helper/RateUserDialog';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -29,6 +28,7 @@ import Cropper from 'react-easy-crop';
 import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 import ReviewsRoundedIcon from '@mui/icons-material/ReviewsRounded';
 import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
+import UserProfileDetails from './Helper/UserProfileDetails';
 
 
 // Set default icon manually
@@ -894,17 +894,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 View Ratings
               </Button>
             </Box>
-            <Box sx={{display: 'flex',justifyContent:'center', gap: '20px', alignItems:'center', p: 2,
-              // ...getGlassmorphismStyle(theme, darkMode),
-               borderRadius: '12px' }}>
-              <Rating value={userData?.trustLevel || 0} precision={0.5} readOnly />
-              <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px'}}>
-                {/* {isFetching ? (
-                <CircularProgress size={20} />
-                  ) : ( */}
-                  <Typography variant="body2" color="textPrimary"> {userData?.trustLevel || "N/A"} </Typography>
-                {/* )} */}
-                {/* <Typography variant="body2" color="textSecondary">({totalReviews} reviews)</Typography> */}
+            <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', p: 2, borderRadius: '12px'}}>
+              <Rating value={userData?.trustLevel || 0} precision={0.5} readOnly /> 
+              <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px', justifyContent: 'center', alignItems: 'center'}}>
+                <Typography variant="body2" color="textPrimary"> {userData?.trustLevel || "N/A"} </Typography>
+                <Typography variant="body2" color="textSecondary">({userData?.totalReviews} reviews)</Typography>
               </Box>
             </Box>
           </Box>
@@ -1518,7 +1512,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         </DialogActions>
       </Dialog>
 
-      <RateUserDialog
+      <UserProfileDetails
         userId={id}
         open={isRateDialogOpen}
         onClose={handleCloseRateDialog}

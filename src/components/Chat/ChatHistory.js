@@ -1,6 +1,6 @@
 // src/components/ChatHistory.js
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating } from '@mui/material';
 // import SendIcon from '@mui/icons-material/Send';
 // import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 // import Picker from 'emoji-picker-react';
@@ -18,6 +18,7 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { format } from "date-fns";
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
+import API, { checkExistingRating } from '../api/api';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -36,7 +37,7 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
   //   : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialog, isAuthenticated, darkMode }) => {
+const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialog, isAuthenticated, darkMode, setSnackbar }) => {
     // const tokenUsername = localStorage.getItem('tokenUsername');
     // const { buyerId } = useParams(); // Get groupId from URL if available
   const userId = localStorage.getItem('userId');
@@ -68,6 +69,59 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
   // const [loadingHelperCode, setLoadingHelperCode] = useState(false);
   const [helperCode, setHelperCode] = useState('');
   const [helperCodeVerified, setHelperCodeVerified] = useState(false);
+  const [isRateUserOpen, setIsRateUserOpen] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
+  const [rating, setRating] = useState(3);
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // checkingExistingRating function
+  const checkExistingRatingStatus = async () => {
+    if (!isAuthenticated) {
+      return;
+    }
+    try {
+      const response = await checkExistingRating(otherUserId, postId);
+      
+      if (response.data.hasRated) {
+        setHasRated(true);
+        setRating(response.data.rating);
+        setComment(response.data.comment || '');
+      } else {
+        setHasRated(false);
+        setRating(3); // Reset to default rating
+        setComment('');
+      }
+      console.log('fetched rate status', response.data.hasRated);
+    } catch (error) {
+      console.error('Error checking existing rating:', error);
+      setHasRated(false);
+      setRating(3); // Reset to default on error
+      setComment('');
+      return;
+    }
+  };
+
+  const handleSubmitRating = async () => {
+    if (!rating || rating < 1 || rating > 5 || userId === otherUserId || !isAuthenticated) return;
+
+    setLoading(true);
+    try {
+      const authToken = localStorage.getItem('authToken');
+      const newRating = { rating, comment };
+      await API.post(`/api/auth/rate/${otherUserId}/${postId}`,  newRating , {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      setSnackbar({ open: true, message: hasRated ? "Rating updated successfully." : "Rating added successfully.", severity: "success" });
+      setHasRated(true); // Update the hasRated state after successful submission
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+      setSnackbar({ open: true, message: error.response?.data?.message || "Error submitting rating", severity: "error" });
+    } finally {
+      setLoading(false);
+      setIsRateUserOpen(false);
+    }
+  };
   
 
   const fetchChatHistory = useCallback(async () => {
@@ -79,6 +133,9 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
     }});
       const data = await response.json();
       setMessages(data.messages || []);
+      if (chatData.helperCode) {
+        checkExistingRatingStatus();
+      }
     } catch (error) {
       console.error('Error fetching chat history:', error);
     } finally {
@@ -622,7 +679,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
           zIndex: 10000, p: 1,
           backgroundColor: darkMode ? 'rgb(21, 20, 20)' : 'rgb(244, 238, 238)',
           boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-          borderRadius:'8px'
+          borderRadius:'8px', display: 'flex', justifyContent: 'center', flexDirection: 'column', 
           }} >
           <Typography color="success" align="center" sx={{fontSize: isMobile ? '12px' : '14px', mb: 1}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
           {/* Helper Code Section */}
@@ -632,6 +689,72 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
               'Give code only after the service is done.'} 
               {/* {chatData.chatId} */}
           </Typography>
+          {helperCodeVerified && 
+            <Box align="center" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+            {isRateUserOpen ? 
+              <Box width="300px" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <Typography variant="body1" color="textSecondary">
+                    Give your Rating:
+                  </Typography>
+                  <Rating
+                    value={rating} sx={{ margin: '10px 10px' }}
+                    onChange={(e, newValue) => setRating(newValue)}
+                  />
+                </Box>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Comment (optional)"
+                  variant="outlined"
+                  margin="dense"
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  inputProps={{ maxLength: 200 }}
+                  sx={{
+                    marginTop: '1rem',
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '10px',
+                      //   bgcolor: theme.palette.background.paper,
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '0px 0px',
+                      //  scrollbarWidth: 'thin'
+                    },
+                  }}
+                />
+                <Box mt={1} display="flex" justifyContent="flex-end">
+                  <Button size="small" onClick={() => setIsRateUserOpen((prev) => !prev)} disabled={loading} style={{ borderRadius: '8px', marginRight: '10px', textTransform: 'none' }}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSubmitRating}
+                    variant="contained"
+                    color="primary" size="small"
+                    disabled={loading || rating === 0}
+                    sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', textTransform: 'none'}}
+                  >
+                    {loading ? <CircularProgress size={20} /> : 'Submit'}
+                  </Button>
+                </Box>
+              </Box>
+              :
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', alignItems: 'center', m: 1}}>
+                <Typography align="center" sx={{fontSize: isMobile ? '12px' : '14px'}}>Rate the service or user.</Typography>
+                <Button
+                  variant="outlined"
+                  color="primary" size="small"
+                  onClick={() => setIsRateUserOpen(true)}
+                  disabled={!helperCodeVerified}
+                  sx={{ borderRadius: '12px', textTransform: 'none' }}
+                >
+                  {hasRated ? 'Edit your Rating' : 'Give Rating'}
+                </Button>
+              </Box>
+            }
+            </Box>
+          }
           
           {/* <Box display="flex" flexDirection={isMobile ? 'column' : 'column'} alignItems="center" ml={isMobile ? '8rem' : '0rem'}>
             <Box display="flex" alignItems="center">

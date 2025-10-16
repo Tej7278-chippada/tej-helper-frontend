@@ -24,7 +24,6 @@ import RouteRoundedIcon from '@mui/icons-material/RouteRounded';
 import RouteMapDialog from './RouteMapDialog';
 import ChatDialog from '../Chat/ChatDialog';
 import LinkRoundedIcon from '@mui/icons-material/LinkRounded';
-import RateUserDialog from './RateUserDialog';
 import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import axios from 'axios';
 import PaidIcon from '@mui/icons-material/Paid';
@@ -34,6 +33,7 @@ import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, Chi
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
 import ReportPost from '../Reports/ReportPost';
+import UserProfileDetails from './UserProfileDetails';
 
 const getServiceIcon = (serviceType) => {
   switch (serviceType) {
@@ -1583,7 +1583,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             chatData={chatData}
           />
           {/* Rating Dialog */}
-          <RateUserDialog
+          <UserProfileDetails
             userId={post.user.id}
             open={isRateDialogOpen}
             onClose={handleCloseRateDialog}

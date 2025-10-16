@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip } from '@mui/material';
-import API, { fetchProfilePosts, fetchProfileRating, followUser, unfollowUser } from '../api/api';
-import { userData } from '../../utils/userData';
+import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip } from '@mui/material';
+import { fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
+// import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
@@ -20,20 +20,20 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
-const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar, darkMode }) => {
+const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar, darkMode }) => {
   const navigate = useNavigate();
-  const [rating, setRating] = useState(3);
-  const [comment, setComment] = useState('');
-  const [loading, setLoading] = useState(false);
+  // const [rating, setRating] = useState(3);
+  // const [comment, setComment] = useState('');
+  // const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
   const [totalReviews, setTotalReviews] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
-  const [ratings, setRatings] = useState([]);
-  const loggedUserData = userData();
-  const [isRateUserOpen, setIsRateUserOpen] = useState(false);
-  const [isRatingExisted, setIsRatingExisted] = useState(false);
+  // const [ratings, setRatings] = useState([]);
+  // const loggedUserData = userData();
+  // const [isRateUserOpen, setIsRateUserOpen] = useState(false);
+  // const [isRatingExisted, setIsRatingExisted] = useState(false);
   const theme = useTheme();
-  const [activeTab, setActiveTab] = useState('reviews'); // 'reviews' or 'services'
+  const [activeTab, setActiveTab] = useState('services'); // 'reviews' or 'services'
   const [serviceHistory, setServiceHistory] = useState([]);
   const [posts, setPosts] = useState([]);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -45,7 +45,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   // Fetch user's rating when dialog opens
   useEffect(() => {
     if (open) {
-      fetchUserRating();
+      fetchUserProfile();
       fetchUserPosts();
       // fetchUserRatings();
     }
@@ -64,31 +64,31 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
     }
   };
 
-  const fetchUserRating = async () => {
+  const fetchUserProfile = async () => {
     setIsFetching(true);
     try {
-      const response = await fetchProfileRating(userId);
+      const response = await fetchUserProfileData(userId);
       setProfile(response.data);
       setIsFollowing(response.data.isFollowing || false);
       setFollowerCount(response.data.followerCount);
       setFollowingCount(response.data.followingCount);
       setAverageRating(response.data.averageRating);
       setTotalReviews(response.data.totalReviews);
-      setRatings(response.data.ratings);
+      // setRatings(response.data.ratings);
       setServiceHistory(response.data.serviceHistory || []);
 
       // Autofill if logged-in user already rated this user
-      const existingRating = response.data.ratings.find(
-        (r) => r.userId?._id === loggedUserData?.userId || ''
-      );
-      if (existingRating) {
-        setRating(existingRating.rating);
-        setComment(existingRating.comment);
-        setIsRatingExisted(true);
-      } else {
-        setRating(0); // Reset to default if not found
-        setComment('');
-      }
+      // const existingRating = response.data.ratings.find(
+      //   (r) => r.userId?._id === loggedUserData?.userId || ''
+      // );
+      // if (existingRating) {
+      //   setRating(existingRating.rating);
+      //   setComment(existingRating.comment);
+      //   setIsRatingExisted(true);
+      // } else {
+      //   setRating(0); // Reset to default if not found
+      //   setComment('');
+      // }
     } catch (error) {
       console.error('Error fetching user rating:', error);
     } finally {
@@ -130,42 +130,42 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
   //   }
   // };
 
-  const handleSubmit = async () => {
-    if (!rating || rating < 1 || rating > 5 || userId === loggedUserData?.userId) return;
+//   const handleSubmit = async () => {
+//     if (!rating || rating < 1 || rating > 5 || userId === loggedUserData?.userId) return;
 
-    if (!isAuthenticated) {
-      setLoginMessage({
-        open: true,
-        message: 'Please log in first. Click here to login.',
-        severity: 'warning',
-      });
-      return;
-    }
+//     if (!isAuthenticated) {
+//       setLoginMessage({
+//         open: true,
+//         message: 'Please log in first. Click here to login.',
+//         severity: 'warning',
+//       });
+//       return;
+//     }
 
-    setLoading(true);
-    try {
-      const authToken = localStorage.getItem('authToken');
-      const newRating = {  rating, comment };
-      await API.post(`/api/auth/rate/${userId}`,  newRating , {
-        headers: { Authorization: `Bearer ${authToken}` }
-      });
+//     setLoading(true);
+//     try {
+//       const authToken = localStorage.getItem('authToken');
+//       const newRating = {  rating, comment };
+//       await API.post(`/api/auth/rate/${userId}`,  newRating , {
+//         headers: { Authorization: `Bearer ${authToken}` }
+//       });
 
-      // Refresh rating after submitting
-      fetchUserRating();
+//       // Refresh rating after submitting
+//       fetchUserRating();
 
-      setLoading(false);
-      setIsRateUserOpen(false);
-      // onClose(); // Close dialog after submitting
-      setSnackbar({ open: true, message: "Rating added successfully.", severity: "success" });
-      // Add the new comment to the top of the list
-      // setRatings((prevRatings) => [newRating, ...prevRatings]);
-      // Refresh ratings after submitting
-// fetchUserRatings();
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-      setLoading(false);
-    }
-  };
+//       setLoading(false);
+//       setIsRateUserOpen(false);
+//       // onClose(); // Close dialog after submitting
+//       setSnackbar({ open: true, message: "Rating added successfully.", severity: "success" });
+//       // Add the new comment to the top of the list
+//       // setRatings((prevRatings) => [newRating, ...prevRatings]);
+//       // Refresh ratings after submitting
+// // fetchUserRatings();
+//     } catch (error) {
+//       console.error('Error submitting rating:', error);
+//       setLoading(false);
+//     }
+//   };
 
   // Add follow/unfollow functions
   const handleFollow = async () => {
@@ -221,7 +221,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       borderBottom: 1,
       borderColor: 'divider'
     }}>
-      <Button
+      {/* <Button
         onClick={() => setActiveTab('reviews')} size="small"
         sx={{
           fontWeight: activeTab === 'reviews' ? 'bold' : 'normal',
@@ -232,7 +232,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         }}
       >
         Reviews ({totalReviews})
-      </Button>
+      </Button> */}
       <Button
         onClick={() => setActiveTab('services')} size="small"
         sx={{
@@ -274,7 +274,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       }}
       key={service._id}
     >
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box gap={1} sx={{ mb: 1, display: 'flex', alignItems: 'flex-start' }}>
         <Avatar
           src={`data:image/jpeg;base64,${btoa(
             String.fromCharCode(...new Uint8Array(service.ownerId?.profilePic?.data || []))
@@ -282,26 +282,31 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
           alt={service.ownerId?.username[0]}
           style={{ width: 32, height: 32, borderRadius: '50%' }}
         />
-        <Typography fontWeight="bold">
-          {service.ownerId?.username || "Anonymous"}
-        </Typography>
-        <Typography variant="body2" sx={{ ml: 'auto' }}>
-          {new Date(service.verifiedAt).toLocaleString()}
-        </Typography>
+        <Box sx={{width: '100%'}}>
+          <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
+            <Typography fontWeight="bold">
+              {service.ownerId?.username || "Anonymous"}
+            </Typography>
+            {service.rating ? <Rating value={service.rating || 0} precision={0.5} readOnly /> :
+            <Typography variant="caption" color="textSecondary">
+              No Rating
+            </Typography>}
+          </Box>
+          <Typography variant="caption" color="textSecondary">
+            {service.postId?.postType === 'HelpRequest' 
+              ? `Help Request (${service.postId?.categories})`
+              : `Service Offering (${service.postId?.serviceType})`}
+          </Typography>
+          <Typography variant="body2" sx={{textTransform: 'capitalize'}}>
+            Post: {service.postId?.title || "Service"}
+          </Typography>
+        </Box>
+        
       </Box>
-      <Typography variant="body2" sx={{ mt: 1 }}>
-        {service.postId?.title || "Service"}
+      {service.comment && <Typography variant="body2" > Comment: {service?.comment}</Typography>}
+      <Typography variant="caption" color="textSecondary" > {/* sx={{ ml: 'auto' }} */}
+        Service on: {new Date(service.verifiedAt).toLocaleString()}
       </Typography>
-      <Typography variant="caption" color="textSecondary">
-        {service.postId?.postType === 'HelpRequest' 
-          ? `Help Request (${service.postId?.categories})`
-          : `Service Offering (${service.postId?.serviceType})`}
-      </Typography>
-      {/* <Box display="flex" alignItems="center" mt={1}>
-        <Typography variant="caption" color="primary">
-          Helper Code: {service.helperCode}
-        </Typography>
-      </Box> */}
     </Box>
   );
 
@@ -469,11 +474,33 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
         <Box sx={{ p: 1}}>
           <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1 }}>
-              <Avatar
-                src={`data:image/png;base64,${profile?.profilePic}`}
-                alt={profile?.username[0]}
-                sx={{ width: 60, height: 60, borderRadius: '50%', marginRight: 1 }}
-              />
+              {profile?.profilePic ?
+               <Avatar
+                  src={`data:image/png;base64,${profile?.profilePic}`}
+                  alt={profile?.username[0]}
+                  sx={{ width: 60, height: 60, borderRadius: '50%', marginRight: 1 }}
+                /> : 
+                <Box
+                  sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0, mr: 1
+                  }}
+                >
+                  <Typography 
+                    variant="caption" 
+                    color="textSecondary"
+                    sx={{ textAlign: 'center', px: 1 }}
+                  >
+                    No Image
+                  </Typography>
+                </Box>
+              }
               <Box sx={{ width: '100%'}}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <Typography variant="h6" >{profile?.username}</Typography>
@@ -523,9 +550,9 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body1" gutterBottom>Trust Level:</Typography>
-                  </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body1" gutterBottom>Trust Level:</Typography>
+            </Box>
             <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
               <Rating value={averageRating || 0} precision={0.5} readOnly /> 
               <Box sx={{display: isMobile? 'flex' : 'flex', gap:'8px', justifyContent: 'center', alignItems: 'center'}}>
@@ -535,7 +562,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
             </Box>
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: isMobile ? '10px' : '14px', mb: 1}}>
+        {/* <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: isMobile ? '10px' : '14px', mb: 1}}>
           <Typography variant="h6" >
             Users Reviews
           </Typography>
@@ -547,7 +574,7 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
               {isRatingExisted ? 'Edit your Rating' : 'Rate the User'}
             </Button>
           )}
-        </Box>
+        </Box> */}
         {renderTabNavigation()}
 
         <Box
@@ -587,50 +614,50 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
               <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
               <Typography color='grey' variant='body2'>Loading Ratings...</Typography>
             </Box>
-          ) : activeTab === 'reviews' ? (ratings.length ? (
-            ratings.map((rating, index) => (
-              <Box
-                key={index}
-                sx={{
-                  margin: "0px",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  // border: "1px solid #ddd",
-                  border: darkMode 
-                    ? '1px solid rgba(255, 255, 255, 0.1)' 
-                    : '1px solid rgba(0, 0, 0, 0.2)',
-                  marginTop: "6px",
-                  // backgroundColor: "#fff"
-                }}
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  <Avatar
-                    src={`data:image/jpeg;base64,${btoa(
-                      String.fromCharCode(...new Uint8Array(rating.userId?.profilePic?.data || []))
-                    )}` }
-                    alt={rating.userId?.username[0]}
-                    style={{ width: 32, height: 32, borderRadius: '50%' }}
-                  />
-                  <Typography fontWeight="bold">
-                    {rating.userId?.username || "Anonymous"}
-                  </Typography>
-                  <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'auto'}}/>
-                  {/* <Typography variant="caption" color="textSecondary" marginLeft="auto">
-                    {new Date(rating.createdAt).toLocaleString()}
-                  </Typography> */}
-                </Box>
-                {/* <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/> */}
-                <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
-                <Typography variant="caption" color="textSecondary" >
-                  {new Date(rating.createdAt).toLocaleString()}
-                </Typography>
-              </Box>
-            ))
-          ) : (
-            <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
-              No Ratings available.
-            </Typography>
-          )) : activeTab === 'services' ? (
+          // ) : activeTab === 'reviews' ? (ratings.length ? (
+          //   ratings.map((rating, index) => (
+          //     <Box
+          //       key={index}
+          //       sx={{
+          //         margin: "0px",
+          //         padding: "12px",
+          //         borderRadius: "8px",
+          //         // border: "1px solid #ddd",
+          //         border: darkMode 
+          //           ? '1px solid rgba(255, 255, 255, 0.1)' 
+          //           : '1px solid rgba(0, 0, 0, 0.2)',
+          //         marginTop: "6px",
+          //         // backgroundColor: "#fff"
+          //       }}
+          //     >
+          //       <Box display="flex" alignItems="center" gap={1}>
+          //         <Avatar
+          //           src={`data:image/jpeg;base64,${btoa(
+          //             String.fromCharCode(...new Uint8Array(rating.userId?.profilePic?.data || []))
+          //           )}` }
+          //           alt={rating.userId?.username[0]}
+          //           style={{ width: 32, height: 32, borderRadius: '50%' }}
+          //         />
+          //         <Typography fontWeight="bold">
+          //           {rating.userId?.username || "Anonymous"}
+          //         </Typography>
+          //         <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'auto'}}/>
+          //         {/* <Typography variant="caption" color="textSecondary" marginLeft="auto">
+          //           {new Date(rating.createdAt).toLocaleString()}
+          //         </Typography> */}
+          //       </Box>
+          //       {/* <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/> */}
+          //       <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
+          //       <Typography variant="caption" color="textSecondary" >
+          //         {new Date(rating.createdAt).toLocaleString()}
+          //       </Typography>
+          //     </Box>
+          //   ))
+          // ) : (
+          //   <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
+          //     No Ratings available.
+          //   </Typography>)
+          ) : activeTab === 'services' ? (
             serviceHistory.length ? (
               serviceHistory.map(renderServiceItem)
             ) : (
@@ -648,10 +675,9 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
           ) : null}
         </Box>
       </DialogContent>
-      { isRateUserOpen && (
+      {/* { isRateUserOpen && (
       <DialogActions sx={{gap: 1, m:'10px', display: 'flow', ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
         <Box width="100%">
-            {/* User Rating Input */}
             <Box>
               <Box sx={{display:'flex', gap:'10px'}}>
                 <Typography variant="body1" color="textSecondary">
@@ -698,12 +724,6 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
                 </Button>
             </Box>
         </Box>
-        
-        {/* {userId === loggedUserData?.userId && (
-          <Button onClick={onClose} disabled={loading} style={{ margin: "0rem", borderRadius: '8px' }}>
-            Close
-          </Button>
-        )} */}
       </DialogActions>
       
       // ) : (
@@ -716,9 +736,9 @@ const RateUserDialog = ({ userId, open, onClose, isMobile, isAuthenticated, setL
       //       </Button>
       //     </Box>
       //   )
-      )}
+      )} */}
     </Dialog>
   );
 };
 
-export default RateUserDialog;
+export default UserProfileDetails;

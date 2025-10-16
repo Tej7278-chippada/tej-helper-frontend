@@ -10,10 +10,10 @@ import apiClient from '../../utils/axiosConfig';
 import ChatHistory from './ChatHistory';
 // import CloseIcon from '@mui/icons-material/Close';
 import AssignmentIndRoundedIcon from '@mui/icons-material/AssignmentIndRounded';
-import RateUserDialog from '../Helper/RateUserDialog';
 import { format } from 'date-fns';
 import { io } from 'socket.io-client';
 import { dark } from '@mui/material/styles/createPalette';
+import UserProfileDetails from '../Helper/UserProfileDetails';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -478,7 +478,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
           }}>
             {chatDetailsById ? (
               <Box sx={{ margin: '0rem' }}>
-                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData?.title || postTitle} postStatus={postData?.postStatus || postStatus} isAuthenticated={isAuthenticated} darkMode={darkMode}/>  {/* User ChatHistory component */}
+                <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData?.title || postTitle} postStatus={postData?.postStatus || postStatus} isAuthenticated={isAuthenticated} darkMode={darkMode} setSnackbar={setSnackbar}/>  {/* User ChatHistory component */}
               </Box>
             ) : (
               <Box sx={{ margin: '0rem', textAlign: 'center', marginTop: '1rem' }}>
@@ -511,12 +511,12 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
             </IconButton>
           </Box> */}
           {chatDetailsById && (
-            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData?.title || postTitle} postStatus={postData?.postStatus || postStatus} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} />
+            <ChatHistory chatData={chatDetailsById} postId={postId} postTitle={postData?.title || postTitle} postStatus={postData?.postStatus || postStatus} handleCloseDialog={handleCloseDialog} isAuthenticated={isAuthenticated} darkMode={darkMode} setSnackbar={setSnackbar} />
           )}
         {/* </DialogContent> */}
       </Dialog>
       {/* Rating Dialog */}
-      <RateUserDialog
+      <UserProfileDetails
         userId={selectedUserId}
         open={isRateDialogOpen}
         onClose={handleCloseRateDialog}
