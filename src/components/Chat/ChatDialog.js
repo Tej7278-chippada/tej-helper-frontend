@@ -70,6 +70,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState('');
+  const [hasHelperTag, sethasHelperTag] = useState(post.helperIds.includes(userId) || false);
 
 //   useEffect(() => {
 //     // if (open) {
@@ -116,6 +117,12 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       });
 
       socket.on('receiveMessage', (newMessage) => {
+        if (!hasHelperTag) {
+          if (newMessage.text === 'I have marked you as the helper for this post.') {
+            sethasHelperTag(true);
+            // return;
+          }
+        }
         // Only process messages for this specific chat
         setMessages((prevMessages) => {
           // ✅ Remove the temp message when the actual message arrives
@@ -461,6 +468,29 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         if (chatData) {
           chatData.helperCodeVerified = true;
         }
+        // Emit and send the verification success via socket to post owner
+        socket.emit('sendMessage', {
+          postId: post._id, // or postId in ChatHistory.js
+          senderId: userId,
+          receiverId: otherUserId, // post.user.id in ChatDialog.js or chatData.id in ChatHistory.js
+          text: `Yup 👍! Helper code ${verificationCode} has been verified! If you enjoyed my help, please rate my service or profile — your support keeps me motivated!`,
+          // chatId: chatData.chatId, // You might need to get this from your chat state
+          postOwnerId: post.user.id,
+          postTitle: post.title,
+          senderName: senderUsername,
+        });
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
+          postId: post._id,
+          sellerId: post.user.id,
+          buyerId: userId,
+          text: `Yup 👍! Helper code ${verificationCode} has been verified! If you enjoyed my help, please rate my service or profile — your support keeps me motivated!`,
+          }, {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              'Content-Type': 'application/json',
+            }
+          }
+        );
       }
     } catch (error) {
       setVerificationError(
@@ -535,7 +565,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           </Box>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems:'center', gap:1 }}>
-          {post.helperIds.includes(userId) && (
+          {hasHelperTag && (
             <Tooltip title="Helper tag" arrow placement="left" 
               enterTouchDelay={0}  // Show tooltip immediately on touch
               leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
@@ -566,7 +596,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
     /* bgcolor:'#f5f5f5', */ 
       // scrollbarColor: '#aaa transparent', // Firefox (thumb & track)
      }}>
-        {post.helperIds.includes(userId) && (
+        {hasHelperTag && (
           <Box sx={{
             position: 'sticky',
             top: '0px',
@@ -588,7 +618,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             ) : (
             <>
             <Typography variant="body2" align="center" sx={{mt: 2, mb: 1}}>
-              Enter the helper code provided by the post owner to increase your profile’s trust level.
+              Enter the helper code provided by the post owner to add the service into your Service History after the service done.
             </Typography> 
             <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1, justifyContent: 'center', alignItems: 'center'}}>
               

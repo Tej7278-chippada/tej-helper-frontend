@@ -180,6 +180,13 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
       });
 
       socket.on('receiveMessage', (newMessage) => {
+        if (isHelper && !helperCodeVerified) {
+          if (newMessage.text === `Yup 👍! Helper code ${helperCode} has been verified! If you enjoyed my help, please rate my service or profile — your support keeps me motivated!`) {
+            setHelperCodeVerified(true);
+            // setChatDetailsById(chatData.helperCodeVerified = true);
+            // return;
+          }
+        }
         // Only process messages for this specific chat
         setMessages((prevMessages) => {
           // ✅ Remove the temp message when the actual message arrives
@@ -231,7 +238,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
       socket.off('userTyping', handleTypingEvent);
       clearTimeout(typingTimeout.current);
     };
-  }, [chatData.id, fetchChatHistory, postId, userId]);
+  }, [chatData.id, fetchChatHistory, postId, userId, isHelper, helperCode]);
 
   const markMessagesAsSeen = useCallback(async (messageIds) => {
     if (!messageIds || messageIds.length === 0) return;
@@ -461,6 +468,27 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
       // if(!isHelper) {
       // handleGenerateHelperCode();
       // }
+      if (response.data.helperCode) { // Emit and send the Tagging message via socket to helper
+        socket.emit('sendMessage', {
+          postId: postId, // or postId in ChatHistory.js
+          senderId: userId,
+          receiverId: otherUserId, // post.user.id in ChatDialog.js or chatData.id in ChatHistory.js
+          text: 'I have marked you as the helper for this post.',
+          // chatId: chatData.chatId, // You might need to get this from your chat state
+          postOwnerId: userId,
+          postTitle: postTitle,
+          senderName: senderUsername
+        });
+        await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/sendMessage`, {
+            postId: postId,
+            sellerId: userId,
+            buyerId: chatData.id,
+            text: 'I have marked you as the helper for this post.',    
+          
+          }, {headers: {
+            Authorization: `Bearer ${authToken}`, 'Content-Type': 'application/json',
+        }});
+      }
     } catch (error) {
       console.error('Error toggling helper:', error);
     } finally {
