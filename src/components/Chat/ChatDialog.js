@@ -71,6 +71,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationError, setVerificationError] = useState('');
   const [hasHelperTag, sethasHelperTag] = useState(post.helperIds.includes(userId) || false);
+  const [chatId, setChatId] = useState(chatData.chatId);
 
 //   useEffect(() => {
 //     // if (open) {
@@ -198,14 +199,17 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
 
       // Emit real-time seen status to update the chat list
       socket.emit('messagesSeen', { 
-        chatId: chatData.chatId 
+        // chatId: (chatData.chatId || chatId),
+        postId: post._id, // or postId in ChatHistory.js
+        buyerId: userId, // or chatData.id in ChatHistory.js
+        sellerId: post.user.id,
       });
 
     } catch (error) {
-      // console.error('Error marking messages as seen:', error);
-      setSnackbar({ open: true, message: "Error marking messages as seen.", severity: "warning" });
+      console.error('Error marking messages as seen:', error);
+      // setSnackbar({ open: true, message: "Error marking messages as seen.", severity: "warning" });
     }
-  }, [post._id, userId, post.user.id, authToken, chatData?.chatId]); // Adjust dependencies for ChatHistory.js
+  }, [post._id, userId, post.user.id, authToken, (chatData?.chatId || chatId)]); // Adjust dependencies for ChatHistory.js
 
   useEffect(() => {
     if (!open || messages.length === 0) return;
@@ -319,7 +323,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         senderName: senderUsername,
       });
 
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/chats/send`, {
         postId: post._id,
         sellerId: post.user.id,
         buyerId: userId,
@@ -330,6 +334,10 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           'Content-Type': 'application/json',
         }
       });
+
+      if(response.data.chatId) {
+        setChatId(response.data.chatId);
+      }
 
       // if (response) {
       //   const newMessage = { senderId: userId, text: messageToSend, createdAt: new Date() };

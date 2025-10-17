@@ -260,7 +260,10 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
 
       // Emit real-time seen status to update the chat list
       socket.emit('messagesSeen', { 
-        chatId: chatData.chatId 
+        // chatId: chatData.chatId ,
+        postId: postId, // or postId in ChatHistory.js
+        buyerId: chatData.id, // or chatData.id in ChatHistory.js
+        sellerId: userId,
       });
     } catch (error) {
       console.error('Error marking messages as seen:', error);
