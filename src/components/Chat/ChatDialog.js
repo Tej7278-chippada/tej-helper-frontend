@@ -140,18 +140,28 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         );
       });
 
-      // Notify server that this user is online
-      socket.emit('userOnline', userId);
-
-      // Listen for status changes of the other user
-      socket.on('userStatusChange', ({ userId: changedUserId, isOnline: status }) => {
-        if (changedUserId === otherUserId) {
-          setIsOnline(status);
+      // Notify server that this user is online in THIS specific chat
+      socket.emit('userOnline', {
+        userId, 
+        postId: post._id,
+        otherUserId: post.user.id,
+        chatId: (chatData.chatId || chatId)
+      });
+      // Listen for status changes of the other user FOR THIS SPECIFIC POST
+      socket.on('userStatusChange', ({ userId: changedUserId, postId, isOnline: status, activeChatWith }) => {
+        if (changedUserId === otherUserId && postId === post._id) {
+          // User is only online for us if they're actively chatting with us
+          const isOnlineForUs = status && activeChatWith === userId;
+          setIsOnline(isOnlineForUs);
         }
       });
 
-      // Check initial online status
-      socket.emit('checkOnlineStatus', otherUserId, (status) => {
+      // Check initial online status for this specific chat
+      socket.emit('checkOnlineStatus', {
+        userIdToCheck: otherUserId, 
+        postId: post._id,
+        otherUserId: userId
+      }, (status) => {
         setIsOnline(status);
       });
 
@@ -169,10 +179,15 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         userId: userId, 
         otherUserId: post.user.id 
       });
+      // When closing chat, notify server // Notify server that user left this specific chat
+      socket.emit('userAway', {
+        userId, 
+        postId: post._id,
+        otherUserId: post.user.id,
+        chatId: (chatData.chatId || chatId)
+      });
       socket.off('receiveMessage');
       socket.off('messageSeenUpdate');
-      // When closing chat, notify server
-      socket.emit('userAway', userId);
       socket.off('userStatusChange');
       socket.off('userTyping', handleTypingEvent);
       clearTimeout(typingTimeout.current);

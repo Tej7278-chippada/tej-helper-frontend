@@ -179,6 +179,14 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
         otherUserId: userId
       });
 
+      // Notify server that this user is online in THIS specific chat
+      socket.emit('userOnline', {
+        userId, 
+        postId: postId,
+        otherUserId: chatData.id,
+        chatId: chatData.chatId
+      });
+
       socket.on('receiveMessage', (newMessage) => {
         if (isHelper && !helperCodeVerified) {
           if (newMessage.text === `Yup 👍! Helper code ${helperCode} has been verified! If you enjoyed my help, please rate my service or profile — your support keeps me motivated!`) {
@@ -203,18 +211,21 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
         );
       });
 
-      // Notify server that this user is online
-      socket.emit('userOnline', userId);
-
-      // Listen for status changes of the other user
-      socket.on('userStatusChange', ({ userId: changedUserId, isOnline: status }) => {
-        if (changedUserId === otherUserId) {
-          setIsOnline(status);
+      // Listen for status changes of the other user FOR THIS SPECIFIC POST
+      socket.on('userStatusChange', ({ userId: changedUserId, postId: changedPostId, isOnline: status, activeChatWith }) => {
+        if (changedUserId === otherUserId && changedPostId === postId) {
+          // User is only online for us if they're actively chatting with us
+          const isOnlineForUs = status && activeChatWith === userId;
+          setIsOnline(isOnlineForUs);
         }
       });
 
-      // Check initial online status
-      socket.emit('checkOnlineStatus', otherUserId, (status) => {
+      // Check initial online status for this specific chat
+      socket.emit('checkOnlineStatus', { 
+        userIdToCheck: otherUserId,
+        postId: postId,
+        otherUserId: userId
+      }, (status) => {
         setIsOnline(status);
       });
 
@@ -230,10 +241,15 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
         userId: chatData.id, 
         otherUserId: userId 
       });
+      // Notify server that user left this specific chat
+      socket.emit('userAway', {
+        userId, 
+        postId: postId,
+        otherUserId: chatData.id,
+        chatId: chatData.chatId
+      });
       socket.off('receiveMessage');
       socket.off('messageSeenUpdate');
-      // When closing chat, notify server
-      socket.emit('userAway', userId);
       socket.off('userStatusChange');
       socket.off('userTyping', handleTypingEvent);
       clearTimeout(typingTimeout.current);
