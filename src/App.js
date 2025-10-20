@@ -273,6 +273,32 @@ function App() {
     fetchInitialCount();
   }, [username]);
 
+  // Track user's webpage presence
+  useEffect(() => {
+    if (userId && socket) {
+      // User comes online when App.js mounts
+      socket.emit('userOnline', { userId });
+      
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          // User returned to the page
+          socket.emit('userOnline', { userId });
+        } else {
+          // User left the page
+          socket.emit('userOffline', { userId });
+        }
+      };
+
+      // Listen for visibility changes
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        socket.emit('userOffline', { userId });
+      };
+    }
+  }, [socket, userId]);
+
   // Initialize socket connection
   useEffect(() => {
     if (userId) {

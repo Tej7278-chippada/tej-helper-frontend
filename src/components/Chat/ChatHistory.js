@@ -19,6 +19,7 @@ import { format } from "date-fns";
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
 import API, { checkExistingRating } from '../api/api';
+import StatusIndicator from './StatusIndicator';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -60,7 +61,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef(null);
-  const [isOnline, setIsOnline] = useState(false);
+  const [isOnline, setIsOnline] = useState('');
   const otherUserId = chatData.id; // The user we're chatting with
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
@@ -180,7 +181,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
       });
 
       // Notify server that this user is online in THIS specific chat
-      socket.emit('userOnline', {
+      socket.emit('userInChat', {
         userId, 
         postId: postId,
         otherUserId: chatData.id,
@@ -212,21 +213,29 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
       });
 
       // Listen for status changes of the other user FOR THIS SPECIFIC POST
-      socket.on('userStatusChange', ({ userId: changedUserId, postId: changedPostId, isOnline: status, activeChatWith }) => {
-        if (changedUserId === otherUserId && changedPostId === postId) {
-          // User is only online for us if they're actively chatting with us
-          const isOnlineForUs = status && activeChatWith === userId;
-          setIsOnline(isOnlineForUs);
+      socket.on('userStatusChange', ({ userId: changedUserId, postId: changedPostId, status, otherUserId : activeChatWith }) => {
+        if (changedUserId === otherUserId) {
+          // Update status based on the detailed information
+          if (status === 'inChat' && changedPostId === postId && activeChatWith === userId) {
+            setIsOnline('inChat');
+          } else if (status === 'inChat' && (changedPostId !== postId || activeChatWith !== userId)) {
+            setIsOnline('online');
+          } else if (status === 'online') {
+            setIsOnline('online');
+          } else {
+            setIsOnline('offline');
+          }
         }
       });
 
       // Check initial online status for this specific chat
-      socket.emit('checkOnlineStatus', { 
+      socket.emit('checkUserStatus', { 
         userIdToCheck: otherUserId,
         postId: postId,
         otherUserId: userId
-      }, (status) => {
+      }, ({ status, detailedStatus }) => {
         setIsOnline(status);
+        // console.log('status',status);
       });
 
       // Listen for typing events
@@ -242,7 +251,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
         otherUserId: userId 
       });
       // Notify server that user left this specific chat
-      socket.emit('userAway', {
+      socket.emit('userLeftChat', {
         userId, 
         postId: postId,
         otherUserId: chatData.id,
@@ -668,7 +677,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
               <Typography variant="h6" fontWeight="400" fontFamily="sans-serif">
                 {chatData.username}
               </Typography>
-              {isOnline ? (
+              {/* {isOnline ? (
                 <Typography 
                   component="span" 
                   variant="caption"
@@ -687,7 +696,8 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
                     Offline
                   </Typography>
                 )
-              }
+              } */}
+              <StatusIndicator status={isOnline} />
               {/* <Typography>Chat History{postId}</Typography>
               <Typography>BuyerId {chatData.id}</Typography>
               <Typography>SellerId {userId}</Typography>  */}

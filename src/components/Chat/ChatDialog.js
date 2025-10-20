@@ -15,6 +15,7 @@ import StarRoundedIcon from '@mui/icons-material/StarRounded';
 import { format } from "date-fns";
 import DoneRoundedIcon from '@mui/icons-material/DoneRounded';
 import DoneAllRoundedIcon from '@mui/icons-material/DoneAllRounded';
+import StatusIndicator from './StatusIndicator';
 
 const socket = io(process.env.REACT_APP_API_URL);
 
@@ -61,7 +62,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef(null);
-  const [isOnline, setIsOnline] = useState(false);
+  const [isOnline, setIsOnline] = useState('');
   const otherUserId = post.user.id; // The user we're chatting with
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
@@ -117,6 +118,14 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         otherUserId: post.user.id 
       });
 
+      // Notify server that this user is in THIS specific chat
+      socket.emit('userInChat', {
+        userId, 
+        postId: post._id,
+        otherUserId: post.user.id,
+        chatId: (chatData.chatId || chatId)
+      });
+
       socket.on('receiveMessage', (newMessage) => {
         if (!hasHelperTag) {
           if (newMessage.text === 'I have marked you as the helper for this post.') {
@@ -141,29 +150,40 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       });
 
       // Notify server that this user is online in THIS specific chat
-      socket.emit('userOnline', {
-        userId, 
-        postId: post._id,
-        otherUserId: post.user.id,
-        chatId: (chatData.chatId || chatId)
-      });
+      // socket.emit('userOnline', {
+      //   userId, 
+      //   postId: post._id,
+      //   otherUserId: post.user.id,
+      //   chatId: (chatData.chatId || chatId)
+      // });
+      
       // Listen for status changes of the other user FOR THIS SPECIFIC POST
-      socket.on('userStatusChange', ({ userId: changedUserId, postId, isOnline: status, activeChatWith }) => {
-        if (changedUserId === otherUserId && postId === post._id) {
-          // User is only online for us if they're actively chatting with us
-          const isOnlineForUs = status && activeChatWith === userId;
-          setIsOnline(isOnlineForUs);
+      socket.on('userStatusChange', ({ userId: changedUserId, postId, status, otherUserId: activeChatWith }) => {
+        if (changedUserId === otherUserId) {
+          // Update status based on the detailed information
+          if (status === 'inChat' && postId === post._id && activeChatWith === userId) {
+            setIsOnline('inChat');
+          } else if (status === 'inChat' && (activeChatWith !== userId || postId !== post._id)) {
+            setIsOnline('online');
+          } else if (status === 'online') {
+            setIsOnline('online');
+          } else {
+            setIsOnline('offline');
+          }
         }
       });
 
       // Check initial online status for this specific chat
-      socket.emit('checkOnlineStatus', {
+      socket.emit('checkUserStatus', {
         userIdToCheck: otherUserId, 
         postId: post._id,
         otherUserId: userId
-      }, (status) => {
+      }, ({ status, detailedStatus }) => {
         setIsOnline(status);
+        // console.log('status',status);
       });
+
+      
 
       // Listen for typing events from other user
       socket.on('userTyping', handleTypingEvent);
@@ -180,7 +200,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         otherUserId: post.user.id 
       });
       // When closing chat, notify server // Notify server that user left this specific chat
-      socket.emit('userAway', {
+      socket.emit('userLeftChat', {
         userId, 
         postId: post._id,
         otherUserId: post.user.id,
@@ -561,7 +581,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               {post.user?.username}
-              {isOnline ? (
+              {/* {isOnline ? (
                 <Typography 
                   component="span" 
                   variant="caption"
@@ -580,8 +600,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
                   Offline
                 </Typography>
               )
-            }
+            } */}
             </Typography>
+            <StatusIndicator status={isOnline} />
             <Typography variant="body2" color="text.secondary" sx={{display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',overflow: 'hidden', textOverflow: 'ellipsis'}}>
               {post.title}
             </Typography>
