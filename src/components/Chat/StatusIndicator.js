@@ -26,7 +26,7 @@ const StatusIndicator = ({ status }) => {
         default:
           return {
             color: '#9E9E9E',
-            text: 'Offline-Null',
+            text: 'Offline',
             tooltip: 'User is offline'
           };
       }

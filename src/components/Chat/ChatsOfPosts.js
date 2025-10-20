@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfPosts.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, Backdrop, CircularProgress, Slide, Chip, } from '@mui/material';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Button, IconButton, Snackbar, Alert, Backdrop, CircularProgress, Slide, Chip, Tooltip, } from '@mui/material';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -142,7 +142,7 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
 
-  const handleOpenRateDialog = ({userID}) => {
+  const handleViewUserProfile = ({userID}) => {
     setSelectedUserId(userID);
     setRateDialogOpen(true);
   };
@@ -416,48 +416,21 @@ const ChatsOfPosts = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) =>
                               {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
                             </Box>
                           )}
-                          <IconButton
-                            aria-label="View profile"
-                            onClick={(e) => { 
-                              e.stopPropagation();
-                              handleOpenRateDialog({ userID: chat.id });
-                            }}
-                            sx={{ 
-                              marginLeft: 'auto',
-                              position: 'relative' 
-                            }}
-                          >
-                            {/* {chat.unreadMessagesCount > 0 && (
-                            <Box
-                              sx={{
-                                position: 'absolute',
-                                top: 0,
-                                right: 0,
-                                backgroundColor: 'red',
-                                color: 'white',
-                                borderRadius: '50%',
-                                width: '20px',
-                                height: '20px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '0.75rem',
-                                fontWeight: 'bold',
-                                transform: 'translate(25%, -25%)',
-                                zIndex: 1,
-                                animation: chat.unreadMessagesCount > 0 ? 'pulse 1.5s infinite' : 'none',
-                                '@keyframes pulse': {
-                                  '0%': { transform: 'translate(25%, -25%) scale(1)' },
-                                  '50%': { transform: 'translate(25%, -25%) scale(1.2)' },
-                                  '100%': { transform: 'translate(25%, -25%) scale(1)' }
-                                }
+                          <Tooltip title="View User profile" arrow>
+                            <IconButton
+                              aria-label="View profile"
+                              onClick={(e) => { 
+                                e.stopPropagation();
+                                handleViewUserProfile({ userID: chat.id });
+                              }}
+                              sx={{ 
+                                marginLeft: 'auto',
+                                position: 'relative' 
                               }}
                             >
-                              {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
-                            </Box>
-                            )} */}
-                            <AssignmentIndRoundedIcon />
-                          </IconButton>
+                              <AssignmentIndRoundedIcon />
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </Box>
                     ))

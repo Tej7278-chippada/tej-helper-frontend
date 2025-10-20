@@ -306,8 +306,8 @@ function App() {
       setSocket(newSocket);
 
       // Join user's notification room
-      newSocket.emit('joinNotificationsRoom', userId);
-      console.log('notifications room');
+      // newSocket.emit('joinNotificationsRoom', userId);
+      // console.log('notifications room');
       return () => {
         newSocket.disconnect();
       };
@@ -342,7 +342,7 @@ function App() {
     return () => {
       if (socket) {
         socket.off('notificationCountUpdate');
-        socket.off('newNotification');
+        // socket.off('newNotification');
       }
     };
   }, [socket, userId]);

@@ -1,6 +1,6 @@
 // components/Chat/ChatsOfUser.js
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled, Backdrop, CircularProgress, alpha, Chip, TextField, InputAdornment, } from '@mui/material';
+import { Box, Typography, Card, Avatar, useMediaQuery, Dialog, Snackbar, Alert, Button, IconButton, Badge, styled, Backdrop, CircularProgress, alpha, Chip, TextField, InputAdornment, Tooltip, } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTheme } from '@emotion/react';
 import SkeletonChats from './SkeletonChats';
@@ -230,6 +230,14 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   }, [fetchChatsOfUser, navigate, userId]);
 
   const handleChatClick = async (chat) => {
+    if (!chat.posts.postId) {
+      setSnackbar({
+        open: true,
+        message: 'Unable to load chat. The post or user might no longer be available.',
+        severity: 'warning'
+      });
+      return;
+    }
     setLoadingSelectedChat(true);
     try {
       setChatDetailsById(chat);
@@ -244,6 +252,18 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     } finally {
       setLoadingSelectedChat(false);
     }
+  };
+
+  const handleOpenPost = (postId) => {
+    if (!postId) {
+      setSnackbar({
+        open: true,
+        message: 'Unable to load chat. The post or user might no longer be available.',
+        severity: 'warning'
+      });
+      return;
+    }
+    navigate(`/post/${postId}`);
   };
 
   const handleCloseDialog = () => {
@@ -274,10 +294,6 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
 
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
-  };
-
-  const openPostDetail = ({postId}) => {
-    navigate(`/post/${postId}`);
   };
 
    // Styled Badge to position media image on bottom-right corner
@@ -621,46 +637,19 @@ const ChatsOfUser = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                               {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
                             </Box>
                           )}
-                          <IconButton
-                            aria-label="View post details"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openPostDetail({postId: chat.posts.postId});
-                            }}
-                            variant="text"
-                            sx={{marginLeft:'auto', position: 'relative'}}
-                          >
-                            {/* {chat.unreadMessagesCount > 0 && (
-                              <Box
-                                sx={{
-                                  position: 'absolute',
-                                  top: 0,
-                                  right: 0,
-                                  backgroundColor: theme.palette.error.main,
-                                  color: theme.palette.error.contrastText,
-                                  borderRadius: '50%',
-                                  minWidth: '20px',
-                                  height: '20px',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '0.75rem',
-                                  fontWeight: 'bold',
-                                  transform: 'translate(25%, -25%)',
-                                  zIndex: 1,
-                                  animation: 'pulse 1.5s infinite',
-                                  '@keyframes pulse': {
-                                    '0%': { transform: 'translate(25%, -25%) scale(1)' },
-                                    '50%': { transform: 'translate(25%, -25%) scale(1.1)' },
-                                    '100%': { transform: 'translate(25%, -25%) scale(1)' }
-                                  }
-                                }}
-                              >
-                                {chat.unreadMessagesCount > 9 ? '9+' : chat.unreadMessagesCount}
-                              </Box>
-                            )} */}
-                            <ArtTrackRoundedIcon/>
-                          </IconButton>
+                          <Tooltip title="View post details" arrow>
+                            <IconButton
+                              aria-label="View post details"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenPost(chat.posts.postId);
+                              }}
+                              variant="text"
+                              sx={{marginLeft:'auto', position: 'relative'}}
+                            >
+                              <ArtTrackRoundedIcon/>
+                            </IconButton>
+                          </Tooltip>
                         </Box>
                       </Box>
                     ))
