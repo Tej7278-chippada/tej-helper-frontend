@@ -67,6 +67,9 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeout = useRef(null);
   const typingDebounceTimeout = useRef(null);
+  const lastTypingEmitTime = useRef(0);
+  const TYPING_DEBOUNCE_DELAY = 300; // ms
+  const TYPING_TIMEOUT_DELAY = 2000; // ms
   const senderUsername = localStorage.getItem('tokenUsername');
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
@@ -103,6 +106,18 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   const handleTypingEvent = useCallback(({ userId: typingUserId, isTyping: typing, postId: typingPostId }) => {
     if (typingUserId === userId && typingPostId === post._id) {
       setIsTyping(typing);
+      
+      // Clear existing timeout when new typing event comes
+      if (typingTimeout.current) {
+        clearTimeout(typingTimeout.current);
+      }
+      
+      // If user is typing, set timeout to stop typing indicator
+      if (typing) {
+        typingTimeout.current = setTimeout(() => {
+          setIsTyping(false);
+        }, TYPING_TIMEOUT_DELAY + 500); // Add buffer for network delay
+      }
     }
   }, [otherUserId, post._id]);
 
@@ -206,11 +221,21 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         otherUserId: post.user.id,
         chatId: (chatData.chatId || chatId)
       });
+      // Stop typing when leaving chat
+      socket.emit('typing', { 
+        postId: post._id, 
+        userId, 
+        otherUserId,
+        isTyping: false 
+      });
+      
+      // Clear all timeouts
+      clearTimeout(typingTimeout.current);
+      clearTimeout(typingDebounceTimeout.current);
       socket.off('receiveMessage');
       socket.off('messageSeenUpdate');
       socket.off('userStatusChange');
       socket.off('userTyping', handleTypingEvent);
-      clearTimeout(typingTimeout.current);
     };
   }, [open, fetchChatHistory, post._id, userId, post.user.id]);
 
@@ -327,6 +352,20 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
       setSnackbar({ open: true, message: "Network is offline.", severity: "warning" });
       return; // Do not proceed with sending
     }
+
+    // Stop typing indicator immediately when sending
+    socket.emit('typing', { 
+      postId: post._id, 
+      userId, 
+      otherUserId,
+      isTyping: false 
+    });
+    
+    // Clear all typing timeouts
+    clearTimeout(typingTimeout.current);
+    clearTimeout(typingDebounceTimeout.current);
+    lastTypingEmitTime.current = 0;
+    setIsTyping(false);
   
     const tempMessageId = `temp-${Date.now()}`;
     const sentAt = new Date(); // Timestamp when sending starts
@@ -450,29 +489,24 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
   }));
 
   const handleInputChange = (e) => {
-    setMessage(e.target.value);
+    const newMessage = e.target.value;
+    setMessage(newMessage);
     
-    // Notify others when typing starts
-    // if (!typingTimeout.current && e.target.value.length > 0) {
-    //   socket.emit('typing', { 
-    //     postId: post._id, 
-    //     userId, 
-    //     otherUserId,
-    //     isTyping: true 
-    //   });
-    // }
-    // Only emit typing after 500ms of typing (not on every keystroke)
-    clearTimeout(typingDebounceTimeout.current);
-    typingDebounceTimeout.current = setTimeout(() => {
-      if (e.target.value.length > 0) {
+    const now = Date.now();
+    
+    // Only emit typing after debounce delay of 500ms and if we haven't emitted recently (not on every keystroke)
+    if (newMessage.length > 0 && now - lastTypingEmitTime.current > TYPING_DEBOUNCE_DELAY) {
+      clearTimeout(typingDebounceTimeout.current);
+      typingDebounceTimeout.current = setTimeout(() => {
         socket.emit('typing', { 
           postId: post._id, 
           userId, 
           otherUserId,
           isTyping: true 
         });
-      }
-    }, 200);
+        lastTypingEmitTime.current = Date.now();
+      }, TYPING_DEBOUNCE_DELAY);
+    }
     
     // Set timeout to stop typing indicator after 3 seconds of inactivity
     clearTimeout(typingTimeout.current);
@@ -483,7 +517,8 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         otherUserId,
         isTyping: false 
       });
-    }, 2000);
+      lastTypingEmitTime.current = 0;
+    }, TYPING_TIMEOUT_DELAY);
   };
 
   // helper code verification handler
