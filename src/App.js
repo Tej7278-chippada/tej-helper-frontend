@@ -281,10 +281,10 @@ function App() {
       
       const handleVisibilityChange = () => {
         if (document.visibilityState === 'visible') {
-          // User returned to the page
+          // User returned to the page - they're online again
           socket.emit('userOnline', { userId });
         } else {
-          // User left the page
+          // User left the page (switched tabs/apps)
           socket.emit('userOffline', { userId });
         }
       };
@@ -294,6 +294,7 @@ function App() {
 
       return () => {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
+        // emit offline when component actually unmounts (user leaves site)
         socket.emit('userOffline', { userId });
       };
     }

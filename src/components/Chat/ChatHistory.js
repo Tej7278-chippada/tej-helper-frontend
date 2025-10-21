@@ -1,6 +1,6 @@
 // src/components/ChatHistory.js
 import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
-import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating } from '@mui/material';
+import { TextField, IconButton, Box, Typography, useTheme, useMediaQuery, Avatar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Rating, Tooltip } from '@mui/material';
 // import SendIcon from '@mui/icons-material/Send';
 // import EmojiEmotionsIcon from '@mui/icons-material/EmojiEmotions';
 // import Picker from 'emoji-picker-react';
@@ -661,7 +661,7 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
     >
       {/* <Box display="flex" justifyContent="space-between" alignItems="center" sx={{scrollbarWidth:'none', margin: -1}}> */}
         {/* {!isMobile ? ( */}
-          <Box display="flex" alignItems="center">
+          <Box sx={{ display: 'flex', alignItems: 'center'}}>
             <Avatar
               alt={chatData.profilePic}
               src={
@@ -704,10 +704,22 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
             </Box>
             
           </Box> 
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap:1 }}>
-            <IconButton onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper || helperCodeVerified}>
-              {isHelper ? <StarRoundedIcon fontSize="medium" sx={{color: '#eab308'}}/> : <StarOutlineRoundedIcon fontSize="medium" />}
-            </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap:1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+              <Tooltip title={isHelper ? 'Remove Helper Tag' : 'Tag as Helper'} arrow>
+              <IconButton aria-label={isHelper ? 'Remove Helper Tag' : 'Tag as Helper'} onClick={() => setHelperDialogOpen(true)} disabled={helperCount >= peopleCount && !isHelper || helperCodeVerified}>
+                {isHelper ? <StarRoundedIcon fontSize="medium" sx={{color: '#eab308'}}/> : <StarOutlineRoundedIcon fontSize="medium" />}
+              </IconButton>
+              </Tooltip>
+              <Typography
+                variant="caption" 
+                sx={{ 
+                  color: '#9E9E9E',
+                }}
+              >
+                {helperCount}/{peopleCount}
+              </Typography>
+            </Box>
             {isMobile && (
               <Box >
                 <IconButton 
@@ -740,9 +752,14 @@ const ChatHistory = ({ chatData, postId, postTitle, postStatus, handleCloseDialo
           }} >
           <Typography color="success" align="center" sx={{fontSize: isMobile ? '12px' : '14px', mb: 1}}>You’ve marked this user as the helper for this post.</Typography> {/* {chatData.chatId} */}
           {/* Helper Code Section */}
-          <Typography color="success" align="center" margin={0} sx={{fontSize: isMobile ? '12px' : '14px'}}>
-            { helperCodeVerified ? 'Helper code verified!' : helperCode ? 
-              `Please share the helper code ${helperCode} once the service is complete.` : 
+          <Typography color="success" align="center" margin={0} sx={{fontSize: isMobile ? '12px' : '14px', whiteSpace: 'pre-line' }}>
+            { helperCodeVerified ? 'Helper code verified!' : helperCode ? (
+                <>
+                  Please share the helper code <strong>{helperCode}</strong> after the service is complete.
+                  {'\n'}
+                  Note: Helper Tag cannot be removed once the code is verified by the Helper.
+                </>
+              ) : 
               'Give code only after the service is done.'} 
               {/* {chatData.chatId} */}
           </Typography>

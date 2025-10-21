@@ -610,16 +610,16 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems:'center', gap:1 }}>
           {hasHelperTag && (
-            <Tooltip title="Helper tag" arrow placement="left" 
-              enterTouchDelay={0}  // Show tooltip immediately on touch
-              leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
-              disableInteractive // Prevent tooltip from disappearing on accidental touches
+            <Tooltip title="Helper tag" arrow // placement="left" 
+              // enterTouchDelay={0}  // Show tooltip immediately on touch
+              // leaveTouchDelay={1500} // Keep tooltip visible for 1.5 seconds on touch
+              // disableInteractive // Prevent tooltip from disappearing on accidental touches
             >
               <IconButton 
               // onClick={() => setHelperDialogOpen(true)} 
               aria-label="Helper tag"
               >
-                <StarRoundedIcon fontSize="medium" color="primary"/> 
+                <StarRoundedIcon fontSize="medium" sx={{ color: '#eab308'}}/> 
               </IconButton>
             </Tooltip>
           )}

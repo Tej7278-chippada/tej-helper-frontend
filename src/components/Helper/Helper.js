@@ -1779,7 +1779,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           />
                         )}
                       </Box>
-                      {marker.distance && (
+                      {marker.distance !== null && (
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <LocationOnIcon sx={{ 
                             fontSize: 16, mr: 0.5,
@@ -3770,7 +3770,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   }}
                                 />
                               )}
-                              {post.distance && (
+                              {post.distance !== null && (
                                 <Chip 
                                   label={post.distance < 1 ? `${Math.round(post.distance * 1000)} m away` : `${post.distance.toFixed(1)} km away`}
                                   size="small" 
