@@ -94,10 +94,27 @@ export const deleteUserPost = (id) => {
 };
 
 // Fetch user's own posts
-export const fetchUserPosts = () => {
+export const fetchUserPosts0 = () => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
   return API.get('/api/posts/my-posts', { headers });
+};
+
+export const fetchUserPosts = (skip = 0, limit = 12, filters = {} ) => {
+  const params = { skip, limit,
+    // categories: filters.categories,
+    // serviceType: filters.serviceType,
+    // gender: filters.gender,
+    postStatus: filters.postStatus,
+    // price: `${filters.priceRange[0]}-${filters.priceRange[1]}`,
+    postType: filters.postType, // added this line for only shows the Helper posts on ALL section
+    // sortBy: sortBy
+  };
+
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  
+  return API.get('/api/posts/my-posts', { headers, params });
 };
 
 // export const fetchPosts = () => API.get('/api/posts');

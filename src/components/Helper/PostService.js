@@ -1,6 +1,6 @@
 // src/components/Helper/PostService.js
 import React, { useCallback, useEffect, useState } from 'react';
-import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, Badge, alpha, Chip, } from '@mui/material';
+import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle,Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, Badge, alpha, Chip, ListItemIcon, Fab, styled, ToggleButtonGroup, ToggleButton, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
 // import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
@@ -38,8 +38,43 @@ import DemoPosts from '../Banners/DemoPosts';
 import CurrencyRupeeRoundedIcon from '@mui/icons-material/CurrencyRupeeRounded';
 import WorkIcon from '@mui/icons-material/Work';
 import { formatPrice } from '../../utils/priceFormatter';
+// import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
+// import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
+import LiveHelpRoundedIcon from '@mui/icons-material/LiveHelpRounded';
+import HomeRepairServiceRoundedIcon from '@mui/icons-material/HomeRepairServiceRounded';
 // import { NotificationAdd } from '@mui/icons-material';
 // import axios from "axios";
+
+// Styled components
+const AnimatedToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+  position: 'relative',
+  overflow: 'hidden',
+  borderRadius: '24px',
+  padding: '4px',
+  background: theme.palette.mode === 'dark' 
+    ? 'rgba(255, 255, 255, 0.1)' 
+    : 'rgba(0, 0, 0, 0.05)',
+  '& .MuiToggleButton-root': {
+    position: 'relative',
+    zIndex: 1,
+    border: 'none',
+    transition: 'all 0.3s ease',
+  }
+}));
+
+const SliderThumb = styled(Box)(({ theme, position }) => ({
+  position: 'absolute',
+  top: '4px',
+  left: position === 'left' ? '4px' : '48%',
+  width: '49%',
+  height: 'calc(100% - 8px)',
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? 'rgba(67, 97, 238, 0.7)' 
+    : '#4361ee',
+  borderRadius: '22px',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  zIndex: 0,
+}));
 
 
 // Enhanced glassmorphism styles
@@ -104,17 +139,48 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [loadingMedia, setLoadingMedia] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
   const [validationErrors, setValidationErrors] = useState({});
-
+  const DEFAULT_FILTERS = {
+    // sortBy: 'nearest',
+    // categories: 'Paid',
+    // serviceType: '',
+    // gender: '',
+    postStatus: '',
+    // priceRange: [0, 10000000],
+    postType: 'HelpRequest' // added this line for only shows the Helper posts on ALL section
+  };
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [postType, setPostType] = useState('HelpRequest');
+  // const [totalPosts, setTotalPosts] = useState(0);
+  // const [showPostType, setShowPostType] = useState(false);
   
- 
+  // function to handle sort change
+  const handlePostType = (postType) => {
+    setPostType(postType);
+    // setShowPostType(false);
+    // setShowDistanceRanges(false);
+    // Update filters
+    const newFilters = { 
+      ...filters,
+      postType: postType
+    };
+
+    setFilters(newFilters);
+    // setLocalFilters(newFilters);
+    // setSkip(0);
+    // Clear cache to force refetch with new sort order
+    // globalCache.lastCacheKey = null;
+    // // Ensure filters are saved to localStorage
+    // localStorage.setItem('helperFilters', JSON.stringify(newFilters));
+  };
 
 
 
     const fetchPostsData = useCallback(async () => {
         setLoading(true);
         try {
-          const response = await fetchUserPosts();
-          setPosts(response.data || []); // Set products returned by the API .reverse()
+          const response = await fetchUserPosts(0, 12, filters);
+          setPosts(response.data.posts || []); // Set products returned by the API .reverse()
+          // setTotalPosts(response.data.posts.length);
         } catch (error) {
           console.error('Error fetching your posts:', error);
           // setNotification({ open: true, message: 'Failed to fetch products.', type: 'error' });
@@ -122,7 +188,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
         } finally {
           setLoading(false);
         }
-    }, []);
+    }, [postType]);
 
     
     const fetchPostMedia = async (postId) => {
@@ -438,22 +504,144 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             {/* <Typography variant="h6" style={{ flexGrow: 1 }}>
             User Posts
             </Typography> */}
-            <Typography 
-              variant="h6" 
-              fontWeight={600}
-              sx={{
-                background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', //background: '#4361ee',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
-              My Posts
-            </Typography>
+            <Box>
+              <Typography 
+                variant="body1" 
+                fontWeight={600}
+                sx={{
+                  background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', //background: '#4361ee',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                My Posts
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {postType === 'HelpRequest' ? 'Help Requests' : 'Service Offerings'}
+              </Typography>
+            </Box>
 
 
+          <Box sx={{ display: 'flex', gap: 1}}>
+            {/* Type Selection Toggle with Slider Animation */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative' }}>
+              <AnimatedToggleButtonGroup
+                value={postType}
+                exclusive
+                // onChange={handleTypeChange}
+                aria-label="post type selection"
+                sx={{
+                  minWidth: isMobile ? '120px' : '120px',
+                  '& .MuiToggleButton-root': {
+                    px: 1,
+                    py: 1,
+                    width: '50%',
+                    borderRadius: '18px',
+                    fontWeight: 600,
+                    fontSize: isMobile ? '0.875rem' : '0.9rem',
+                    '&.Mui-selected': {
+                      backgroundColor: 'transparent',
+                      color: darkMode ? '#fff' : '#fff',
+                      '&:hover': {
+                        backgroundColor: 'transparent',
+                      }
+                    },
+                    '&:not(.Mui-selected)': {
+                      color: darkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
+                    },
+                    '&:hover': {
+                      backgroundColor: 'transparent',
+                    }
+                  }
+                }}
+              ><Tooltip title="Help Requests" arrow>
+                <ToggleButton
+                  value="HelpRequest" 
+                  aria-label="Help Requests"
+                  // Prevent default to avoid auto-scrolling
+                  onClick={() => handlePostType('HelpRequest')}
+                  sx={{textTransform: 'none'}}
+                >
+                  <LiveHelpRoundedIcon sx={{ mr: 0, fontSize: '18px' }} />
+                  {/* {postType === 'HelpRequest' ? 'Help Requests' : ''} */}
+                </ToggleButton>
+                </Tooltip>
+                <Tooltip title="Service Offerings" arrow>
+                <ToggleButton 
+                  value="ServiceOffering" 
+                  aria-label="service Offerings"
+                  // Prevent default to avoid auto-scrolling
+                  onClick={() => handlePostType('ServiceOffering')}
+                  sx={{textTransform: 'none'}}
+                >
+                  <HomeRepairServiceRoundedIcon sx={{ mr: 0, fontSize: '18px' }} />
+                  {/* {postType !== 'HelpRequest' ? 'Services Nearby' : ''} */}
+                </ToggleButton>
+                </Tooltip>
+                
+                {/* Slider thumb for animation */}
+                <SliderThumb position={postType === 'HelpRequest' ? 'left' : 'right'} />
+              </AnimatedToggleButtonGroup>
+            </Box>
             
-            <Button
+            {/* filters card */}
+            {/* <Tooltip title="Post Type" arrow>
+              <IconButton 
+                onClick={() => setShowPostType(!showPostType)}
+                sx={{
+                  minWidth: '40px',
+                  minHeight: '40px',
+                  mr: '4px', ...getButtonStyle(darkMode, showPostType),
+                  // backgroundColor: showSortMenu ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                }}
+              >
+                <FilterListRoundedIcon />
+              </IconButton>
+            </Tooltip> */}
+            {/* Sort Menu */}
+            {/* {showPostType && (
+              <Card
+                sx={{
+                  position: 'absolute',
+                  top: isMobile ? '55px' : '65px',
+                  right: '8px',
+                  zIndex: 1001,
+                  borderRadius: '12px',
+                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  minWidth: '200px'
+                }}
+              >
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, px: 1 }}>
+                    Post Type
+                  </Typography>
+                  <MenuItem
+                    onClick={() => handlePostType('HelpRequest')}
+                    selected={postType === 'HelpRequest'}
+                    sx={{ borderRadius: '8px' }}
+                  >
+                    <ListItemIcon>
+                      {postType === 'HelpRequest' && <CheckRoundedIcon fontSize="small" color="success" />}
+                    </ListItemIcon>
+                    Help Requests
+                  </MenuItem>
+                  <MenuItem 
+                    onClick={() => handlePostType('ServiceOffering')}
+                    selected={postType === 'ServiceOffering'}
+                    sx={{ borderRadius: '8px', mb: 0.5 }}
+                  >
+                    <ListItemIcon>
+                      {postType === 'ServiceOffering' && <CheckRoundedIcon fontSize="small" color="success" />}
+                    </ListItemIcon>
+                    Service Offerings
+                  </MenuItem>
+                </Box>
+              </Card>
+            )} */}
+            <Tooltip title="Add New Post" arrow>
+            <IconButton
               variant="contained"
               onClick={() => handleOpenDialog()}
               size="small"
@@ -461,26 +649,27 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                 // backgroundColor: '#1976d2', // Primary blue
                 background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
                 color: '#fff',
-                // padding: '4px 12px',
-                borderRadius: '12px',
+                padding: '4px 16px', my: '2px',
+                borderRadius: '20px',
                 boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
                 '&:hover': {
                   // backgroundColor: '#1565c0', // Darker shade on hover
                   boxShadow: '0 6px 20px rgba(67, 97, 238, 0.4)',
                   transform: 'translateY(-2px)',
                 },
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px', marginRight: '0px',
+                // display: 'flex',
+                // alignItems: 'center',
+                // gap: '8px', marginRight: '0px',
                 textTransform: 'none',
                 fontWeight: 600,
               }}
               aria-label="Add New Post"
-              title="Add New Post"
             >
               <PostAddRoundedIcon sx={{ fontSize: '20px' }} />
-              <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Post</span>
-            </Button>
+              {/* <span style={{ fontSize: '14px', fontWeight: '500' }}>Add Post</span> */}
+            </IconButton>
+            </Tooltip>
+          </Box>
             
         </Toolbar>
         <Box sx={{ paddingTop: '1rem', paddingBottom: '2rem', mx: isMobile ? '4px' : '8px', paddingInline: '4px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
@@ -941,15 +1130,40 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
           borderRadius: '12px',
           mt: 2
         }}>
+          {/* <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            You've reached the end of <strong>{totalPosts} posts</strong>
+          </Typography> */}
           <Typography color="text.secondary">
-            No more posts of yous...
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {/* Current search range: {distanceRange} km */}
+            No more {postType === 'HelpRequest' ? 'Help Requests' : 'Service Offerings'} posts of yous...
           </Typography>
         </Box>
       )}
       </Box>
+        {/* <Fab
+          variant="extended"
+          size="small"
+          onClick={() => handleOpenDialog()}
+          // disabled={selectedPosts.length <= 1}
+          sx={{ height: '35px', borderRadius: '20px', color: '#fff', position: 'fixed', bottom: isMobile? 64 : 24, right: 16, zIndex: 1100, p: '4px 8px', borderRadius: '12px',
+            background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+            boxShadow: darkMode 
+              ? '0 4px 14px rgba(59, 130, 246, 0.4)'
+              : '0 4px 14px rgba(37, 99, 235, 0.3)',
+            '&:hover': {
+              background: darkMode 
+                ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
+                : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+              boxShadow: darkMode 
+                ? '0 6px 20px rgba(59, 130, 246, 0.6)'
+                : '0 6px 20px rgba(37, 99, 235, 0.4)',
+              transform: 'translateY(-1px)'
+            },
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <PostAddRoundedIcon sx={{ mr: 1 }} />
+          Add Post
+        </Fab> */}
         <EnhancedPostServiceDialog openDialog={openDialog} onCloseDialog={handleCloseDialog} setSnackbar={setSnackbar} submitError={submitError} setSubmitError={setSubmitError} theme={theme}
          isMobile={isMobile} fetchPostsData={fetchPostsData} /* fetchUnsplashImages={fetchUnsplashImages} noImagesFound={noImagesFound} */ 
          newMedia={newMedia} setNewMedia={setNewMedia} mediaError={mediaError} setMediaError={setMediaError} editingProduct={editingProduct} existingMedia={existingMedia} setExistingMedia={setExistingMedia}
