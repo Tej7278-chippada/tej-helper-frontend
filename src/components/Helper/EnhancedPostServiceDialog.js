@@ -62,11 +62,12 @@ import {
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon
 } from '@mui/icons-material';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import HelpRoundedIcon from '@mui/icons-material/HelpRounded';
 import BusinessCenterRoundedIcon from '@mui/icons-material/BusinessCenterRounded';
 import SupervisorAccountRoundedIcon from '@mui/icons-material/SupervisorAccountRounded';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 // import { TextField, Button, Select, MenuItem, InputLabel, FormControl, Card, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Alert, Box, Toolbar, Grid, CardMedia, CardContent, Tooltip, CardActions, Snackbar, useMediaQuery, IconButton, CircularProgress, LinearProgress, Switch, } from '@mui/material';
 import API, { addUserPost, deleteUserPost, fetchPostMediaById, fetchUserPosts, updateUserPost } from '../api/api';
 // import { useTheme } from '@emotion/react';
@@ -175,6 +176,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DistanceSlider from './DistanceSlider';
 
 // Add these constants after the serviceTypes array
 const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -490,6 +492,25 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
   const [loadingGeneration, setLoadingGeneration] = useState(false);
   const [noImagesFound, setNoImagesFound] = useState(false); // NEW state for empty results
   const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [distanceRange, setDistanceRange] = useState(2); // Default distance range in km
+  const mapRef = useRef(null);
+  const distanceValues = [2, 5, 10]; // , 20, 50, 70, 100
+  // Auto-zoom and center map on selected distance
+  const getZoomLevel = (distance) => {
+    // Adjust zoom level based on distance
+    if (distance <= 2) return 13;
+    if (distance <= 5) return 12;
+    if (distance <= 10) return 11;
+    // if (distance <= 20) return 10;
+    // if (distance <= 50) return 9;
+    // if (distance <= 70) return 8;
+    // if (distance <= 100) return 8;
+    // if (distance <= 200) return 7;
+    // if (distance <= 500) return 6;
+    // if (distance <= 1000) return 5;
+    return 13;
+  };
+  const [notifyNearby, setNotifyNearby] = useState(false);
 
 
   // Fetch images from Unsplash based on title
@@ -803,6 +824,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     setValidationErrors({});
     setMediaError('');
     setSubmitError('');
+    setNotifyNearby(false);
     
     // Call parent's close handler
     onCloseDialog();  // Changed from handleCloseDialog to onCloseDialog
@@ -865,6 +887,15 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     });
   };
 
+  const toggleNotifyNearby = (e) => {
+    const isChecked = e.target.checked;
+    setNotifyNearby(isChecked);
+    if (isChecked) {
+      setSnackbar({ open: true, message: 'Notify nearby turned on.', severity: 'info' });
+    } else {
+      setSnackbar({ open: true, message: 'Notify nearby turned off.', severity: 'info' });
+    }
+  };
 
   // Add selected image to new media from UnSplash
   const handleSelectImage = async (imageUrl) => {
@@ -1365,6 +1396,9 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     }
     if (timeTo) {
       data.append('timeTo', timeTo.toISOString());
+    }
+    if (notifyNearby) {
+      data.append('notifyDistance', distanceRange);
     }
 
     try {
@@ -2075,14 +2109,18 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
             </Box> */}
             <Box elevation={0} sx={{ borderRadius: 3, height: 300, bgcolor: 'grey.100', m: 1 }}>
             <MapContainer
-              center={formData.latitude ? [formData.latitude, formData.longitude] : protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude]}
-              zoom={13}
+              center={protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude]}
+              // center={formData.latitude ? [formData.latitude, formData.longitude] : protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude]}
+              zoom={getZoomLevel(distanceRange)} // zoom={13}
+              ref={mapRef}
+              whenCreated={(map) => (mapRef.current = map)}
               style={{ height: '100%', width: '100%', borderRadius: '8px', }}
               attributionControl={false}  // Disables the watermark
               maxBounds={worldBounds} // Restrict the map to the world bounds
               maxBoundsViscosity={1.0} // Prevents the map from being dragged outside the bounds
             >
-              <ChangeView center={formData.latitude ? [formData.latitude, formData.longitude] : protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude]} />
+              {/* <ChangeView center={formData.latitude ? [formData.latitude, formData.longitude] : protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude]} /> */}
+              <ChangeView center={ protectLocation ? [finalLocation.latitude, finalLocation.longitude] : [currentLocation.latitude, currentLocation.longitude]} />
               <TileLayer
                 url={mapMode === 'normal'
                   ? 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -2157,6 +2195,28 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                 </Marker>
               }
               {/* )} */}
+              {/* Distance Circles */}
+              {notifyNearby && currentLocation && distanceValues.map((radius) => (
+                <Circle
+                  key={radius}
+                  center={currentLocation ? [currentLocation.latitude, currentLocation.longitude] : [0, 0]}
+                  radius={radius * 1000}
+                  pathOptions={{
+                    color: radius === distanceRange ? "#1976d2" : "rgba(10, 30, 110, 0)", //#1976d2 #999
+                    fillColor: radius === distanceRange ? "rgba(10, 30, 110, 0.05) " : "rgba(10, 30, 110, 0) ",
+                    fillOpacity: 0.2,
+                    weight: radius === distanceRange ? 1 : 1,
+                  }}
+                // eventHandlers={{
+                //   click: () => {
+                //     setDistanceRange(radius);
+                //     mapRef.current.setView([userLocation.latitude, userLocation.longitude], radius > 100 ? 9 : radius > 50 ? 10 : 11);
+                //   },
+                // }}
+                >
+                  {/* <Popup>{distanceRange} km</Popup> */}
+                </Circle>
+              ))}
             </MapContainer>
             </Box>
             {/* Map Controls */}
@@ -2327,6 +2387,47 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   />
                 </Box>
               </Paper>
+              {!editingProduct && <Paper 
+                elevation={0}
+                sx={{ 
+                  p: isMobile ? 1 : 2, 
+                  bgcolor: 'rgba(255, 255, 255, 0.7)',
+                  borderRadius: 2,
+                  border: '1px solid rgba(0, 0, 0, 0.05)', mt: 1,
+                }}
+              >
+                <Box sx={{display: 'flex', flexDirection: 'column', }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <Box sx={{ display: 'flex', alignItems: 'center'}}>
+                      <NotificationsActiveIcon sx={{ color: 'success.main', mr: 2 }} />
+                      <Box>
+                        <Typography variant="body1" fontWeight={500}>
+                          Notify nearby
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          Sends post notification to nearby users.
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Switch
+                      checked={notifyNearby}
+                      onChange={toggleNotifyNearby}
+                      color="primary"
+                    />
+                  </Box>
+                  {notifyNearby && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', ml: 4, mr: 1, mt: 2}}>
+                      <DistanceSlider distanceRange={distanceRange} setDistanceRange={setDistanceRange}
+                      userLocation={currentLocation} mapRef={mapRef} isMobile={isMobile} getZoomLevel={getZoomLevel}
+                      distanceValues={distanceValues} /> 
+                      <Typography variant="caption" color="text.secondary" marginTop={4}>
+                        *Your post will be shared with nearby users within <strong>{distanceRange} km</strong> radius distance.
+                        You can check the blue circle on the map for reference.
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
+              </Paper>}
             </CardContent>
           </Card>
 

@@ -75,7 +75,9 @@ const DistanceSlider = ({ distanceRange, setDistanceRange, userLocation, mapRef,
     timeoutRef.current = setTimeout(() => {
       provideFeedback();
     }, 150);
-    setShowDistanceRanges(false);
+    if (setShowDistanceRanges) {
+      setShowDistanceRanges(false);
+    }
   };
 
   // Cleanup on unmount
