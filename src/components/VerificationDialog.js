@@ -128,6 +128,54 @@ const VerificationDialog = ({ open, onClose, onSubmit, loading, attempts, maxAtt
     setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
   };
 
+  // compress front image if size > 2MB
+  const handleDocFrontPic = async (e) => {
+    const file = e.target.files[0];
+    if (file && file.size > 2 * 1024 * 1024) {
+      const resizedBlob = await resizeImage(file, 2 * 1024 * 1024);
+      const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+      setDocumentFront(resizedFile);
+    } else {
+      setDocumentFront(file);
+    }
+  };
+
+  // compress back image if size > 2MB
+  const handleDocBackPic = async (e) => {
+    const file = e.target.files[0];
+    if (file && file.size > 2 * 1024 * 1024) {
+      const resizedBlob = await resizeImage(file, 2 * 1024 * 1024);
+      const resizedFile = new File([resizedBlob], file.name, { type: file.type });
+      setDocumentBack(resizedFile);
+    } else {
+      setDocumentBack(file);
+    }
+  };
+
+  const resizeImage = (blob, maxSize) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = URL.createObjectURL(blob);
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        let width = img.width;
+        let height = img.height;
+        const scaleFactor = Math.sqrt(maxSize / blob.size);
+        width *= scaleFactor;
+        height *= scaleFactor;
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (resizedBlob) => resolve(resizedBlob),
+          "image/jpeg",
+          0.8
+        );
+      };
+    });
+  };
+
   const handleNext = () => {
     setActiveStep((prevStep) => prevStep + 1);
   };
@@ -213,7 +261,8 @@ const VerificationDialog = ({ open, onClose, onSubmit, loading, attempts, maxAtt
                   id="document-front"
                   type="file"
                   // capture="environment" // Opens camera on mobile
-                  onChange={(e) => setDocumentFront(e.target.files[0])}
+                  // onChange={(e) => setDocumentFront(e.target.files[0])}
+                  onChange={handleDocFrontPic}
                 />
                 <label htmlFor="document-front">
                   <Button
@@ -255,7 +304,8 @@ const VerificationDialog = ({ open, onClose, onSubmit, loading, attempts, maxAtt
                   id="document-back"
                   type="file"
                   // capture="environment" // Opens camera on mobile
-                  onChange={(e) => setDocumentBack(e.target.files[0])}
+                  // onChange={(e) => setDocumentBack(e.target.files[0])}
+                  onChange={handleDocBackPic}
                 />
                 <label htmlFor="document-back">
                   <Button
