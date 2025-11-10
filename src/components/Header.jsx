@@ -486,7 +486,15 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
                   transition: 'all 0.3s ease', ml: 1,
                   '&:hover': {
                     transform: 'scale(1.05)',
-                  }
+                  },
+                  '&:active': {
+                    transform: 'scale(0.98)', // Add press feedback instead
+                    transition: 'transform 0.1s ease',
+                  },
+                  WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                  WebkitTouchCallout: 'none', // Disable iOS callout
+                  WebkitUserSelect: 'none', // Disable text selection
+                  userSelect: 'none',
                 }}
               >
                 <Link

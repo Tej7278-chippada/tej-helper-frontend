@@ -649,7 +649,16 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                         ? `data:image/jpeg;base64,${userData.profilePic}`
                         : 'https://placehold.co/200x200?text=No+Image'
                     }
-                    sx={{ width: isMobile ? '160px' : '100%', height: isMobile ? '160px' : '100%', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer' }} // fit-content
+                    sx={{ width: isMobile ? '160px' : '100%', height: isMobile ? '160px' : '100%', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                      WebkitTouchCallout: 'none', // Disable iOS callout
+                      WebkitUserSelect: 'none', // Disable text selection
+                      userSelect: 'none',
+                      '&:active': {
+                        transform: 'scale(0.98)', // Add press feedback instead
+                        transition: 'transform 0.1s ease',
+                      },
+                     }} // fit-content
                     onClick={() => setProfilePicDialog(true)}
                   />
                   <IconButton

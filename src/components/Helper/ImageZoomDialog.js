@@ -225,6 +225,23 @@ const ImageZoomDialog = ({ selectedImage, handleCloseImageModal, images, isMobil
                     onTouchEnd={handleTouchEnd}
                 />
 
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 10,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        color: 'white',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        padding: '4px 10px',
+                        borderRadius: '6px',
+                        fontSize: '14px'
+                    }}
+                >
+                    {currentIndex + 1} / {images.length}
+                </Box>
+
+
                 {/* Close Button */}
                 <IconButton
                     onClick={handleCloseImageModal}

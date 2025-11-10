@@ -34,6 +34,7 @@ import {
 import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
 import Layout from '../Layout';
 import { getAllVerifications, updateVerificationStatus } from '../api/adminApi';
+import ImageZoomDialog from '../Helper/ImageZoomDialog';
 
 const TabPanel = ({ children, value, index, ...other }) => (
   <div hidden={value !== index} {...other}>
@@ -58,6 +59,7 @@ const ProfileVerification = ({ darkMode, toggleDarkMode, unreadCount, shouldAnim
   const [rejectionReason, setRejectionReason] = useState('');
   const [selectedPredefinedReason, setSelectedPredefinedReason] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     fetchVerifications();
@@ -201,6 +203,16 @@ const ProfileVerification = ({ darkMode, toggleDarkMode, unreadCount, shouldAnim
         size="small"
       />
     );
+  };
+
+  // Function to open the zoomed image modal
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
+  };
+
+  // Function to close the zoomed image modal
+  const handleCloseImageModal = () => {
+    setSelectedImage(null);
   };
 
   const VerificationCard = ({ user }) => (
@@ -394,7 +406,8 @@ const ProfileVerification = ({ darkMode, toggleDarkMode, unreadCount, shouldAnim
                     <img
                         src={`data:image/jpeg;base64,${selectedUser.idVerification.documentFront}`}
                         alt="Document Front"
-                        style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '8px' }}
+                        style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '8px', cursor: 'pointer' }}
+                        onClick={() => handleImageClick(selectedUser.idVerification.documentFront)} // Open image in modal on click
                     />
                     ) : (
                     <Alert severity="warning">No document front uploaded</Alert>
@@ -407,7 +420,8 @@ const ProfileVerification = ({ darkMode, toggleDarkMode, unreadCount, shouldAnim
                     <img
                         src={`data:image/jpeg;base64,${selectedUser.idVerification.documentBack}`}
                         alt="Document Back"
-                        style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '8px' }}
+                        style={{ width: '100%', maxHeight: '300px', objectFit: 'contain', borderRadius: '8px', cursor: 'pointer' }}
+                        onClick={() => handleImageClick(selectedUser.idVerification.documentBack)} // Open image in modal on click
                     />
                     ) : (
                     <Alert severity="info">No document back uploaded (optional)</Alert>
@@ -420,7 +434,8 @@ const ProfileVerification = ({ darkMode, toggleDarkMode, unreadCount, shouldAnim
                     <img
                         src={`data:image/jpeg;base64,${selectedUser.idVerification.selfieWithDocument}`}
                         alt="Selfie with Document"
-                        style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '8px' }}
+                        style={{ width: '100%', maxHeight: '400px', objectFit: 'contain', borderRadius: '8px', cursor: 'pointer' }}
+                        onClick={() => handleImageClick(selectedUser.idVerification.selfieWithDocument)} // Open image in modal on click
                     />
                     ) : (
                     <Alert severity="error">No selfie with document uploaded</Alert>
@@ -575,6 +590,14 @@ const ProfileVerification = ({ darkMode, toggleDarkMode, unreadCount, shouldAnim
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* Image Dialog with Zoom */}
+        <ImageZoomDialog
+          selectedImage={selectedImage}
+          handleCloseImageModal={handleCloseImageModal}
+          images={[selectedImage]} // Pass the full media array
+          isMobile={isMobile}
+        />
 
         {snackbar.open && (
           <Alert 
