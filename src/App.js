@@ -33,6 +33,7 @@ import PostStatusManagement from './components/Admin/PostStatusManagement';
 import SystemHealthDashboard from './components/Admin/SystemHealthDashboard';
 import AdminPreferences from './components/Admin/AdminPreferences';
 import PostReports from './components/Admin/PostReports';
+import ProfileVerification from './components/Admin/ProfileVerification';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -417,37 +418,42 @@ function App() {
           } />
           <Route path="/userManagement" element={
             <PrivateRoute adminOnly>
-              <UserManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <UserManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/userFeedbacks" element={
             <PrivateRoute adminOnly>
-              <Feedbacks darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <Feedbacks darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/adminPage" element={
             <PrivateRoute adminOnly>
-              <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <AdminPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/post-status-management" element={
             <PrivateRoute adminOnly>
-              <PostStatusManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <PostStatusManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/system-health" element={
             <PrivateRoute adminOnly>
-              <SystemHealthDashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <SystemHealthDashboard darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/admin-preferences" element={
             <PrivateRoute adminOnly>
-              <AdminPreferences darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <AdminPreferences darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/post-reports" element={
             <PrivateRoute adminOnly>
-              <PostReports darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} userName={userName}/>
+              <PostReports darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
+            </PrivateRoute>
+          } />
+          <Route path="/profile-verification" element={
+            <PrivateRoute adminOnly>
+              <ProfileVerification darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/terms-conditions" element={<TermsConditions />} />

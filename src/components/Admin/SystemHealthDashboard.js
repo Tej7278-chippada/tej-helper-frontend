@@ -37,7 +37,7 @@ import { getSystemHealth, getNotificationStats } from "../api/adminApi";
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import Layout from "../Layout";
 
-const SystemHealthDashboard = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const SystemHealthDashboard = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
@@ -137,7 +137,7 @@ const SystemHealthDashboard = ({ darkMode, toggleDarkMode, unreadCount, shouldAn
       toggleDarkMode={toggleDarkMode} 
       unreadCount={unreadCount} 
       shouldAnimate={shouldAnimate} 
-      userName={userName}
+      username={username}
     >
       {(loading && !systemHealth) ?
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">

@@ -48,7 +48,7 @@ import Layout from '../Layout';
 import { useTheme } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 
-const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
@@ -249,7 +249,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
         toggleDarkMode={toggleDarkMode} 
         unreadCount={unreadCount} 
         shouldAnimate={shouldAnimate} 
-        userName={userName}
+        username={username}
     >
     <Box sx={{ p: isMobile ? 1 : 3 }}>
       {/* Header */}

@@ -25,8 +25,9 @@ import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
 import SettingsInputComponentRoundedIcon from '@mui/icons-material/SettingsInputComponentRounded';
 import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
+import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
 
-const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
@@ -39,6 +40,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       color: "#2196f3",
       route: "/userManagement",
       bgGradient: "linear-gradient(135deg, #2196f3 0%, #21cbf3 100%)"
+    },
+    {
+      title: "Profile Verification",
+      description: "Review and verify user identity documents and profiles",
+      icon: <VerifiedUserRoundedIcon sx={{ fontSize: 40 }} />,
+      color: "#ff9800",
+      route: "/profile-verification",
+      bgGradient: "linear-gradient(135deg, #ff9800 0%, #ff5722 100%)"
     },
     {
       title: "Reports Management",
@@ -100,7 +109,7 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       toggleDarkMode={toggleDarkMode} 
       unreadCount={unreadCount} 
       shouldAnimate={shouldAnimate}
-      userName={userName}
+      username={username}
     >
       <Box sx={{ m: isMobile ? '12px' : '18px' }}>
         {/* Header Section */}
@@ -118,7 +127,7 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
             </Typography>
           </Stack>
           <Typography variant="body1" color="text.secondary">
-            Welcome back, {userName}! Manage platform settings and content.
+            Welcome back! Manage platform settings and content.
           </Typography>
         </Box>
 

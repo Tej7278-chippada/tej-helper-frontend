@@ -1,10 +1,10 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import API, { deleteProfilePicture, fetchUserProfile, updateProfilePicture, updateUserProfile } from './api/api';
+import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, getIdVerificationStatus, submitIdVerification, updateProfilePicture, updateUserProfile } from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 // import { Marker, TileLayer } from 'leaflet';
@@ -29,6 +29,12 @@ import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 import ReviewsRoundedIcon from '@mui/icons-material/ReviewsRounded';
 import ManageAccountsRoundedIcon from '@mui/icons-material/ManageAccountsRounded';
 import UserProfileDetails from './Helper/UserProfileDetails';
+import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
+import GppMaybeRoundedIcon from '@mui/icons-material/GppMaybeRounded';
+import HourglassEmptyRoundedIcon from '@mui/icons-material/HourglassEmptyRounded';
+import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
+import DocumentScannerRoundedIcon from '@mui/icons-material/DocumentScannerRounded';
+import VerificationDialog from './VerificationDialog';
 
 
 // Set default icon manually
@@ -110,6 +116,91 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [interests, setInterests] = useState('');
+  const [verificationStatus, setVerificationStatus] = useState('not_started');
+  const [verificationLoading, setVerificationLoading] = useState(false);
+  const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
+  const [verificationData, setVerificationData] = useState(null);
+
+  // Add this useEffect to fetch verification status
+  // useEffect(() => {
+  //   const fetchVerificationStatus = async () => {
+  //     try {
+  //       const response = await getIdVerificationStatus(id);
+  //       // setVerificationStatus(response.data.status);
+  //       // setVerificationData(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching verification status:', error);
+  //     }
+  //   };
+
+  //   if (userData) {
+  //     fetchVerificationStatus();
+  //   }
+  // }, [id, userData]);
+
+  // to handle verification submission
+  const handleSubmitVerification = async (formData) => {
+    try {
+      setVerificationLoading(true);
+      const response = await submitIdVerification(id, formData);
+      
+      setVerificationStatus('pending_review');
+      setVerificationData(prev => ( {...prev,
+        attempts: response.data.attempts,
+        submittedAt: response.data.submittedAt,
+        documentType: response.data.documentType }));
+      setVerificationDialogOpen(false);
+      setSnackbar({ 
+        open: true, 
+        message: response.data.message, 
+        severity: 'success' 
+      });
+    } catch (error) {
+      console.error('Error submitting verification:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Error submitting verification', 
+        severity: 'error' 
+      });
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  const handleCancelVerification = async () => {
+    try {
+      setVerificationLoading(true);
+      const response = await cancelIdVerification(id);
+      
+      setVerificationStatus('not_started');
+      setVerificationData(previous => ( {...previous, submittedAt: null, documentType: null }));
+      setSnackbar({ 
+        open: true, 
+        message: response.data.message, 
+        severity: 'success' 
+      });
+    } catch (error) {
+      console.error('Error cancelling verification:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Error cancelling verification', 
+        severity: 'error' 
+      });
+    } finally {
+      setVerificationLoading(false);
+    }
+  };
+
+  const getDocType = (type) => {
+    switch (type) {
+      case 'aadhaar': return 'Aadhaar';
+      case 'driving_license': return 'Driving License';
+      case 'passport': return 'Passport';
+      case 'voter_id': return 'Voter ID';
+      case 'pan_card': return 'Pan Card';
+      default: return 'Goberment ID';
+    }
+  };
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -119,6 +210,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         setUserData(response.data);
         setFollowerCount(response.data.followerCount);
         setFollowingCount(response.data.followingCount);
+        setVerificationStatus(response.data.status);
+        setVerificationData(response.data);
         // fetchAddress(response.data.location.latitude, response.data.location.longitude);
         
       } catch (err) {
@@ -902,6 +995,113 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               </Box>
             </Box>
           </Box>
+          <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box display="flex" alignItems="center">
+                <Avatar sx={{ 
+                  bgcolor: verificationStatus === 'approved' ? 'success.main' : 
+                          verificationStatus === 'pending_review' ? 'warning.main' : 
+                          verificationStatus === 'rejected' ? 'error.main' : 'grey.500', 
+                  mr: 1, 
+                  height: '32px', 
+                  width: '32px' 
+                }}>
+                  {verificationStatus === 'approved' ? <VerifiedUserRoundedIcon fontSize="small" /> :
+                  verificationStatus === 'pending_review' ? <HourglassEmptyRoundedIcon fontSize="small" /> :
+                  verificationStatus === 'rejected' ? <GppMaybeRoundedIcon fontSize="small" /> :
+                  <DocumentScannerRoundedIcon fontSize="small" />}
+                </Avatar>
+                <Typography variant="h6">
+                  Identity Verification
+                </Typography>
+              </Box>
+              <Chip
+                label={
+                  verificationStatus === 'approved' ? 'Verified' :
+                  verificationStatus === 'pending_review' ? 'Under Review' :
+                  verificationStatus === 'rejected' ? 'Rejected' : 'Not Verified'
+                }
+                color={
+                  verificationStatus === 'approved' ? 'success' :
+                  verificationStatus === 'pending_review' ? 'warning' :
+                  verificationStatus === 'rejected' ? 'error' : 'default'
+                }
+                variant={verificationStatus === 'not_started' ? 'outlined' : 'filled'}
+              />
+            </Box>
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Typography variant="body2" color="textSecondary">
+                {verificationStatus === 'approved' ? 
+                  'Your identity has been successfully verified. This builds trust with other users.' :
+                verificationStatus === 'pending_review' ? 
+                  'Your verification is under review. This usually takes 24-48 hours.' :
+                verificationStatus === 'rejected' ? 
+                  `Your verification was rejected. ${verificationData?.rejectionReason || 'Please try again with clearer documents.'}` :
+                  'Verify your identity to increase trust and access more features. Submit clear photos of your government ID.'}
+              </Typography>
+              
+              {verificationData && (
+                <>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, fontSize: '0.875rem' }}>
+                  <Typography variant="body2" color="textSecondary">
+                    Attempts: {verificationData.attempts || 0}/{verificationData.maxAttempts || 3}
+                  </Typography>
+                  {verificationData.documentType && (
+                    <Typography variant="body2" color="textSecondary" >
+                      DocumentType: {getDocType(verificationData.documentType) || 'N/A'}
+                    </Typography>
+                  )}
+                </Box>
+                {verificationData.submittedAt && (
+                  <Typography variant="body2" color="textSecondary">
+                    Submitted on: {new Date(verificationData.submittedAt).toLocaleDateString()}
+                  </Typography>
+                )}
+                {verificationData.reviewedAt && (
+                  <Typography variant="body2" color="textSecondary">
+                    Reviewed on: {new Date(verificationData.reviewedAt).toLocaleDateString()}
+                  </Typography>
+                )}
+                </>
+              )}
+              
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {(verificationStatus === 'not_started' || verificationStatus === 'rejected') && (
+                  <Button
+                    variant="contained"
+                    onClick={() => setVerificationDialogOpen(true)}
+                    disabled={verificationLoading || (verificationData?.attempts >= verificationData?.maxAttempts)}
+                    startIcon={<DocumentScannerRoundedIcon />}
+                    sx={{ borderRadius: '12px', textTransform: 'none' }}
+                  >
+                    {verificationData?.attempts >= verificationData?.maxAttempts ? 
+                      'Max Attempts Reached' : 'Start Verification'}
+                  </Button>
+                )}
+                
+                {verificationStatus === 'pending_review' && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleCancelVerification}
+                    disabled={verificationLoading}
+                    startIcon={<CancelRoundedIcon />}
+                    sx={{ borderRadius: '12px', textTransform: 'none' }}
+                  >
+                    Cancel Verification
+                  </Button>
+                )}
+                
+                {verificationStatus === 'approved' && (
+                  <Typography variant="body2" color="success.main" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <VerifiedUserRoundedIcon sx={{ mr: 0.5, fontSize: '1rem' }} />
+                    Verified on {new Date(verificationData?.reviewedAt).toLocaleDateString()}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          </Box>
           <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Box display="flex" alignItems="center">
@@ -1511,6 +1711,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* verification submission dialog */}
+      <VerificationDialog
+        open={verificationDialogOpen}
+        onClose={() => setVerificationDialogOpen(false)}
+        onSubmit={handleSubmitVerification}
+        loading={verificationLoading}
+        attempts={verificationData?.attempts || 0}
+        maxAttempts={verificationData?.maxAttempts || 3}
+        isMobile={isMobile} darkMode={darkMode}
+      />
 
       <UserProfileDetails
         userId={id}

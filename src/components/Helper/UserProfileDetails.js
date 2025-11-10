@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider } from '@mui/material';
 import { fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
 // import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
-
+import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -209,6 +209,17 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       setSnackbar({ open: true, message: error.response?.data?.message || 'Error unfollowing user', severity: 'error' });
     } finally {
       setLoadingFollow(false);
+    }
+  };
+
+  const getDocType = (type) => {
+    switch (type) {
+      case 'aadhaar': return 'Aadhaar';
+      case 'driving_license': return 'Driving License';
+      case 'passport': return 'Passport';
+      case 'voter_id': return 'Voter ID';
+      case 'pan_card': return 'Pan Card';
+      default: return 'Goberment ID';
     }
   };
 
@@ -503,32 +514,24 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
               }
               <Box sx={{ width: '100%'}}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Typography variant="h6" >{profile?.username}</Typography>
-                  {userId !== localStorage.getItem('userId') && (
-                    <Button
-                      variant={isFollowing ? "outlined" : "contained"} size="small"
-                      onClick={isFollowing ? handleUnfollow : handleFollow}
-                      sx={{ borderRadius: '12px', textTransform: 'none' }}
-                      disabled={!isAuthenticated || isFetching || loadingFollow} // Disable if not logged in
-                    >
-                      { loadingFollow ? <CircularProgress size={20} /> : isFollowing ? 'Unfollow' : 'Follow'}
-                    </Button>
-                  )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="h6" >{profile?.username}</Typography>
+                    {(profile?.idVerificationStatus === 'approved') &&
+                    <Tooltip title="Verified User" placement="top" arrow>
+                      <VerifiedRoundedIcon sx={{ mr: 0.5, fontSize: '20px', color: 'Highlight' }} />  
+                    </Tooltip>}
+                  </Box>
+                  
                 </Box>
+                {profile?.idVerificationStatus === 'approved' && (
+                  <Typography variant="body2" color="success.main" sx={{ display: 'flex', alignItems: 'center' }}>
+                    {/* <VerifiedUserRoundedIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> */}
+                    User verified with government ID of {getDocType(profile?.verifiedDoc)}
+                  </Typography>
+                )}
                 <Typography variant="body2">
                   Bio: {profile?.description}
                 </Typography>
-                <Box sx={{ my: 1 }}>
-                  <Typography variant="body2" gutterBottom>Network:</Typography>
-                  <Box sx={{ display: 'flex', gap: 3 }}>
-                    <Typography variant="body2">
-                      <strong>{followerCount}</strong> Followers
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>{followingCount}</strong> Following
-                    </Typography>
-                  </Box>
-                </Box>
                 {profile?.interests && profile.interests.length > 0 && (
                   <Box sx={{ my: 0,  }}>
                     <Typography variant="body2" gutterBottom>Interests:</Typography>
@@ -544,6 +547,30 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     </Box>
                   </Box>
                 )}
+                {/* <Divider sx={{ my: 1 }} /> */}
+                <Box sx={{ my: 1 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="body1">Network:</Typography>
+                    {userId !== localStorage.getItem('userId') && (
+                      <Button
+                        variant={isFollowing ? "outlined" : "contained"} size="small"
+                        onClick={isFollowing ? handleUnfollow : handleFollow}
+                        sx={{ borderRadius: '12px', textTransform: 'none' }}
+                        disabled={!isAuthenticated || isFetching || loadingFollow} // Disable if not logged in
+                      >
+                        { loadingFollow ? <CircularProgress size={20} /> : isFollowing ? 'Unfollow' : 'Follow'}
+                      </Button>
+                    )}
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 3 }}>
+                    <Typography variant="body2">
+                      <strong>{followerCount}</strong> Followers
+                    </Typography>
+                    <Typography variant="body2">
+                      <strong>{followingCount}</strong> Following
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Box>
             

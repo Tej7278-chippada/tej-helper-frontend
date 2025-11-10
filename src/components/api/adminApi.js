@@ -233,3 +233,46 @@ export const getReportStatistics = () => {
     headers: { Authorization: `Bearer ${authToken}` }
   });
 };
+
+// fetching all verifications data
+export const getAllVerifications = async () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.get('/api/auth/id-verification/all', { headers });
+};
+
+// only fetch pending verifications
+export const getPendingVerifications = async () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.get('/api/auth/id-verification/pending', { headers });
+};
+
+export const getUserVerificationDetails = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.get(`/api/auth/id-verification/user/${userId}`, { headers });
+};
+
+// update the verification status(approve/reject)
+export const updateVerificationStatus = async (userId, status, rejectionReason = '') => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.put(`/api/auth/id-verification/review/${userId}`, 
+    { status, rejectionReason }, 
+    { headers }
+  );
+};

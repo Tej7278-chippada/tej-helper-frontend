@@ -439,3 +439,33 @@ export const getUserProfile = async (userId) => {
   
   return await API.get(`/api/auth/profile/${userId}`, { headers });
 };
+
+// submit ID verification documents
+export const submitIdVerification = async (userId, formData) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'multipart/form-data'
+  } : {};
+  
+  return await API.post(`/api/auth/id-verification/submit/${userId}`, formData, { headers });
+};
+
+// export const getIdVerificationStatus = async (userId) => {
+//   const authToken = localStorage.getItem('authToken');
+//   const headers = authToken ? { 
+//     Authorization: `Bearer ${authToken}`
+//   } : {};
+  
+//   return await API.get(`/api/auth/id-verification/status/${userId}`, { headers });
+// };
+
+// cancel ID verification process by user
+export const cancelIdVerification = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.delete(`/api/auth/id-verification/cancel/${userId}`, { headers });
+};

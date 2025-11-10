@@ -65,7 +65,7 @@ import {
 } from "../api/adminApi";
 import Layout from "../Layout";
 
-const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   
@@ -287,7 +287,7 @@ const PostStatusManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAni
       toggleDarkMode={toggleDarkMode} 
       unreadCount={unreadCount} 
       shouldAnimate={shouldAnimate} 
-      userName={userName}
+      username={username}
     >
       {/* Header */}
       <Box sx={{ mb: 0, p: isMobile ? 1 : 3 }}>

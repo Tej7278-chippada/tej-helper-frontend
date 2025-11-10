@@ -65,7 +65,7 @@ const statusIcons = {
   resolved: <CheckCircleIcon />
 };
 
-const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -224,7 +224,7 @@ const Feedbacks = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userN
       toggleDarkMode={toggleDarkMode} 
       unreadCount={unreadCount} 
       shouldAnimate={shouldAnimate} 
-      userName={userName}
+      username={username}
     >
       <Box sx={{ p: { xs: 2, md: 3 } }}>
         {/* Header */}

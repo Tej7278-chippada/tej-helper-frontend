@@ -29,7 +29,7 @@ import { filterUsersByStatus, getUserCounts, searchUsers, updateAccountStatus } 
 import { useTheme } from "@emotion/react";
 import ClearIcon from '@mui/icons-material/Clear';
 
-const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, userName }) => {
+const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -184,7 +184,7 @@ const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, 
       toggleDarkMode={toggleDarkMode} 
       unreadCount={unreadCount} 
       shouldAnimate={shouldAnimate}
-      userName={userName}
+      username={username}
     >
       <Box sx={{ m: isMobile ? '12px' : '18px' }}>
         <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom>
