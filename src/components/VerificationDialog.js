@@ -212,7 +212,7 @@ const VerificationDialog = ({ open, onClose, onSubmit, loading, attempts, maxAtt
                   style={{ display: 'none' }}
                   id="document-front"
                   type="file"
-                  capture="environment" // Opens camera on mobile
+                  // capture="environment" // Opens camera on mobile
                   onChange={(e) => setDocumentFront(e.target.files[0])}
                 />
                 <label htmlFor="document-front">
@@ -254,7 +254,7 @@ const VerificationDialog = ({ open, onClose, onSubmit, loading, attempts, maxAtt
                   style={{ display: 'none' }}
                   id="document-back"
                   type="file"
-                  capture="environment" // Opens camera on mobile
+                  // capture="environment" // Opens camera on mobile
                   onChange={(e) => setDocumentBack(e.target.files[0])}
                 />
                 <label htmlFor="document-back">
