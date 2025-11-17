@@ -23,7 +23,7 @@ import {
 } from "@mui/icons-material";
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
-import SettingsInputComponentRoundedIcon from '@mui/icons-material/SettingsInputComponentRounded';
+// import SettingsInputComponentRoundedIcon from '@mui/icons-material/SettingsInputComponentRounded';
 import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
 import VerifiedUserRoundedIcon from '@mui/icons-material/VerifiedUserRounded';
 
@@ -73,14 +73,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, usern
       route: "/post-status-management",
       bgGradient: "linear-gradient(135deg, #9c27b0 0%, #e91e63 100%)"
     },
-    {
-      title: "Admin Preferences",
-      description: "Manage post status update settings and system preferences",
-      icon: <SettingsInputComponentRoundedIcon sx={{ fontSize: 40 }} />,
-      color: "#673ab7",
-      route: "/admin-preferences",
-      bgGradient: "linear-gradient(135deg, #673ab7 0%, #512da8 100%)"
-    },
+    // {
+    //   title: "Admin Preferences",
+    //   description: "Manage post status update settings and system preferences",
+    //   icon: <SettingsInputComponentRoundedIcon sx={{ fontSize: 40 }} />,
+    //   color: "#673ab7",
+    //   route: "/admin-preferences",
+    //   bgGradient: "linear-gradient(135deg, #673ab7 0%, #512da8 100%)"
+    // },
     {
       title: "System Health",
       description: "Monitor system performance, database status, and notifications",
