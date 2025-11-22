@@ -34,6 +34,7 @@ import SystemHealthDashboard from './components/Admin/SystemHealthDashboard';
 import AdminPreferences from './components/Admin/AdminPreferences';
 import PostReports from './components/Admin/PostReports';
 import ProfileVerification from './components/Admin/ProfileVerification';
+import PlansComparison from './components/Admin/PlansComparison';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -458,6 +459,7 @@ function App() {
           } />
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/plans" element={<PlansComparison />} />
         </Routes>
       </Router>
     </ThemeProvider>
