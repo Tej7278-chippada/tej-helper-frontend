@@ -431,6 +431,24 @@ export const unfollowUser = async (userId) => {
   return await API.post(`/api/auth/unfollow/${userId}`, {}, { headers });
 };
 
+// Fetch user's followers
+export const fetchUserFollowers = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  return await API.get(`/api/auth/${userId}/followers`, { headers });
+};
+
+// Fetch user's following
+export const fetchUserFollowing = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  return await API.get(`/api/auth/${userId}/following`, { headers });
+};
+
 export const getUserProfile = async (userId) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { 

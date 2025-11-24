@@ -10,6 +10,7 @@ import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
+import FollowDialog from './FollowDialog';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -45,6 +46,10 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   const [followingCount, setFollowingCount] = useState(0);
   const [profile, setProfile] = useState(null);
   const [loadingFollow, setLoadingFollow] = useState(false);
+  const [followDialogOpen, setFollowDialogOpen] = useState(false);
+  const [followType, setFollowType] = useState(''); // 'followers' or 'following'
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [nestedProfileOpen, setNestedProfileOpen] = useState(false);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -214,6 +219,27 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
     } finally {
       setLoadingFollow(false);
     }
+  };
+
+  const handleOpenFollowers = () => {
+    setFollowType('followers');
+    setFollowDialogOpen(true);
+  };
+
+  const handleOpenFollowing = () => {
+    setFollowType('following');
+    setFollowDialogOpen(true);
+  };
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setNestedProfileOpen(true);
+    setFollowDialogOpen(false);
+  };
+
+  const handleCloseNestedProfile = () => {
+    setNestedProfileOpen(false);
+    setSelectedUser(null);
   };
 
   const getDocType = (type) => {
@@ -585,10 +611,32 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     )}
                   </Box>
                   <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      onClick={handleOpenFollowers}
+                      sx={{ 
+                        cursor: 'pointer',
+                        '&:hover': { 
+                          color: 'primary.main',
+                          textDecoration: 'underline'
+                        }
+                      }}
+                    >
                       <strong>{followerCount}</strong> Followers
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary"
+                      onClick={handleOpenFollowing}
+                      sx={{ 
+                        cursor: 'pointer',
+                        '&:hover': { 
+                          color: 'primary.main',
+                          textDecoration: 'underline'
+                        }
+                      }}
+                    >
                       <strong>{followingCount}</strong> Following
                     </Typography>
                   </Box>
@@ -825,6 +873,28 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       //     </Box>
       //   )
       )} */}
+      {/* Followers/Following Dialog */}
+      <FollowDialog
+        open={followDialogOpen}
+        onClose={() => setFollowDialogOpen(false)}
+        userId={userId}
+        followType={followType}
+        onUserClick={handleUserClick}
+        darkMode={darkMode}
+        isMobile={isMobile}
+      />
+
+      {/* Nested User Profile Details */}
+      <UserProfileDetails
+        userId={selectedUser?._id}
+        open={nestedProfileOpen}
+        onClose={handleCloseNestedProfile}
+        isMobile={isMobile}
+        isAuthenticated={isAuthenticated}
+        setLoginMessage={setLoginMessage}
+        setSnackbar={setSnackbar}
+        darkMode={darkMode}
+      />
     </Dialog>
   );
 };

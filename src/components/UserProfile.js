@@ -40,6 +40,7 @@ import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
+import FollowDialog from './Helper/FollowDialog';
 
 
 // Set default icon manually
@@ -129,6 +130,10 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [verificationLoading, setVerificationLoading] = useState(false);
   const [verificationDialogOpen, setVerificationDialogOpen] = useState(false);
   const [verificationData, setVerificationData] = useState(null);
+  const [followDialogOpen, setFollowDialogOpen] = useState(false);
+  const [followType, setFollowType] = useState(''); // 'followers' or 'following'
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userProfileDetailsOpen, setUserProfileDetailsOpen] = useState(false);
 
   // Add this useEffect to fetch verification status
   // useEffect(() => {
@@ -625,6 +630,22 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     }));
   };
 
+  const handleOpenFollowers = () => {
+    setFollowType('followers');
+    setFollowDialogOpen(true);
+  };
+
+  const handleOpenFollowing = () => {
+    setFollowType('following');
+    setFollowDialogOpen(true);
+  };
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+    setUserProfileDetailsOpen(true);
+    setFollowDialogOpen(false);
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* <Snackbar
@@ -833,10 +854,28 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       </Box>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" 
+                        onClick={handleOpenFollowers}
+                        sx={{ 
+                          cursor: 'pointer',
+                          '&:hover': { 
+                            color: 'primary.main',
+                            textDecoration: 'underline'
+                          }
+                        }}
+                      >
                         <strong>{followerCount}</strong> Followers
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" >
+                      <Typography variant="body2" color="text.secondary"
+                        onClick={handleOpenFollowing}
+                        sx={{ 
+                          cursor: 'pointer',
+                          '&:hover': { 
+                            color: 'primary.main',
+                            textDecoration: 'underline'
+                          }
+                        }}
+                      >
                         <strong>{followingCount}</strong> Following
                       </Typography>
                     </Box>
@@ -1908,6 +1947,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         </DialogActions>
       </Dialog>
 
+      {/* Followers/Following Dialog */}
+      <FollowDialog
+        open={followDialogOpen}
+        onClose={() => setFollowDialogOpen(false)}
+        userId={id}
+        followType={followType}
+        onUserClick={handleUserClick}
+        darkMode={darkMode}
+        isMobile={isMobile}
+      />
+
       {/* verification submission dialog */}
       <VerificationDialog
         open={verificationDialogOpen}
@@ -1920,9 +1970,13 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       />
 
       <UserProfileDetails
-        userId={id}
-        open={isRateDialogOpen}
-        onClose={handleCloseRateDialog}
+        userId={selectedUser?._id || id}
+        open={userProfileDetailsOpen || isRateDialogOpen}
+        onClose={() => {
+          setUserProfileDetailsOpen(false);
+          setSelectedUser(null);
+          if (isRateDialogOpen) handleCloseRateDialog();
+        }}
         // post={post}
         isMobile={isMobile}
         // isAuthenticated={isAuthenticated} 
