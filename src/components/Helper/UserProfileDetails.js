@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider, Grid } from '@mui/material';
 import { fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
 // import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
 import { useNavigate } from 'react-router-dom';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
+import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
+import BloodtypeIcon from '@mui/icons-material/Bloodtype';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -484,7 +488,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
        > {/*  backgroundColor: "#f5f5f5", */}
         <Box sx={{ p: 1}}>
           <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, mb: 2 }}>
               {profile?.profilePic ?
                <Avatar
                   src={`data:image/png;base64,${profile?.profilePic}`}
@@ -518,7 +522,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     <Typography variant="h6" >{profile?.username}</Typography>
                     {(profile?.idVerificationStatus === 'approved') &&
                     <Tooltip title="Verified User" placement="top" arrow>
-                      <VerifiedRoundedIcon sx={{ mr: 0.5, fontSize: '20px', color: 'Highlight' }} />  
+                      <VerifiedRoundedIcon sx={{ fontSize: '20px', color: 'Highlight' }} />  
                     </Tooltip>}
                   </Box>
                   
@@ -532,25 +536,43 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 <Typography variant="body2">
                   Bio: {profile?.description}
                 </Typography>
-                {profile?.interests && profile.interests.length > 0 && (
-                  <Box sx={{ my: 0,  }}>
-                    <Typography variant="body2" gutterBottom>Interests:</Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {profile.interests.map((interest, index) => (
-                        <Chip
-                          key={index} size="small"
-                          label={interest}
-                          variant="outlined"
-                          sx={{ borderRadius: '12px' }}
-                        />
-                      ))}
-                    </Box>
+                
+
+              </Box>
+            </Box>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={12} md={6} >
+                {/* {profile?.interests && profile.interests.length > 0 && ( */}
+                <Box sx={{ my: 0,  }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <InterestsRoundedIcon fontSize="small" color="primary" />
+                    <Typography variant="body1" >Interests:</Typography>
                   </Box>
-                )}
-                {/* <Divider sx={{ my: 1 }} /> */}
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 4 }}>
+                    {profile?.interests.map((interest, index) => (
+                      <Chip
+                        key={index}
+                        label={interest}
+                        variant="outlined" size="small" color="textSecondary"
+                        sx={{ borderRadius: '12px', padding: '4px 6px' }}
+                      />
+                    ))}
+                    {profile?.interests?.length === 0 && (
+                      <Typography variant="body2" color="textSecondary">
+                        No interests specified.
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+                {/* )} */}
+              </Grid>
+              <Grid item xs={12} sm={12} md={6} >
                 <Box sx={{ my: 1 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Typography variant="body1">Network:</Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Diversity2RoundedIcon fontSize="small" color="warning" />
+                      <Typography variant="body1">Network:</Typography>
+                    </Box>
                     {userId !== localStorage.getItem('userId') && (
                       <Button
                         variant={isFollowing ? "outlined" : "contained"} size="small"
@@ -562,18 +584,57 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       </Button>
                     )}
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 3 }}>
-                    <Typography variant="body2">
+                  <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
+                    <Typography variant="body2" color="text.secondary">
                       <strong>{followerCount}</strong> Followers
                     </Typography>
-                    <Typography variant="body2">
+                    <Typography variant="body2" color="text.secondary">
                       <strong>{followingCount}</strong> Following
                     </Typography>
                   </Box>
                 </Box>
-              </Box>
-            </Box>
-            
+              </Grid>
+              {/* Blood Donation */}
+              <Grid item xs={12} sm={12} md={6} >
+                <Box sx={{ mb: 2 }}>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <BloodtypeIcon color="error" fontSize="small" />
+                    <Typography variant="body1" fontWeight={500}>
+                      Blood Donation
+                    </Typography>
+                  </Box>
+
+                  <Typography variant="body2" color="textSecondary" >
+                    {profile?.bloodDonar?.donate === true
+                      ? profile?.bloodDonar?.bloodGroup === "Unknown"
+                        ? "This user donates blood! (Blood group not specified)"
+                        : `This user donates blood! (${profile?.bloodDonar?.bloodGroup})`
+                      : profile?.bloodDonar?.donate === false
+                      ? "Blood donation is not enabled."
+                      : "This preference hasn’t been set yet."}
+                  </Typography>
+                </Box>
+              </Grid>
+              {/* Women Safety */}
+              <Grid item xs={12} sm={12} md={6} >
+                <Box>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <VolunteerActivismIcon color="success" fontSize="small" />
+                    <Typography variant="body1" fontWeight={500}>
+                      Women’s Safety Support
+                    </Typography>
+                  </Box>
+
+                  <Typography variant="body2" color="textSecondary" >
+                    {profile?.withYou === true
+                      ? "This user stands for women's safety!"
+                      : profile?.withYou === false
+                      ? "This feature is not enabled."
+                      : "This preference hasn’t been set yet."}
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>

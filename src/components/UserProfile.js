@@ -1,7 +1,7 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem, Switch, FormControl, InputLabel, Select, Menu } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
 import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, getIdVerificationStatus, submitIdVerification, updateProfilePicture, updateUserProfile } from './api/api';
@@ -35,6 +35,11 @@ import HourglassEmptyRoundedIcon from '@mui/icons-material/HourglassEmptyRounded
 import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import DocumentScannerRoundedIcon from '@mui/icons-material/DocumentScannerRounded';
 import VerificationDialog from './VerificationDialog';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import BloodtypeIcon from '@mui/icons-material/Bloodtype';
+import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
+import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
+import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 
 
 // Set default icon manually
@@ -104,7 +109,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [profileForm, setProfileForm] = useState({
     username: '',
     email: '',
-    phone: ''
+    phone: '',
+    profileDescription: '',
+    withYou: false,
+    donate: false,
+    bloodGroup: '',
   });
   const [profilePicDialog, setProfilePicDialog] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
@@ -373,6 +382,9 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       username: userData.username,
       email: userData.email,
       phone: userData.phone || '',
+      withYou: userData.withYou || false,
+      donate: userData.bloodDonar?.donate || false,
+      bloodGroup: userData.bloodDonar?.bloodGroup || '',
       profileDescription: userData.profileDescription || '',
       interests: userData.interests || []
     });
@@ -426,15 +438,21 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         ...profileForm,
         interests: Array.isArray(profileForm.interests) ? profileForm.interests : []
       });
+      const updated = response.data.user;
       setUserData(prev => ({
         ...prev,
-        username: response.data.user.username,
-        email: response.data.user.email,
-        phone: response.data.user.phone,
-        profileDescription: response.data.user.profileDescription,
-        interests: response.data.user.interests
+        username: updated.username,
+        email: updated.email,
+        phone: updated.phone,
+        withYou: updated.withYou,
+        bloodDonar: {
+          donate: updated.bloodDonar?.donate ?? false,
+          bloodGroup: updated.bloodDonar?.bloodGroup ?? ''
+        },
+        profileDescription: updated.profileDescription,
+        interests: updated.interests
       }));
-      localStorage.setItem('tokenUsername', response.data.user.username);
+      localStorage.setItem('tokenUsername', updated.username);
       setEditProfileOpen(false);
       setSnackbar({ 
         open: true, 
@@ -590,6 +608,23 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     }
   };
 
+  const toggleWithYou = (e) => {
+    const isChecked = e.target.checked;
+    setProfileForm((prev) => ({
+      ...prev,
+      withYou: isChecked
+    }));
+  };
+
+  const toggleBloodDonate = (e) => {
+    const isChecked = e.target.checked;
+    setProfileForm((prev) => ({
+      ...prev,
+      donate: isChecked,
+      // bloodGroup: isChecked ? prev.bloodGroup : '' // remove group if turned off
+    }));
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* <Snackbar
@@ -719,9 +754,15 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       User Name:
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {userData.username}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      <Typography variant="body2" color="textSecondary">
+                        {userData.username}
+                      </Typography>
+                      {(verificationStatus === 'approved') &&
+                      <Tooltip title="Verification Badge" placement="top" arrow>
+                        <VerifiedRoundedIcon sx={{ fontSize: '20px', color: 'Highlight' }} />  
+                      </Tooltip>}
+                    </Box>
                   </Grid>
                   <Grid item xs={6} sm={4}>
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
@@ -745,7 +786,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       <Chip
                         label={userData?.emailVerified === true ? 'Verified' : 'Not Verified'} 
                         color={userData?.emailVerified === true ? 'success' : 'warning' }
-                        sx={{ height: '24px', ml: 1 }} variant="outlined"
+                        sx={{ height: '24px', ml: 1 }} variant="outlined" size="small"
                       />
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
@@ -753,12 +794,89 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     </Typography>
                     
                   </Grid>
-                  <Grid item xs={6} sm={4}>
+                  <Grid item xs={12} sm={12} >
                     <Typography variant="body1" style={{ fontWeight: 500 }}>
                       Profile Description:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {userData?.profileDescription || 'No description added yet.'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6} >
+                    <Box >
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <InterestsRoundedIcon fontSize="small" color="primary" />
+                        <Typography variant="body1" style={{ fontWeight: 500 }} >Interests</Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 4 }}>
+                        {userData?.interests.map((interest, index) => (
+                          <Chip
+                            key={index}
+                            label={interest}
+                            variant="outlined" size="small" color="textSecondary"
+                            sx={{ borderRadius: '12px', padding: '4px 6px' }}
+                          />
+                        ))}
+                        {userData?.interests?.length === 0 && (
+                          <Typography variant="body2" color="textSecondary">
+                            No interests specified.
+                          </Typography>
+                        )}
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6} >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Diversity2RoundedIcon fontSize="small" color="warning" />
+                        <Typography variant="body1" style={{ fontWeight: 500 }} >Network</Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        <strong>{followerCount}</strong> Followers
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" >
+                        <strong>{followingCount}</strong> Following
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6} >
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <VolunteerActivismIcon color="success" fontSize="small" />
+                      <Typography variant="body1" style={{ fontWeight: 500 }}>
+                        Standing with Women Safety
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="textSecondary">
+                      {userData?.withYou === true
+                        ? 'You are supporting women’s safety — Great!'
+                        : userData?.withYou === false
+                        ? 'You can enable this anytime.'
+                        : `You haven't set this preference yet.`}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" marginTop={4}>
+                      *Your profile will be visible to women nearby who may need help in unsafe situations.
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={12} md={6} >
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <BloodtypeIcon color="error" fontSize="small" />
+                      <Typography variant="body1" fontWeight={500}>
+                        Blood Donation Status
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" color="textSecondary">
+                      {userData?.bloodDonar?.donate === true
+                        ? userData?.bloodDonar?.bloodGroup === "Unknown"
+                          ? "You’re a blood donor — thank you! (Blood group not specified)"
+                          : `You’re a blood donor — thank you! (${userData?.bloodDonar?.bloodGroup})`
+                        : userData?.bloodDonar?.donate === false
+                        ? "You haven’t enabled blood donation."
+                        : "You haven’t set this preference yet."}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" marginTop={4}>
+                      *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
                     </Typography>
                   </Grid>
                   {/* <Grid item xs={6} sm={4}>
@@ -814,13 +932,16 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 </Grid>
               </Box>
 
-              <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+              {/* <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Typography variant="h6" gutterBottom>Network</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <Diversity2RoundedIcon fontSize="small" color="primary" />
+                    <Typography variant="h6" >Network</Typography>
+                  </Box>
                 </Box>
 
-                {/* Follow stats */}
-                <Box sx={{ display: 'flex', gap: 3 }}>
+                Follow stats
+                <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
                   <Typography variant="body2">
                     <strong>{followerCount}</strong> Followers
                   </Typography>
@@ -828,10 +949,10 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     <strong>{followingCount}</strong> Following
                   </Typography>
                 </Box>
-              </Box>
+              </Box> */}
 
               {/* Interests Section */}
-              {userData?.interests && userData.interests.length > 0 && (
+              {/* {userData?.interests && userData.interests.length > 0 && (
                 <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
                   <Typography variant="h6" gutterBottom>Interests</Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -845,7 +966,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     ))}
                   </Box>
                 </Box>
-              )}
+              )} */}
 
               {/* <Box sx={{pt: 2}}>
                 <Toolbar sx={{
@@ -1506,7 +1627,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               }}
               inputProps={{ maxLength: 100 }}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0, display: 'block' }}>
               {profileForm?.profileDescription?.length}/100 characters
             </Typography>
             <Box sx={{ mt: 2 }}>
@@ -1574,6 +1695,72 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   ),
                 }}
               />
+              
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" fontWeight={500}>
+                  {profileForm.withYou
+                    ? 'You stand for women’s safety'
+                    : 'Stand for women’s safety?'}
+                </Typography>
+                <Switch
+                  checked={profileForm.withYou}
+                  onChange={toggleWithYou}
+                  color="primary"
+                />
+              </Box>
+              <Typography variant="caption" color="text.secondary" marginTop={4}>
+                *Your profile will be visible to women nearby who may need help in unsafe situations.
+              </Typography>
+            </Box>
+
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Typography variant="body2" fontWeight={500}>
+                  {profileForm.donate
+                    ? "You're donating blood — thank you for helping others!"
+                    : "Would you like to become a blood donor?"}
+                </Typography>
+
+                <Switch
+                  checked={profileForm.donate}
+                  onChange={toggleBloodDonate}
+                  color="primary"
+                />
+              </Box>
+
+              {profileForm.donate && (
+                <FormControl fullWidth required sx={{ mt: 2 }}>
+                  <InputLabel>Blood Group</InputLabel>
+                  <Select
+                    value={profileForm.bloodGroup || ''}
+                    onChange={(e) =>
+                      setProfileForm({ ...profileForm, bloodGroup: e.target.value })
+                    }
+                    label="BloodGroup"
+                    sx={{ borderRadius: 2 }}
+                    required
+                  >
+                    <MenuItem value="A+">A+</MenuItem>
+                    <MenuItem value="A-">A-</MenuItem>
+                    <MenuItem value="B+">B+</MenuItem>
+                    <MenuItem value="B-">B-</MenuItem>
+                    <MenuItem value="AB+">AB+</MenuItem>
+                    <MenuItem value="AB-">AB-</MenuItem>
+                    <MenuItem value="O+">O+</MenuItem>
+                    <MenuItem value="O-">O-</MenuItem>
+                    <MenuItem value="Unknown">I don't know my blood group</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
+
+              <Typography variant="caption" color="text.secondary" marginTop={4}>
+                *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
+              </Typography>
+
+            </Box>
+
+
             </Box>
           </Box>
         </DialogContent>
