@@ -234,7 +234,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   const handleUserClick = (user) => {
     setSelectedUser(user);
     setNestedProfileOpen(true);
-    setFollowDialogOpen(false);
+    // setFollowDialogOpen(false);
   };
 
   const handleCloseNestedProfile = () => {

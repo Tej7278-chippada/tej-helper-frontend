@@ -1,6 +1,6 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate} from 'react-router-dom';
+import { useParams, useNavigate, Link} from 'react-router-dom';
 import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem, Switch, FormControl, InputLabel, Select, Menu } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
@@ -134,6 +134,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [followType, setFollowType] = useState(''); // 'followers' or 'following'
   const [selectedUser, setSelectedUser] = useState(null);
   const [userProfileDetailsOpen, setUserProfileDetailsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
+  const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
 
   // Add this useEffect to fetch verification status
   // useEffect(() => {
@@ -220,6 +222,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     const fetchUserDetails = async () => {
       try {
         setLoading(true);
+        const authToken = localStorage.getItem('authToken');
+        setIsAuthenticated(!!authToken); // Check if user is authenticated
         const response = await fetchUserProfile(id);
         setUserData(response.data);
         setFollowerCount(response.data.followerCount);
@@ -643,7 +647,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const handleUserClick = (user) => {
     setSelectedUser(user);
     setUserProfileDetailsOpen(true);
-    setFollowDialogOpen(false);
+    // setFollowDialogOpen(false);
   };
 
   return (
@@ -1975,12 +1979,13 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         onClose={() => {
           setUserProfileDetailsOpen(false);
           setSelectedUser(null);
+          setRateDialogOpen(false);
           if (isRateDialogOpen) handleCloseRateDialog();
         }}
         // post={post}
         isMobile={isMobile}
-        // isAuthenticated={isAuthenticated} 
-        // setLoginMessage={setLoginMessage}  
+        isAuthenticated={isAuthenticated} 
+        setLoginMessage={setLoginMessage}  
         setSnackbar={setSnackbar} darkMode={darkMode}
       />
 
@@ -1992,6 +1997,63 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
           {snackbar.message}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={loginMessage.open}
+        autoHideDuration={9000}
+        onClose={() => setLoginMessage({ ...loginMessage, open: false })}
+        message={
+          <span>
+            Please log in first.{" "}
+            <Link
+              to="/login"
+              style={{ color: "yellow", textDecoration: "underline", cursor: "pointer" }}
+            >
+              Click here to login
+            </Link>
+          </span>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert
+          severity="warning"
+          variant="filled"
+          sx={{
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "5px",
+                // padding: "3px 8px",
+                marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          }
+        >
+          Please log in first.
         </Alert>
       </Snackbar>
       <TermsPolicyBar darkMode={darkMode}/>

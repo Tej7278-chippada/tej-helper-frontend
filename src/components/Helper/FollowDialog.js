@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -24,29 +24,71 @@ const FollowDialog = ({
 }) => {
   const [followData, setFollowData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
 
+  // Reset state when dialog opens/closes or userId/followType changes
   useEffect(() => {
     if (open && userId) {
-      fetchFollowData();
+      setFollowData([]);
+      setPage(1);
+      setHasMore(true);
+      setInitialLoad(true);
+      fetchFollowData(1, true);
+    } else {
+      setFollowData([]);
+      setPage(1);
+      setHasMore(true);
     }
   }, [open, userId, followType]);
 
-  const fetchFollowData = async () => {
+  const fetchFollowData = async (pageNum = 1, isInitial = false) => {
     try {
-      setLoading(true);
+      if (isInitial) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError('');
+      
       const response = followType === 'followers' 
-        ? await fetchUserFollowers(userId)
-        : await fetchUserFollowing(userId);
-      setFollowData(response.data);
+        ? await fetchUserFollowers(userId, pageNum)
+        : await fetchUserFollowing(userId, pageNum);
+      
+      if (isInitial) {
+        setFollowData(response.data.users || response.data);
+      } else {
+        setFollowData(prev => [...prev, ...(response.data.users || response.data)]);
+      }
+      
+      // Check if there's more data
+      if (response.data.users) {
+        setHasMore(response.data.users.length === 10); // Assuming 10 per page
+      } else {
+        setHasMore((response.data.length || 0) === 10);
+      }
+      
+      setPage(pageNum);
     } catch (err) {
       console.error(`Error fetching ${followType}:`, err);
       setError(`Failed to load ${followType}`);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+      setInitialLoad(false);
     }
   };
+
+  const handleScroll = useCallback((e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // Load more when 80% scrolled
+    if (scrollHeight - scrollTop <= clientHeight * 1.2 && hasMore && !loadingMore && !loading) {
+      fetchFollowData(page + 1, false);
+    }
+  }, [hasMore, loadingMore, loading, page, followType, userId]);
 
   const handleUserClick = (user) => {
     if (onUserClick) {
@@ -69,12 +111,28 @@ const FollowDialog = ({
     >
       <DialogTitle>
         {followType === 'followers' ? 'Followers' : 'Following'} 
-        {/* {loading && <CircularProgress size={20} sx={{ ml: 1 }} />} */}
+        {/* {loading && initialLoad && <CircularProgress size={20} sx={{ ml: 1 }} />} */}
       </DialogTitle>
       
-      <DialogContent>
+      <DialogContent 
+        onScroll={handleScroll}
+        sx={{ 
+          overflow: 'auto',
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+            borderRadius: '4px',
+          },
+        }}
+      >
         <Box sx={{ mt: 1 }}>
-          {loading ? (
+          {loading && initialLoad ? (
             <Box display="flex" justifyContent="center" alignItems="center" height={100}>
               <CircularProgress />
             </Box>
@@ -87,57 +145,71 @@ const FollowDialog = ({
               No {followType} found
             </Typography>
           ) : (
-            followData.map((user) => (
-              <Box
-                key={user._id}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 2,
-                  p: 1,
-                  mb: 1,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  '&:hover': {
-                    backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
-                  }
-                }}
-                onClick={() => handleUserClick(user)}
-              >
-                <Avatar
-                  src={user.profilePic ? `data:image/jpeg;base64,${user.profilePic}` : null}
-                  sx={{ width: 50, height: 50 }}
-                />
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="body1" fontWeight="medium">
-                    {user.username}
-                    {user.idVerification?.status === 'approved' && (
-                      <VerifiedRoundedIcon 
-                        sx={{ 
-                          fontSize: '16px', 
-                          color: 'primary.main',
-                          ml: 0.5,
-                          verticalAlign: 'text-bottom'
-                        }} 
-                      />
-                    )}
-                  </Typography>
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary" 
-                    sx={{
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                    }}
-                  >
-                    {user.profileDescription || 'No description'}
-                  </Typography>
+            <>
+              {followData.map((user) => (
+                <Box
+                  key={user._id}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2,
+                    p: 1,
+                    mb: 1,
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                    }
+                  }}
+                  onClick={() => handleUserClick(user)}
+                >
+                  <Avatar
+                    src={user.profilePic ? `data:image/jpeg;base64,${user.profilePic}` : null}
+                    sx={{ width: 50, height: 50 }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body1" fontWeight="medium">
+                      {user.username}
+                      {user.idVerification?.status === 'approved' && (
+                        <VerifiedRoundedIcon 
+                          sx={{ 
+                            fontSize: '16px', 
+                            color: 'primary.main',
+                            ml: 0.5,
+                            verticalAlign: 'text-bottom'
+                          }} 
+                        />
+                      )}
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      color="text.secondary" 
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {user.profileDescription || 'No description'}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))
+              ))}
+              
+              {loadingMore && (
+                <Box display="flex" justifyContent="center" alignItems="center" py={2}>
+                  <CircularProgress size={24} />
+                </Box>
+              )}
+              
+              {!hasMore && followData.length > 0 && (
+                <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
+                  No more {followType} to load
+                </Typography>
+              )}
+            </>
           )}
         </Box>
       </DialogContent>

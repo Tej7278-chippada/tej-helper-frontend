@@ -431,22 +431,22 @@ export const unfollowUser = async (userId) => {
   return await API.post(`/api/auth/unfollow/${userId}`, {}, { headers });
 };
 
-// Fetch user's followers
-export const fetchUserFollowers = async (userId) => {
+// Fetch user's followers with pagination
+export const fetchUserFollowers = async (userId, page = 1, limit = 10) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { 
     Authorization: `Bearer ${authToken}`
   } : {};
-  return await API.get(`/api/auth/${userId}/followers`, { headers });
+  return await API.get(`/api/auth/${userId}/followers?page=${page}&limit=${limit}`, { headers });
 };
 
-// Fetch user's following
-export const fetchUserFollowing = async (userId) => {
+// Fetch user's following with pagination
+export const fetchUserFollowing = async (userId, page = 1, limit = 10) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { 
     Authorization: `Bearer ${authToken}`
   } : {};
-  return await API.get(`/api/auth/${userId}/following`, { headers });
+  return await API.get(`/api/auth/${userId}/following?page=${page}&limit=${limit}`, { headers });
 };
 
 export const getUserProfile = async (userId) => {
