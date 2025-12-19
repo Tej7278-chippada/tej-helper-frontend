@@ -118,6 +118,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
     'UnPaid': '/categoryBar/volunteer.png' || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200&h=120&fit=crop&auto=format',
     'Emergency': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
     'Friends': '/categoryBar/friends.png',
+    // 'BloodDonars': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
     'ParkingSpace': '/categoryBar/parking.png' || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop&auto=format',
     'VehicleRental': '/categoryBar/vehiclesRental.png' || 'https://images.unsplash.com/photo-1549924231-f129b911e442?w=200&h=120&fit=crop&auto=format',
     'FurnitureRental': '/categoryBar/furnitureRentals.png' || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=120&fit=crop&auto=format',
@@ -218,6 +219,7 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
   ];
 
   const serviceCategories = [
+    // { value: 'BloodDonars', label: 'Blood Donars', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
     { value: 'ParkingSpace', label: 'Parking Space', color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.1)' },
     { value: 'VehicleRental', label: 'Vehicle Rental', color: '#3b82f6', bgColor: 'rgba(59, 130, 246, 0.1)' },
     { value: 'FurnitureRental', label: 'Furniture Rental', color: '#4f46e5', bgColor: 'rgba(79, 70, 229, 0.1)' },

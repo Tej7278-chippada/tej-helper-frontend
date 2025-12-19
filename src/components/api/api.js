@@ -117,6 +117,46 @@ export const fetchUserPosts = (skip = 0, limit = 12, filters = {} ) => {
   return API.get('/api/posts/my-posts', { headers, params });
 };
 
+// Fetch blood donors
+export const fetchBloodDonors = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '') => {
+  const params = { 
+    skip, 
+    limit,
+    bloodGroup: filters.bloodGroup || 'All',
+    sortBy: 'nearest'
+  };
+
+  // Add search query parameter
+  if (searchQuery && searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
+  
+  // Add location parameters if provided
+  if (userLocation && distanceRange) {
+    params.userLat = userLocation.latitude;
+    params.userLng = userLocation.longitude;
+    params.distance = distanceRange;
+  }
+  
+  return API.get('/api/posts/blood-donors', { params });
+};
+
+// Fetch blood donor locations
+export const fetchBloodDonorLocations = (userLocation, distanceRange, filters = {}, searchQuery = '') => {
+  const params = {
+    userLat: userLocation.latitude,
+    userLng: userLocation.longitude,
+    distance: distanceRange,
+    bloodGroup: filters.bloodGroup || 'All'
+  };
+
+  if (searchQuery && searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
+
+  return API.get('/api/posts/blood-donors/locations', { params });
+};
+
 // export const fetchPosts = () => API.get('/api/posts');
 export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '', sortBy = 'nearest') => {
   const params = { skip, limit,
