@@ -104,7 +104,14 @@ const CategoryName = styled(Typography)(({ theme, customcolor, isselected }) => 
   color: isselected === 'true' ? customcolor : theme.palette.text.primary,
 }));
 
-const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMobile }) => {
+const SubCategoryName = styled(Typography)(({ theme, customcolor, isselected }) => ({
+  textAlign: 'center',
+  fontSize: '0.6rem',
+  fontWeight: isselected === 'true' ? 500 : 400,
+  color: theme.palette.text.secondary,
+}));
+
+const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMobile, setSnackbar }) => {
   const [selectedType, setSelectedType] = useState(filters.postType || 'HelpRequest');
   const [showHelpCategories, setShowHelpCategories] = useState(false);
   const [showServiceCategories, setShowServiceCategories] = useState(false);
@@ -118,7 +125,8 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
     'UnPaid': '/categoryBar/volunteer.png' || 'https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200&h=120&fit=crop&auto=format',
     'Emergency': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
     'Friends': '/categoryBar/friends.png',
-    // 'BloodDonars': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
+    'BloodDonars': '/categoryBar/emergency.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
+    'StandwithWomen': '/categoryBar/standwithwomen.png' || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=120&fit=crop&auto=format',
     'ParkingSpace': '/categoryBar/parking.png' || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=120&fit=crop&auto=format',
     'VehicleRental': '/categoryBar/vehiclesRental.png' || 'https://images.unsplash.com/photo-1549924231-f129b911e442?w=200&h=120&fit=crop&auto=format',
     'FurnitureRental': '/categoryBar/furnitureRentals.png' || 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=120&fit=crop&auto=format',
@@ -216,6 +224,11 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
     { value: 'Paid', label: 'Paid', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.1)' },
     { value: 'UnPaid', label: 'Volunteer', color: '#f59e0b', bgColor: 'rgba(245, 158, 11, 0.1)' },
     { value: 'Emergency', label: 'Emergency', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
+  ];
+
+  const nearbyPeople = [
+    { value: 'BloodDonars', label: 'Blood Donars', sublabel: 'Find Blood donars nearby', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
+    { value: 'StandwithWomen', label: 'Stand with Women', sublabel: 'People nearby stand for women safety', color: '#ec4899', bgColor: 'rgba(236, 72, 153, 0.1)' }
   ];
 
   const serviceCategories = [
@@ -452,6 +465,42 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
               </IconButton>
               <Box sx={{maxHeight: '60vh', overflowY: 'auto', pt: 2, px: 1}}>
               <Grid container spacing={1} justifyContent="center">
+                {nearbyPeople.map((service) => (
+                  <Grid item xs={6} sm={6} key={service.value} sx={{ display: 'flex' }}>
+                    <CategoryItem
+                      sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                      }}
+                      isselected={(selectedCategory === service.value).toString()}
+                      customcolor={service.color}
+                      // onClick={() => handleServiceCategorySelect(service.value)}
+                      onClick={() => {setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });}}
+                    >
+                      <CategoryImage 
+                        src={categoryImages[service.value]} 
+                        alt={service.label}
+                        onError={(e) => {
+                          e.target.src = 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=120&fit=crop&auto=format';
+                        }}
+                      />
+                      <CategoryName 
+                        customcolor={service.color}
+                        isselected={(selectedCategory === service.value).toString()}
+                      >
+                        {service.label}
+                      </CategoryName>
+                      <SubCategoryName 
+                        customcolor={service.color}
+                        isselected={(selectedCategory === service.value).toString()}
+                      >
+                        {service.sublabel}
+                      </SubCategoryName>
+                    </CategoryItem>
+                  </Grid>
+                ))}
                 {serviceCategories.map((service) => (
                   <Grid item xs={6} sm={4} key={service.value}>
                     <CategoryItem

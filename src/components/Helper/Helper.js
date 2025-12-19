@@ -2375,7 +2375,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           />
         </Box>
         
-        <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile}/>
+        <MenuCard selectedCategory={selectedCategory} onCategorySelect={handleCategorySelect} filters={filters} darkMode={darkMode} isMobile={isMobile} setSnackbar={setSnackbar} />
         {/* <Box 
           sx={{
             transition: 'transform 0.3s ease, opacity 0.3s ease',
