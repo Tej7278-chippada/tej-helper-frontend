@@ -22,12 +22,16 @@ import {
   Pagination,
   Stack,
   InputAdornment,
-  IconButton
+  IconButton,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import Layout from "../Layout";
 import { filterUsersByStatus, getUserCounts, searchUsers, updateAccountStatus } from "../api/adminApi";
 import { useTheme } from "@emotion/react";
 import ClearIcon from '@mui/icons-material/Clear';
+import UserProfileDetails from "../Helper/UserProfileDetails";
+import { Link } from "react-router-dom";
 
 const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,11 +59,18 @@ const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, 
     hasPrev: false
   });
   const [searchMode, setSearchMode] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isUserProfileDialogOpen, setUserProfileDialogOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+  const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
 
   // Fetch user counts on component mount
   useEffect(() => {
     const fetchCounts = async () => {
       try {
+        const authToken = localStorage.getItem('authToken');
+        setIsAuthenticated(!!authToken);
         const response = await getUserCounts();
         setUserCounts(response.data);
       } catch (error) {
@@ -177,6 +188,25 @@ const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, 
       page: 1 // Always reset to page 1 when changing limit
     }));
   };
+
+  const handleViewUserProfile = (userID) => {
+    setSelectedUserId(userID);
+    setUserProfileDialogOpen(true);
+  };
+  const handleCloseUserProfileDialog = () => {
+    setUserProfileDialogOpen(false);
+    setSelectedUserId(null);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }) : '—';
   
   return (
     <Layout 
@@ -316,8 +346,33 @@ const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, 
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user._id}>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          cursor: 'pointer',
+                          color: 'primary.main',
+                          fontWeight: 500,
+                          '&:hover': {
+                            textDecoration: 'underline',
+                          },
+                        }}
+                        onClick={() => handleViewUserProfile(user._id)}
+                      >
+                        {user.username}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        {user.email}{user.emailVerified && ('✔️')}
+                        <Typography variant="caption" color="text.secondary">
+                          🕒 Created: {formatDate(user.accountCreatedAt)}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          🔑 Last Login: {formatDate(user.lastLoginAt)}
+                        </Typography>
+                      </Box>
+                    </TableCell>
                     <TableCell>{user.userCode}</TableCell>
                     <TableCell>{user.accountStatus}</TableCell>
                     <TableCell>
@@ -381,6 +436,80 @@ const UserManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, 
           </Box>
         )}
       </Box>
+      <UserProfileDetails
+        userId={selectedUserId}
+        open={isUserProfileDialogOpen}
+        onClose={handleCloseUserProfileDialog}
+        isMobile={isMobile}
+        isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
+      />
+      <Snackbar
+        open={loginMessage.open}
+        autoHideDuration={9000}
+        onClose={() => setLoginMessage({ ...loginMessage, open: false })}
+        message={
+          <span>
+            Please log in first.{" "}
+            <Link
+              to="/login"
+              style={{ color: "yellow", textDecoration: "underline", cursor: "pointer" }}
+            >
+              Click here to login
+            </Link>
+          </span>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert
+          severity="warning"
+          variant="filled"
+          sx={{
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "5px",
+                // padding: "3px 8px",
+                marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          }
+        >
+          Please log in first.
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };
