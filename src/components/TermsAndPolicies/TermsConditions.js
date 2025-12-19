@@ -15,8 +15,11 @@ const TermsConditions = () => {
             Terms and Conditions
           </Typography>
           
-          <Typography variant="body1" paragraph>
+          {/* <Typography variant="body1" paragraph>
             Last updated on {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
+          </Typography> */}
+          <Typography variant="body1" paragraph>
+            Last updated on Dec 19, 2025
           </Typography>
 
           <Typography variant="body1" paragraph>
@@ -174,8 +177,11 @@ const TermsConditions = () => {
           <Typography variant="body1" paragraph>
             For any questions regarding these Terms:
           </Typography>
-          <Typography variant="body1" paragraph sx={{ fontWeight: 'bold' }}>
+          {/* <Typography variant="body1" paragraph sx={{ fontWeight: 'bold' }}>
             Email: helper-in.support@gmail.com
+          </Typography> */}
+          <Typography variant="body1" paragraph sx={{ fontWeight: 'bold' }}>
+            Email: helper.in.dev@gmail.com
           </Typography>
         </Box>
       </Container>
