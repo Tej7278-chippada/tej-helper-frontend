@@ -1,6 +1,6 @@
 // /src/components/Register.js
-import React, { useState } from 'react';
-import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton, MenuItem, Paper } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton, MenuItem, Paper, Divider } from '@mui/material';
 import axios from 'axios';
 import Layout from './Layout';
 import Cropper from 'react-easy-crop';
@@ -9,6 +9,7 @@ import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import CloseIcon from '@mui/icons-material/Close';
 import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
 import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
+import { Link } from 'react-router-dom';
 
 const theme = createTheme({
   breakpoints: {
@@ -68,6 +69,17 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
   // const [address, setAddress] = useState({ street: '', area: '', city: '', state: '', pincode: '' });
   // const [ loadingImg, setLoadingImg ] = useState(false);
   const [ finalPic, setFinalPic ] = useState(null);
+
+  // const gradientBackground = darkMode
+  //   ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'
+  //   : 'linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 50%, #c7d2fe 100%)';
+
+  // const gradientButton = 'linear-gradient(135deg, #4361ee 0%, #3a0ca3 50%, #7209b7 100%)';
+  const gradientHover = 'linear-gradient(135deg, #3a56d4 0%, #2d0a8c 50%, #5c0b9b 100%)';
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleCropComplete = async (_, croppedAreaPixels) => {
     if (!profilePic) return; // Ensure profilePic is set before proceeding
@@ -862,15 +874,72 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
               {success && <Alert
                 sx={{borderRadius: '12px', color: darkMode ? 'success.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(76, 175, 80, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(76, 175, 80, 0.15)' : '0 2px 8px rgba(76, 175, 80, 0.1)',}}
               severity="success">{success}</Alert>}
-              <Button type="submit" sx={{marginTop:'1rem', borderRadius:'12px', maxWidth: isMobile ? '300px' : '500px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'}} variant="contained" color="primary" fullWidth disabled={loading}>
-                {loading ? <CircularProgress size={24} /> : 'Register'}
+              <Button type="submit" variant="contained"  fullWidth sx={{ marginTop: '1rem', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', // background: gradientButton,
+                color: 'white',
+                py: 1,
+                borderRadius: 3,
+                fontWeight: 600,
+                fontSize: '1rem',
+                textTransform: 'none',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                '&:hover': {
+                  background: gradientHover,
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                },
+                '&:active': {
+                  transform: 'translateY(0)',
+                },
+                '&.Mui-disabled': {
+                  background: 'rgba(0, 0, 0, 0.12)',
+                  color: 'rgba(0, 0, 0, 0.26)',
+                },
+              }} disabled={loading}>
+                {loading ? <CircularProgress size={24} sx={{ color: '#3a0ca3' }}/> : 'Create Account'}
               </Button>
-              <Typography variant="body2" align="center" sx={{ marginTop: '10px' }}>
+              {/* <Button type="submit" sx={{marginTop:'1rem', borderRadius:'12px', maxWidth: isMobile ? '300px' : '500px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'}} variant="contained" color="primary" fullWidth disabled={loading}>
+                {loading ? <CircularProgress size={24} /> : 'Register'}
+              </Button> */}
+              {/* <Typography variant="body2" align="center" sx={{ marginTop: '10px' }}>
                 Already have an account?{' '}
                 <Button href="/login" variant="text" sx={{borderRadius:'12px'}}>
                   Login
                 </Button>
-              </Typography>
+              </Typography> */}
+              <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Typography variant="body2" color="inherit">
+                  Already have an account?{' '}
+                  <Link
+                    to="/login"
+                    style={{
+                      color: '#4361ee',
+                      textDecoration: 'none',
+                      fontWeight: 600,
+                      transition: 'all 0.3s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.color = '#3a0ca3';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.color = '#4361ee';
+                    }}
+                  >
+                    Sign In
+                  </Link>
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ 
+              // display: { xs: 'flex', sm: 'none' }, 
+              display: 'flex',
+              alignItems: 'center', alignContent: 'center', justifyContent: 'center',
+              my: 2,
+              width: '100%'
+            }}>
+              <Divider sx={{ flexGrow: 1, borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)' }} />
+              <Typography variant="caption" sx={{ px: 2, color: 'inherit' }}>or continue with</Typography>
+              <Divider sx={{ flexGrow: 1, borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)' }} />
             </Box>
             <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
           </form>

@@ -50,9 +50,14 @@ const DemoPosts = ({ isMobile, postId}) => {
         console.error('Error fetching post details:', error);
         // Add some demo fallback data for better UX
         setOffers([
-          { data: '/images/p8.png', _id: '1', remove: false, title: 'Demo Paid Post' },
-          { data: '/images/u9.png', _id: '2', remove: false, title: 'Demo UnPaid Post' },
-          { data: '/images/e3.png', _id: '3', remove: false, title: 'Demo Emergency Post' }
+          { data: '/images/p1.jpg', _id: '1', remove: false, title: 'Demo Paid Post' },
+          { data: '/images/p2.jpg', _id: '2', remove: false, title: 'Demo UnPaid Post' },
+          { data: '/images/p3.jpg', _id: '3', remove: false, title: 'Demo Emergency Post' },
+          { data: '/images/p4.jpg', _id: '4', remove: false, title: 'Demo Paid Post' },
+          { data: '/images/p5.jpg', _id: '5', remove: false, title: 'Demo UnPaid Post' },
+          { data: '/images/p6.jpg', _id: '6', remove: false, title: 'Demo Emergency Post' },
+          { data: '/images/p7.jpg', _id: '7', remove: false, title: 'Demo Paid Post' },
+          { data: '/images/p8.jpg', _id: '8', remove: false, title: 'Demo UnPaid Post' }
         ]);
       } finally {
         setLoading(false);

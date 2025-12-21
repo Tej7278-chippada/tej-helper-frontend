@@ -425,6 +425,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                 color: 'white',
                 padding: isMobile ? '1.5rem 1rem' : '2rem', pt: '6rem',
                 textAlign: 'center',
+                alignContent: 'center', alignItems: 'center', justifyContent: 'center', display: 'flex',
                 borderRadius: '0 0 16px 16px', mt: -8,
                 // margin: isMobile ? '0.5rem' : '1rem',
                 boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
@@ -441,6 +442,8 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                   zIndex: 0
                 }
               }}>
+                <Box sx={{ display: 'flex', maxWidth: 'md', alignItems: 'center', justifyContent: 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 0 : 4 }}>
+                <Box >
                 <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
                   fontWeight: 700,
                   mb: 1,
@@ -488,7 +491,9 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                     Explore Opportunities
                   </Button>
                 </Box> */}
+                </Box>
                 <DemoPosts isMobile={isMobile} postId={'685beee058f2f12cad780020'} />
+                </Box>
               </Box>
         <Box>
         <Toolbar sx={{display:'flex', justifyContent:'space-between', 

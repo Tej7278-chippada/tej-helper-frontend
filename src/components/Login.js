@@ -1,6 +1,6 @@
 // /components/Login.js
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, Dialog, DialogContent, DialogActions, CircularProgress, InputAdornment, IconButton,
+import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, Dialog, DialogContent, DialogActions, CircularProgress, InputAdornment, IconButton, Divider, Fade,
   //  IconButton
    } from '@mui/material';
 import axios from 'axios';
@@ -50,64 +50,25 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('md')); // Media query for small screens
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+
+  // const gradientBackground = darkMode
+  //   ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'
+  //   : 'linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 50%, #c7d2fe 100%)';
+
+  // const gradientButton = 'linear-gradient(135deg, #4361ee 0%, #3a0ca3 50%, #7209b7 100%)';
+  const gradientHover = 'linear-gradient(135deg, #3a56d4 0%, #2d0a8c 50%, #5c0b9b 100%)';
   
-
-  // const isEmail = (input) => {
-  //   // Regex to check if input is an email
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   return emailRegex.test(input);
-  // };
-
-  // useEffect(() => {
-  //   const extendSession = async () => {
-  //     const authToken = localStorage.getItem('authToken');
-  //     if (authToken) {
-  //       try {
-  //         const response = await axios.post(
-  //         `${process.env.REACT_APP_API_URL}/api/auth/refresh-token`,
-  //         {},
-  //         { headers: { Authorization: `Bearer ${authToken}` } }
-  //         );
-  //         const newToken  = response.data.authToken;
-  //         const tokenUsername = localStorage.getItem('tokenUsername');
-  //         const tokens = JSON.parse(localStorage.getItem('authTokens')) || {};
-  //         tokens[tokenUsername] = newToken ;
-  //         localStorage.setItem('authTokens', JSON.stringify(tokens));
-  //         localStorage.setItem('authToken', newToken );
-  //         console.log('authToken refreshed..! :', newToken);
-  //       } catch (error) {
-  //         console.error('Failed to extend session:', error);
-  //         localStorage.removeItem('authToken');
-  //         localStorage.removeItem('authTokens');
-  //         localStorage.removeItem('tokenUsername');
-  //         localStorage.removeItem('userId');
-  //         localStorage.setItem('tokenProfilePic', tokenPic);
-  //         navigate('/login', { replace: true });
-  //         console.log('Refresh token failed. Token expired or invalid.');
-  //       }
-  //     }
-  //   };
-
-  //   const activityEvents = ['mousemove', 'keydown', 'scroll', 'click'];
-  //   activityEvents.forEach((event) =>
-  //     window.addEventListener(event, extendSession)
-  //   );
-
-  //   return () => {
-  //     activityEvents.forEach((event) =>
-  //       window.removeEventListener(event, extendSession)
-  //     );
-  //   };
-  // }, [navigate]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     setLoading(true);
-                                        // `${process.env.REACT_APP_API_URL}/transfer`
     try {     
-      const isEmail = validateEmail(identifier);                         // 'http://localhost:5002/api/auth/login' 'https://tej-chat-app-8cd7e70052a5.herokuapp.com/api/auth/login'
+      const isEmail = validateEmail(identifier);
       const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, { identifier, password, isEmail  });
       setSuccess(`You are logged in with ${isEmail ? 'email' : 'username'}: ${identifier}`);
       setIdentifier('');
@@ -161,21 +122,6 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
       setLoading(false);
     }
   };
-
-  // const handleForgotPassword = () => {
-  //   setForgotPasswordOpen(true);
-  // };
-
-  // const handleResetPassword = async () => {
-  //   try {                     // 'http://localhost:5002/api/auth/forgot-password'
-  //     const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/forgot-password`, { resetData });
-  //     setResetMessage('Your password has been reset successfully');
-  //     setResetData('');
-  //     setForgotPasswordOpen(false);
-  //   } catch (error) {
-  //     setResetMessage('Error resetting password. Please try again.');
-  //   }
-  // };
 
   const handleForgotPassword = () => {
     // navigate('/forgot-password');
@@ -238,7 +184,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           }}>
            "Helper is a community-driven platform connecting people who need help with those willing to offer it—whether for paid work, volunteering, or emergencies."
           </Typography>
-         {!isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'} /> }
+         <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'} /> {/* {!isMobile &&  */}
         </Box>
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh" width= {isMobile ? "auto" : "100%"}
     padding={isMobile ? 2 : 4} // Adjust padding for mobile
@@ -247,7 +193,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
       {/* <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
         Login
       </Typography> */}
-      <Typography 
+      {/* <Typography 
         variant={isMobile ? "h5" : "h4"}
         fontWeight={700}
         sx={{
@@ -257,10 +203,87 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           backgroundClip: 'text', mb:'2rem'
         }}
       >
-        Login
-      </Typography>
+        Sign In to Your Account
+      </Typography> */}
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
+        {/* <LoginIcon
+          sx={{
+            fontSize: 48,
+            background: gradientButton,
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            mb: 2,
+          }}
+        /> */}
+        <Typography
+          variant={isMobile ? 'h5' : 'h4'}
+          sx={{
+            fontWeight: 700,
+            // background: gradientButton,
+            background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            mb: 1,
+          }}
+        >
+          Sign In
+        </Typography>
+        <Typography variant="body1" color="inherit">
+          Access your Helper account
+        </Typography>
+      </Box>
+      <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
+      <Box sx={{ 
+        // display: { xs: 'flex', sm: 'none' }, 
+        display: 'flex',
+        alignItems: 'center', 
+        my: 2,
+        width: '100%', maxWidth: isMobile ? '220px' : '300px',
+      }}>
+        <Divider sx={{ flexGrow: 1, borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)' }} />
+        <Typography variant="caption" sx={{ px: 2, color: 'inherit' }}>or continue with</Typography>
+        <Divider sx={{ flexGrow: 1, borderColor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)' }} />
+      </Box>
       <form onSubmit={handleLogin} style={{ maxWidth: isMobile ? '300px' : '400px', width: '100%',  }}> {/* ...getGlassmorphismStyle(theme), padding:'12px', borderRadius:isMobile ? '12px' : '18px' */}
-      {location.state?.message && <div>{location.state.message}</div>}
+        {location.state?.message && !error && !success && <div>{location.state.message}</div>}
+        {error && (
+          <Fade in={!!error}>
+            <Alert
+              severity="error"
+              sx={{
+                animation: 'slideDown 0.3s ease',
+                '@keyframes slideDown': {
+                  from: { opacity: 0, transform: 'translateY(-10px)' },
+                  to: { opacity: 1, transform: 'translateY(0)' },
+                },
+                borderRadius: '12px', color: darkMode ? 'error.contrastText' : 'text.primary',
+                border: darkMode ? '1px solid rgba(244, 67, 54, 0.3)' : '1px solid rgba(244, 67, 54, 0.2)',
+                boxShadow: darkMode ? '0 2px 8px rgba(244, 67, 54, 0.15)' : '0 2px 8px rgba(244, 67, 54, 0.1)',
+                mb: 1
+              }}
+            >
+              {error}
+            </Alert>
+          </Fade>
+        )}
+        {success && (
+          <Fade in={!!success}>
+            <Alert
+              severity="success"
+              sx={{
+                animation: 'slideDown 0.3s ease',
+                borderRadius: '12px', color: darkMode ? 'success.contrastText' : 'text.primary', 
+                border: darkMode ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(76, 175, 80, 0.2)', 
+                boxShadow: darkMode ? '0 2px 8px rgba(76, 175, 80, 0.15)' : '0 2px 8px rgba(76, 175, 80, 0.1)',
+                mb: 1
+              }}
+            >
+              {success}
+            </Alert>
+          </Fade>
+        )}
         <TextField
           label="Username or Email"
           variant="outlined"
@@ -389,71 +412,80 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
             ),
           }}
         />
-        {error && <Alert
-         sx={{borderRadius: '12px', color: darkMode ? 'error.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(244, 67, 54, 0.3)' : '1px solid rgba(244, 67, 54, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(244, 67, 54, 0.15)' : '0 2px 8px rgba(244, 67, 54, 0.1)', }} 
-         severity="error">{error}
-        </Alert>}
-        {success && <Alert
-         sx={{borderRadius: '12px', color: darkMode ? 'success.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(76, 175, 80, 0.3)' : '1px solid rgba(76, 175, 80, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(76, 175, 80, 0.15)' : '0 2px 8px rgba(76, 175, 80, 0.1)',}}
-         severity="success">{success}
-        </Alert>}
-        <Button type="submit" variant="contained"  fullWidth sx={{ marginTop: '1rem', borderRadius:'12px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', }} disabled={loading}>
-        {loading ? <CircularProgress size={24} color="inherit"/> : 'Login'}
+        <Button type="submit" variant="contained"  fullWidth sx={{ marginTop: '1rem', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', // background: gradientButton,
+          color: 'white',
+          py: 1,
+          borderRadius: 3,
+          fontWeight: 600,
+          fontSize: '1rem',
+          textTransform: 'none',
+          transition: 'all 0.3s ease',
+          boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+          '&:hover': {
+            background: gradientHover,
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+          },
+          '&:active': {
+            transform: 'translateY(0)',
+          },
+          '&.Mui-disabled': {
+            background: 'rgba(0, 0, 0, 0.12)',
+            color: 'rgba(0, 0, 0, 0.26)',
+          },
+        }} disabled={loading}>
+          {loading ? <CircularProgress size={24} sx={{ color: '#3a0ca3' }}/> : 'Sign In'}
         </Button>
-        <Button variant="text" color="primary" fullWidth onClick={handleForgotPassword} sx={{ marginTop: '10px', borderRadius:'12px' }}>
+        <Button variant="text" fullWidth onClick={handleForgotPassword} sx={{ marginTop: '10px', borderRadius:'12px',
+          color: '#4361ee',
+          fontWeight: 600,
+          fontSize: '1rem',
+          textTransform: 'none',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            // background: gradientHover,
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+
+          },
+          '&:active': {
+            transform: 'translateY(0)',
+          },
+          '&.Mui-disabled': {
+            background: 'rgba(0, 0, 0, 0.12)',
+            color: 'rgba(0, 0, 0, 0.26)',
+          },
+         }}>
           Forgot Password?
         </Button>
-        <Typography variant="body2" align="center" style={{ marginTop: '10px' }}>
-          Don't have an account?{' '}
-          {/* <Button href="/register" variant="text">
-            Register  Can be used only site deployed on custom domain, cant use on static domain of netlify
-          </Button> */}
-          <Link to="/register" sx={{ color: 'inherit', textDecoration: 'none', display: 'inline-block', borderRadius: '12px' }}>
-            <Button variant="text" sx={{borderRadius: '12px', ml:'4px'}}>
-              Register
-            </Button>
-          </Link>
-        </Typography>
-        <GoogleOAuth setSuccess={setSuccess} setError={setError} darkMode={darkMode} />
+        <Box sx={{ textAlign: 'center', mt: 2 }}>
+          <Typography variant="body2" color="inherit">
+            Don't have an account?{' '}
+            <Link
+              to="/register"
+              style={{
+                color: '#4361ee',
+                textDecoration: 'none',
+                fontWeight: 600,
+                transition: 'all 0.3s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#3a0ca3';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = '#4361ee';
+              }}
+            >
+              Create Account
+            </Link>
+          </Typography>
+        </Box>
       </form>
-      
-        {/* Close button */}
-        {/* <IconButton
-          onClick={() => setForgotPasswordOpen(false)}
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            color: '#333'
-          }}
-        >
-          <CloseIcon />
-        </IconButton> */}
-              <ForgotPassword darkMode={darkMode} forgotPasswordOpen={forgotPasswordOpen} setForgotPasswordOpen={setForgotPasswordOpen} isMobile={isMobile}/>
+      <ForgotPassword darkMode={darkMode} forgotPasswordOpen={forgotPasswordOpen} setForgotPasswordOpen={setForgotPasswordOpen} isMobile={isMobile}/>
        
-       {isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'}/> }
+       {/* {isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'}/> } */}
     </Box>
 </Box>
-    {/* Forgot Password Dialog */}
-    {/* <Dialog open={forgotPasswordOpen} onClose={() => setForgotPasswordOpen(false)}>
-          <DialogTitle>Reset Password</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Email or Phone Number"
-              variant="outlined"
-              fullWidth
-              margin="normal"
-              value={resetData}
-              onChange={(e) => setResetData(e.target.value)}
-            />
-            {resetMessage && <Alert severity="info" style={{ marginTop: '10px' }}>{resetMessage}</Alert>}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setForgotPasswordOpen(false)} color="secondary">Cancel</Button>
-            <Button onClick={handleResetPassword} color="primary">Reset Password</Button>
-          </DialogActions>
-        </Dialog> */}
         <TermsPolicyBar darkMode={darkMode}/>
     </Layout>
     </ThemeProvider>
