@@ -51,6 +51,10 @@ import SortRoundedIcon from '@mui/icons-material/SortRounded';
 import FilterListRoundedIcon from '@mui/icons-material/FilterListRounded';
 import { WaveAnimationCircles } from '../Maps/WaveAnimation';
 import CompareRoundedIcon from '@mui/icons-material/CompareRounded';
+// import MarkerClusterGroup from 'react-leaflet-cluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -482,38 +486,49 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     });
   };
 
-  const postsMappingIcon = ( title, color ) => {
-    const size = 30;
-    const borderWidth = 2;
-    const totalSize = size + borderWidth * 2;
+  const postsMappingIcon = useCallback((title, color, darkMode) => {
+    const cacheKey = `${title}-${color}-${darkMode}`;
     
-    const html = `
-      <div style="
-        width: ${totalSize}px;
-        height: ${totalSize}px;
-        border-radius: 50%;
-        border: ${borderWidth}px solid ${darkMode ? 'rgba(168, 168, 168, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
-        background: ${color};
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        overflow: hidden;
-      ">
-        <div style="color: white; font-weight: bold; font-size: 16px;">
-          ${title[0]?.toUpperCase() || 'A'}
+    if (!postIconCache[cacheKey]) {
+      const size = 30;
+      const borderWidth = 2;
+      const totalSize = size + borderWidth * 2;
+      
+      const html = `
+        <div style="
+          width: ${totalSize}px;
+          height: ${totalSize}px;
+          border-radius: 50%;
+          border: ${borderWidth}px solid ${darkMode ? 'rgba(168, 168, 168, 0.8)' : 'rgba(255, 255, 255, 0.8)'};
+          background: ${color};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          overflow: hidden;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        "
+        onmouseenter="this.style.transform='scale(1.2)'; this.style.zIndex='1000';"
+        onmouseleave="this.style.transform='scale(1)'; this.style.zIndex='';"
+        >
+          <div style="color: white; font-weight: bold; font-size: 16px; user-select: none;">
+            ${title[0]?.toUpperCase() || 'A'}
+          </div>
         </div>
-      </div>
-    `;
+      `;
+      
+      postIconCache[cacheKey] = L.divIcon({
+        html: html,
+        iconSize: [totalSize, totalSize],
+        iconAnchor: [totalSize / 2, totalSize / 2],
+        popupAnchor: [0, -totalSize / 2],
+        className: 'post-marker'
+      });
+    }
     
-    return L.divIcon({
-      html: html,
-      iconSize: [totalSize, totalSize],
-      iconAnchor: [totalSize / 2, totalSize / 2],
-      popupAnchor: [0, -totalSize / 2],
-      className: 'user-location-marker'
-    });
-  };
+    return postIconCache[cacheKey];
+  }, [darkMode]);
 
   // const [map, setMap] = useState(null);
 
@@ -672,6 +687,32 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       .leaflet-popup-close-button:hover {
         color: ${darkMode ? 'white' : 'black'} !important;
         background: transparent !important;
+      }
+
+      .marker-cluster {
+        transition: transform 0.3s ease;
+      }
+      
+      .marker-cluster:hover {
+        transform: scale(1.1);
+      }
+      
+      .post-marker {
+        transition: transform 0.2s ease, filter 0.2s ease;
+      }
+      
+      .leaflet-marker-icon {
+        pointer-events: auto !important;
+      }
+      
+      /* Improve popup performance */
+      .leaflet-popup-content-wrapper {
+        will-change: transform, opacity;
+      }
+      
+      /* Reduce marker repaints */
+      .leaflet-marker-icon {
+        will-change: transform;
       }
     `;
     document.head.appendChild(style);
@@ -877,11 +918,26 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // Posts locations mapping code starts here
   const [postMarkers, setPostMarkers] = useState([]);
+  const postIconCache = useRef({});
   // const [allPostLocations, setAllPostLocations] = useState([]);
   // const [selectedPost, setSelectedPost] = useState(null);
   // const [postDetails, setPostDetails] = useState(null);
   // const [loadingPostDetails, setLoadingPostDetails] = useState(false);
   // const [showPostDialog, setShowPostDialog] = useState(false);
+
+  
+  // debounce utility function
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
 
   // createPostMarkers function to handle different location formats
   const createPostMarkers = useCallback((locationsData) => {
@@ -889,35 +945,42 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setPostMarkers([]);
       return;
     }
-
-    const markers = locationsData.map(post => {
-      let latitude, longitude;
+    // Batch process markers to reduce rendering overhead
+    const markers = [];
+    const batchSize = 50; // Process markers in batches
+    
+    for (let i = 0; i < locationsData.length; i += batchSize) {
+      const batch = locationsData.slice(i, i + batchSize);
       
-      if (post.location && post.location.coordinates) {
-        [longitude, latitude] = post.location.coordinates;
-      } else if (post.location && post.location.latitude && post.location.longitude) {
-        latitude = post.location.latitude;
-        longitude = post.location.longitude;
-      } else {
-        return null;
-      }
+      batch.forEach(post => {
+        let latitude, longitude;
+        
+        if (post.location && post.location.coordinates) {
+          [longitude, latitude] = post.location.coordinates;
+        } else if (post.location && post.location.latitude && post.location.longitude) {
+          latitude = post.location.latitude;
+          longitude = post.location.longitude;
+        } else {
+          return;
+        }
 
-      if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-        return null;
-      }
+        if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+          return;
+        }
 
-      return {
-        id: post._id,
-        position: [latitude, longitude],
-        title: post.title,
-        price: post.price,
-        postType: post.postType,
-        categories: post.categories,
-        serviceType: post.serviceType,
-        distance: post.distance,
-        postStatus: post.postStatus
-      };
-    }).filter(marker => marker !== null);
+        markers.push({
+          id: post._id,
+          position: [latitude, longitude],
+          title: post.title,
+          price: post.price,
+          postType: post.postType,
+          categories: post.categories,
+          serviceType: post.serviceType,
+          distance: post.distance,
+          postStatus: post.postStatus
+        });
+      });
+    }
 
     setPostMarkers(markers);
   }, []);
@@ -961,10 +1024,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   shadowSize: [41, 41]
   // });
 
-  // to fetch all post locations
+  // to fetch all post locations with viewport-based loading
   useEffect(() => {
     const fetchAllPostLocations = async () => {
-      if (!userLocation || !distanceRange) return;
+      if (!userLocation || !distanceRange || !mapRef.current) return;
 
       const currentLocationsCacheKey = generateCacheKey('locations');
     
@@ -990,7 +1053,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       localStorage.removeItem('lastClickedMarkerId');
 
       try {
-        const response = await fetchPostLocations(userLocation, distanceRange, filters, searchQuery);
+        // Get current map bounds for viewport-based loading
+        const bounds = mapRef.current.getBounds();
+
+        const response = await fetchPostLocations(userLocation, distanceRange, filters, searchQuery,
+          bounds // Pass map bounds to API if supported
+        );
         const locationsData = response.data.locations || [];
         const totalCount = response.data.totalCount || 0;
 
@@ -998,7 +1066,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         globalCache.locationsData[currentLocationsCacheKey] = {
           locations: locationsData,
           totalCount: totalCount,
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          bounds: bounds.toBBoxString() // Store bounds for cache validation
         };
         globalCache.lastLocationsCacheKey = currentLocationsCacheKey;
         globalCache.totalLocationsCount = totalCount;
@@ -1021,7 +1090,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       }
     };
 
+    // debounce to map move events
+    const debouncedFetch = debounce(fetchAllPostLocations, 500);
+    
+    if (mapRef.current) {
+      mapRef.current.on('moveend', debouncedFetch);
+      mapRef.current.on('zoomend', debouncedFetch);
+    }
+
+    // Initial fetch
     fetchAllPostLocations();
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.off('moveend', debouncedFetch);
+        mapRef.current.off('zoomend', debouncedFetch);
+      }
+    };
   }, [userLocation, distanceRange, filters, searchQuery, generateCacheKey, createPostMarkers]);
 
   // Add this function to fetch post details
@@ -1457,6 +1542,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     return () => {
       localStorage.removeItem('lastHelperScroll');
       localStorage.removeItem('lastViewedPostId');
+      // Clear icon cache on unmount to prevent memory leaks
+      postIconCache.current = {};
     };
   }, []);
 
@@ -1640,199 +1727,300 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </Popup>
               </Marker>
             )}
-            {/* posts locations mapping code */}
-            {postMarkers.map(marker => {
-              let color = '#4CAF50';
-              
-              // Choose icon color based on post type/category
-              if (marker.postType === 'ServiceOffering') {
-                color = '#2196F3';
-              } else if (marker.categories === 'Paid') {
-                color = '#4CAF50';
-              } else if (marker.categories === 'UnPaid') {
-                color = '#FF9800';
-              } else if (marker.categories === 'Emergency') {
-                color = '#E91E63';
-              }
+            {/* // Update the MapContainer component to include MarkerClusterGroup
+            // Replace the individual markers rendering with clustered markers */}
+            {postMarkers.length > 0 && (
+              <MarkerClusterGroup
+                chunkedLoading
+                chunkDelay={100}
+                spiderfyOnMaxZoom={true}
+                showCoverageOnHover={true}
+                zoomToBoundsOnClick={true}
+                maxClusterRadius={60}
+                disableClusteringAtZoom={19} // Spider clustering at zoom 19 and above
+                spiderLegPolylineOptions={{
+                  weight: 1.5,
+                  color: darkMode ? '#3b82f6' : '#2563eb',
+                  opacity: 0.7
+                }}
+                iconCreateFunction={(cluster) => {
+                  const count = cluster.getChildCount();
+                  const size = count > 100 ? 60 : count > 50 ? 50 : count > 20 ? 40 : 30;
+                  
+                  return L.divIcon({
+                    html: `<div style="
+                      width: ${size}px;
+                      height: ${size}px;
+                      background: ${darkMode ? 'rgba(59, 130, 246, 0.9)' : 'rgba(37, 99, 235, 0.9)'};
+                      color: white;
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: bold;
+                      font-size: ${size > 40 ? '14px' : '12px'};
+                      border: 2px solid white;
+                      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                      cursor: pointer;
+                    ">${count}</div>`,
+                    iconSize: [size, size],
+                    className: 'marker-cluster'
+                  });
+                }}
+              >
+              {/* posts locations mapping code */}
+              {postMarkers.map(marker => {
+                let color = '#4CAF50';
+                
+                // Choose icon color based on post type/category
+                if (marker.postType === 'ServiceOffering') {
+                  color = '#2196F3';
+                } else if (marker.categories === 'Paid') {
+                  color = '#4CAF50';
+                } else if (marker.categories === 'UnPaid') {
+                  color = '#FF9800';
+                } else if (marker.categories === 'Emergency') {
+                  color = '#E91E63';
+                }
 
-              return (
-                <Marker
-                  key={marker.id}
-                  position={marker.position}
-                  icon={postsMappingIcon(marker.title, color)}
-                  eventHandlers={{
-                    // click: () => handleMarkerClick(marker),
-                    mouseover: (e) => {
-                      e.target.setZIndexOffset(1000); // Bring to front on hover
-                    },
-                    mouseout: (e) => {
-                      e.target.setZIndexOffset(0); // Reset on mouseout
-                    }
-                  }}
-                  data-marker-id={marker.id}
-                  // eventHandlers={{
-                  //   click: () => {
-                      // const postElement = document.getElementById(`post-${marker.id}`);
-                      // if (postElement) {
-                      //   postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      //   postElement.style.transition = 'all 0.3s ease';
-                      //   postElement.style.boxShadow = '0 0 20px rgba(67, 97, 238, 0.5)';
-                      //   setTimeout(() => {
-                      //     postElement.style.boxShadow = '';
-                      //   }, 2000);
-                      // }
-                    // }
-                  // }}
-                >
-                  {/*  popup content to show more information */}
-                  <Popup 
-                    className="custom-popup"
-                    closeButton={true}
-                  >
-                    <Box sx={{ 
-                      minWidth: '180px', 
-                      maxWidth: isMobile ? '250px' : '300px',
-                      p: 1.5,
-                    }}>
-                      <Typography variant="subtitle1" gutterBottom sx={{ 
-                        fontWeight: 'bold',
-                        color: darkMode ? 'white' : 'text.primary'
-                      }}>
-                        {marker.title}
-                      </Typography>
-                      
-                      <Box sx={{ 
-                        mb: 1, 
-                        display: 'flex', 
-                        flexDirection: 'row', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center' 
-                      }}>
-                        <Box >
-                          <Chip 
-                            label={marker.postType === 'HelpRequest' 
-                              ? (marker.categories || 'Help') 
-                              : (marker.serviceType || 'Service')}
-                            size="small" 
-                            color={marker.postType === 'HelpRequest' ? 'primary' : 'success'}
-                            sx={{ fontSize: '0.7rem', height: '20px', mr: 0.8,
-                              // fontWeight: '600',
-                              backgroundColor: marker.postType === 'HelpRequest' 
-                                ? (marker.categories === 'Paid' 
-                                    ? darkMode ? '#065f46' : '#10b981'
-                                    : marker.categories === 'UnPaid'
-                                    ? darkMode ? '#854d0e' : '#f59e0b'
-                                    : marker.categories === 'Emergency'
-                                    ? darkMode ? '#991b1b' : '#dc2626'
-                                    : darkMode ? '#374151' : '#6b7280'
-                                  )
-                                : (darkMode ? '#1e3a8a' : '#3b82f6'),
-                              color: 'white',
-                              '& .MuiChip-label': {
-                                px: 1
-                              }
-                            }}
-                          />
-                          {/* Post Status Chip */}
-                          <Chip
-                            label={marker.postStatus || 'Active'}
-                            size="small"
-                            sx={{
-                              fontSize: '0.65rem',
-                              height: '20px',
-                              // fontWeight: '600',
-                              backgroundColor: marker.postStatus === 'Active' 
-                                ? (darkMode ? '#065f46' : '#10b981')
-                                : marker.postStatus === 'InActive'
-                                ? (darkMode ? '#6b7280' : '#9ca3af')
-                                : marker.postStatus === 'Closed'
-                                ? (darkMode ? '#991b1b' : '#dc2626')
-                                : (darkMode ? '#854d0e' : '#f59e0b'),
-                              color: 'white',
-                              '& .MuiChip-label': {
-                                px: 1
-                              }
-                            }}
-                          />
-                        </Box>
-                        {marker.price > 0 && (
-                          <Chip 
-                            label={formatPrice(marker.price)}
-                            icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: '14px', color: 'inherit' }} />}
-                            size="small" 
-                            variant="filled"
-                            sx={{
-                              // fontSize: '0.7rem',
-                              height: '20px',
-                              // fontWeight: '600',
-                              backgroundColor: darkMode 
-                                ? (marker.price > 1000 ? '#7c2d12' : '#365314')
-                                : (marker.price > 1000 ? '#fed7aa' : '#d9f99d'),
-                              color: darkMode 
-                                ? (marker.price > 1000 ? '#fdba74' : '#a3e635')
-                                : (marker.price > 1000 ? '#9a3412' : '#3f6212'),
-                              border: 'none',
-                              '& .MuiChip-label': {
-                                px: 0.5, mr: 1,
-                              }
-                            }}
-                          />
-                        )}
-                      </Box>
-                      {marker.distance !== null && (
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <LocationOnIcon sx={{ 
-                            fontSize: 16, mr: 0.5,
-                            color: darkMode ? '#60a5fa' : '#3b82f6',
-                          }} />
-                          <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
-                            {marker.distance < 1 
-                              ? `${Math.round(marker.distance * 1000)}m away` 
-                              : `${marker.distance.toFixed(1)}km away`
+                return (
+                  <Marker
+                    key={marker.id}
+                    position={marker.position}
+                    icon={postsMappingIcon(marker.title, color, darkMode)}
+                    eventHandlers={{
+                      // click: () => handleMarkerClick(marker),
+                      click: (e) => {
+                        e.originalEvent.stopPropagation();
+                        
+                        // Highlight clicked marker
+                        const markerElement = e.target.getElement();
+                        if (markerElement) {
+                          markerElement.style.transition = 'all 0.3s ease';
+                          // markerElement.style.transform = 'scale(1.3)';
+                          // markerElement.style.zIndex = '1000';
+                          markerElement.style.filter = 'brightness(1.2)';
+                          
+                          // Remove highlight after 1.5 seconds
+                          setTimeout(() => {
+                            if (markerElement) {
+                              // markerElement.style.transform = 'scale(1)';
+                              // markerElement.style.zIndex = '';
+                              markerElement.style.filter = 'brightness(1)';
                             }
-                          </Typography>
+                          }, 1500);
+                        }
+                        
+                        // Open popup
+                        e.target.openPopup();
+                      },
+                      mouseover: (e) => {
+                        e.target.setZIndexOffset(1000); // Bring to front on hover
+                        // const markerElement = e.target.getElement();
+                        // if (markerElement && !markerElement.style.transform.includes('scale(1.3)')) {
+                        //   markerElement.style.transform = 'scale(1.1)';
+                        //   markerElement.style.zIndex = '500';
+                        // }
+                      },
+                      mouseout: (e) => {
+                        e.target.setZIndexOffset(0); // Reset on mouseout
+                        // const markerElement = e.target.getElement();
+                        // if (markerElement && !markerElement.style.transform.includes('scale(1.3)')) {
+                        //   markerElement.style.transform = 'scale(1)';
+                        //   markerElement.style.zIndex = '';
+                        // }
+                      },
+                      add: (e) => {
+                        // Add data attribute for easier selection
+                        const markerElement = e.target.getElement();
+                        if (markerElement) {
+                          markerElement.setAttribute('data-marker-id', marker.id);
+                        }
+                      }
+                    }}
+                    // data-marker-id={marker.id}
+                    // eventHandlers={{
+                    //   click: () => {
+                        // const postElement = document.getElementById(`post-${marker.id}`);
+                        // if (postElement) {
+                        //   postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        //   postElement.style.transition = 'all 0.3s ease';
+                        //   postElement.style.boxShadow = '0 0 20px rgba(67, 97, 238, 0.5)';
+                        //   setTimeout(() => {
+                        //     postElement.style.boxShadow = '';
+                        //   }, 2000);
+                        // }
+                      // }
+                    // }}
+                  >
+                    {/*  popup content to show more information */}
+                    <Popup 
+                      className="custom-popup"
+                      closeButton={true}
+                      autoClose={false}
+                      closeOnClick={false}
+                      onOpen={() => {
+                        // Save marker state when popup opens
+                        if (mapRef.current) {
+                          const center = mapRef.current.getCenter();
+                          const zoom = mapRef.current.getZoom();
+                          
+                          globalCache.lastMapCenter = [center.lat, center.lng];
+                          globalCache.lastMapZoom = zoom;
+                          globalCache.lastClickedMarkerId = marker.id;
+                          
+                          localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
+                          localStorage.setItem('lastMapZoom', zoom.toString());
+                          localStorage.setItem('lastClickedMarkerId', marker.id);
+                        }
+                      }}
+                    >
+                      <Box sx={{ 
+                        minWidth: '180px', 
+                        maxWidth: isMobile ? '250px' : '300px',
+                        p: 1.5,
+                      }}>
+                        <Typography variant="subtitle1" gutterBottom sx={{ 
+                          fontWeight: 'bold',
+                          color: darkMode ? 'white' : 'text.primary'
+                        }}>
+                          {marker.title}
+                        </Typography>
+                        
+                        <Box sx={{ 
+                          mb: 1, 
+                          display: 'flex', 
+                          flexDirection: 'row', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center' 
+                        }}>
+                          <Box >
+                            <Chip 
+                              label={marker.postType === 'HelpRequest' 
+                                ? (marker.categories || 'Help') 
+                                : (marker.serviceType || 'Service')}
+                              size="small" 
+                              color={marker.postType === 'HelpRequest' ? 'primary' : 'success'}
+                              sx={{ fontSize: '0.7rem', height: '20px', mr: 0.8,
+                                // fontWeight: '600',
+                                backgroundColor: marker.postType === 'HelpRequest' 
+                                  ? (marker.categories === 'Paid' 
+                                      ? darkMode ? '#065f46' : '#10b981'
+                                      : marker.categories === 'UnPaid'
+                                      ? darkMode ? '#854d0e' : '#f59e0b'
+                                      : marker.categories === 'Emergency'
+                                      ? darkMode ? '#991b1b' : '#dc2626'
+                                      : darkMode ? '#374151' : '#6b7280'
+                                    )
+                                  : (darkMode ? '#1e3a8a' : '#3b82f6'),
+                                color: 'white',
+                                '& .MuiChip-label': {
+                                  px: 1
+                                }
+                              }}
+                            />
+                            {/* Post Status Chip */}
+                            <Chip
+                              label={marker.postStatus || 'Active'}
+                              size="small"
+                              sx={{
+                                fontSize: '0.65rem',
+                                height: '20px',
+                                // fontWeight: '600',
+                                backgroundColor: marker.postStatus === 'Active' 
+                                  ? (darkMode ? '#065f46' : '#10b981')
+                                  : marker.postStatus === 'InActive'
+                                  ? (darkMode ? '#6b7280' : '#9ca3af')
+                                  : marker.postStatus === 'Closed'
+                                  ? (darkMode ? '#991b1b' : '#dc2626')
+                                  : (darkMode ? '#854d0e' : '#f59e0b'),
+                                color: 'white',
+                                '& .MuiChip-label': {
+                                  px: 1
+                                }
+                              }}
+                            />
+                          </Box>
+                          {marker.price > 0 && (
+                            <Chip 
+                              label={formatPrice(marker.price)}
+                              icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: '14px', color: 'inherit' }} />}
+                              size="small" 
+                              variant="filled"
+                              sx={{
+                                // fontSize: '0.7rem',
+                                height: '20px',
+                                // fontWeight: '600',
+                                backgroundColor: darkMode 
+                                  ? (marker.price > 1000 ? '#7c2d12' : '#365314')
+                                  : (marker.price > 1000 ? '#fed7aa' : '#d9f99d'),
+                                color: darkMode 
+                                  ? (marker.price > 1000 ? '#fdba74' : '#a3e635')
+                                  : (marker.price > 1000 ? '#9a3412' : '#3f6212'),
+                                border: 'none',
+                                '& .MuiChip-label': {
+                                  px: 0.5, mr: 1,
+                                }
+                              }}
+                            />
+                          )}
                         </Box>
-                      )}
+                        {marker.distance !== null && (
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <LocationOnIcon sx={{ 
+                              fontSize: 16, mr: 0.5,
+                              color: darkMode ? '#60a5fa' : '#3b82f6',
+                            }} />
+                            <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
+                              {marker.distance < 1 
+                                ? `${Math.round(marker.distance * 1000)}m away` 
+                                : `${marker.distance.toFixed(1)}km away`
+                              }
+                            </Typography>
+                          </Box>
+                        )}
 
-                      <Button 
-                        variant="outlined" 
-                        size="small" 
-                        fullWidth 
-                        sx={{ 
-                          mt: 1, 
-                          fontSize: '0.75rem', 
-                          borderRadius: '8px', 
-                          textTransform: 'none',
-                          fontWeight: '600',
-                          color: darkMode 
-                            ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
-                            : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                          // boxShadow: darkMode 
-                          //   ? '0 4px 14px rgba(59, 130, 246, 0.4)'
-                          //   : '0 4px 14px rgba(37, 99, 235, 0.3)',
-                          '&:hover': {
+                        <Button 
+                          variant="outlined" 
+                          size="small" 
+                          fullWidth 
+                          sx={{ 
+                            mt: 1, 
+                            fontSize: '0.75rem', 
+                            borderRadius: '8px', 
+                            textTransform: 'none',
+                            fontWeight: '600',
                             color: darkMode 
-                              ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
-                              : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                            boxShadow: darkMode 
-                              ? '0 6px 20px rgba(59, 130, 246, 0.6)'
-                              : '0 6px 20px rgba(37, 99, 235, 0.4)',
-                            transform: 'translateY(-1px)'
-                          },
-                          transition: 'all 0.2s ease'
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          fetchPostDetails(marker.id);
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </Box>
-                  </Popup>
-                </Marker>
-              );
-            })}
+                              ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
+                              : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            // boxShadow: darkMode 
+                            //   ? '0 4px 14px rgba(59, 130, 246, 0.4)'
+                            //   : '0 4px 14px rgba(37, 99, 235, 0.3)',
+                            '&:hover': {
+                              color: darkMode 
+                                ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
+                                : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                              boxShadow: darkMode 
+                                ? '0 6px 20px rgba(59, 130, 246, 0.6)'
+                                : '0 6px 20px rgba(37, 99, 235, 0.4)',
+                              transform: 'translateY(-1px)'
+                            },
+                            transition: 'all 0.2s ease'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fetchPostDetails(marker.id);
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </Box>
+                    </Popup>
+                  </Marker>
+                );
+              })}
+              </MarkerClusterGroup>
+            )}
             {/* Wave Animation Circles */}
             <WaveAnimationCircles 
               center={userLocation ? [userLocation.latitude, userLocation.longitude] : null}
