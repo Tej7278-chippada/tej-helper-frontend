@@ -1,5 +1,5 @@
 // /components/Login.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, Dialog, DialogContent, DialogActions, CircularProgress, InputAdornment, IconButton, Divider, Fade,
   //  IconButton
    } from '@mui/material';
@@ -55,6 +55,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [showAboutHelper, setShowAboutHelper] = useState(false);
+  const aboutHelperRef = useRef(null);
 
   // const gradientBackground = darkMode
   //   ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'
@@ -66,6 +67,17 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    if (showAboutHelper && aboutHelperRef.current) {
+      setTimeout(() => {
+        aboutHelperRef.current.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+      }, 100);
+    }
+  }, [showAboutHelper]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -519,7 +531,13 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
       </Button>
     </Box>
 </Box>
-        {showAboutHelper && <AboutHelper isMobile={isMobile} darkMode={darkMode} />}
+        {showAboutHelper && (
+          <div ref={aboutHelperRef} style={{
+              scrollMarginTop: isMobile ? '80px' : '100px',
+            }}>
+            <AboutHelper isMobile={isMobile} darkMode={darkMode} />
+          </div>
+        )}
         {/* {showAboutHelper && <HelperHome darkMode={darkMode}/>} */}
         <TermsPolicyBar isMobile={isMobile} darkMode={darkMode}/>
     </Layout>
