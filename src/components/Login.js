@@ -15,6 +15,10 @@ import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import DemoPosts from './Banners/DemoPosts';
 import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
 import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
+import AboutHelperSkeleton from './Banners/AboutHelperSkeleton';
+import AboutHelper from './Banners/AboutHelper';
 
 const theme = createTheme({
   breakpoints: {
@@ -50,6 +54,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('md')); // Media query for small screens
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
+  const [showAboutHelper, setShowAboutHelper] = useState(false);
 
   // const gradientBackground = darkMode
   //   ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'
@@ -187,8 +192,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
          <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'} /> {/* {!isMobile &&  */}
         </Box>
     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" minHeight="70vh" width= {isMobile ? "auto" : "100%"}
-    padding={isMobile ? 2 : 4} // Adjust padding for mobile
-    // sx={{...getGlassmorphismStyle(theme),}}
+    padding={isMobile ? 2 : 4} sx={{ position: 'relative' }}// sx={{...getGlassmorphismStyle(theme),}}
     >
       {/* <Typography variant={isMobile ? "h5" : "h4"} gutterBottom>
         Login
@@ -482,11 +486,42 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
         </Box>
       </form>
       <ForgotPassword darkMode={darkMode} forgotPasswordOpen={forgotPasswordOpen} setForgotPasswordOpen={setForgotPasswordOpen} isMobile={isMobile}/>
-       
        {/* {isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'}/> } */}
+      <Button
+        variant="text"
+        onClick={() => setShowAboutHelper(!showAboutHelper)}
+        size="small"
+        sx={{
+          position: isMobile ? 'relative' : 'absolute',
+          mt: isMobile ? 2 : 0,
+          zIndex: 2,
+          bottom: 6,
+          right: 6,
+          width: '150px', borderRadius: 4,
+          color: '#4361ee',
+          fontWeight: 600,
+          fontSize: '1rem',
+          textTransform: 'none',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            // background: gradientHover,
+            transform: 'translateY(-2px)',
+            boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+
+          },
+          '&:active': {
+            transform: 'translateY(0)',
+          },
+        }}
+      >
+        {showAboutHelper ? 'Hide' : 'About Helper'}
+        {showAboutHelper ? <KeyboardArrowUpRoundedIcon fontSize="small" /> : <KeyboardArrowDownRoundedIcon fontSize="small" />}
+      </Button>
     </Box>
 </Box>
-        <TermsPolicyBar darkMode={darkMode}/>
+        {showAboutHelper && <AboutHelper isMobile={isMobile} darkMode={darkMode} />}
+        {/* {showAboutHelper && <HelperHome darkMode={darkMode}/>} */}
+        <TermsPolicyBar isMobile={isMobile} darkMode={darkMode}/>
     </Layout>
     </ThemeProvider>
   );
