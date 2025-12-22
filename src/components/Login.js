@@ -515,6 +515,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
           fontSize: '1rem',
           textTransform: 'none',
           transition: 'all 0.3s ease',
+          boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
           '&:hover': {
             // background: gradientHover,
             transform: 'translateY(-2px)',
