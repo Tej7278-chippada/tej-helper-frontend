@@ -608,6 +608,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // Fetch user's location and address
   const fetchUserLocation = useCallback(() => {
+    window.scrollTo(0, 0);
     setLoadingLocation(true);
 
     if (!navigator.geolocation) {
@@ -650,7 +651,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         // console.error('Error fetching location:', error);
         setSnackbar({
           open: true,
-          message: 'Failed to fetch your current location.',
+          message: 'Failed to fetch your current location. Please enable the location permission or try again. Your location is never shared publicly.',
           severity: 'error',
         });
         setLoadingLocation(false);
@@ -681,6 +682,30 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       return `${(accuracy / 1000).toFixed(2)} km`;
     }
     return `${Math.round(accuracy)} m`;
+  };
+
+  const getLocationLabel = ({ loading, address, isMobile }) => {
+    if (loading) return 'Finding your location…';
+
+    if (!address)
+      return 'Location unavailable';
+
+    const words = address.split(' ');
+    const limit = isMobile ? 2 : 3;
+
+    return words.length > limit
+      ? `${words.slice(0, limit).join(' ')}…`
+      : address;
+  };
+
+  const getLocationDescription = ({ loading, address }) => {
+    if (loading)
+      return 'We’re detecting your current location to show nearby posts…';
+
+    if (!address)
+      return 'Location access is disabled. Enable location permission to find posts near you. Your location is never shared publicly.';
+
+    return address;
   };
 
   // Handle browser back button
@@ -2269,15 +2294,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             }
           }}>
             <LocationOnIcon sx={{ color: '#4361ee' }} />
-            <Typography variant="body1" sx={{
-              color: '#4361ee',
-              fontWeight: 600,
-              maxWidth: isMobile ? '120px' : '200px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap'
-            }}>
-              {(currentAddress.split(" ").length > (isMobile ? 2 : 3) ? `${currentAddress.split(" ").slice(0, (isMobile ? 2 : 3)).join(" ")}...` : currentAddress) || "Fetching location..."}
+            <Typography
+              variant="body1"
+              sx={{
+                color: '#4361ee',
+                fontWeight: 600,
+                maxWidth: isMobile ? '120px' : '200px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {getLocationLabel({
+                loading: loadingLocation,
+                address: currentAddress,
+                isMobile
+              })}
             </Typography>
           </IconButton>
         </Box>
@@ -2306,21 +2338,33 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </Box>
               <Box display="flex" justifyContent="start" mb={2} mt={1}>
                 <LocationOnIcon color='primary' />
-                <Typography variant="body1" sx={{ marginLeft: '8px', color: 'grey', cursor: 'pointer', '&:hover': { color: theme.palette.success.main } }} onClick={recenterUserLocation}>
-                  {currentAddress || "Fetching location..."}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    marginLeft: '8px',
+                    color: 'grey',
+                    cursor: 'pointer',
+                    '&:hover': { color: theme.palette.success.main }
+                  }}
+                  onClick={recenterUserLocation}
+                >
+                  {getLocationDescription({
+                    loading: loadingLocation,
+                    address: currentAddress
+                  })}
                 </Typography>
               </Box>
               {locationDetails?.accuracy && (
                 <Box sx={{ m: '10px' }}>
                   <Typography variant="body2" color="textSecondary">
-                    * Your location accuracy is approximately{' '}
-                    <strong>{formatAccuracy(locationDetails.accuracy)}</strong>.
+                    📍 Location accuracy: approximately{' '}
+                    <strong>{formatAccuracy(locationDetails.accuracy)}</strong>
                   </Typography>
                 </Box>
               )}
               {locationDetails?.accuracy > 1000 && (
                 <Typography variant="caption" color="warning.main">
-                  Location accuracy is low. Consider moving to an open area.
+                  ⚠️ Low accuracy detected. Move to an open area or enable GPS for better results.
                 </Typography>
               )}
             </CardContent>
