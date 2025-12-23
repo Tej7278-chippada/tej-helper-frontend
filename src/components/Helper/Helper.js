@@ -609,23 +609,30 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // Fetch user's location and address
   const fetchUserLocation = useCallback(() => {
     setLoadingLocation(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
+
+    if (!navigator.geolocation) {
+      console.error('Geolocation not supported');
+      setLoadingLocation(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude, accuracy } = position.coords;
           const locationData = { latitude, longitude };
           setUserLocation(locationData);
+          setLocationDetails({ accuracy });  // GPS accuracy in meters
+          const address = await fetchAddress(latitude, longitude); // Fetch address first
+          setCurrentAddress(address);
           setLoadingLocation(false);
           localStorage.setItem('userLocation', JSON.stringify(locationData)); // Store in localStorage
-          fetchAddress(latitude, longitude);
-          setLocationDetails({
-            accuracy: position.coords.accuracy, // GPS accuracy in meters
-          });
-          saveLocation(latitude, longitude);
+
           const savedDistance = localStorage.getItem('distanceRange');
           if (savedDistance) {
             setDistanceRange(Number(savedDistance));
           }
+          await saveLocation(latitude, longitude, address, accuracy);
           // Clear saved map state when user explicitly recenters
           globalCache.lastMapCenter = null;
           globalCache.lastMapZoom = null;
@@ -633,41 +640,47 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           localStorage.removeItem('lastMapCenter');
           localStorage.removeItem('lastMapZoom');
           localStorage.removeItem('lastClickedMarkerId');
-        },
-        (error) => {
-          console.error('Error fetching location:', error);
-          setSnackbar({ open: true, message: 'Failed to fetch the current location. Please enable the location permission or try again.', severity: 'error' });
+        } catch (error) {
+          // console.error('Error fetching location:', error);
+          setSnackbar({ open: true, message: 'Failed to fetch your current location. Please enable the location permission or try again.', severity: 'error' });
           setLoadingLocation(false);
         }
-      );
-    } else {
-      console.error('Geolocation is not supported by this browser.');
-      setLoadingLocation(false);
-    }
+      },
+      (error) => {
+        // console.error('Error fetching location:', error);
+        setSnackbar({
+          open: true,
+          message: 'Failed to fetch your current location.',
+          severity: 'error',
+        });
+        setLoadingLocation(false);
+      }
+    );
   }, []);
 
-  const saveLocation = async (latitude, longitude) => {
-    // setSavingLocation(true);
+  const saveLocation = async (latitude, longitude, address, accuracy) => {
     try {
       const authToken = localStorage.getItem('authToken');
       await API.put(`/api/auth/${userId}/location`, {
         location: {
           latitude: latitude,
           longitude: longitude,
-          address: currentAddress
+          address: address,
+          accuracy: accuracy
         },
       }, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      // setSuccessMessage('Location saved successfully.');
-      // setSnackbar({ open: true, message: 'Location saved successfully.', severity: 'success' });
-      // setSavingLocation(false);
     } catch (err) {
-      // setError('Failed to save location. Please try again later.');
-      // setSnackbar({ open: true, message: 'Failed to save location. Please try again later.', severity: 'error' });
-      // setSavingLocation(false);
       console.error('Error saving location:', err);
     }
+  };
+
+  const formatAccuracy = (accuracy) => {
+    if (accuracy >= 1000) {
+      return `${(accuracy / 1000).toFixed(2)} km`;
+    }
+    return `${Math.round(accuracy)} m`;
   };
 
   // Handle browser back button
@@ -1520,10 +1533,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     try {
       const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
       const data = await response.json();
-      setCurrentAddress(data.display_name);
-      localStorage.setItem('userAddress', data.display_name);
+      const address = data.display_name || 'Address not found';
+      localStorage.setItem('userAddress', address);
+      return address;
     } catch (error) {
       console.error("Error fetching address:", error);
+      return '';
     }
   };
 
@@ -2295,12 +2310,18 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   {currentAddress || "Fetching location..."}
                 </Typography>
               </Box>
-              {locationDetails && (
+              {locationDetails?.accuracy && (
                 <Box sx={{ m: '10px' }}>
                   <Typography variant="body2" color="textSecondary">
-                    * Your location accuracy is approximately <strong>{locationDetails.accuracy}m</strong>.
+                    * Your location accuracy is approximately{' '}
+                    <strong>{formatAccuracy(locationDetails.accuracy)}</strong>.
                   </Typography>
                 </Box>
+              )}
+              {locationDetails?.accuracy > 1000 && (
+                <Typography variant="caption" color="warning.main">
+                  Location accuracy is low. Consider moving to an open area.
+                </Typography>
               )}
             </CardContent>
           </Card>
