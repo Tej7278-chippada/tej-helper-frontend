@@ -36,6 +36,7 @@ import PostReports from './components/Admin/PostReports';
 import ProfileVerification from './components/Admin/ProfileVerification';
 import PlansComparison from './components/Admin/PlansComparison';
 import NotificationPermissionDialog from './components/Notifications/NotificationPermissionDialog';
+import CouponRequestsPage from './components/Admin/CouponRequestsPage';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -531,6 +532,12 @@ function App() {
           <Route path="/profile-verification" element={
             <PrivateRoute adminOnly>
               <ProfileVerification darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
+            </PrivateRoute>
+          } />
+          <Route path="/coupon-management" element={
+            <PrivateRoute adminOnly>
+              <CouponRequestsPage darkMode={darkMode} toggleDarkMode={toggleDarkMode} 
+                unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/terms-conditions" element={<TermsConditions />} />

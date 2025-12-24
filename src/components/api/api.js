@@ -527,3 +527,17 @@ export const cancelIdVerification = async (userId) => {
   
   return await API.delete(`/api/auth/id-verification/cancel/${userId}`, { headers });
 };
+
+
+// User coupon request
+export const requestCoupon = () => {
+  return API.post('/api/coupon/request-coupon');
+};
+
+export const getMyCouponRequest = () => {
+  return API.get('/api/coupon/my-coupon-request');
+};
+
+export const getMyCoupon = () => {
+  return API.get('/api/coupon/my-coupon');
+};

@@ -19,7 +19,8 @@ import {
   PeopleAlt as UsersIcon,
   Feedback as FeedbackIcon,
   Campaign as BannerIcon,
-  AdminPanelSettings as AdminIcon
+  AdminPanelSettings as AdminIcon,
+  CardGiftcardRounded
 } from "@mui/icons-material";
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
@@ -88,6 +89,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, usern
       color: "#00bcd4",
       route: "/system-health",
       bgGradient: "linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)"
+    },
+    {
+      title: "Coupon Management",
+      description: "Manage coupon requests from users with 50+ followers",
+      icon: <CardGiftcardRounded sx={{ fontSize: 40 }} />,
+      color: "#9c27b0",
+      route: "/coupon-management",
+      bgGradient: "linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)"
     },
     {
       title: "Admin Banners",

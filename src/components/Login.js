@@ -1,7 +1,7 @@
 // /components/Login.js
 import React, { useEffect, useRef, useState } from 'react';
 import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, Dialog, DialogContent, DialogActions, CircularProgress, InputAdornment, IconButton, Divider, Fade,
-  //  IconButton
+  Card, CardContent, Grid, Chip //  IconButton
    } from '@mui/material';
 import axios from 'axios';
 import Layout from './Layout';
@@ -19,6 +19,12 @@ import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownR
 import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
 import AboutHelperSkeleton from './Banners/AboutHelperSkeleton';
 import AboutHelper from './Banners/AboutHelper';
+import CardGiftcardRoundedIcon from '@mui/icons-material/CardGiftcardRounded';
+// import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
+// import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
+import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
+import { ArrowForwardRounded, PeopleAltRounded } from '@mui/icons-material';
 
 const theme = createTheme({
   breakpoints: {
@@ -56,6 +62,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
   const [showAboutHelper, setShowAboutHelper] = useState(false);
   const aboutHelperRef = useRef(null);
+  const [showExpandedCard, setShowExpandedCard] = useState(false);
 
   // const gradientBackground = darkMode
   //   ? 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)'
@@ -222,6 +229,196 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
       >
         Sign In to Your Account
       </Typography> */}
+
+        <Box sx={{ 
+          width: '100%', 
+          mb: 2,
+          px: 1
+        }}>
+          <Card sx={{ 
+            borderRadius: 2,
+            background: 'linear-gradient(135deg, #232f3e 0%, #37475A 100%)',
+            color: 'white',
+            overflow: 'hidden',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)'
+            }
+          }}
+          onClick={() => setShowExpandedCard(!showExpandedCard)}
+          >
+            <Box sx={{ p: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <CardGiftcardRoundedIcon fontSize="small" sx={{ color: '#FF9900' }} />
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    ₹500 Amazon Pay Gift Card
+                  </Typography>
+                </Box>
+                <IconButton size="small" sx={{ color: '#FF9900' }}>
+                  {showExpandedCard ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
+                </IconButton>
+              </Box>
+              
+              {!showExpandedCard ? (
+                <>
+                  <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mb: 0.5, mt: 0.5 }}>
+                    Reach 50 followers → My Profile → Network Section
+                  </Typography>
+                  <Chip 
+                    label="50+ Followers Required"
+                    size="small"
+                    sx={{ 
+                      background: 'rgba(255, 153, 0, 0.2)',
+                      color: '#FF9900',
+                      border: '1px solid rgba(255, 153, 0, 0.3)',
+                      fontSize: '0.7rem'
+                    }}
+                  />
+                </>
+              ) : (
+                <Box sx={{ mt: 2 }}>
+                  {/* Expanded Content - Same as desktop but adapted for mobile */}
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <PeopleAltRounded fontSize="small" />
+                      <Typography variant="body2" fontWeight={500}>
+                        Eligibility Requirement:
+                      </Typography>
+                    </Box>
+                    <Chip 
+                      label="50+ Followers"
+                      size="small"
+                      sx={{ 
+                        background: 'linear-gradient(135deg, #FF9900 0%, #FFAD33 100%)',
+                        color: 'white',
+                        fontWeight: 600,
+                        mb: 1
+                      }}
+                    />
+                    <Typography variant="caption" sx={{ opacity: 0.8, display: 'block', mt: 0.5 }}>
+                      Build your community and unlock rewards
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="body2" fontWeight={500} sx={{ mb: 0.5 }}>
+                      How to Claim:
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                      <Box sx={{ 
+                        width: 20, 
+                        height: 20, 
+                        borderRadius: '50%', 
+                        background: '#FF9900',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        mt: 0.25
+                      }}>
+                        <Typography variant="caption" sx={{ color: 'white', fontWeight: 700 }}>1</Typography>
+                      </Box>
+                      <Typography variant="caption">
+                        Login and grow your followers to 50+
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
+                      <Box sx={{ 
+                        width: 20, 
+                        height: 20, 
+                        borderRadius: '50%', 
+                        background: '#FF9900',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        mt: 0.25
+                      }}>
+                        <Typography variant="caption" sx={{ color: 'white', fontWeight: 700 }}>2</Typography>
+                      </Box>
+                      <Typography variant="caption">
+                        Go to <strong>My Profile</strong>
+                      </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                      <Box sx={{ 
+                        width: 20, 
+                        height: 20, 
+                        borderRadius: '50%', 
+                        background: '#FF9900',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        mt: 0.25
+                      }}>
+                        <Typography variant="caption" sx={{ color: 'white', fontWeight: 700 }}>3</Typography>
+                      </Box>
+                      <Typography variant="caption">
+                        Click <strong>Request Coupon</strong> in Network Section
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    my: 1,
+                    p: 1,
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: 2,
+                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#FF9900' }}>
+                      Amazon Pay
+                    </Typography>
+                  </Box>
+
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent card toggle
+                      navigate('/register');
+                    }}
+                    sx={{
+                      background: 'linear-gradient(135deg, #FF9900 0%, #FFAD33 100%)',
+                      color: 'white',
+                      fontWeight: 600,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      py: 0.8,
+                      mt: 1,
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #E68900 0%, #FF9900 100%)',
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 4px 12px rgba(255, 153, 0, 0.3)'
+                      }
+                    }}
+                    endIcon={<ArrowForwardRounded />}
+                  >
+                    Sign Up to Get Started
+                  </Button>
+                  
+                  <Typography variant="caption" sx={{ 
+                    display: 'block', 
+                    textAlign: 'center', 
+                    mt: 1.5,
+                    opacity: 0.7,
+                    fontStyle: 'italic'
+                  }}>
+                    Tap card to collapse
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </Card>
+        </Box>
       <Box sx={{ textAlign: 'center', mb: 3 }}>
         {/* <LoginIcon
           sx={{

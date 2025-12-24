@@ -276,3 +276,16 @@ export const updateVerificationStatus = async (userId, status, rejectionReason =
     { headers }
   );
 };
+
+// Admin coupon management
+export const getCouponRequests = (params) => {
+  return API.get('/api/coupon/admin/requests', { params });
+};
+
+export const getCouponRequestDetails = (requestId) => {
+  return API.get(`/api/coupon/admin/request/${requestId}`);
+};
+
+export const reviewCouponRequest = (requestId, data) => {
+  return API.put(`/api/coupon/admin/request/${requestId}/review`, data);
+};
