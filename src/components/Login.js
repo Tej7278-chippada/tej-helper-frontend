@@ -231,7 +231,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
       </Typography> */}
 
         <Box sx={{ 
-          width: '100%', 
+          width: 'fit-content' , // isMobile ? '100%' : 'fit-content'
           mb: 2,
           px: 1
         }}>
