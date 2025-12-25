@@ -7,7 +7,7 @@ const GoogleAdsTracker = () => {
   useEffect(() => {
     if (window.gtag) {
       window.gtag('event', 'conversion', {
-        send_to: 'AW-17814776719/lOdDCJ3UitQbEI_X365C' // 'AW-CONVERSION_ID/CONVERSION_LABEL'
+        send_to: 'AW-17831170469/lOdDCJ3UitQbEI_X365C' // 'AW-CONVERSION_ID/CONVERSION_LABEL'
       });
     }
   }, [location]);
