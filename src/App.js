@@ -38,6 +38,7 @@ import PlansComparison from './components/Admin/PlansComparison';
 import NotificationPermissionDialog from './components/Notifications/NotificationPermissionDialog';
 import CouponRequestsPage from './components/Admin/CouponRequestsPage';
 import AboutHelper from './components/Banners/AboutHelper';
+import GoogleAdsTracker from './utils/GoogleAdsTracker';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -437,6 +438,7 @@ function App() {
         </Alert>
       </Snackbar>
       <Router>
+        <GoogleAdsTracker />
         <NearPostsNotification darkMode={darkMode}/>
         <Routes>
           <Route path="/login" element={<Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} setLoginStatus={setLoginStatus}/>} />

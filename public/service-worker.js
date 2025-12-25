@@ -13,6 +13,25 @@ self.addEventListener('push', (event) => {
     };
   }
 
+   // Custom handling for nearby posts
+  if (payload.type === 'nearby_post') {
+    payload = {
+      title: 'New Post Nearby!',
+      body: payload.message || 'Someone nearby needs help or is offering a service',
+      icon: '/logo192.png',
+      badge: '/logo192.png',
+      data: {
+        url: payload.postId ? `/post/${payload.postId}` : '/',
+        type: 'nearby_post',
+        postId: payload.postId,
+        distance: payload.distance
+      },
+      vibrate: [200, 100, 200],
+      // Add timestamp to show freshness
+      timestamp: payload.timestamp || Date.now()
+    };
+  }
+
   // Custom handling for chat messages
   if (payload.type === 'chat_message') {
     payload = {
@@ -34,7 +53,10 @@ self.addEventListener('push', (event) => {
     icon: payload.icon || '/logo192.png',
     badge: '/logo192.png',
     data: payload.data || { url: '/' },
-    vibrate: [200, 100, 200] // Add vibration for chat messages
+    vibrate: [200, 100, 200], // Add vibration for chat messages
+    timestamp: payload.timestamp,
+    tag: payload.data?.type, // Group notifications by type
+    requireInteraction: payload.requireInteraction || false
   };
 
   event.waitUntil(
@@ -47,6 +69,24 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  // Handle nearby posts
+  if (event.notification.data.type === 'nearby_post') {
+    const postUrl = `/post/${event.notification.data.postId}`;
+    
+    event.waitUntil(
+      clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true
+      }).then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes(postUrl) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        return clients.openWindow(postUrl);
+      })
+    );
+  } 
   // Special handling for chat messages
   if (event.notification.data.type === 'chat_message') {
     // const chatUrl = `/chat/${event.notification.data.chatId}`;

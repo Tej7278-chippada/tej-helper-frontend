@@ -1,0 +1,86 @@
+<!-- Helper Logo – Horizontal / Landscape Layout -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 520 180"
+     width="520" height="180"
+     role="img" aria-label="Helper logo horizontal"
+     style="display:block; margin:auto">
+
+  <defs>
+    <!-- Background gradient -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#667eea"/>
+      <stop offset="100%" stop-color="#764ba2"/>
+    </linearGradient>
+
+    <!-- Hand gradients -->
+    <linearGradient id="g-green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4CAF50"/>
+      <stop offset="100%" stop-color="#45A049"/>
+    </linearGradient>
+    <linearGradient id="g-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2196F3"/>
+      <stop offset="100%" stop-color="#1976D2"/>
+    </linearGradient>
+    <linearGradient id="g-orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF9800"/>
+      <stop offset="100%" stop-color="#F57C00"/>
+    </linearGradient>
+    <linearGradient id="g-pink" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E91E63"/>
+      <stop offset="100%" stop-color="#C2185B"/>
+    </linearGradient>
+
+    <!-- Glows -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="textGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1" result="tblur"/>
+      <feMerge>
+        <feMergeNode in="tblur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="520" height="180" rx="36" fill="url(#bg-gradient)"/>
+
+  <!-- Icon group -->
+  <g transform="translate(70,25)">
+    <g filter="url(#softGlow)">
+      <circle cx="17.5" cy="22.5" r="37.5" fill="url(#g-green)"/>
+    </g>
+    <g filter="url(#softGlow)">
+      <circle cx="90.0" cy="42.5" r="37.5" fill="url(#g-blue)"/>
+    </g>
+    <g filter="url(#softGlow)">
+      <circle cx="32.5" cy="85.0" r="37.5" fill="url(#g-orange)"/>
+    </g>
+    <g filter="url(#softGlow)">
+      <circle cx="82.5" cy="102.5" r="37.5" fill="url(#g-pink)"/>
+    </g>
+
+    <!-- Connector lines -->
+    <g opacity="0.85">
+      <rect x="25" y="25" width="65" height="4" rx="2" fill="#FFFFFF" opacity="0.8"/>
+      <rect x="15" y="85" width="65" height="4" rx="3" fill="#FFFFFF" opacity="0.8"/>
+    </g>
+  </g>
+
+  <!-- Text (Right, vertically centered) -->
+  <text x="240" y="50%"
+        dominant-baseline="middle"
+        font-family="Inter, Poppins, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+        font-size="72"
+        font-weight="700"
+        letter-spacing="-0.6"
+        fill="#FFFFFF"
+        filter="url(#textGlow)">
+    Helper
+  </text>
+</svg>
