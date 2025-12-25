@@ -197,7 +197,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
             zIndex: 1,
             textShadow: '0 2px 4px rgba(0,0,0,0.2)'
           }}>
-            Help Others, Earn Money
+            Post Tasks, Get Help Fast.
           </Typography>
           <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
             maxWidth: '800px',

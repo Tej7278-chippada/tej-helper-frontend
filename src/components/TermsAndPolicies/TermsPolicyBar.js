@@ -58,7 +58,14 @@ const TermsPolicyBar = ({isMobile, darkMode}) => {
               </Typography>
             </Typography>
           {/* </Box> */}
-
+          <Box sx={{ mt: 0, textAlign: 'center' }}>
+            <Typography
+              variant="caption"
+              sx={{ opacity: 0.6, color: darkMode ? '#aaa' : '#666' }}
+            >
+              Need support? Contact helper.in.dev@gmail.com
+            </Typography>
+          </Box>
           <Typography
             variant="caption"
             sx={{ opacity: 0.6, color: darkMode ? '#aaa' : '#666' }}

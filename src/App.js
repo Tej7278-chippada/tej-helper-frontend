@@ -37,6 +37,7 @@ import ProfileVerification from './components/Admin/ProfileVerification';
 import PlansComparison from './components/Admin/PlansComparison';
 import NotificationPermissionDialog from './components/Notifications/NotificationPermissionDialog';
 import CouponRequestsPage from './components/Admin/CouponRequestsPage';
+import AboutHelper from './components/Banners/AboutHelper';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -543,6 +544,7 @@ function App() {
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/plans" element={<PlansComparison />} />
+          <Route path="/about-helper" element={<AboutHelper />} />
         </Routes>
       </Router>
     </ThemeProvider>
