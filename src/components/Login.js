@@ -1,5 +1,5 @@
 // /components/Login.js
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TextField, Button, Typography, Box, Alert, useMediaQuery, ThemeProvider, createTheme, Dialog, DialogContent, DialogActions, CircularProgress, InputAdornment, IconButton, Divider, Fade,
   Card, CardContent, Grid, Chip //  IconButton
    } from '@mui/material';
@@ -15,16 +15,16 @@ import PinOutlinedIcon from '@mui/icons-material/PinOutlined';
 import DemoPosts from './Banners/DemoPosts';
 import GoogleOAuth from './GoogleOAuth/GoogleOAuth';
 import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
-import AboutHelperSkeleton from './Banners/AboutHelperSkeleton';
+// import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+// import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
+// import AboutHelperSkeleton from './Banners/AboutHelperSkeleton';
 import AboutHelper from './Banners/AboutHelper';
 import CardGiftcardRoundedIcon from '@mui/icons-material/CardGiftcardRounded';
 // import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
 // import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
-import { ArrowForwardRounded, PeopleAltRounded } from '@mui/icons-material';
+import { ArrowForwardRounded, CelebrationRounded, PeopleAltRounded } from '@mui/icons-material';
 
 const theme = createTheme({
   breakpoints: {
@@ -60,8 +60,8 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('md')); // Media query for small screens
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-  const [showAboutHelper, setShowAboutHelper] = useState(false);
-  const aboutHelperRef = useRef(null);
+  // const [showAboutHelper, setShowAboutHelper] = useState(false);
+  // const aboutHelperRef = useRef(null);
   const [showExpandedCard, setShowExpandedCard] = useState(false);
 
   // const gradientBackground = darkMode
@@ -75,16 +75,16 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    if (showAboutHelper && aboutHelperRef.current) {
-      setTimeout(() => {
-        aboutHelperRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }, 100);
-    }
-  }, [showAboutHelper]);
+  // useEffect(() => {
+  //   if (showAboutHelper && aboutHelperRef.current) {
+  //     setTimeout(() => {
+  //       aboutHelperRef.current.scrollIntoView({
+  //         behavior: 'smooth',
+  //         block: 'start',
+  //       });
+  //     }, 100);
+  //   }
+  // }, [showAboutHelper]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -261,13 +261,37 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
                   {showExpandedCard ? <ExpandLessRoundedIcon /> : <ExpandMoreRoundedIcon />}
                 </IconButton>
               </Box>
+
+              {/* Offer Duration - Always visible */}
+              <Box sx={{ 
+                mt: 0.5,
+                mb: 0.5,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5
+              }}>
+                <Typography variant="caption" sx={{ 
+                  opacity: 0.9, 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  background: 'rgba(255, 153, 0, 0.1)',
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: 1
+                }}>
+                  <span style={{ color: '#FF9900', fontWeight: 600 }}>🎁</span>
+                  <span style={{ fontWeight: 500 }}>Dec 25-28</span>
+                  <span style={{ opacity: 0.8 }}>• Christmas Special</span>
+                </Typography>
+              </Box>
               
               {!showExpandedCard ? (
                 <>
                   <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mb: 0.5, mt: 0.5 }}>
                     Reach 50 followers → My Profile → Network Section
                   </Typography>
-                  <Chip 
+                  {/* <Chip 
                     label="50+ Followers Required"
                     size="small"
                     sx={{ 
@@ -276,12 +300,34 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
                       border: '1px solid rgba(255, 153, 0, 0.3)',
                       fontSize: '0.7rem'
                     }}
-                  />
+                  /> */}
                 </>
               ) : (
                 <Box sx={{ mt: 2 }}>
                   {/* Expanded Content - Same as desktop but adapted for mobile */}
                   <Box sx={{ mb: 2 }}>
+                    {/* Offer Duration Details */}
+                    <Box sx={{ 
+                      mb: 2, 
+                      p: 1.5, 
+                      background: 'rgba(211, 47, 47, 0.1)',
+                      borderRadius: 2,
+                      border: '1px solid rgba(211, 47, 47, 0.2)'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <CelebrationRounded sx={{ color: '#FFD700' }} />
+                        <Typography variant="body2" fontWeight={600}>
+                          🎄 Christmas Celebration Offer
+                        </Typography>
+                      </Box>
+                      <Typography variant="caption" sx={{ display: 'block', mb: 0.5, opacity: 0.9 }}>
+                        <strong>Limited Time:</strong> December 25th to 28th, 2025
+                      </Typography>
+                      <Typography variant="caption" sx={{ display: 'block', opacity: 0.8 }}>
+                        This special ₹500 Amazon Pay gift card is exclusively available during our Christmas celebrations.
+                        Requests must be made within this period to qualify.
+                      </Typography>
+                    </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <PeopleAltRounded fontSize="small" />
                       <Typography variant="body2" fontWeight={500}>
@@ -322,7 +368,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
                         <Typography variant="caption" sx={{ color: 'white', fontWeight: 700 }}>1</Typography>
                       </Box>
                       <Typography variant="caption">
-                        Login and grow your followers to 50+
+                        Login and grow your followers to 50+ <strong style={{ color: '#FF9900' }}>(Before Dec 28)</strong>
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
@@ -359,6 +405,23 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
                       </Box>
                       <Typography variant="caption">
                         Click <strong>Request Coupon</strong> in Network Section
+                      </Typography>
+                    </Box>
+                    {/* Important Note */}
+                    <Box sx={{ 
+                      mt: 2, 
+                      p: 1, 
+                      background: 'rgba(255, 153, 0, 0.1)',
+                      borderRadius: 1,
+                      borderLeft: '3px solid #FF9900'
+                    }}>
+                      <Typography variant="caption" sx={{ display: 'block', fontWeight: 600, color: '#FF9900' }}>
+                        ⚡ Important:
+                      </Typography>
+                      <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
+                        • Offer valid only from <strong>December 25-28, 2025</strong><br/>
+                        • Coupon requests must be submitted within this period<br/>
+                        • Gift cards will be shared within 24 hours of request
                       </Typography>
                     </Box>
                   </Box>
@@ -697,7 +760,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
       </form>
       <ForgotPassword darkMode={darkMode} forgotPasswordOpen={forgotPasswordOpen} setForgotPasswordOpen={setForgotPasswordOpen} isMobile={isMobile}/>
        {/* {isMobile && <DemoPosts isMobile={isMobile} postId={'685bec9758f2f12cad77fff0'}/> } */}
-      <Button
+      {/* <Button
         variant="text"
         onClick={() => setShowAboutHelper(!showAboutHelper)}
         size="small"
@@ -727,16 +790,16 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
       >
         {showAboutHelper ? 'Hide' : 'About Helper'}
         {showAboutHelper ? <KeyboardArrowUpRoundedIcon fontSize="small" /> : <KeyboardArrowDownRoundedIcon fontSize="small" />}
-      </Button>
+      </Button> */}
     </Box>
 </Box>
-        {showAboutHelper && (
+        {/* {showAboutHelper && (
           <div ref={aboutHelperRef} style={{
               scrollMarginTop: isMobile ? '80px' : '100px',
-            }}>
+            }}> */}
             <AboutHelper isMobile={isMobile} darkMode={darkMode} />
-          </div>
-        )}
+          {/* </div>
+        )} */}
         {/* {showAboutHelper && <HelperHome darkMode={darkMode}/>} */}
         <TermsPolicyBar isMobile={isMobile} darkMode={darkMode}/>
     </Layout>
