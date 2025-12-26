@@ -55,6 +55,8 @@ import CompareRoundedIcon from '@mui/icons-material/CompareRounded';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import MarkerClusterGroup from '@changey/react-leaflet-markercluster';
+import LocationPermissionDialog from '../Maps/LocationPermissionDialog';
+import NotificationPermissionDialog from '../Notifications/NotificationPermissionDialog';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -254,6 +256,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   postStatus: '',
   //   priceRange: [0, 10000],
   // });
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [currentAddress, setCurrentAddress] = useState(() => {
     const savedAddress = localStorage.getItem('userAddress');
@@ -617,6 +621,59 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       return;
     }
 
+    triggerLocation();
+    
+  }, []);
+
+  const triggerLocation = () => {
+    const hasSeenLocationDialog = localStorage.getItem('hasSeenLocationDialog');
+    const locationPermissionRequested = localStorage.getItem('locationPermissionRequested');
+
+    // Check location permission status first
+    if ('geolocation' in navigator) {
+      navigator.permissions.query({ name: 'geolocation' }).then(permission => {
+        const locationStatus = permission.state;
+        
+        // If location permission hasn't been handled yet
+        if (!hasSeenLocationDialog && locationStatus === 'prompt') {
+          // Wait for app to load then show location dialog
+          setTimeout(() => {
+            setShowLocationDialog(true);
+            localStorage.setItem('hasSeenLocationDialog', 'true');
+          }, 1500);
+        } else if (locationStatus === 'prompt' && locationPermissionRequested === 'later') {
+          // Wait for app to load then show location dialog
+          setTimeout(() => {
+            setShowLocationDialog(true);
+            localStorage.setItem('hasSeenLocationDialog', 'true');
+          }, 1500);
+        } else if (locationStatus === 'denied' && !locationPermissionRequested) {
+          // Wait for app to load then show location dialog
+          setTimeout(() => {
+            setShowLocationDialog(true);
+            localStorage.setItem('hasSeenLocationDialog', 'true');
+          }, 1500);
+        } else if (locationStatus === 'denied' && locationPermissionRequested) {
+          // Location was denied, store this
+          localStorage.setItem('locationPermissionRequested', 'denied');
+          // Check for notifications after location handling
+          checkNotificationsAfterLocation();
+          setLoadingLocation(false);
+        } else if (locationStatus === 'granted') {
+          // Location already granted, check notifications
+          localStorage.setItem('locationPermissionRequested', 'granted');
+          // checkNotificationsAfterLocation();
+        // } else {
+          // Location already seen or other status, check notifications
+          // checkNotificationsAfterLocation();
+          fetchUserPosition();
+          checkNotificationsAfterLocation();
+        }
+      });
+    }
+  }
+
+  const fetchUserPosition = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
@@ -657,7 +714,80 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         setLoadingLocation(false);
       }
     );
-  }, []);
+  }
+
+  const checkNotificationsAfterLocation = () => {
+    const hasSeenNotificationDialog = localStorage.getItem('hasSeenNotificationDialog');
+    const notificationPermissionRequested = localStorage.getItem('notificationPermissionRequested');
+    
+    // Check notification permission
+    if ('Notification' in window && 'serviceWorker' in navigator) {
+      if (!hasSeenNotificationDialog && Notification.permission === 'default') {
+        // Show notification dialog after a short delay
+        setTimeout(() => {
+          setShowNotificationDialog(true);
+          localStorage.setItem('hasSeenNotificationDialog', 'true');
+        }, 500);
+      } else if (Notification.permission === 'denied' && !notificationPermissionRequested) {
+        localStorage.setItem('notificationPermissionRequested', 'denied');
+      } else if (Notification.permission === 'granted') {
+        localStorage.setItem('notificationPermissionRequested', 'granted');
+      }
+    }
+  };
+
+  // handler for location dialog
+  const handleLocationDialogClose = async (enabled, status) => {
+    setShowLocationDialog(false);
+    // console.log(enabled, status);
+    
+    // Store the permission status
+    if (status === 'granted') {
+      localStorage.setItem('locationPermissionRequested', 'granted');
+      fetchUserPosition();
+      // Show notification dialog after location is granted
+      setTimeout(() => {
+        checkNotificationsAfterLocation();
+      }, 500);
+      
+    } else if (status === 'denied') {
+      localStorage.setItem('locationPermissionRequested', 'denied');
+      // Still show notification dialog even if location was denied
+      setTimeout(() => {
+        checkNotificationsAfterLocation();
+      }, 500);
+      setLoadingLocation(false);
+    } else if (status === 'later') {
+      localStorage.setItem('locationPermissionRequested', 'later');
+      // Still show notification dialog even if location was denied
+      setTimeout(() => {
+        checkNotificationsAfterLocation();
+      }, 500);
+      setLoadingLocation(false);
+    }
+    
+    // Optionally show message based on status
+    if (enabled) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Location services enabled', 
+        severity: 'success' 
+      });
+    }
+  };
+
+  // notification dialog handler
+  const handleNotificationDialogClose = (enabled) => {
+    setShowNotificationDialog(false);
+    localStorage.setItem('notificationPermissionRequested', enabled ? 'granted' : 'denied');
+    if (enabled) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Notifications enabled successfully', 
+        severity: 'success' 
+      });
+    }
+  };
 
   const saveLocation = async (latitude, longitude, address, accuracy) => {
     try {
@@ -4979,6 +5109,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           )}
         </DialogContent>
       </Dialog> */}
+      {/* Location Permission Dialog - Shows FIRST */}
+      <LocationPermissionDialog
+        open={showLocationDialog}
+        onClose={handleLocationDialogClose}
+        darkMode={darkMode}
+        isMobile={isMobile}
+        setSnackbar={setSnackbar}
+      />
+      
+      {/* Notification Permission Dialog - Shows AFTER location */}
+      <NotificationPermissionDialog
+        open={showNotificationDialog}
+        onClose={handleNotificationDialogClose}
+        darkMode={darkMode}
+        isMobile={isMobile}
+      />
 
       <Snackbar
         open={snackbar.open}

@@ -212,8 +212,8 @@ function App() {
   const userName = localStorage.getItem('tokenUsername');
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
-  const [loginStatus, setLoginStatus] = useState(false);
-  const [showNotificationDialog, setShowNotificationDialog] = useState(false);
+  // const [loginStatus, setLoginStatus] = useState(false);
+  // const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   // Enhanced loading state management for splash screen
   const [isLoading, setIsLoading] = useState(() => {
     // Check if this is the first time the app is loading in this session
@@ -227,7 +227,7 @@ function App() {
   });
 
   const theme = createTheme(getDesignTokens(darkMode ? 'dark' : 'light'));
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  // const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const toggleDarkMode = () => {
     const newMode = !darkMode;
@@ -284,46 +284,46 @@ function App() {
   }, [username]);
 
   // to check and show permission dialog after successful login
-  useEffect(() => {
-    const checkAndShowNotificationDialog = () => {
-      const hasSeenDialog = localStorage.getItem('hasSeenNotificationDialog');
-      const isLoggedIn = localStorage.getItem('authToken');
-      const notificationPermission = localStorage.getItem('notificationPermissionRequested');
-      console.log('stage 1');
+  // useEffect(() => {
+  //   const checkAndShowNotificationDialog = () => {
+  //     const hasSeenDialog = localStorage.getItem('hasSeenNotificationDialog');
+  //     const isLoggedIn = localStorage.getItem('authToken');
+  //     const notificationPermission = localStorage.getItem('notificationPermissionRequested');
+  //     console.log('stage 1');
       
-      // Only show if:
-      // 1. User is logged in
-      // 2. Hasn't seen dialog before (or we want to remind them)
-      // 3. Haven't requested permission yet (or permission was denied and we want to retry)
-      // 4. Browser supports notifications
-      if (isLoggedIn && 
-          !hasSeenDialog && 
-          !notificationPermission && 
-          'Notification' in window && 
-          'serviceWorker' in navigator) {
-            console.log('stage 2');
+  //     // Only show if:
+  //     // 1. User is logged in
+  //     // 2. Hasn't seen dialog before (or we want to remind them)
+  //     // 3. Haven't requested permission yet (or permission was denied and we want to retry)
+  //     // 4. Browser supports notifications
+  //     if (isLoggedIn && 
+  //         !hasSeenDialog && 
+  //         !notificationPermission && 
+  //         'Notification' in window && 
+  //         'serviceWorker' in navigator) {
+  //           console.log('stage 2');
         
-        // Check current permission status
-        if (Notification.permission === 'default') {
-          // Wait a bit for app to load completely
-          setTimeout(() => {
-            setShowNotificationDialog(true);
-            localStorage.setItem('hasSeenNotificationDialog', 'true');
-          }, 2000);
-        } else if (Notification.permission === 'denied') {
-          // User previously denied, store this so we don't ask again
-          localStorage.setItem('notificationPermissionRequested', 'denied');
-        } else if (Notification.permission === 'granted') {
-          // Already granted, store this
-          localStorage.setItem('notificationPermissionRequested', 'granted');
-        }
-      }
-    };
+  //       // Check current permission status
+  //       if (Notification.permission === 'default') {
+  //         // Wait a bit for app to load completely
+  //         setTimeout(() => {
+  //           setShowNotificationDialog(true);
+  //           localStorage.setItem('hasSeenNotificationDialog', 'true');
+  //         }, 2000);
+  //       } else if (Notification.permission === 'denied') {
+  //         // User previously denied, store this so we don't ask again
+  //         localStorage.setItem('notificationPermissionRequested', 'denied');
+  //       } else if (Notification.permission === 'granted') {
+  //         // Already granted, store this
+  //         localStorage.setItem('notificationPermissionRequested', 'granted');
+  //       }
+  //     }
+  //   };
 
-    // Check after login state is confirmed
-    const timer = setTimeout(checkAndShowNotificationDialog, 1000);
-    return () => clearTimeout(timer);
-  }, [username, loginStatus]); // Run when username changes (login/logout)
+  //   // Check after login state is confirmed
+  //   const timer = setTimeout(checkAndShowNotificationDialog, 1000);
+  //   return () => clearTimeout(timer);
+  // }, [username, loginStatus]); // Run when username changes (login/logout)
 
   // Track user's webpage presence
   useEffect(() => {
@@ -411,7 +411,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <FloatingBackgroundBalls darkMode={darkMode}/>
       {/* Notification Permission Dialog */}
-      <NotificationPermissionDialog
+      {/* <NotificationPermissionDialog
         open={showNotificationDialog}
         onClose={(enabled) => {
           setShowNotificationDialog(false);
@@ -426,7 +426,7 @@ function App() {
           }
         }}
         darkMode={darkMode} isMobile={isMobile}
-      />
+      /> */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -441,7 +441,7 @@ function App() {
         <GoogleAdsTracker />
         <NearPostsNotification darkMode={darkMode}/>
         <Routes>
-          <Route path="/login" element={<Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} setLoginStatus={setLoginStatus}/>} />
+          <Route path="/login" element={<Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} />} />
           <Route path="/register" element={<Register darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>} />
           <Route path="/" element={
             <PrivateRoute>

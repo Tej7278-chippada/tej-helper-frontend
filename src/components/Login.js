@@ -46,7 +46,7 @@ const theme = createTheme({
 //   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
 // });
 
-const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginStatus}) => {
+const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
   // const [username, setUsername] = useState('');
   const [identifier, setIdentifier] = useState(''); // Can be email or username
   const [password, setPassword] = useState('');
@@ -124,7 +124,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate, setLoginSt
 
       setSuccess('Login successful!');
       navigate('/', { replace: true });
-      setLoginStatus(true);
+      // setLoginStatus(true);
     } else {
         setError('Token is missing in response');
       }
