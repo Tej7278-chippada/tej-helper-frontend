@@ -59,7 +59,7 @@ const DistanceSlider = ({ distanceRange, setDistanceRange, userLocation, mapRef,
     setDistanceRange(selectedDistance); // Convert index back to actual distance
     localStorage.setItem('distanceRange', selectedDistance);
     
-    if (mapRef.current && userLocation) {
+    if (mapRef?.current && userLocation) {
       mapRef.current.setView(
         [userLocation.latitude, userLocation.longitude],
         getZoomLevel(selectedDistance)
