@@ -3,6 +3,56 @@ import axios from 'axios';
 
 const API = axios.create({ baseURL: process.env.REACT_APP_API_URL });
 
+// Add request interceptor to include auth token
+API.interceptors.request.use(
+  (config) => {
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      config.headers.Authorization = `Bearer ${authToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle token refresh
+API.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to refresh token
+        const refreshResponse = await axios.post(
+          `${process.env.REACT_APP_API_URL}/api/auth/refresh-token`,
+          {},
+          { headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` } }
+        );
+
+        if (refreshResponse.data.authToken) {
+          localStorage.setItem('authToken', refreshResponse.data.authToken);
+          originalRequest.headers.Authorization = `Bearer ${refreshResponse.data.authToken}`;
+          return API(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        // Redirect to login if refresh fails
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('tokenUsername');
+        localStorage.removeItem('userId');
+        window.location.href = '/login';
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 export default API;
 
 

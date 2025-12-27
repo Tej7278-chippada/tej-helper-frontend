@@ -20,7 +20,8 @@ import {
   Feedback as FeedbackIcon,
   Campaign as BannerIcon,
   AdminPanelSettings as AdminIcon,
-  CardGiftcardRounded
+  CardGiftcardRounded,
+  Cached as CacheIcon
 } from "@mui/icons-material";
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
@@ -89,6 +90,14 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, usern
       color: "#00bcd4",
       route: "/system-health",
       bgGradient: "linear-gradient(135deg, #00bcd4 0%, #0097a7 100%)"
+    },
+    {
+      title: "Cache Management",
+      description: "Monitor and manage Redis cache, clear cache, view statistics",
+      icon: <CacheIcon sx={{ fontSize: 40 }} />,
+      color: "#673ab7",
+      route: "/cache-management",
+      bgGradient: "linear-gradient(135deg, #673ab7 0%, #9575cd 100%)"
     },
     {
       title: "Coupon Management",

@@ -39,6 +39,8 @@ import NotificationPermissionDialog from './components/Notifications/Notificatio
 import CouponRequestsPage from './components/Admin/CouponRequestsPage';
 import AboutHelper from './components/Banners/AboutHelper';
 import GoogleAdsTracker from './utils/GoogleAdsTracker';
+import CacheManagement from './components/Admin/CacheManagement';
+import { SnackbarProvider } from 'notistack';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -409,6 +411,14 @@ function App() {
  
   return (
     <ThemeProvider theme={theme}>
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        autoHideDuration={3000}
+      >
       <FloatingBackgroundBalls darkMode={darkMode}/>
       {/* Notification Permission Dialog */}
       {/* <NotificationPermissionDialog
@@ -543,12 +553,19 @@ function App() {
                 unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
+          <Route path="/cache-management" element={
+            <PrivateRoute adminOnly>
+              <CacheManagement darkMode={darkMode} toggleDarkMode={toggleDarkMode} 
+                unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
+            </PrivateRoute>
+          } />
           <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/plans" element={<PlansComparison />} />
           <Route path="/about-helper" element={<AboutHelper />} />
         </Routes>
       </Router>
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }
