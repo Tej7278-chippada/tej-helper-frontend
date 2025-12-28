@@ -520,15 +520,18 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       }
 
       // Phone validation
-      if (!profileForm.phone) {
-        setError('Phone number is required.');
-        return;
-      }
-
+      // if (!profileForm.phone) {
+      //   setError('Phone number is required.');
+      //   return;
+      // }
+      let phoneNumber = null;
       // Phone validation
-      if (profileForm.phone.length !== 10 || !/^\d+$/.test(profileForm.phone)) {
-        setError('Invalid mobile number.');
-        return;
+      if (profileForm.phone && profileForm.phone.length > 0) {
+        if (profileForm.phone.length !== 10 || !/^\d+$/.test(profileForm.phone)) {
+          setError('Invalid mobile number.');
+          return;
+        }
+        phoneNumber = profileForm.phone;
       }
 
       const response = await updateUserProfile(id, {
@@ -540,7 +543,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         ...prev,
         username: updated.username,
         email: updated.email,
-        phone: updated.phone,
+        phone: phoneNumber,
         withYou: updated.withYou,
         bloodDonar: {
           donate: updated.bloodDonar?.donate ?? false,
@@ -1858,7 +1861,13 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               name="phone"
               type="number"
               value={profileForm.phone}
-              onChange={handleProfileChange}
+              // onChange={handleProfileChange}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 10) {
+                  handleProfileChange(e);
+                }
+              }}
               margin="normal"
               // size="small"
               InputProps={{

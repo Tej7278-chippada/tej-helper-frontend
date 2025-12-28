@@ -169,17 +169,21 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
     }
 
     // Phone validation
-    if (!phone) {
-      setError('Phone number is required.');
-      setLoading(false);
-      return;
-    }
+    // if (!phone) {
+    //   setError('Phone number is required.');
+    //   setLoading(false);
+    //   return;
+    // }
 
     // Phone validation
-    if (phone.length !== 10 || !/^\d+$/.test(phone)) {
-      setError('Invalid mobile number.');
-      setLoading(false);
-      return;
+    let phoneNumber = null;
+    if (phone && phone.length > 0) {
+      if (phone.length !== 10 || !/^\d+$/.test(phone)) {
+        setError('Invalid mobile number.');
+        setLoading(false);
+        return;
+      }
+      phoneNumber = phone;
     }
 
     // if (Object.values(address).some((field) => field.trim() === '')) {
@@ -200,7 +204,13 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
     formData.append('username', username);
     formData.append('password', password);
     formData.append('email', email);
-    formData.append('phone', phone);
+    // formData.append('phone', phone);
+    if (phoneNumber !== null) {
+      formData.append('phone', phoneNumber);
+    } else {
+      formData.append('phone', '');
+    }
+
     // formData.append('address', JSON.stringify(address));
     formData.append('ip', userIP);
     formData.append('location', JSON.stringify({ city, region, country_name, latitude, longitude }));
@@ -600,7 +610,14 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                 />
                 <TextField label="Phone" fullWidth type="number"
                   // sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', }, '& .MuiInputBase-input': { padding: '14px 14px', }, }}
-                  margin="normal" value={phone} onChange={(e) => setPhone(e.target.value)} required
+                  margin="normal" value={phone} 
+                  // onChange={(e) => setPhone(e.target.value)} 
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    if (value.length <= 10) {
+                      setPhone(e.target.value);
+                    }
+                  }}
                   InputProps={{
                     startAdornment: <InputAdornment position="start">+91</InputAdornment>,
                     inputProps: { 
