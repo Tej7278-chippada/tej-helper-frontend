@@ -53,7 +53,7 @@ const LocationPermissionDialog = ({ open, onClose, darkMode, isMobile, setSnackb
 
         // Request location permission
         navigator.geolocation.getCurrentPosition(
-          (position) => {
+          () => {
             setLocationStatus('granted');
             setStep(3);
             

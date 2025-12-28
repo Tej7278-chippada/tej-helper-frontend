@@ -51,6 +51,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
       ],
     },
     {
+      title: 'Search alerts for Lost Child or Pet',
+      image: '/aboutHelper/lost_child.jpg',
+      points: [
+        'Instant local alerts for lost children and missing pets',
+        'Help search nearby and earn rewards for successful finds',
+        'Find faster with local eyes and real-time alerts',
+      ],
+    },
+    {
       title: 'For Students',
       image: '/aboutHelper/student_jobs.jpg',
       points: [

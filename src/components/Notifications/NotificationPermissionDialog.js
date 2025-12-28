@@ -292,7 +292,7 @@ const NotificationPermissionDialog = ({ open, onClose, darkMode, isMobile }) => 
                     color="success" 
                     size="small"
                     variant="outlined"
-                    sx={{ mr: 1 }}
+                    sx={{ mr: 1, mb: 1 }}
                   />
                 {/* )} */}
                 <Chip 
@@ -300,6 +300,7 @@ const NotificationPermissionDialog = ({ open, onClose, darkMode, isMobile }) => 
                   color="success" 
                   size="small"
                   variant="outlined"
+                  sx={{ mb : 1 }}
                 />
               </Box>
             </Box>
