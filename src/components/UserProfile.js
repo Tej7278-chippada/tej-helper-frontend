@@ -1,26 +1,12 @@
 // components/UserProfile.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link} from 'react-router-dom';
-import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Toolbar, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem, Switch, FormControl, InputLabel, Select, Menu } from '@mui/material';
+import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem, Switch, FormControl, InputLabel, Select } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, getIdVerificationStatus, submitIdVerification, updateProfilePicture, updateUserProfile } from './api/api';
+import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, submitIdVerification, updateProfilePicture, updateUserProfile } from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
-// import { Marker, TileLayer } from 'leaflet';
-// import { MapContainer, TileLayer, Marker, useMap, Popup } from 'react-leaflet';
-// import L from 'leaflet';
-// import 'leaflet/dist/leaflet.css';
-// import SatelliteAltRoundedIcon from '@mui/icons-material/SatelliteAltRounded';
-// import MapRoundedIcon from '@mui/icons-material/MapRounded';
-// Fix for Leaflet marker icon issue
-// import markerIcon from 'leaflet/dist/images/marker-icon.png';
-// import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-// import MyLocationRoundedIcon from '@mui/icons-material/MyLocationRounded';
-// import SaveRoundedIcon from '@mui/icons-material/SaveRounded';
-// import StarRoundedIcon from '@mui/icons-material/StarRounded';
-// import CloseIcon from '@mui/icons-material/Close';
-// import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
@@ -41,14 +27,6 @@ import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
-import {
-  CardGiftcardRounded,
-  LockRounded,
-  CheckCircleRounded,
-  PendingRounded,
-  CancelRounded
-} from '@mui/icons-material';
-
 
 // Set default icon manually
 // const customIcon = new L.Icon({
@@ -102,17 +80,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   // const [hoveredId, setHoveredId] = useState(null);
-  // const [successMessage, setSuccessMessage] = useState('');
-  // const [mapMode, setMapMode] = useState('normal');
-  // const [currentLocation, setCurrentLocation] = useState(null);
-  // const [locationDetails, setLocationDetails] = useState(null);
-  // const [loadingLocation, setLoadingLocation] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
-  // const [savingLocation, setSavingLocation] = useState(false);
-  // const [showRatings, setShowRatings] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
-  // const [currentAddress, setCurrentAddress] = useState('');
-  // states for profile editing
   const [editProfileOpen, setEditProfileOpen] = useState(false);
   const [profileForm, setProfileForm] = useState({
     username: '',
@@ -143,104 +112,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [userProfileDetailsOpen, setUserProfileDetailsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
-  const [couponRequest, setCouponRequest] = useState(null);
-  const [userCoupon, setUserCoupon] = useState(null);
-  const [requestLoading, setRequestLoading] = useState(false);
-  // const [couponDialogOpen, setCouponDialogOpen] = useState(false);
-  const isEligibleForCoupon = followerCount >= 50;
-
-  // Add this function to handle coupon request:
-  const handleRequestCoupon = async () => {
-    if (followerCount < 50) {
-      setSnackbar({
-        open: true,
-        message: 'You need at least 50 followers to request Amazon Pay gift card' || 'Error requesting gift card',
-        severity: 'warning'
-      });
-      return;
-    }
-    try {
-      setRequestLoading(true);
-      const response = await API.post('/api/coupon/request-coupon', {}, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-      });
-      
-      setCouponRequest(response.data);
-      setSnackbar({
-        open: true,
-        message: response.data.message,
-        severity: 'success'
-      });
-      
-      // Fetch updated request status
-      fetchCouponRequest();
-      
-    } catch (error) {
-      console.error('Error requesting coupon:', error);
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Error requesting coupon',
-        severity: 'error'
-      });
-    } finally {
-      setRequestLoading(false);
-    }
-  };
-
-  // Add function to fetch coupon request status:
-  const fetchCouponRequest = async () => {
-    try {
-      const response = await API.get('/api/coupon/my-coupon-request', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-      });
-      setCouponRequest(response.data);
-    } catch (error) {
-      // No request found is okay
-      if (error.response?.status !== 404) {
-        console.error('Error fetching coupon request:', error);
-      }
-    }
-  };
-
-  // Add function to fetch user's coupon:
-  const fetchUserCoupon = async () => {
-    try {
-      const response = await API.get('/api/coupon/my-coupon', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('authToken')}` }
-      });
-      setUserCoupon(response.data);
-    } catch (error) {
-      // No coupon found is okay
-      if (error.response?.status !== 404) {
-        console.error('Error fetching coupon:', error);
-      }
-    }
-  };
-
-  // Add these useEffect calls:
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchCouponRequest();
-      fetchUserCoupon();
-    }
-  }, [id, isAuthenticated]);
-
-  // Add this useEffect to fetch verification status
-  // useEffect(() => {
-  //   const fetchVerificationStatus = async () => {
-  //     try {
-  //       const response = await getIdVerificationStatus(id);
-  //       // setVerificationStatus(response.data.status);
-  //       // setVerificationData(response.data);
-  //     } catch (error) {
-  //       console.error('Error fetching verification status:', error);
-  //     }
-  //   };
-
-  //   if (userData) {
-  //     fetchVerificationStatus();
-  //   }
-  // }, [id, userData]);
 
   // to handle verification submission
   const handleSubmitVerification = async (formData) => {
@@ -321,7 +192,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         // fetchAddress(response.data.location.latitude, response.data.location.longitude);
         
       } catch (err) {
-        // setError('Failed to fetch User details. Please try again later.');
         setSnackbar({ open: true, message: 'Failed to fetch User details. Please try again later.', severity: 'error' });
       } finally {
         setLoading(false);
@@ -338,13 +208,10 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       await API.delete(`/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-
-      // setSuccessMessage('Your account has been deleted successfully.');
       setSnackbar({ open: true, message: 'Your account has been deleted successfully.', severity: 'success' });
       localStorage.clear();
       navigate('/login');
     } catch (err) {
-      // setError('Failed to delete account. Please try again later.');
       setSnackbar({ open: true, message: 'Failed to delete account. Please try again later.', severity: 'error' });
     } finally {
       setDeleteDialogOpen(false);
@@ -454,22 +321,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   //     console.error("Error fetching address:", error);
   //   }
   // };
-  
-  // if (loading || !userData) {
-  //   return (
-  //     <Layout>
-  //       <Box sx={{margin: '8px' }}>
-        // {/* <SkeletonCards /> */}
-  //       <SkeletonProductDetail />
-  //       </Box>
-  //     </Layout>
-  //   );
-  // };
-  // if (error) return <Alert severity="error">{error}</Alert>;
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
-
-  // const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [isRateDialogOpen, setRateDialogOpen] = useState(false);
   const handleOpenRateDialog = () => setRateDialogOpen(true);
   const handleCloseRateDialog = () => setRateDialogOpen(false);
@@ -743,17 +596,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
-      {/* <Snackbar
-        open={!!successMessage}
-        autoHideDuration={9000}
-        onClose={() => setSuccessMessage('')}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Alert severity="success" onClose={() => setSuccessMessage('')}>
-          {successMessage}
-        </Alert>
-      </Snackbar> */}
-      
       <Typography variant="h6" sx={{ flexGrow: 1, mx: isMobile ? '10px' : '16px', mt: 1 }} >
         User Profile
       </Typography>
@@ -974,146 +816,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                         <strong>{followingCount}</strong> Following
                       </Typography>
                     </Box>
-                      {/* Coupon Request Section */}
-                      <Box sx={{ mt: 2, ml: 4 }}>
-                        {/* Display current coupon if user has one */}
-                        {userCoupon && (
-                          <Box sx={{ mb: 3, p: 2, bgcolor: 'success.light', borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                              <CheckCircleRounded color="success" />
-                              <Typography variant="subtitle1" fontWeight={600}>
-                                Active Coupon Available!
-                              </Typography>
-                            </Box>
-                            <Typography variant="body2">
-                              Code: <strong>{userCoupon.code}</strong>
-                            </Typography>
-                            <Typography variant="body2">
-                              Value: ₹{userCoupon.value}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              Expires: {new Date(userCoupon.expiresAt).toLocaleDateString()}
-                            </Typography>
-                            {userCoupon.isUsed && (
-                              <Chip label="Used" color="default" size="small" sx={{ mt: 1 }} />
-                            )}
-                          </Box>
-                        )}
-
-                      {/* Display request status if pending */}
-                      {couponRequest && !userCoupon && (
-                        <Box sx={{ mb: 3, p: 2, 
-                          bgcolor: couponRequest.status === 'Approved' ? 'success.light' : 
-                                  couponRequest.status === 'Rejected' ? 'error.light' : 'warning.light',
-                          borderRadius: 2 
-                        }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                            {couponRequest.status === 'Requested' || couponRequest.status === 'Pending' ? (
-                              <PendingRounded color="warning" />
-                            ) : couponRequest.status === 'Approved' ? (
-                              <CheckCircleRounded color="success" />
-                            ) : (
-                              <CancelRounded color="error" />
-                            )}
-                            <Typography variant="subtitle1" fontWeight={600}>
-                              Coupon Request: {couponRequest.status}
-                            </Typography>
-                          </Box>
-                          <Typography variant="body2">
-                            Requested on: {new Date(couponRequest.requestedAt).toLocaleDateString()}
-                          </Typography>
-                          {couponRequest.reviewedAt && (
-                            <Typography variant="body2">
-                              Reviewed on: {new Date(couponRequest.reviewedAt).toLocaleDateString()}
-                            </Typography>
-                          )}
-                          {couponRequest.adminMessage && (
-                            <Typography variant="body2">
-                              Message: {couponRequest.adminMessage}
-                            </Typography>
-                          )}
-                          {couponRequest.rejectionReason && (
-                            <Typography variant="body2" color="error">
-                              Reason: {couponRequest.rejectionReason}
-                            </Typography>
-                          )}
-                        </Box>
-                      )}
-
-                      {/* Request button (only show if no active coupon or pending request) */}
-                      {!userCoupon && (!couponRequest || ['Rejected'].includes(couponRequest.status)) && (
-                        <>
-                          <Button
-                            fullWidth
-                            disabled={ requestLoading} // !isEligibleForCoupon ||
-                            onClick={handleRequestCoupon}
-                            startIcon={
-                              // !isEligibleForCoupon ? (
-                              //   <LockRounded />
-                              // ) : (
-                                <CardGiftcardRounded />
-                              // )
-                            }
-                            sx={{
-                              background:
-                              //  isEligibleForCoupon
-                              //   ? 
-                                'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
-                                // : 'linear-gradient(135deg, #bdbdbd, #9e9e9e)',
-                              color: 'white',
-                              borderRadius: 3,
-                              textTransform: 'none',
-                              fontWeight: 600,
-                              py: 1.2,
-                              boxShadow:
-                              //  isEligibleForCoupon
-                              //   ? 
-                                '0 6px 25px rgba(67,97,238,0.35)',
-                                // : 'none',
-                              transition: 'all 0.3s ease',
-                              '&:hover': {
-                                transform:
-                                //  isEligibleForCoupon ? 
-                                 'translateY(-2px)',
-                                  // : 'none',
-                                boxShadow:
-                                //  isEligibleForCoupon
-                                  // ? 
-                                  '0 10px 30px rgba(67,97,238,0.45)',
-                                  // : 'none',
-                              },
-                            }}
-                          >
-                            {requestLoading ? (
-                              <CircularProgress size={22} sx={{ color: '#fff' }} />
-                            ) : (
-                              'Request ₹500 Gift Card'
-                            )}
-                          </Button>
-
-                          {/* Eligibility Helper Text */}
-                          {!isEligibleForCoupon && (
-                            <Typography
-                              variant="caption"
-                              color="text.secondary"
-                              sx={{ display: 'block', mt: 0.8 }}
-                            >
-                              Reach <strong>50 followers</strong> to unlock Amazon pay gift card request
-                            </Typography>
-                          )}
-
-                          {isEligibleForCoupon && (
-                            <Typography
-                              variant="caption"
-                              color="success.main"
-                              sx={{ display: 'block', mt: 0.8 }}
-                            >
-                              🎉 You're eligible! Request your gift card now
-                            </Typography>
-                          )}
-                        </>
-                      )}
-                    </Box>
+                    {/* <RequestCoupon id={id} isAuthenticated={isAuthenticated} followerCount={followerCount} setSnackbar={setSnackbar} /> */}
                   </Grid>
                   <Grid item xs={12} sm={12} md={6} >
                     <Box display="flex" alignItems="center" gap={1}>
@@ -1153,94 +856,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
                     </Typography>
                   </Grid>
-                  {/* <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Account Status:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {userData?.accountStatus}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Email Verified:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {userData?.emailVerified === true ? 'Yes' : 'No'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                     Account created at:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {new Date(userData?.accountCreatedAt).toLocaleString() || 'Invalid date'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                     Last login at:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {new Date(userData?.lastLoginAt).toLocaleString() || 'Invalid date'}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6} sm={4}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                     lastProfilePicUpdate:
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {new Date(userData?.lastProfilePicUpdate).toLocaleString() || 'Invalid date'}
-                    </Typography>
-                  </Grid> */}
-                  {/* <Grid item xs={12} sm={12}>
-                    <Typography variant="body1" style={{ fontWeight: 500 }}>
-                      Address:
-                    </Typography>
-                    {userData.address && (
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                    {`${userData.address.street}, ${userData.address.area}, ${userData.address.city}, ${userData.address.state} - ${userData.address.pincode}`}
-                    </Typography>
-                    )}
-                  </Grid> */}
                 </Grid>
               </Box>
-
-              {/* <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <Diversity2RoundedIcon fontSize="small" color="primary" />
-                    <Typography variant="h6" >Network</Typography>
-                  </Box>
-                </Box>
-
-                Follow stats
-                <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
-                  <Typography variant="body2">
-                    <strong>{followerCount}</strong> Followers
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>{followingCount}</strong> Following
-                  </Typography>
-                </Box>
-              </Box> */}
-
-              {/* Interests Section */}
-              {/* {userData?.interests && userData.interests.length > 0 && (
-                <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
-                  <Typography variant="h6" gutterBottom>Interests</Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {userData.interests.map((interest, index) => (
-                      <Chip
-                        key={index}
-                        label={interest}
-                        variant="outlined"
-                        sx={{ borderRadius: '8px' }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              )} */}
 
               {/* <Box sx={{pt: 2}}>
                 <Toolbar sx={{
@@ -1296,86 +913,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 </Toolbar>
               </Box> */}
             </Box>
-            {/* {showRatings && (
-              <Card
-                sx={{
-                  position: 'absolute',
-                  top: isMobile ? '150px' : '10px',
-                  left: isMobile ? '2%' : null,
-                  right: isMobile ? null : '2%',
-                  width: '95%',
-                  maxWidth: '400px',
-                  zIndex: 1000,
-                  borderRadius: '10px', backdropFilter: 'blur(12px)',
-                  // boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-                  // backgroundColor: '#fff',
-                   '& .MuiCardContent-root': { padding: '10px' },
-                }}
-              >
-                <CardContent>
-                  Close Button
-                  <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">Your Profile Ratings</Typography>
-                    <IconButton onClick={() => setShowRatings(false)}>
-                      <CloseIcon />
-                    </IconButton>
-                  </Box>
-                  <Box display="flex" mb={1} gap={1}>
-                    <Typography variant="body2" color="textSecondary" >
-                      Trust Level
-                    </Typography>
-                    <StarRoundedIcon sx={{ color: 'gold', fontSize: 18 }} />
-                    <Typography variant="body2" color="textSecondary" ml="-4px">
-                      {userData.trustLevel || "N/A"}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">({userData.totalReviews} reviews)</Typography>
-                  </Box>
-                  <Box sx={{ height: '300px', overflowY: 'auto', scrollbarWidth: 'thin', bgcolor: 'rgba(0, 0, 0, 0.07)', borderRadius: '8px', scrollbarColor: '#aaa transparent', cursor: 'pointer' }}>
-                    {userData.ratings.length ? (
-                      userData.ratings.map((rating, index) => (
-                        <Box
-                          key={index}
-                          sx={{
-                            margin: "6px",
-                            padding: "12px",
-                            borderRadius: "8px",
-                            border: "1px solid #ddd",
-                            marginTop: "6px",
-                            // backgroundColor: "#fff"
-                          }}
-                        >
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <Avatar
-                              src={`data:image/jpeg;base64,${btoa(
-                                String.fromCharCode(...new Uint8Array(rating.userId?.profilePic?.data || []))
-                              )}`}
-                              alt={rating.userId?.username[0]}
-                              style={{ width: 32, height: 32, borderRadius: '50%' }}
-                            />
-                            <Typography fontWeight="bold">
-                              {rating.userId?.username || "Anonymous"}
-                            </Typography>
-                            <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{ marginLeft: 'auto' }} />
-                            <Typography variant="caption" color="textSecondary" marginLeft="auto">
-                            {new Date(rating.createdAt).toLocaleString()}
-                          </Typography>
-                          </Box>
-                          <Rating value={rating.rating || 0} precision={0.5} readOnly sx={{marginLeft:'2rem'}}/>
-                          <Typography sx={{ paddingTop: "0.5rem" }}>{rating.comment}</Typography>
-                          <Typography variant="caption" color="textSecondary" >
-                            {new Date(rating.createdAt).toLocaleString()}
-                          </Typography>
-                        </Box>
-                      ))
-                    ) : (
-                      <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
-                        No Ratings available.
-                      </Typography>
-                    )}
-                  </Box>
-                </CardContent>
-              </Card>
-            )} */}
           </Box>
           <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -1516,9 +1053,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   Account Management
                 </Typography>
               </Box>
-              {/* <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none'}} onClick={handleOpenRateDialog}>
-                View Ratings
-              </Button> */}
             </Box>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={4}>
@@ -1903,6 +1437,13 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: '8px',
+                  // backgroundColor: '#ffffff',
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#1976d2',
+                  },
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#5f6368',
                 },
               }}
               inputProps={{ maxLength: 100 }}
@@ -1911,136 +1452,133 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
               {profileForm?.profileDescription?.length}/100 characters
             </Typography>
             <Box sx={{ mt: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <Typography variant="body2" gutterBottom>Interests</Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {profileForm?.interests?.length}/10 added
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-                {profileForm.interests?.map((interest, index) => (
-                  <Chip
-                    key={index}
-                    label={interest}
-                    onDelete={() => {
-                      const newInterests = [...profileForm.interests];
-                      newInterests.splice(index, 1);
-                      setProfileForm(prev => ({ ...prev, interests: newInterests }));
-                    }}
-                    sx={{ borderRadius: '8px' }}
-                  />
-                ))}
-              </Box>
-              <TextField
-                fullWidth
-                label="Add Interest"
-                value={interests}
-                onChange={(e) => setInterests(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter' && interests.trim()) {
-                    e.preventDefault();
-                    setProfileForm(prev => ({
-                      ...prev,
-                      interests: [...(prev.interests || []), interests.trim()]
-                    }));
-                    setInterests('');
-                  }
-                }}
-                placeholder="Type an interest and press Enter"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '8px',
-                  },
-                }}
-                inputProps={{ maxLength: 20 }}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Button 
-                        onClick={() => {
-                          if (interests.trim()) {
-                            setProfileForm(prev => ({
-                              ...prev,
-                              interests: [...(prev.interests || []), interests.trim()]
-                            }));
-                            setInterests('');
-                          }
-                        }}
-                        disabled={!interests.trim() || profileForm?.interests?.length >= 10}
-                        sx={{ borderRadius: '8px' }}
-                      >
-                        Add
-                      </Button>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" fontWeight={500}>
-                  {profileForm.withYou
-                    ? 'You stand for women’s safety'
-                    : 'Stand for women’s safety?'}
-                </Typography>
-                <Switch
-                  checked={profileForm.withYou}
-                  onChange={toggleWithYou}
-                  color="primary"
-                />
-              </Box>
-              <Typography variant="caption" color="text.secondary" marginTop={4}>
-                *Your profile will be visible to women nearby who may need help in unsafe situations.
-              </Typography>
-            </Box>
-
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Typography variant="body2" fontWeight={500}>
-                  {profileForm.donate
-                    ? "You're donating blood — thank you for helping others!"
-                    : "Would you like to become a blood donor?"}
-                </Typography>
-
-                <Switch
-                  checked={profileForm.donate}
-                  onChange={toggleBloodDonate}
-                  color="primary"
-                />
-              </Box>
-
-              {profileForm.donate && (
-                <FormControl fullWidth required sx={{ mt: 2 }}>
-                  <InputLabel>Blood Group</InputLabel>
-                  <Select
-                    value={profileForm.bloodGroup || ''}
-                    onChange={(e) =>
-                      setProfileForm({ ...profileForm, bloodGroup: e.target.value })
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Add Interest"
+                  value={interests}
+                  onChange={(e) => setInterests(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && interests.trim()) {
+                      e.preventDefault();
+                      setProfileForm(prev => ({
+                        ...prev,
+                        interests: [...(prev.interests || []), interests.trim()]
+                      }));
+                      setInterests('');
                     }
-                    label="BloodGroup"
-                    sx={{ borderRadius: 2 }}
-                    required
-                  >
-                    <MenuItem value="A+">A+</MenuItem>
-                    <MenuItem value="A-">A-</MenuItem>
-                    <MenuItem value="B+">B+</MenuItem>
-                    <MenuItem value="B-">B-</MenuItem>
-                    <MenuItem value="AB+">AB+</MenuItem>
-                    <MenuItem value="AB-">AB-</MenuItem>
-                    <MenuItem value="O+">O+</MenuItem>
-                    <MenuItem value="O-">O-</MenuItem>
-                    <MenuItem value="Unknown">I don't know my blood group</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
+                  }}
+                  placeholder="Type an interest and press Enter"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                    },
+                  }}
+                  inputProps={{ maxLength: 20 }}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Button 
+                          onClick={() => {
+                            if (interests.trim()) {
+                              setProfileForm(prev => ({
+                                ...prev,
+                                interests: [...(prev.interests || []), interests.trim()]
+                              }));
+                              setInterests('');
+                            }
+                          }}
+                          disabled={!interests.trim() || profileForm?.interests?.length >= 10}
+                          sx={{ borderRadius: '8px' }}
+                        >
+                          Add
+                        </Button>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                  <Typography variant="body2" gutterBottom>Interests</Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {profileForm?.interests?.length}/10 added
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1}}>
+                  {profileForm.interests?.map((interest, index) => (
+                    <Chip
+                      key={index}
+                      label={interest}
+                      onDelete={() => {
+                        const newInterests = [...profileForm.interests];
+                        newInterests.splice(index, 1);
+                        setProfileForm(prev => ({ ...prev, interests: newInterests }));
+                      }}
+                      sx={{ borderRadius: '8px' }}
+                    />
+                  ))}
+                </Box>
+              </Box>
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={500}>
+                    {profileForm.donate
+                      ? "You're donating blood — thank you for helping others!"
+                      : "Would you like to become a blood donor?"}
+                  </Typography>
 
-              <Typography variant="caption" color="text.secondary" marginTop={4}>
-                *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
-              </Typography>
+                  <Switch
+                    checked={profileForm.donate}
+                    onChange={toggleBloodDonate}
+                    color="primary"
+                  />
+                </Box>
 
-            </Box>
+                {profileForm.donate && (
+                  <FormControl fullWidth required sx={{ mt: 2 }}>
+                    <InputLabel>Blood Group</InputLabel>
+                    <Select
+                      value={profileForm.bloodGroup || ''}
+                      onChange={(e) =>
+                        setProfileForm({ ...profileForm, bloodGroup: e.target.value })
+                      }
+                      label="BloodGroup"
+                      sx={{ borderRadius: 2 }}
+                      required
+                    >
+                      <MenuItem value="A+">A+</MenuItem>
+                      <MenuItem value="A-">A-</MenuItem>
+                      <MenuItem value="B+">B+</MenuItem>
+                      <MenuItem value="B-">B-</MenuItem>
+                      <MenuItem value="AB+">AB+</MenuItem>
+                      <MenuItem value="AB-">AB-</MenuItem>
+                      <MenuItem value="O+">O+</MenuItem>
+                      <MenuItem value="O-">O-</MenuItem>
+                      <MenuItem value="Unknown">I don't know my blood group</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
 
-
+                <Typography variant="caption" color="text.secondary" marginTop={4}>
+                  *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
+                </Typography>
+              </Box>
+              <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={500}>
+                    {profileForm.withYou
+                      ? 'You stand for women’s safety'
+                      : 'Stand for women’s safety?'}
+                  </Typography>
+                  <Switch
+                    checked={profileForm.withYou}
+                    onChange={toggleWithYou}
+                    color="primary"
+                  />
+                </Box>
+                <Typography variant="caption" color="text.secondary" marginTop={4}>
+                  *Your profile will be visible to women nearby who may need help in unsafe situations.
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </DialogContent>

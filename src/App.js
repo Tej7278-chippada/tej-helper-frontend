@@ -5,7 +5,7 @@ import Login from './components/Login';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Register from './components/Register';
 import PrivateRoute from './components/PriviteRoute';
-import { Alert, Snackbar, ThemeProvider, createTheme, useMediaQuery } from '@mui/material';
+import { Alert, Snackbar, ThemeProvider, createTheme } from '@mui/material';
 import ForgotPassword from './components/ForgotPassword';
 import UserProfile from './components/UserProfile';
 import Helper from './components/Helper/Helper';
@@ -35,10 +35,10 @@ import AdminPreferences from './components/Admin/AdminPreferences';
 import PostReports from './components/Admin/PostReports';
 import ProfileVerification from './components/Admin/ProfileVerification';
 import PlansComparison from './components/Admin/PlansComparison';
-import NotificationPermissionDialog from './components/Notifications/NotificationPermissionDialog';
+// import NotificationPermissionDialog from './components/Notifications/NotificationPermissionDialog';
 import CouponRequestsPage from './components/Admin/CouponRequestsPage';
 import AboutHelper from './components/Banners/AboutHelper';
-import GoogleAdsTracker from './utils/GoogleAdsTracker';
+// import GoogleAdsTracker from './utils/GoogleAdsTracker';
 import CacheManagement from './components/Admin/CacheManagement';
 import { SnackbarProvider } from 'notistack';
 // import AppInstaller from './components/AppInstaller';
@@ -212,7 +212,7 @@ function App() {
   const username = localStorage.getItem('tokenUsername');
   const [unreadCount, setUnreadCount] = useState(0);
   const userId = localStorage.getItem('userId');
-  const userName = localStorage.getItem('tokenUsername');
+  // const userName = localStorage.getItem('tokenUsername');
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   // const [loginStatus, setLoginStatus] = useState(false);
@@ -450,7 +450,7 @@ function App() {
         </Alert>
       </Snackbar>
       <Router>
-        <GoogleAdsTracker />
+        {/* <GoogleAdsTracker /> */}
         <NearPostsNotification darkMode={darkMode}/>
         <Routes>
           <Route path="/login" element={<Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} />} />
