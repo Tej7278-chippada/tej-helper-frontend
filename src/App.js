@@ -206,6 +206,10 @@ const FloatingBackgroundBalls = ({ darkMode }) => {
     // },
   // },
 
+  function RootGate() {
+    const isLoggedIn = Boolean(localStorage.getItem("authToken"));
+    return isLoggedIn ? <Helper /> : <Login />;
+  }
 
 function App() {
   const [socket, setSocket] = useState(null);
@@ -456,9 +460,9 @@ function App() {
           <Route path="/login" element={<Login darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate} />} />
           <Route path="/register" element={<Register darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>} />
           <Route path="/" element={
-            <PrivateRoute>
-              <Helper darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
-            </PrivateRoute>
+            // <PrivateRoute>
+              <RootGate darkMode={darkMode} toggleDarkMode={toggleDarkMode} username={username} unreadCount={unreadCount} shouldAnimate={shouldAnimate}/>
+            // </PrivateRoute>
           } />
           <Route path="/userPosts" element={
             <PrivateRoute>
