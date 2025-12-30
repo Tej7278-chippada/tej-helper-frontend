@@ -8,7 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- <meta name="theme-color" content="#000000" /> -->
     <meta name="theme-color" content="#1976d2" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" /> <!-- black-translucent -->
+    <!-- <meta name="apple-mobile-web-app-status-bar-style" content="default" /> black-translucent -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <!-- <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" /> -->
@@ -38,6 +39,20 @@
     <meta name="twitter:title" content="Helper – Find & Offer Local Help, Jobs & Services" />
     <meta name="twitter:description" content="Post your needs or offer your skills—Helper connects communities for jobs, volunteering, and emergencies." />
     <meta name="twitter:image" content="https://helper.net.in/logo192.png" />
+
+    <!-- <script>
+        // Force standalone mode
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.documentElement.classList.add('standalone');
+        }
+        
+        // Prevent pull-to-refresh in standalone
+        document.addEventListener('touchmove', function(e) {
+            if (window.scrollY === 0) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script> -->
 
     <!-- ✅ Structured Data (JSON-LD for Google Rich Results) -->
     <script type="application/ld+json">

@@ -41,6 +41,7 @@ import AboutHelper from './components/Banners/AboutHelper';
 import GoogleAdsTracker from './utils/GoogleAdsTracker';
 import CacheManagement from './components/Admin/CacheManagement';
 import { SnackbarProvider } from 'notistack';
+// import AppInstaller from './components/AppInstaller';
 
 const getDesignTokens = (mode) => ({
   palette: {
@@ -419,6 +420,7 @@ function App() {
         }}
         autoHideDuration={3000}
       >
+      {/* <AppInstaller darkMode={darkMode} /> */}
       <FloatingBackgroundBalls darkMode={darkMode}/>
       {/* Notification Permission Dialog */}
       {/* <NotificationPermissionDialog

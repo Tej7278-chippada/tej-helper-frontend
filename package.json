@@ -43,6 +43,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:twa": "react-scripts build && cp public/.well-known/assetlinks.json build/.well-known/",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
