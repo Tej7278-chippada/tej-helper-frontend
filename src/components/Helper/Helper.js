@@ -1862,6 +1862,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     localStorage.removeItem('lastMapViewTimestamp');
   };
 
+  const formatDistance = (distance) => {
+    if (distance === null || distance === undefined) return null;
+
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)} m away`;
+    }
+
+    return `${distance.toFixed(1)} km away`;
+  };
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleDateString('en-IN', {
+      dateStyle: 'medium',
+      // timeStyle: 'short',
+    }) : '—';
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       {/* Demo Posts Banner Section */}
@@ -4167,10 +4183,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         left: 0,
                         right: 0,
                         height: '60%',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
                       }} />
                       {/* Status Badge */}
-                      <Chip
+                      {/* <Chip
                         label={post.postStatus}
                         size="small"
                         sx={{
@@ -4182,28 +4198,51 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           fontWeight: 600,
                           fontSize: '0.75rem'
                         }}
-                      />
+                      /> */}
+                      {post.distance != null && (
+                        <Chip
+                          label={formatDistance(post.distance)}
+                          size="small"
+                          sx={{
+                            position: 'absolute',
+                            top: 12,
+                            left: 12,
+                            backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                            color: '#fff',
+                            fontSize: '0.7rem',
+                            height: '20px',
+                            backdropFilter: 'blur(4px)', // subtle glass effect
+                          }}
+                        />
+                      )}
+
                       {/* Full Time Badge */}
                       {post.isFullTime && (
                         <Chip
                           icon={<WorkIcon sx={{ fontSize: 16 }} />}
-                          label="Full Time" color="#fff"
+                          label="Full Time"
                           size="small"
                           sx={{
                             position: 'absolute',
                             top: 12,
                             right: 12,
-                            backgroundColor: 'info.main',
-                            color: 'white',
+                            backgroundColor: darkMode ? 'rgba(0, 0, 0, 0.25)' : 'info.main',
+                            color: '#fff',
+                            backdropFilter: 'blur(4px)',
                             fontWeight: 600,
-                            fontSize: '0.75rem',
+                            fontSize: '0.7rem',
+                            height: '22px',
+                            boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                             '& .MuiChip-icon': {
+                              color: '#fff',
                               marginLeft: '6px',
-                              height: '16px'
+                              marginRight: '-4px',
+                              height: '16px',
                             },
                           }}
                         />
                       )}
+
                       <CardContent style={{
                         position: 'absolute',
                         bottom: 0,
@@ -4218,34 +4257,117 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           </Typography>
                         } */}
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',}}>
-                          <Tooltip title={post.title} placement="top" arrow>
+                          {/* <Tooltip title={post.title} placement="top" arrow> */}
                             <Typography variant="h6" component="div" style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white', textTransform: 'capitalize' }}>
                               {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                             </Typography>
-                          </Tooltip>
-                          {post.postType === 'HelpRequest' && post.categories !== 'UnPaid' &&
+                          {/* </Tooltip> */}
+                          {post.postType === 'HelpRequest' && post.categories !== 'UnPaid' && (
                             <Chip
                               icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: 16 }} />}
-                              label={`${formatPrice(post.price)}`} color="white"
-                              variant="filled" size="small"
-                              sx={{
-                                backgroundColor: 'success.main',
-                                color: '#fff',
-                                px: 0.5, py: 1,
-                                fontWeight: 500,
-                                fontSize: '0.875rem',
-                                transition: 'transform 0.2s ease',
+                              label={formatPrice(post.price)}
+                              size="small"
+                              sx={(theme) => ({
+                                backgroundColor:
+                                  // darkMode
+                                  //   ?
+                                     'rgba(102, 187, 106, 0.18)', // muted green
+                                    // : theme.palette.success.main,
+                                color:
+                                  // darkMode
+                                  //   ? 
+                                    theme.palette.success.light,
+                                    // : '#fff',
+                                border:
+                                  // darkMode
+                                  //   ? 
+                                    '1px solid rgba(102, 187, 106, 0.45)',
+                                    // : 'none',
+                                pr: 0.75,
+                                height: '22px',
+                                fontWeight: 600,
+                                fontSize: '0.75rem',
+                                backdropFilter: 'blur(4px)',
+                                WebkitBackdropFilter: 'blur(4px)',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                boxShadow:
+                                  darkMode
+                                    ? 'none'
+                                    : '0 2px 6px rgba(0,0,0,0.2)',
+                                '&:hover': {
+                                  transform: 'translateY(-1px)',
+                                },
                                 '& .MuiChip-label': {
                                   px: '4px',
                                 },
                                 '& .MuiChip-icon': {
-                                  marginLeft: '2px',
-                                  height: '16px'
+                                  color: 'inherit',
+                                  marginLeft: '4px',
+                                  marginRight: '-4px',
+                                  height: '16px',
                                 },
-                              }}
+                              })}
                             />
-                          }
+                          )}
+
                           {post.postType !== 'HelpRequest' &&
+                          // <Chip
+                          //   label={post.postStatus}
+                          //   size="small"
+                          //   sx={{
+                          //     backgroundColor: post.postStatus === 'Active' ? 'success.main' : 'error.main',
+                          //     color: 'white',
+                          //     fontWeight: 600,
+                          //     fontSize: '0.75rem'
+                          //   }}
+                          // />
+                          <Chip
+                            // icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: 16 }} />}
+                            label={post.postStatus}
+                            size="small"
+                            sx={(theme) => ({
+                              backgroundColor:
+                                // darkMode
+                                //   ?
+                                    post.postStatus === 'Active' ? 'rgba(102, 187, 106, 0.18)' : 'rgba(187, 115, 102, 0.18)',  // muted green
+                                  // : theme.palette.success.main,
+                              color:
+                                // darkMode
+                                //   ? 
+                                  post.postStatus === 'Active' ? theme.palette.success.light : theme.palette.error.main,
+                                  // : '#fff',
+                              border:
+                                // darkMode
+                                //   ? 
+                                  post.postStatus === 'Active' ? '1px solid rgba(102, 187, 106, 0.45)' : '1px solid rgba(187, 115, 102, 0.45)',
+                                  // : 'none',
+                              px: 0.75,
+                              height: '22px',
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              backdropFilter: 'blur(4px)',
+                              WebkitBackdropFilter: 'blur(4px)',
+                              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                              boxShadow:
+                                darkMode
+                                  ? 'none'
+                                  : '0 2px 6px rgba(0,0,0,0.2)',
+                              '&:hover': {
+                                transform: 'translateY(-1px)',
+                              },
+                              '& .MuiChip-label': {
+                                px: '4px',
+                              },
+                              '& .MuiChip-icon': {
+                                color: 'inherit',
+                                marginLeft: '4px',
+                                marginRight: '-4px',
+                                height: '16px',
+                              },
+                            })}
+                          />
+                          }
+                          {/* {post.postType !== 'HelpRequest' &&
                             <Chip
                               label={post.distance < 1 ? `${Math.round(post.distance * 1000)} m away` : `${post.distance.toFixed(1)} km away`}
                               variant="outlined" size="small"
@@ -4255,7 +4377,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 transition: 'transform 0.2s ease'
                               }}
                             />
-                          }
+                          } */}
                           {/* {post.postType !== 'HelpRequest' &&
                             <Chip
                               // icon={<PriceChangeIcon sx={{ fontSize: 16 }} />}
@@ -4305,6 +4427,17 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           // Help Request specific content
                           <Box sx={{ mb: 1 }}>
                             <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
+                              <Chip 
+                                label={post.postStatus}
+                                size="small"
+                                sx={{
+                                  backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                  color: '#90caf9',
+                                  backdropFilter: 'blur(4px)',
+                                  fontSize: '0.7rem',
+                                  height: '20px'
+                                }}
+                              />
                               {post.peopleCount && (
                                 <Chip 
                                   label={`${post.peopleCount} ${post.gender || 'People'}`}
@@ -4318,12 +4451,24 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   sx={{
                                     backgroundColor: 'rgba(33, 150, 243, 0.2)',
                                     color: '#90caf9',
+                                    backdropFilter: 'blur(4px)',
                                     fontSize: '0.7rem',
                                     height: '20px'
                                   }}
                                 />
                               )}
-                              {post.distance !== null && (
+                              <Chip 
+                                label={formatDate(post.serviceDate)}
+                                size="small"
+                                sx={{
+                                  backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                                  color: '#90caf9',
+                                  backdropFilter: 'blur(4px)',
+                                  fontSize: '0.7rem',
+                                  height: '20px'
+                                }}
+                              />
+                              {/* {post.distance !== null && (
                                 <Chip 
                                   label={post.distance < 1 ? `${Math.round(post.distance * 1000)} m away` : `${post.distance.toFixed(1)} km away`}
                                   size="small" 
@@ -4334,7 +4479,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                     height: '20px'
                                   }}
                                 />
-                              )}
+                              )} */}
                               {/* <Chip
                                 label={`Status: ${post.postStatus}`}
                                 variant="outlined"
@@ -4359,6 +4504,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   color: '#4caf50', 
                                   borderColor: '#4caf50',
                                   backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                                  backdropFilter: 'blur(4px)',
                                   mb: 1,
                                   fontWeight: 600
                                 }}
@@ -4380,6 +4526,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                           backgroundColor: 'rgba(255,255,255,0.15)', 
                                           color: '#fff',
                                           borderColor: 'rgba(255,255,255,0.3)',
+                                          backdropFilter: 'blur(4px)',
                                           fontSize: '0.7rem',
                                           height: '20px'
                                         }}
@@ -4415,6 +4562,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                     sx={{
                                       backgroundColor: 'rgba(33, 150, 243, 0.2)',
                                       color: '#90caf9',
+                                      backdropFilter: 'blur(4px)',
                                       fontSize: '0.7rem',
                                       height: '20px'
                                     }}
@@ -4428,6 +4576,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                     sx={{
                                       backgroundColor: 'rgba(33, 150, 243, 0.2)',
                                       color: '#90caf9',
+                                      backdropFilter: 'blur(4px)',
                                       borderColor: 'rgba(255,255,255,0.3)',
                                       fontSize: '0.7rem',
                                       height: '20px'

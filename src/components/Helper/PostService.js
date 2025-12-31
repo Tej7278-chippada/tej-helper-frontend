@@ -420,6 +420,12 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
     };
   }, [openDialog, setOpenDialog]);
 
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }) : '—';
+
 
     return (
         <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
@@ -480,7 +486,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                       zIndex: 1,
                       textShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}>
-                      Serve Customers Near You!
+                      Grow Your Business Locally!
                     </Typography>
                     <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
                       maxWidth: '800px',
@@ -825,7 +831,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                   background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)'
                 }} />
                 {/* Status Badge */}
-                <Chip
+                {/* <Chip
                   label={post.postStatus}
                   size="small"
                   sx={{
@@ -837,23 +843,76 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                     fontWeight: 600,
                     fontSize: '0.75rem'
                   }}
+                /> */}
+                <Chip
+                  // icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: 16 }} />}
+                  label={post.postStatus}
+                  size="small"
+                  sx={(theme) => ({
+                    position: 'absolute',
+                    top: 12,
+                    left: 12,
+                    backgroundColor:
+                      // darkMode
+                      //   ?
+                          post.postStatus === 'Active' ? 'rgba(102, 187, 106, 0.18)' : post.postStatus === 'Closed' ? 'rgba(187, 185, 102, 0.18)'  : 'rgba(187, 115, 102, 0.18)',  // muted green
+                        // : theme.palette.success.main,
+                    color:
+                      // darkMode
+                      //   ? 
+                        post.postStatus === 'Active' ? theme.palette.success.light : post.postStatus === 'Closed' ? theme.palette.warning.main : theme.palette.error.main,
+                        // : '#fff',
+                    border:
+                      // darkMode
+                      //   ? 
+                        post.postStatus === 'Active' ? '1px solid rgba(102, 187, 106, 0.45)' : post.postStatus === 'Closed' ? '1px solid rgba(187, 185, 102, 0.45)' : '1px solid rgba(187, 115, 102, 0.45)',
+                        // : 'none',
+                    px: 0.75,
+                    height: '22px',
+                    fontWeight: 600,
+                    fontSize: '0.75rem',
+                    backdropFilter: 'blur(4px)',
+                    WebkitBackdropFilter: 'blur(4px)',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                    boxShadow:
+                      darkMode
+                        ? 'none'
+                        : '0 2px 6px rgba(0,0,0,0.2)',
+                    '&:hover': {
+                      transform: 'translateY(-1px)',
+                    },
+                    '& .MuiChip-label': {
+                      px: '4px',
+                    },
+                    '& .MuiChip-icon': {
+                      color: 'inherit',
+                      marginLeft: '4px',
+                      marginRight: '-4px',
+                      height: '16px',
+                    },
+                  })}
                 />
                 {post.isFullTime && (
                   <Chip
                     icon={<WorkIcon sx={{ fontSize: 16 }} />}
-                    label="Full Time" color="#fff"
+                    label="Full Time"
                     size="small"
                     sx={{
                       position: 'absolute',
                       top: 12,
                       right: 12,
-                      backgroundColor: 'info.main',
-                      color: 'white',
+                      backgroundColor: darkMode ? 'rgba(0, 0, 0, 0.25)' : 'info.main',
+                      color: '#fff',
+                      backdropFilter: 'blur(4px)',
                       fontWeight: 600,
-                      fontSize: '0.75rem',
+                      fontSize: '0.7rem',
+                      height: '22px',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
                       '& .MuiChip-icon': {
+                        color: '#fff',
                         marginLeft: '6px',
-                        height: '16px'
+                        marginRight: '-4px',
+                        height: '16px',
                       },
                     }}
                   />
@@ -870,31 +929,56 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                     </Typography>
                   } */}
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',}}>
-                    <Tooltip title={post.title} placement="top" arrow>
+                    {/* <Tooltip title={post.title} placement="top" arrow> */}
                       <Typography variant="h6" component="div" style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white', textTransform: 'capitalize' }}>
                         {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
                       </Typography>
-                    </Tooltip>
+                    {/* </Tooltip> */}
                     {post.postType === 'HelpRequest' && post.categories !== 'UnPaid' &&
                       <Chip
                         icon={<CurrencyRupeeRoundedIcon sx={{ fontSize: 16 }} />}
-                        label={`${formatPrice(post.price)}`} color="white"
-                        variant="filled" size="small"
-                        sx={{
-                          backgroundColor: 'success.main',
-                          color: '#fff',
-                          px: 0.5, py: 1,
-                          fontWeight: 500,
-                          fontSize: '0.875rem',
-                          transition: 'transform 0.2s ease',
+                        label={formatPrice(post.price)}
+                        size="small"
+                        sx={(theme) => ({
+                          backgroundColor:
+                            // darkMode
+                            //   ?
+                                'rgba(102, 187, 106, 0.18)', // muted green
+                              // : theme.palette.success.main,
+                          color:
+                            // darkMode
+                            //   ? 
+                              theme.palette.success.light,
+                              // : '#fff',
+                          border:
+                            // darkMode
+                            //   ? 
+                              '1px solid rgba(102, 187, 106, 0.45)',
+                              // : 'none',
+                          pr: 0.75,
+                          height: '22px',
+                          fontWeight: 600,
+                          fontSize: '0.75rem',
+                          backdropFilter: 'blur(4px)',
+                          WebkitBackdropFilter: 'blur(4px)',
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                          boxShadow:
+                            darkMode
+                              ? 'none'
+                              : '0 2px 6px rgba(0,0,0,0.2)',
+                          '&:hover': {
+                            transform: 'translateY(-1px)',
+                          },
                           '& .MuiChip-label': {
                             px: '4px',
                           },
                           '& .MuiChip-icon': {
-                            marginLeft: '2px',
-                            height: '16px'
+                            color: 'inherit',
+                            marginLeft: '4px',
+                            marginRight: '-4px',
+                            height: '16px',
                           },
-                        }}
+                        })}
                       />
                     }
                     {/* {post.postType !== 'HelpRequest' &&
@@ -916,11 +1000,13 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                     {post.postType !== 'HelpRequest' && 
                       <Chip 
                         label={post.serviceType}
-                        variant="outlined" 
+                        // variant="outlined" 
                         size="small" 
                         sx={{ 
                           color: '#fff', 
                           borderColor: 'rgba(255,255,255,0.5)',
+                          backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                          backdropFilter: 'blur(4px)',
                           fontSize: '0.75rem'
                         }}
                       />
@@ -937,6 +1023,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                           sx={{ 
                             color: '#fff', 
                             borderColor: 'rgba(255,255,255,0.5)',
+                            backdropFilter: 'blur(4px)',
                             fontSize: '0.75rem'
                           }}
                         />
@@ -948,6 +1035,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                             sx={{ 
                               color: '#fff', 
                               borderColor: 'rgba(255,255,255,0.5)',
+                              backdropFilter: 'blur(4px)',
                               fontSize: '0.75rem'
                             }}
                           />
@@ -976,6 +1064,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                             color: '#4caf50', 
                             borderColor: '#4caf50',
                             backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            backdropFilter: 'blur(4px)',
                             mb: 1,
                             fontWeight: 600
                           }}
@@ -997,6 +1086,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                                     backgroundColor: 'rgba(255,255,255,0.15)', 
                                     color: '#fff',
                                     borderColor: 'rgba(255,255,255,0.3)',
+                                    backdropFilter: 'blur(4px)',
                                     fontSize: '0.7rem',
                                     height: '20px'
                                   }}
@@ -1032,6 +1122,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                               sx={{
                                 backgroundColor: 'rgba(33, 150, 243, 0.2)',
                                 color: '#90caf9',
+                                backdropFilter: 'blur(4px)',
                                 fontSize: '0.7rem',
                                 height: '20px'
                               }}
@@ -1046,6 +1137,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                                 backgroundColor: 'rgba(33, 150, 243, 0.2)',
                                 color: '#90caf9',
                                 borderColor: 'rgba(255,255,255,0.3)',
+                                backdropFilter: 'blur(4px)',
                                 fontSize: '0.7rem',
                                 height: '20px'
                               }}
@@ -1086,12 +1178,12 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                     {post.description}
                   </Typography>
                   <Typography variant="body2" style={{ marginTop: '1rem', marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.9)'  }}>
-                    Posted on : {new Date(post.createdAt).toLocaleString() || 'Invalid date'}
+                    Posted on : {formatDate(post.createdAt) || 'Invalid date'}
                   </Typography>
                   {/* {!(post.createdAt === post.updatedAt) && ( */}
                   {post.updatedAt && (
                   <Typography variant="body2" style={{ marginBottom: '0.5rem', color: 'rgba(255, 255, 255, 0.9)'  }}>
-                    Updated on : {new Date(post.updatedAt).toLocaleString() || 'Invalid date'}
+                    Updated on : {formatDate(post.updatedAt) || 'Invalid date'}
                   </Typography>
                   )}
                   {/* )} */}
@@ -1109,10 +1201,84 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                         right: 0,
                         // padding: '16px',
                         color: 'white'  }}>
-                  <Box>
-                    <Button color="primary" size="small" variant="outlined" startIcon={<EditNoteRoundedIcon />} sx={{ marginRight: '10px', borderRadius:'8px' }} onClick={(event) => {event.stopPropagation(); // Prevent triggering the parent onClick
-                      handleEdit(post);}}>Edit</Button>
-                    <Button color="secondary" size="small" variant="outlined" startIcon={<DeleteSweepRoundedIcon />} key={post._id} sx={{borderRadius:'8px'}} onClick={(event) => {event.stopPropagation(); handleDeleteClick(post);}}>Delete</Button>
+                  <Box display="flex" gap={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<EditNoteRoundedIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(post);
+                      }}
+                      sx={(theme) => ({
+                        borderRadius: '8px',
+                        minHeight: '30px',
+                        px: 1.2,
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        backdropFilter: 'blur(4px)',
+                        WebkitBackdropFilter: 'blur(4px)',
+                        borderColor:
+                          darkMode
+                            ? 'rgba(144, 202, 249, 0.4)'
+                            : theme.palette.primary.main,
+                        color:
+                          darkMode
+                            ? theme.palette.primary.light
+                            : theme.palette.primary.main,
+                        backgroundColor:
+                          darkMode
+                            ? 'rgba(144, 202, 249, 0.08)'
+                            : 'transparent',
+                        '&:hover': {
+                          backgroundColor:
+                            darkMode
+                              ? 'rgba(144, 202, 249, 0.18)'
+                              : 'rgba(25, 118, 210, 0.04)',
+                        },
+                      })}
+                    >
+                      Edit
+                    </Button>
+
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<DeleteSweepRoundedIcon />}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteClick(post);
+                      }}
+                      sx={(theme) => ({
+                        borderRadius: '8px',
+                        minHeight: '30px',
+                        px: 1.2,
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        backdropFilter: 'blur(4px)',
+                        WebkitBackdropFilter: 'blur(4px)',
+                        borderColor:
+                          darkMode
+                            ? 'rgba(239, 83, 80, 0.4)'
+                            : theme.palette.error.main,
+                        color:
+                          darkMode
+                            ? theme.palette.error.light
+                            : theme.palette.error.main,
+                        backgroundColor:
+                          darkMode
+                            ? 'rgba(239, 83, 80, 0.08)'
+                            : 'transparent',
+                        '&:hover': {
+                          backgroundColor:
+                            darkMode
+                              ? 'rgba(239, 83, 80, 0.18)'
+                              : 'rgba(211, 47, 47, 0.04)',
+                        },
+                      })}
+                    >
+                      Delete
+                    </Button>
                   </Box>
                   <Badge
                     badgeContent={post.unreadMessages || 0} 
@@ -1127,7 +1293,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
                       }
                     }}
                   >
-                    <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
+                    <Button  variant="contained" size="small" startIcon={<ForumRoundedIcon />} sx={{ borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', backdropFilter: 'blur(4px)', textTransform: 'none',
                       '&:hover': {
                         background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', 
                         transform: 'translateY(-2px)' 
@@ -1169,7 +1335,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             You've reached the end of <strong>{totalPosts} posts</strong>
           </Typography> */}
           <Typography color="text.secondary">
-            No more {postType === 'HelpRequest' ? 'Help Requests' : 'Service Offerings'} posts of yous...
+            No more {postType === 'HelpRequest' ? 'Help Requests' : 'Service Offerings'} posts of yours...
           </Typography>
         </Box>
       )}
