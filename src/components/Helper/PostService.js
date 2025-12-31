@@ -88,17 +88,17 @@ const SliderThumb = styled(Box)(({ theme, position }) => ({
 function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [openDialog, setOpenDialog] = useState(false);
   const [posts, setPosts] = useState([]);
-  const [formData, setFormData] = useState({
-    title: '',
-    price: '',
-    postStatus: '',
-    peopleCount: '',
-    gender: '',
-    serviceDays: '',
-    description: '',
-    media: null,
-    isFullTime: false,
-  });
+  // const [formData, setFormData] = useState({
+  //   title: '',
+  //   price: '',
+  //   postStatus: '',
+  //   peopleCount: '',
+  //   gender: '',
+  //   serviceDays: '',
+  //   description: '',
+  //   media: null,
+  //   isFullTime: false,
+  // });
   const [editingProduct, setEditingProduct] = useState(null);
   const [existingMedia, setExistingMedia] = useState([]);
   const [newMedia, setNewMedia] = useState([]);
@@ -152,6 +152,10 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
   const [postType, setPostType] = useState('HelpRequest');
   // const [totalPosts, setTotalPosts] = useState(0);
   // const [showPostType, setShowPostType] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   // function to handle sort change
   const handlePostType = (postType) => {
@@ -444,26 +448,52 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
               }}>
                 <Box sx={{ display: 'flex', maxWidth: 'md', alignItems: 'center', justifyContent: 'center', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 0 : 4 }}>
                 <Box >
-                <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
-                  fontWeight: 700,
-                  mb: 1,
-                  position: 'relative',
-                  zIndex: 1,
-                  textShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                }}>
-                  Need reliable help?
-                </Typography>
-                <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
-                  maxWidth: '800px',
-                  margin: '0 auto',
-                  position: 'relative',
-                  zIndex: 1,
-                  opacity: 0.9,
-                  lineHeight: 1.6
-                }}>
-                  Post your requirement on Helper—hire cleaners, tutors, delivery staff, or event volunteers in minutes.
-                   {/* Find opportunities in your area and make a difference while earning. */}
-                </Typography>
+                  {postType === 'HelpRequest' ? (
+                    <>
+                    <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      position: 'relative',
+                      zIndex: 1,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}>
+                      Need reliable help?
+                    </Typography>
+                    <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
+                      maxWidth: '800px',
+                      margin: '0 auto',
+                      position: 'relative',
+                      zIndex: 1,
+                      opacity: 0.9,
+                      lineHeight: 1.6
+                    }}>
+                      Post your requirement on Helper—hire cleaners, tutors, delivery staff, or event volunteers in minutes.
+                      {/* Find opportunities in your area and make a difference while earning. */}
+                    </Typography>
+                    </>
+                  ) : (
+                    <>
+                    <Typography variant={isMobile ? 'h5' : 'h4'} component="h1" sx={{
+                      fontWeight: 700,
+                      mb: 1,
+                      position: 'relative',
+                      zIndex: 1,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }}>
+                      Serve Customers Near You!
+                    </Typography>
+                    <Typography variant={isMobile ? 'body1' : 'h6'} sx={{
+                      maxWidth: '800px',
+                      margin: '0 auto',
+                      position: 'relative',
+                      zIndex: 1,
+                      opacity: 0.9,
+                      lineHeight: 1.6
+                    }}>
+                      Post your skills or business and reach nearby customers instantly.
+                    </Typography>
+                    </> 
+                  )}
                 {/* <Box sx={{
                   display: 'flex',
                   justifyContent: 'center',
@@ -677,7 +707,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
           </Box>
             
         </Toolbar>
-        <Box sx={{ paddingTop: '1rem', paddingBottom: '2rem', mx: isMobile ? '4px' : '8px', paddingInline: '4px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
+        <Box sx={{ paddingTop: '1rem', paddingBottom: '2rem', mx: isMobile ? 1 : 2, paddingInline: '4px', borderRadius:'10px'}}> {/* sx={{ p: 2 }} */}
         {loading ? (
           <SkeletonCards/>
         ) : (
@@ -1117,7 +1147,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             </Typography>
             <Button 
               variant="outlined" 
-              sx={{ mt: 2, borderRadius: '12px' }}
+              sx={{ m: 2, borderRadius: '12px', textTransform: 'none' }}
               onClick={() => handleOpenDialog()}
             >
               <PostAddRoundedIcon sx={{ fontSize: '20px', mr: '8px'}} />
@@ -1235,6 +1265,80 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             {snackbar.message}
           </Alert>
         </Snackbar>
+        </Box>
+        <Box
+          sx={{
+            p: isMobile ? 2 : 3,
+            mx: isMobile ? 1 : 2,
+            mt: 3,
+            mb: 3,
+            background: darkMode
+              ? 'rgba(255, 255, 255, 0.03)'
+              : 'rgba(255, 255, 255, 0.7)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 2,
+            border: darkMode
+              ? '1px solid rgba(255, 255, 255, 0.1)'
+              : '1px solid rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            📌 Post Guidelines & Purpose
+          </Typography>
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Posts on Helper connect real people nearby for jobs, services, emergencies,
+            and community needs. Add or edit your post carefully so the right helpers
+            or customers can find you faster.
+          </Typography>
+
+          {/* Help Request */}
+          <Typography variant="subtitle2" sx={{ mt: 1 }}>
+            🧑‍💼 When to create a <b>Help Request</b>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Use this if you are seeking help.
+            <br />• Paid work (instant work, daily jobs, part-time tasks)
+            <br />• Unpaid or volunteer support
+            <br />• Emergency needs (urgent, nearby help, medical emergency)
+            <br />⏳ Post Validity: Active until the selected <b>Service Required Date</b>
+          </Typography>
+
+          {/* Service Offering */}
+          <Typography variant="subtitle2" sx={{ mt: 2 }}>
+            🧑‍🔧 When to create a <b>Service Offering</b>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Use this if you are offering a service or skill.
+            <br />• Parking space, vehicle or furniture rental
+            <br />• Cleaning, cooking, tutoring, pet care
+            <br />• Electrician, Plumber, Maintenance, Technician
+            <br />• Local business or professional services
+            <br />⏳ Post Validity: Active for <b>7 days</b> from the posted or last updated date
+          </Typography>
+
+          {/* Why Post */}
+          <Typography variant="subtitle2" sx={{ mt: 2 }}>
+            🎯 Why posting helps
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {/* <br /> */}🌍 Connect with people nearby
+            <br />🚨 Get fast responses for urgent needs
+            <br />💼 Turn skills into income
+            <br />🏡 Work locally without migration
+            <br />🎓 Ideal for students, workers & businesses
+          </Typography>
+
+          {/* CTA */}
+          <Typography
+            variant="body2"
+            sx={{ mt: 2, fontWeight: 500 }}
+            color="primary"
+          >
+            👉 Add a new post to get started, or edit existing posts to keep details
+            accurate and active.
+            <br />💡 Tip: Update your post regularly to keep it active and visible to nearby users.
+          </Typography>
         </Box>
         </Layout>
     );

@@ -4563,6 +4563,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 justifyContent: 'center',
                 height: '50vh',
                 textAlign: 'center',
+                p: 2
               }}>
                 <img 
                   src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
@@ -4588,7 +4589,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   <Button 
                     variant="outlined" 
                     disabled={distanceRange >= 100}
-                    sx={{ mt: 2, borderRadius: '12px' }}
+                    sx={{ m: 2, borderRadius: '12px', textTransform: 'none' }}
                     onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
                   >
                     Increase Search Radius
@@ -4614,7 +4615,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 mt: 2
               }}>
                 <Typography color="text.secondary">
-                  You've reached the end of <strong>{totalPosts} posts</strong> in your area
+                  You've reached the end of <strong>{totalPosts} {selectedCategory} posts</strong> in your area
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                   Current search range: {distanceRange} km
@@ -4624,6 +4625,85 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </Typography>}
               </Box>
             )}
+            <Box
+              sx={{
+                p: isMobile ? 2 : 3,
+                // mx: isMobile ? 1 : 2,
+                mt: 3,
+                mb: 3,
+                background: darkMode
+                  ? 'rgba(255, 255, 255, 0.03)'
+                  : 'rgba(255, 255, 255, 0.7)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: 2,
+                border: darkMode
+                  ? '1px solid rgba(255, 255, 255, 0.1)'
+                  : '1px solid rgba(0, 0, 0, 0.1)',
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                📍 Browse Nearby Helper Posts
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Discover help requests and service offerings near your location.
+                Use filters to quickly find the most relevant posts within your
+                selected distance.
+              </Typography>
+
+              {/* How Browsing Works */}
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                🔍 How browsing works
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                • Posts are shown based on your current location
+                <br />• Distance range filters results (1 km – 200 km)
+                <br />• Only active posts are displayed
+                <br />• Near or recently updated posts appear first
+              </Typography>
+
+              {/* Filter Types */}
+              <Typography variant="subtitle2" sx={{ mt: 2 }}>
+                🎯 Filter by what you need
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {/* <br /> */}🧑‍💼 <b>Help Requests</b> – Paid, Unpaid & Emergency
+                <br />🧑‍🔧 <b>Service Offerings</b> – Blood donars, Maintenance, Rentals, Cleaning, Tutoring & more
+                <br />🚨 <b>Emergency Alerts</b> – Shown with higher priority
+              </Typography>
+
+              {/* Why Distance Matters */}
+              <Typography variant="subtitle2" sx={{ mt: 2 }}>
+                📏 Why distance matters
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                • Closer posts mean faster response
+                <br />• Ideal for urgent and daily work
+                <br />• Saves travel time and cost
+                <br />• Encourages local community support
+              </Typography>
+
+              {/* Actions */}
+              <Typography variant="subtitle2" sx={{ mt: 2 }}>
+                🤝 What you can do
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                • Open a post to view full details
+                <br />• Chat or Contact the post owner directly
+                <br />• Offer help or book a service
+                <br />• Like or save posts for later
+              </Typography>
+
+              {/* CTA */}
+              <Typography
+                variant="body2"
+                sx={{ mt: 2, fontWeight: 500 }}
+                color="primary"
+              >
+                👉 Adjust filters to find the best opportunities near you and start helping
+                or earning today.
+              </Typography>
+            </Box>
           </Box>)}
 
 
@@ -5021,94 +5101,6 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </Box>
         </DialogContent>
       </Dialog>
-      {/* Filter Floating Card */}
-      {/* {filterOpen && (
-        <FilterPosts
-          filterCriteria={filterCriteria}
-          applyFilters={applyFilters}
-          posts={posts}
-          filteredPosts={filteredPosts}
-          onClose={handleFilterToggle}
-        />
-      )} */}
-
-      {/* Post details dialog */}
-      {/* <Dialog open={showPostDialog} onClose={() => setShowPostDialog(false)} fullWidth
-        sx={{  minWidth: '350px', maxWidth: isMobile ? '400px' : '500px', margin: 'auto', '& .MuiPaper-root': { backdropFilter: 'blur(20px)',borderRadius: '16px', scrollbarWidth: 'thin', scrollbarColor: '#aaa transparent', },}}
-        >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6">Post Details</Typography>
-          <IconButton onClick={() => setShowPostDialog(false)}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-          {loadingPostDetails ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : postDetails ? (
-            <>
-              <Typography variant="h6" gutterBottom>
-                {postDetails.title}
-              </Typography>
-              
-              <Box sx={{ mb: 2, alignItems: 'center' }}>
-                <Chip 
-                  label={postDetails.postType === 'HelpRequest' 
-                    ? postDetails.categories 
-                    : postDetails.serviceType}
-                  color="primary"
-                  sx={{ mb: 1 }}
-                />
-                {postDetails.postStatus && (
-                  <Chip 
-                    label={postDetails.postStatus}
-                    color={postDetails.postStatus === 'Active' ? 'success' : 'default'}
-                    sx={{ ml: 1 }}
-                  />
-                )}
-              </Box>
-
-              {postDetails.price > 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <CurrencyRupeeRoundedIcon color="success" />
-                  <Typography variant="h6" color="success.main" sx={{ ml: 1 }}>
-                    {formatPrice(postDetails.price)}
-                  </Typography>
-                </Box>
-              )}
-
-              <Typography variant="body1" paragraph>
-                {postDetails.description}
-              </Typography>
-
-              {postDetails.media && postDetails.media.length > 0 && (
-                <Box sx={{ mb: 2 }}>
-                  <LazyImage
-                    base64Image={postDetails.media[0]}
-                    alt={postDetails.title}
-                    style={{ width: '100%', borderRadius: '8px' }}
-                  />
-                </Box>
-              )}
-
-              <Button 
-                variant="contained" sx={{borderRadius: '8px'}}
-                fullWidth
-                onClick={() => {
-                  setShowPostDialog(false);
-                  navigate(`/post/${postDetails._id}`);
-                }}
-              >
-                Open Full Post
-              </Button>
-            </>
-          ) : (
-            <Typography color="error">Failed to load post details</Typography>
-          )}
-        </DialogContent>
-      </Dialog> */}
       {/* Location Permission Dialog - Shows FIRST */}
       <LocationPermissionDialog
         open={showLocationDialog}

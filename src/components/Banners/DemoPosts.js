@@ -131,7 +131,7 @@ const DemoPosts = ({ isMobile, postId}) => {
 
   if (loading) {
     return (
-      <Box sx={{ width: "100%", maxWidth: "800px", margin: "auto", mt: 3 }}>
+      <Box sx={{ width: "100%", maxWidth: "500px", margin: "auto", mt: 3 }}>
         <Skeleton 
           variant="rectangular" 
           height={isMobile ? 200 : 300} 
@@ -149,7 +149,7 @@ const DemoPosts = ({ isMobile, postId}) => {
   return (
     <Box sx={{ 
       width: "100%", 
-      maxWidth: "800px", // 1200px
+      maxWidth: "500px", // 800px
       margin: "auto", 
       mt: 3,
       position: 'relative'

@@ -2886,6 +2886,31 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   </Box>
                 </Box>
               )}
+
+              <Box sx={{ px: 1, mt: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  ⏳ Post Validity & Auto-Status Rules
+                </Typography>
+                {formData.postType === 'HelpRequest' ? (
+                  <Typography variant="body2" color="text.secondary">
+                    • Active until the selected <b>Service Required Date</b>
+                    <br />• After <b>24 hours</b> of the service date passing,
+                    the post is automatically set to <b>Inactive</b>
+                  </Typography>
+                  ) : (
+                  <Typography variant="body2" color="text.secondary">
+                    • Active for <b>7 days</b> from the posted or last updated date
+                    <br />• Any edit or update extends visibility for another <b>7 days</b>
+                  </Typography>
+                )}
+                <Typography
+                  variant="body2"
+                  sx={{ mt: 2, fontWeight: 500 }}
+                  color="primary"
+                >
+                  💡 Tip: Update your post regularly to keep it active and visible to nearby users.
+                </Typography>
+              </Box>
             </CardContent>
           </Card>
 
