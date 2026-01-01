@@ -1023,7 +1023,7 @@ const ChatDialog = ({ open, onClose, post, user, isAuthenticated, setLoginMessag
             }}
             onMouseDown={(e) => e.preventDefault()} // ✅ Prevents losing focus on mobile
             onClick={(e) => handleSendMessage(e)}
-            disabled={ message.trim() === '' || post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))}
+            disabled={ message.trim() === ''} //  || post.postStatus === 'InActive' || (post.postStatus === 'Closed' && !post.helperIds.includes(userId))
             >
             <SendRoundedIcon sx={{ fontSize: '24px', marginLeft:'4px' }} />
           </IconButton>
