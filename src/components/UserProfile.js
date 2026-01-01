@@ -27,6 +27,7 @@ import Diversity2RoundedIcon from '@mui/icons-material/Diversity2Rounded';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
+import RequestCoupon from './Banners/RequestCoupon';
 
 // Set default icon manually
 // const customIcon = new L.Icon({
@@ -816,7 +817,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                         <strong>{followingCount}</strong> Following
                       </Typography>
                     </Box>
-                    {/* <RequestCoupon id={id} isAuthenticated={isAuthenticated} followerCount={followerCount} setSnackbar={setSnackbar} /> */}
+                    <RequestCoupon id={id} isAuthenticated={isAuthenticated} followerCount={followerCount} setSnackbar={setSnackbar} />
                   </Grid>
                   <Grid item xs={12} sm={12} md={6} >
                     <Box display="flex" alignItems="center" gap={1}>

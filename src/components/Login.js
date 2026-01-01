@@ -19,7 +19,7 @@ import TermsPolicyBar from './TermsAndPolicies/TermsPolicyBar';
 // import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRounded';
 // import AboutHelperSkeleton from './Banners/AboutHelperSkeleton';
 import AboutHelper from './Banners/AboutHelper';
-// import OfferBanner from './Banners/OfferBanner';
+import OfferBanner from './Banners/OfferBanner';
 
 const theme = createTheme({
   breakpoints: {
@@ -223,7 +223,7 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
       >
         Sign In to Your Account
       </Typography> */}
-      {/* <OfferBanner/> */}
+      <OfferBanner/>
       <Box sx={{ textAlign: 'center', mb: 3 }}>
         {/* <LoginIcon
           sx={{

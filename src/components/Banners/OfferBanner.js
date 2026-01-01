@@ -4,8 +4,10 @@ import CardGiftcardRoundedIcon from '@mui/icons-material/CardGiftcardRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
 import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
 import { ArrowForwardRounded, CelebrationRounded, PeopleAltRounded } from '@mui/icons-material';
+import { useNavigate } from "react-router-dom";
 
 const OfferBanner = () => {
+    const navigate = useNavigate();
     const [showExpandedCard, setShowExpandedCard] = useState(false);
 
     return(
@@ -42,7 +44,7 @@ const OfferBanner = () => {
               </Box>
 
               {/* Offer Duration - Always visible */}
-              <Box sx={{ 
+              {/* <Box sx={{ 
                 mt: 0.5,
                 mb: 0.5,
                 display: 'flex',
@@ -63,14 +65,17 @@ const OfferBanner = () => {
                   <span style={{ fontWeight: 500 }}>Dec 25-28</span>
                   <span style={{ opacity: 0.8 }}>• Christmas Special</span>
                 </Typography>
-              </Box>
+              </Box> */}
               
               {!showExpandedCard ? (
                 <>
-                  <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mb: 0.5, mt: 0.5 }}>
+                  <Typography variant="caption" sx={{ opacity: 0.8, display: 'block', mt: 0.5 }}>
+                    Build your community and unlock rewards
+                  </Typography>
+                  {/* <Typography variant="caption" sx={{ opacity: 0.9, display: 'block', mb: 0.5, mt: 0.5 }}>
                     Reach 50 followers → My Profile → Network Section
                   </Typography>
-                  {/* <Chip 
+                  <Chip 
                     label="50+ Followers Required"
                     size="small"
                     sx={{ 
@@ -86,7 +91,7 @@ const OfferBanner = () => {
                   {/* Expanded Content - Same as desktop but adapted for mobile */}
                   <Box sx={{ mb: 2 }}>
                     {/* Offer Duration Details */}
-                    <Box sx={{ 
+                    {/* <Box sx={{ 
                       mb: 2, 
                       p: 1.5, 
                       background: 'rgba(211, 47, 47, 0.1)',
@@ -106,7 +111,10 @@ const OfferBanner = () => {
                         This special ₹500 Amazon Pay gift card is exclusively available during our Christmas celebrations.
                         Requests must be made within this period to qualify.
                       </Typography>
-                    </Box>
+                    </Box> */}
+                    <Typography variant="caption" sx={{ opacity: 0.8, display: 'block', mb: 0.5 }}>
+                      Build your community and unlock rewards
+                    </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                       <PeopleAltRounded fontSize="small" />
                       <Typography variant="body2" fontWeight={500}>
@@ -123,9 +131,9 @@ const OfferBanner = () => {
                         mb: 1
                       }}
                     />
-                    <Typography variant="caption" sx={{ opacity: 0.8, display: 'block', mt: 0.5 }}>
+                    {/* <Typography variant="caption" sx={{ opacity: 0.8, display: 'block', mt: 0.5 }}>
                       Build your community and unlock rewards
-                    </Typography>
+                    </Typography> */}
                   </Box>
 
                   <Box sx={{ mb: 2 }}>
@@ -147,7 +155,8 @@ const OfferBanner = () => {
                         <Typography variant="caption" sx={{ color: 'white', fontWeight: 700 }}>1</Typography>
                       </Box>
                       <Typography variant="caption">
-                        Login and grow your followers to 50+ <strong style={{ color: '#FF9900' }}>(Before Dec 28)</strong>
+                        Login and grow your followers to 50+ 
+                        {/* <strong style={{ color: '#FF9900' }}>(Before Dec 28)</strong> */}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mb: 1 }}>
@@ -198,14 +207,19 @@ const OfferBanner = () => {
                         ⚡ Important:
                       </Typography>
                       <Typography variant="caption" sx={{ display: 'block', opacity: 0.9 }}>
-                        • Offer valid only from <strong>December 25-28, 2025</strong><br/>
-                        • Coupon requests must be submitted within this period<br/>
+                        {/* • Offer valid only from <strong>December 25-28, 2025</strong><br/>
+                        • Coupon requests must be submitted within this period<br/> */}
                         • Gift cards will be shared within 24 hours of request
                       </Typography>
                     </Box>
                   </Box>
 
-                  <Box sx={{ 
+                  <Box
+                    component="a"
+                    href="https://www.amazon.in/dp/B018TV9HIM?_encoding=UTF8&ref=cm_sw_r_cp_ud_dp_CBF59JWWGXDD3490DTFE&ref_=cm_sw_r_cp_ud_dp_CBF59JWWGXDD3490DTFE&social_share=cm_sw_r_cp_ud_dp_CBF59JWWGXDD3490DTFE&th=1&gpo=500"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                   sx={{ 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
@@ -213,7 +227,12 @@ const OfferBanner = () => {
                     p: 1,
                     background: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 2,
-                    border: '1px solid rgba(255, 255, 255, 0.1)'
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      background: 'rgba(255, 255, 255, 0.1)',
+                    },
                   }}>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: '#FF9900' }}>
                       Amazon Pay
