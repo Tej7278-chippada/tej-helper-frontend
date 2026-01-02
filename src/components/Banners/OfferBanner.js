@@ -1,4 +1,4 @@
-import { Box, Button, Card, Chip, IconButton, Typography } from "@mui/material";
+import { Box, Button, Card, Chip, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useState } from "react";
 import CardGiftcardRoundedIcon from '@mui/icons-material/CardGiftcardRounded';
 import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 const OfferBanner = () => {
     const navigate = useNavigate();
     const [showExpandedCard, setShowExpandedCard] = useState(false);
+    const [amazonLoading, setAmazonLoading] = useState(false);
 
     return(
         <Box sx={{ 
@@ -219,24 +220,42 @@ const OfferBanner = () => {
                     href="https://www.amazon.in/dp/B018TV9HIM?_encoding=UTF8&ref=cm_sw_r_cp_ud_dp_CBF59JWWGXDD3490DTFE&ref_=cm_sw_r_cp_ud_dp_CBF59JWWGXDD3490DTFE&social_share=cm_sw_r_cp_ud_dp_CBF59JWWGXDD3490DTFE&th=1&gpo=500"
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setAmazonLoading(true);
+                      setTimeout(() => {
+                        setAmazonLoading(false);
+                      }, 2000);
+                    }}
                    sx={{ 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
+                    gap: 1,
                     my: 1,
                     p: 1,
                     background: 'rgba(255, 255, 255, 0.05)',
                     borderRadius: 2,
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     textDecoration: 'none',
-                    cursor: 'pointer',
+                    cursor: amazonLoading ? 'default' : 'pointer',
+                    pointerEvents: amazonLoading ? 'none' : 'auto',
                     '&:hover': {
                       background: 'rgba(255, 255, 255, 0.1)',
                     },
                   }}>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#FF9900' }}>
-                      Amazon Pay
-                    </Typography>
+                    {amazonLoading ? (
+                      <>
+                        <CircularProgress size={18} sx={{ color: '#FF9900' }} />
+                        <Typography variant="body2" sx={{ color: '#FF9900', fontWeight: 600 }}>
+                          Opening Amazon Pay...
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="h6" sx={{ fontWeight: 700, color: '#FF9900' }}>
+                        Amazon Pay
+                      </Typography>
+                    )}
                   </Box>
 
                   <Button
