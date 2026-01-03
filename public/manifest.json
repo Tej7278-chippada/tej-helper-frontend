@@ -21,7 +21,7 @@
       "purpose": "any maskable"
     }
   ],
-  "start_url": "/?source=pwa",
+  "start_url": "/login",
   "display": "standalone",
   "scope": "/",
   "theme_color": "#1976d2",

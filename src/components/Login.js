@@ -117,7 +117,8 @@ const Login = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
       localStorage.setItem('tokenProfilePic', tokenPic);
 
       setSuccess('Login successful!');
-      navigate('/', { replace: true });
+      // navigate('/', { replace: true });
+      window.location.replace("/");
       // setLoginStatus(true);
     } else {
         setError('Token is missing in response');
