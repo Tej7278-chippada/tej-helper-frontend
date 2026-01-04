@@ -477,7 +477,14 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
                       isselected={(selectedCategory === service.value).toString()}
                       customcolor={service.color}
                       // onClick={() => handleServiceCategorySelect(service.value)}
-                      onClick={() => {setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });}}
+                      // onClick={() => {setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });}}
+                      onClick={() => {
+                        if (service.value === 'BloodDonars') {
+                          handleServiceCategorySelect(service.value);
+                        } else {
+                          setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });
+                        }
+                      }}
                     >
                       <CategoryImage 
                         src={categoryImages[service.value]} 

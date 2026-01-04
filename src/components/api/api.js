@@ -137,8 +137,11 @@ export const fetchBloodDonors = (skip = 0, limit = 12, userLocation = null, dist
     params.userLng = userLocation.longitude;
     params.distance = distanceRange;
   }
+
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
   
-  return API.get('/api/posts/blood-donors', { params });
+  return API.get('/api/posts/blood-donors', { headers, params });
 };
 
 // Fetch blood donor locations
@@ -154,7 +157,10 @@ export const fetchBloodDonorLocations = (userLocation, distanceRange, filters = 
     params.search = searchQuery.trim();
   }
 
-  return API.get('/api/posts/blood-donors/locations', { params });
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  return API.get('/api/posts/blood-donors/locations', { headers, params });
 };
 
 // export const fetchPosts = () => API.get('/api/posts');
@@ -180,8 +186,11 @@ export const fetchPosts = (skip = 0, limit = 12, userLocation = null, distanceRa
     params.userLng = userLocation.longitude;
     params.distance = distanceRange;
   }
+
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
   
-  return API.get('/api/posts', { params });
+  return API.get('/api/posts', { headers, params });
 };
 
 // all posts locations data
@@ -202,7 +211,10 @@ export const fetchPostLocations = (userLocation, distanceRange, filters = {}, se
     params.search = searchQuery.trim();
   }
 
-  return API.get('/api/posts/locations', { params });
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  return API.get('/api/posts/locations', { headers, params });
 };
 
 export const fetchPostById = async (id) => {
