@@ -653,11 +653,11 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                   </Box>
 
                   <Typography variant="body2" color="textSecondary" >
-                    {profile?.bloodDonar?.donate === true
-                      ? profile?.bloodDonar?.bloodGroup === "Unknown"
+                    {profile?.bloodDonor?.donate === true
+                      ? profile?.bloodDonor?.bloodGroup === "Unknown"
                         ? "This user donates blood! (Blood group not specified)"
-                        : `This user donates blood! (${profile?.bloodDonar?.bloodGroup})`
-                      : profile?.bloodDonar?.donate === false
+                        : `This user donates blood! (${profile?.bloodDonor?.bloodGroup})`
+                      : profile?.bloodDonor?.donate === false
                       ? "Blood donation is not enabled."
                       : "This preference hasn’t been set yet."}
                   </Typography>

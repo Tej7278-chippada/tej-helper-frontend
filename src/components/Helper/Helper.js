@@ -11,7 +11,7 @@ import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
 import API, { fetchBloodDonorLocations, fetchBloodDonors, fetchPostById, fetchPostLocations, fetchPosts } from '../api/api';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 // import FilterPosts from './FilterPosts';
 import CloseIcon from '@mui/icons-material/Close';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -55,6 +55,8 @@ import LocationPermissionDialog from '../Maps/LocationPermissionDialog';
 import NotificationPermissionDialog from '../Notifications/NotificationPermissionDialog';
 import ComparePostsDialog from './ComparePostsDialog';
 import BloodDonorCard from './BloodDonorCard';
+import { VerifiedRounded } from '@mui/icons-material';
+import UserProfileDetails from './UserProfileDetails';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -304,7 +306,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const [compareMode, setCompareMode] = useState(false);
   const [selectedPosts, setSelectedPosts] = useState([]);
   const [compareDialogOpen, setCompareDialogOpen] = useState(false);
-  const [bloodDonors, setBloodDonors] = useState([]);
+  // const [bloodDonors, setBloodDonors] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [isUserProfileOpen, setUserProfileOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(() => {
@@ -380,14 +386,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
       'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'HouseSaleLease', 'LandSaleLease', 'Other'
     ].includes(value);
-    const isNearbyUser = ['BloodDonars', 'StandwithWomen'].includes(value);
+    const isNearbyUser = ['BloodDonors', 'StandwithWomen'].includes(value);
 
     if (isNearbyUser) {
       setPostMarkers([]); // Clear post markers
-      setPosts([]);
+      // setPosts([]);
     } else {
-      setBloodDonarMarkers([]);
-      setBloodDonors([]); // Clear blood donors
+      setBloodDonorMarkers([]);
+      // setBloodDonors([]); // Clear blood donors
     }
 
     // Update filters
@@ -538,7 +544,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     });
   };
 
-  const postsMappingIcon = useCallback((title, color, darkMode) => {
+  const postsMappingIcon = useCallback((title, color, darkMode, type) => {
     const cacheKey = `${title}-${color}-${darkMode}`;
     
     if (!postIconCache[cacheKey]) {
@@ -565,7 +571,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         onmouseleave="this.style.transform='scale(1)'; this.style.zIndex='';"
         >
           <div style="color: white; font-weight: bold; font-size: 16px; user-select: none;">
-            ${title[0]?.toUpperCase() || 'A'}
+            ${type === 'bloodDonor' ? title : title[0]?.toUpperCase() || 'A'}
           </div>
         </div>
       `;
@@ -959,6 +965,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     const storedLocation = localStorage.getItem("userLocation");
     const savedDistance = localStorage.getItem('distanceRange');
     const savedAddress = localStorage.getItem('userAddress');
+    const authToken = localStorage.getItem('authToken');
+    setIsAuthenticated(!!authToken);
 
     if (storedLocation && savedAddress) {
       // Use the stored location
@@ -1129,7 +1137,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // Posts locations mapping code starts here
   const [postMarkers, setPostMarkers] = useState([]);
-  const [bloodDonarMarkers, setBloodDonarMarkers] = useState([]);
+  const [bloodDonorMarkers, setBloodDonorMarkers] = useState([]);
   const postIconCache = useRef({});
   // const [allPostLocations, setAllPostLocations] = useState([]);
   // const [selectedPost, setSelectedPost] = useState(null);
@@ -1270,7 +1278,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const fetchBloodDonorsData = async () => {
     if (!userLocation || !distanceRange) return;
   
-    setPosts([]);
+    // setPosts([]);
     setPostMarkers([]);
     const currentCacheKey = generateCacheKey('posts');
   
@@ -1287,7 +1295,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         JSON.stringify(globalCache.lastFilters) === JSON.stringify(filters)) {
         const { posts: cachedPosts, skip: cachedSkip, hasMore: cachedHasMore } = globalCache.data[currentCacheKey];
     
-        setBloodDonors(cachedPosts);
+        // setBloodDonors(cachedPosts);
+        setPosts(cachedPosts);
         setSkip(cachedSkip);
         setHasMore(cachedHasMore);
         setTotalPosts(globalCache.totalPostsCount);
@@ -1322,7 +1331,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         }
       });
   
-      setBloodDonors(donorsData);
+      // setBloodDonors(donorsData);
+      setPosts(donorsData);
       setTotalPosts(totalCount);
       setSkip(12); // Set skip to 24 after initial load
       // Check if there are more posts to load
@@ -1340,7 +1350,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   
   // Function to fetch blood donor locations for map - FIXED
   const fetchBloodDonorLocationsData = async () => {
-    if (!userLocation || !distanceRange || selectedCategory !== 'BloodDonars') return;
+    if (!userLocation || !distanceRange || selectedCategory !== 'BloodDonors') return;
 
     const currentLocationsCacheKey = generateCacheKey('locations');
     
@@ -1354,7 +1364,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       // setAllPostLocations(cachedLocations);
       globalCache.totalLocationsCount = cachedTotalCount;
       // createPostMarkers(cachedLocations);
-      setBloodDonarMarkers(cachedLocations);
+      setBloodDonorMarkers(cachedLocations);
       return;
     }
 
@@ -1397,11 +1407,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
       // Update blood donors state with locations data
       // setBloodDonors(locationsData);
-      setBloodDonarMarkers(locationsData);
+      setBloodDonorMarkers(locationsData);
       
       // Clear post markers when showing blood donors
       setPostMarkers([]);
-      console.log('blood donars locations', locationsData.length );
+      // console.log('blood donors locations', locationsData.length );
   
     } catch (error) {
       console.error("Error fetching blood donor locations:", error);
@@ -1415,11 +1425,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     try {
       setLoadingMore(true);
       const response = await fetchBloodDonors(skip, 12, userLocation, distanceRange, filters, searchQuery);
-      const newDonors = response.data.donors || [];
+      const newPosts = response.data.donors || [];
       
-      if (newDonors.length > 0) {
+      if (newPosts.length > 0) {
         // setBloodDonors(prev => [...prev, ...newDonors]);
-        const updatedPosts = [...bloodDonors, ...newDonors];
+        // const updatedPosts = [...bloodDonors, ...newDonors];
+        const updatedPosts = [...posts, ...newPosts];
         const currentCacheKey = generateCacheKey('posts');
           
           // Update global cache
@@ -1427,21 +1438,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             globalCache.data[currentCacheKey] = {
               ...globalCache.data[currentCacheKey],
               posts: updatedPosts,
-              skip: skip + newDonors.length,
+              skip: skip + newPosts.length,
               hasMore: updatedPosts.length < response.data.totalCount
             };
           }
-          // setPosts(updatedPosts);
+          setPosts(updatedPosts);
           // setBloodDonors(updatedPosts);
-          setBloodDonors(prev => [...prev, ...newDonors]);
-          setSkip(prevSkip => prevSkip + newDonors.length);
+          // setBloodDonors(prev => [...prev, ...newDonors]);
+          // setPosts(prev => [...prev, ...newPosts]);
+          setSkip(prevSkip => prevSkip + newPosts.length);
           // Update hasMore based on whether we've reached the total count
           setHasMore(updatedPosts.length < response.data.totalCount);
-          console.log(`Fetched ${newDonors.length} new posts with search "${searchQuery}"  (skip: ${skip}, total: ${response.data.totalCount})`);
+          console.log(`Fetched ${newPosts.length} new posts with search "${searchQuery}"  (skip: ${skip}, total: ${response.data.totalCount})`);
         } else {
           setHasMore(false);
         }
-      console.log('loading more', newDonors.length);
+      console.log('loading more', newPosts.length);
       
     } catch (error) {
       console.error("Error fetching more blood donors:", error);
@@ -1452,28 +1464,73 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   
   // Update useEffect to handle blood donors
   useEffect(() => {
-    if (selectedCategory === 'BloodDonars') {
+    if (selectedCategory === 'BloodDonors') {
       fetchBloodDonorLocationsData();
       fetchBloodDonorsData();
     } else {
       // Clear blood donors when not in BloodDonors mode
-      setBloodDonors([]);
-      setBloodDonarMarkers([]);
+      // setBloodDonors([]);
+      setBloodDonorMarkers([]);
     }
   }, [userLocation, distanceRange, searchQuery, filters, sortBy, generateCacheKey ]);
+
+  
+  const handleOpenUserProfileDialog = (id) => {
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    // Save map state to cache
+    if (mapRef.current) {
+      const center = mapRef.current.getCenter();
+      const zoom = mapRef.current.getZoom();
+      const bounds = mapRef.current.getBounds();
+      
+      globalCache.lastMapCenter = [center.lat, center.lng];
+      globalCache.lastMapZoom = zoom;
+      globalCache.lastMapBounds = bounds;
+      globalCache.lastClickedMarkerId = id;
+
+      // Also save view state (not just center/zoom)
+      globalCache.lastMapView = {
+        center: [center.lat, center.lng],
+        zoom: zoom,
+        bounds: bounds.toBBoxString(),
+        timestamp: Date.now()
+      };
+      
+      // Also save to localStorage as backup
+      localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
+      localStorage.setItem('lastMapZoom', zoom.toString());
+      localStorage.setItem('lastMapBounds', JSON.stringify(bounds.toBBoxString()));
+      localStorage.setItem('lastClickedMarkerId', id);
+      localStorage.setItem('lastMapViewTimestamp', Date.now().toString());
+    }
+    setSelectedUserId(id);
+    setUserProfileOpen(true);
+  };
+  
+  const handleCloseUserProfileDialog = () => {
+    setUserProfileOpen(false);
+    setSelectedUserId(null);
+  };
   
   // Function to handle blood donor click
-  const handleDonorClick = (donor) => {
-    // Navigate to donor profile or show donor details
-    console.log('Donor clicked:', donor);
-    // You can implement navigation to donor profile or show a dialog
-    // navigate(`/profile/${donor.userCode}`);
-  };
+  // const handleDonorClick = (donor) => {
+  //   // Navigate to donor profile or show donor details
+  //   console.log('Donor clicked:', donor);
+  //   // You can implement navigation to donor profile or show a dialog
+  //   // navigate(`/profile/${donor.userCode}`);
+  // };
 
   // to fetch all post locations with viewport-based loading
   useEffect(() => {
-    // Don't fetch post locations if BloodDonars is selected
-    if (selectedCategory === 'BloodDonars') {
+    // Don't fetch post locations if BloodDonors is selected
+    if (selectedCategory === 'BloodDonors') {
       setPostMarkers([]); // Clear post markers
       return;
     }
@@ -1750,9 +1807,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // Fetch posts data
   useEffect(() => {
-    if (!distanceRange || !userLocation || selectedCategory === 'BloodDonars') {
+    if (!distanceRange || !userLocation) { //  || selectedCategory === 'BloodDonors'
       setPosts([]);
       return;
+    }
+    if (selectedCategory === 'BloodDonors') {
+      return; // Skip fetching posts if BloodDonors is selected
     }
     const currentCacheKey = generateCacheKey('posts');
     const fetchData = async () => {
@@ -1837,7 +1897,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     
     try {
       setLoadingMore(true);
-      if (selectedCategory === 'BloodDonars') {
+      if (selectedCategory === 'BloodDonors') {
         console.log('loading more.. 1');
       // Load more blood donors
       await loadMoreBloodDonors();
@@ -2227,7 +2287,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             )}
             {/* // Update the MapContainer component to include MarkerClusterGroup
             // Replace the individual markers rendering with clustered markers */}
-            {selectedCategory !== 'BloodDonars' && postMarkers.length > 0 && (
+            {selectedCategory !== 'BloodDonors' && postMarkers.length > 0 && (
               <MarkerClusterGroup
                 chunkedLoading
                 chunkDelay={100}
@@ -2532,98 +2592,222 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </MarkerClusterGroup>
             )}
             {/* Blood Donor Markers - Only show when in BloodDonors mode */}
-{selectedCategory === 'BloodDonars' && bloodDonarMarkers.length > 0 && (
-  <MarkerClusterGroup
-    chunkedLoading
-    chunkDelay={100}
-    spiderfyOnMaxZoom={true}
-    showCoverageOnHover={true}
-    zoomToBoundsOnClick={true}
-    maxClusterRadius={60}
-    disableClusteringAtZoom={19}
-    spiderLegPolylineOptions={{
-      weight: 1.5,
-      color: '#dc3545',
-      opacity: 0.7
-    }}
-    iconCreateFunction={(cluster) => {
-      const count = cluster.getChildCount();
-      const size = count > 100 ? 60 : count > 50 ? 50 : count > 20 ? 40 : 30;
-      
-      return L.divIcon({
-        html: `<div style="
-          width: ${size}px;
-          height: ${size}px;
-          background: rgba(220, 53, 69, 0.9);
-          color: white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          font-size: ${size > 40 ? '14px' : '12px'};
-          border: 2px solid white;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-          cursor: pointer;
-        ">${count}</div>`,
-        iconSize: [size, size],
-        className: 'marker-cluster'
-      });
-    }}
-  >
-    {bloodDonarMarkers.map((donor, index) => {
-      if (donor.location && donor.location.latitude && donor.location.longitude) {
-        // Create custom icon for blood donors
-        const customIcon = new L.Icon({
-          iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-            <svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 3C15 10 22 12 22 20C22 28 15 37 15 37C15 37 8 28 8 20C8 12 15 10 15 3Z" 
-                    fill="#dc3545" stroke="#ffffff" stroke-width="2"/>
-              <text x="15" y="25" text-anchor="middle" fill="white" font-size="10" font-weight="bold">
-                ${donor.bloodDonar?.bloodGroup?.charAt(0) || 'B'}
-              </text>
-            </svg>
-          `),
-          iconSize: [30, 40],
-          iconAnchor: [15, 40],
-          popupAnchor: [0, -40]
-        });
+            {selectedCategory === 'BloodDonors' && bloodDonorMarkers.length > 0 && (
+              <MarkerClusterGroup
+                chunkedLoading
+                chunkDelay={100}
+                spiderfyOnMaxZoom={true}
+                showCoverageOnHover={true}
+                zoomToBoundsOnClick={true}
+                maxClusterRadius={60}
+                disableClusteringAtZoom={19} // Spider clustering at zoom 19 and above
+                spiderLegPolylineOptions={{
+                  weight: 1.5,
+                  // color: '#dc3545',
+                  color: darkMode ? '#3b82f6' : '#2563eb',
+                  opacity: 0.7
+                }}
+                iconCreateFunction={(cluster) => {
+                  const count = cluster.getChildCount();
+                  const size = count > 100 ? 60 : count > 50 ? 50 : count > 20 ? 40 : 30;
+                  
+                  return L.divIcon({
+                    html: `<div style="
+                      width: ${size}px;
+                      height: ${size}px;
+                      // background: rgba(220, 53, 69, 0.9);
+                      background: ${darkMode ? 'rgba(59, 130, 246, 0.9)' : 'rgba(37, 99, 235, 0.9)'};
+                      color: white;
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-weight: bold;
+                      font-size: ${size > 40 ? '14px' : '12px'};
+                      border: 2px solid white;
+                      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                      cursor: pointer;
+                    ">${count}</div>`,
+                    iconSize: [size, size],
+                    className: 'marker-cluster'
+                  });
+                }}
+              >
+                {bloodDonorMarkers.map((donor, index) => {
+                  if (donor.location && donor.location.latitude && donor.location.longitude) {
+                    // Create custom icon for blood donors
+                    const customIcon = new L.Icon({
+                      iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+                        <svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M15 3C15 10 22 12 22 20C22 28 15 37 15 37C15 37 8 28 8 20C8 12 15 10 15 3Z" 
+                                fill="#dc3545" stroke="#ffffff" stroke-width="2"/>
+                          <text x="15" y="25" text-anchor="middle" fill="white" font-size="10" font-weight="bold">
+                            ${donor.bloodDonor?.bloodGroup?.charAt(0) || 'B'}
+                          </text>
+                        </svg>
+                      `),
+                      iconSize: [30, 40],
+                      iconAnchor: [15, 40],
+                      popupAnchor: [0, -40]
+                    });
 
-        return (
-          <Marker
-            key={`${donor._id}-${index}`}
-            position={[donor.location.latitude, donor.location.longitude]}
-            icon={customIcon}
-            eventHandlers={{
-              click: (e) => {
-                e.originalEvent.stopPropagation();
-                e.target.openPopup();
-              }
-            }}
-          >
-            <Popup>
-              <div style={{ minWidth: '200px' }}>
-                <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{donor.username}</h4>
-                <p style={{ margin: '4px 0', color: '#666' }}>
-                  <strong>Blood Group:</strong> {donor.bloodDonar?.bloodGroup || 'Unknown'}
-                </p>
-                <p style={{ margin: '4px 0', color: '#666' }}>
-                  <strong>Distance:</strong> {donor.distance?.toFixed(1)} km
-                </p>
-                {donor.trustLevel && (
-                  <p style={{ margin: '4px 0', color: '#666' }}>
-                    <strong>Trust Level:</strong> {donor.trustLevel}/5
-                  </p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        );
-      }
-      return null;
-    })}
-  </MarkerClusterGroup>
-)}
+                    return (
+                      <Marker
+                        key={`${donor._id}-${index}`}
+                        position={[donor.location.latitude, donor.location.longitude]}
+                        // icon={customIcon}
+                        icon={postsMappingIcon(donor.bloodDonor?.bloodGroup, '#dc3545', darkMode, 'bloodDonor')}
+                        eventHandlers={{
+                          click: (e) => {
+                            e.originalEvent.stopPropagation();
+                            e.target.openPopup();
+                          }
+                        }}
+                      >
+                        <Popup
+                          className="custom-popup"
+                          closeButton={true}
+                          autoClose={false}
+                          closeOnClick={false}
+                          onOpen={() => {
+                            // Save marker state when popup opens
+                            if (mapRef.current) {
+                              const center = mapRef.current.getCenter();
+                              const zoom = mapRef.current.getZoom();
+                              const bounds = mapRef.current.getBounds();
+                              
+                              // Save comprehensive map state
+                              globalCache.lastMapView = {
+                                center: [center.lat, center.lng],
+                                zoom: zoom,
+                                bounds: bounds.toBBoxString(),
+                                timestamp: Date.now()
+                              };
+                              
+                              globalCache.lastMapCenter = [center.lat, center.lng];
+                              globalCache.lastMapZoom = zoom;
+                              globalCache.lastClickedMarkerId = donor._id;
+                              
+                              // Save to localStorage
+                              localStorage.setItem('lastMapCenter', JSON.stringify([center.lat, center.lng]));
+                              localStorage.setItem('lastMapZoom', zoom.toString());
+                              localStorage.setItem('lastMapBounds', JSON.stringify(bounds.toBBoxString()));
+                              localStorage.setItem('lastClickedMarkerId', donor._id);
+                              localStorage.setItem('lastMapViewTimestamp', Date.now().toString());
+                            }
+                          }}
+                        >
+                          <Box sx={{ 
+                            minWidth: '180px', 
+                            maxWidth: isMobile ? '250px' : '300px',
+                            p: 1.5,
+                          }}>
+                            <Box gap={1} sx={{ display: 'flex', alignItems: 'center', mb: 1 }} >
+                              <Typography variant="subtitle1" sx={{ 
+                                fontWeight: 'bold',
+                                color: darkMode ? 'white' : 'text.primary'
+                              }}>
+                                {donor.username}
+                              </Typography>
+                              {donor.idVerification?.status === 'approved' && (
+                                <VerifiedRounded color="success" fontSize="small" />
+                              )}
+                            </Box>
+                            {/* <h4 style={{ margin: '0 0 8px 0', color: '#333' }}>{donor.username}</h4> */}
+                            {/* <p style={{ margin: '4px 0', color: '#666' }}>
+                              <strong>Blood Group:</strong> {donor.bloodDonor?.bloodGroup || 'Unknown'}
+                            </p> */}
+                            {/* <p style={{ margin: '4px 0', color: '#666' }}>
+                              <strong>Distance:</strong> {donor.distance?.toFixed(1)} km
+                            </p> */}
+                            {/* {donor.trustLevel && (
+                              <p style={{ margin: '4px 0', color: '#666' }}>
+                                <strong>Trust Level:</strong> {donor.trustLevel}/5
+                              </p>
+                            )} */}
+                            <Box sx={{ 
+                              mb: 1, 
+                              display: 'flex', 
+                              flexDirection: 'row', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center' 
+                            }}>
+                              <Box >
+                                <Chip 
+                                  label={donor.bloodDonor?.bloodGroup || 'Unknown'}
+                                  size="small" 
+                                  color={'#dc3545'}
+                                  sx={{ fontSize: '0.7rem', height: '20px', mr: 0.8,
+                                    // fontWeight: '600',
+                                    backgroundColor: '#dc3545',
+                                    color: 'white',
+                                    '& .MuiChip-label': {
+                                      px: 1
+                                    }
+                                  }}
+                                />
+                              </Box>
+                            </Box>
+                            <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
+                              <strong>Trust Level:</strong> {donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'}
+                            </Typography>
+                            {donor.distance !== null && (
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <LocationOnIcon sx={{ 
+                                  fontSize: 16, mr: 0.5,
+                                  color: darkMode ? '#60a5fa' : '#3b82f6',
+                                }} />
+                                <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
+                                  {donor.distance < 1 
+                                    ? `${Math.round(donor.distance * 1000)}m away` 
+                                    : `${donor.distance.toFixed(1)}km away`
+                                  }
+                                </Typography>
+                              </Box>
+                            )}
+                            <Button 
+                              variant="outlined" 
+                              size="small" 
+                              fullWidth 
+                              sx={{ 
+                                mt: 1, 
+                                fontSize: '0.75rem', 
+                                borderRadius: '8px', 
+                                textTransform: 'none',
+                                fontWeight: '600',
+                                color: darkMode 
+                                  ? 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' 
+                                  : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                                // boxShadow: darkMode 
+                                //   ? '0 4px 14px rgba(59, 130, 246, 0.4)'
+                                //   : '0 4px 14px rgba(37, 99, 235, 0.3)',
+                                '&:hover': {
+                                  color: darkMode 
+                                    ? 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)' 
+                                    : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                                  boxShadow: darkMode 
+                                    ? '0 6px 20px rgba(59, 130, 246, 0.6)'
+                                    : '0 6px 20px rgba(37, 99, 235, 0.4)',
+                                  transform: 'translateY(-1px)'
+                                },
+                                transition: 'all 0.2s ease'
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenUserProfileDialog(donor._id);
+                              }}
+                            >
+                              View Details
+                            </Button>
+                          </Box>
+                        </Popup>
+                      </Marker>
+                    );
+                  }
+                  return null;
+                })}
+              </MarkerClusterGroup>
+            )}
             {/* Wave Animation Circles */}
             <WaveAnimationCircles 
               center={userLocation ? [userLocation.latitude, userLocation.longitude] : null}
@@ -3541,7 +3725,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               >
                 <CardContent>
                   <Typography variant="h6" gutterBottom >
-                    { selectedCategory === 'BloodDonars' ? 'Blood Donar filters' : 'Filters'}
+                    { selectedCategory === 'BloodDonors' ? 'Blood Donor filters' : 'Filters'}
                   </Typography>
                   <IconButton
                     onClick={() => setIsExtraFiltersOpen(false)}
@@ -3556,7 +3740,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   
                   <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
 
-                    {selectedCategory === 'BloodDonars' ? 
+                    {selectedCategory === 'BloodDonors' ? 
                     <>
                     {/* Blood Group Filter */}
                     <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',}, minWidth: '240px' }}>
@@ -4221,15 +4405,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           >
           {loadingLocation || loading ? (
               <SkeletonCards/>
-            ) : selectedCategory === 'BloodDonars' ? ( // Check if showing blood donors
+            ) : selectedCategory === 'BloodDonors' ? ( // Check if showing blood donors
                   /* BLOOD DONORS DISPLAY */
-                  bloodDonors.length > 0 ? (
+                  posts.length > 0 ? (
                     <Grid container spacing={isMobile ? 1.5 : 1.5}>
-                      {bloodDonors.map((donor, index) => (
-                        <Grid item xs={12} sm={6} md={4} key={`${donor._id}-${index}`} ref={index === bloodDonors.length - 3 ? lastPostRef : null} id={`post-${donor._id}`}>
+                      {posts.map((donor, index) => (
+                        <Grid item xs={12} sm={6} md={4} key={`${donor._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${donor._id}`}>
                           <BloodDonorCard
                             donor={donor} 
-                            onClick={() => handleDonorClick(donor)} // You'll need to implement this function
+                            // onClick={() => handleDonorClick(donor._id)} // You'll need to implement this function
+                            onClick={() => handleOpenUserProfileDialog(donor._id)}
                             darkMode={darkMode}
                           />
                         </Grid>
@@ -4515,7 +4700,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem',}}>
                           {/* <Tooltip title={post.title} placement="top" arrow> */}
                             <Typography variant="h6" component="div" style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'white', textTransform: 'capitalize' }}>
-                              {post.title.split(" ").length > 5 ? `${post.title.split(" ").slice(0, 5).join(" ")}...` : post.title}
+                              {post?.title?.split(" ").length > 5 ? `${post?.title?.split(" ").slice(0, 5).join(" ")}...` : post?.title}
                             </Typography>
                           {/* </Tooltip> */}
                           {post.postType === 'HelpRequest' && post.categories !== 'UnPaid' && (
@@ -5073,7 +5258,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {/* <br /> */}🧑‍💼 <b>Help Requests</b> – Paid, Unpaid & Emergency
-                <br />🧑‍🔧 <b>Service Offerings</b> – Blood donars, Maintenance, Rentals, Cleaning, Tutoring & more
+                <br />🧑‍🔧 <b>Service Offerings</b> – Blood donors, Maintenance, Rentals, Cleaning, Tutoring & more
                 <br />🚨 <b>Emergency Alerts</b> – Shown with higher priority
               </Typography>
 
@@ -5116,6 +5301,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       {/* Compare Dialog */}
       <ComparePostsDialog isMobile={isMobile} darkMode={darkMode} formatPrice={formatPrice} openPostDetail={openPostDetail} compareDialogOpen={compareDialogOpen} setCompareDialogOpen={setCompareDialogOpen} selectedPosts={selectedPosts} setSelectedPosts={setSelectedPosts} />
 
+      {/* Rating Dialog */}
+      <UserProfileDetails
+        userId={selectedUserId}
+        open={isUserProfileOpen}
+        onClose={handleCloseUserProfileDialog}
+        // post={post}
+        isMobile={isMobile}
+        isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
+      />
+
       {/* Location Permission Dialog - Shows FIRST */}
       <LocationPermissionDialog
         open={showLocationDialog}
@@ -5142,6 +5337,64 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       >
         <Alert onClose={handleCloseSnackbar} action={snackbar.action} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
           {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={loginMessage.open}
+        autoHideDuration={9000}
+        onClose={() => setLoginMessage({ ...loginMessage, open: false })}
+        message={
+          <span>
+            Please log in first.{" "}
+            <Link
+              to="/login"
+              style={{ color: "yellow", textDecoration: "underline", cursor: "pointer" }}
+            >
+              Click here to login
+            </Link>
+          </span>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert
+          severity="warning"
+          variant="filled"
+          sx={{
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "5px",
+                // padding: "3px 8px",
+                marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          }
+        >
+          Please log in first.
         </Alert>
       </Snackbar>
     

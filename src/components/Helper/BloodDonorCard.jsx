@@ -8,10 +8,14 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
     <Card 
       sx={{ 
         cursor: 'pointer', 
-        mb: 2,
+        // mb: 2,
         borderRadius: 3,
         backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
         transition: 'all 0.3s ease',
+        WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+        WebkitTouchCallout: 'none', // Disable iOS callout
+        WebkitUserSelect: 'none', // Disable text selection
+        userSelect: 'none', // Disable text selection
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: darkMode 
@@ -22,14 +26,14 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
       onClick={onClick}
     >
       <CardContent sx={{ p: 2 }}>
-        <Box display="flex" alignItems="flex-start" gap={2}>
+        <Box display="flex" alignItems="flex-start" gap={2} mb={1}>
           {/* Profile Picture */}
           <Avatar 
             src={donor.profilePic ? `data:image/jpeg;base64,${donor.profilePic}` : null}
             sx={{ 
               width: 60, 
               height: 60,
-              border: `2px solid ${donor.bloodDonar?.bloodGroup === 'O+' ? '#dc3545' : '#1976d2'}`
+              // border: `2px solid ${donor.bloodDonor?.bloodGroup === 'O+' ? '#dc3545' : '#1976d2'}`
             }}
           >
             {!donor.profilePic && donor.username?.charAt(0).toUpperCase()}
@@ -49,7 +53,7 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
             {/* Blood Group and Distance */}
             <Box display="flex" gap={1} alignItems="center" mb={1}>
               <Chip 
-                label={`Blood Group: ${donor.bloodDonar?.bloodGroup || 'Unknown'}`}
+                label={`Blood Group: ${donor.bloodDonor?.bloodGroup || 'Unknown'}`}
                 color="error"
                 size="small"
                 sx={{ fontWeight: 'bold' }}
@@ -62,50 +66,55 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
               </Box>
             </Box>
             
-            {/* Profile Description */}
-            {donor.profileDescription && (
-              <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 1 }}>
-                {donor.profileDescription.length > 100 
-                  ? `${donor.profileDescription.substring(0, 100)}...`
-                  : donor.profileDescription
-                }
-              </Typography>
-            )}
             
-            {/* Additional Info */}
-            <Box display="flex" gap={1} flexWrap="wrap">
-              {/* Trust Level */}
-              <Chip 
-                label={
-                  <Box display="flex" alignItems="center">
-                    <Rating value={donor.trustLevel || 0} size="small" readOnly />
-                    <Typography variant="caption" sx={{ ml: 0.5 }}>
-                      ({donor.trustLevel || 0}/5)
-                    </Typography>
-                  </Box>
-                }
-                variant="outlined"
-                size="small"
-              />
-              
-              {/* Last Donated */}
-              {donor.bloodDonar?.lastDonated?.[0] && (
-                <Chip 
-                  label={`Last donated: ${new Date(donor.bloodDonar.lastDonated[0]).toLocaleDateString()}`}
-                  variant="outlined"
-                  size="small"
-                  color="info"
-                />
-              )}
-              
-              {/* Follower Count */}
-              <Chip 
-                label={`${donor.followerCount || 0} followers`}
-                variant="outlined"
-                size="small"
-              />
-            </Box>
           </Box>
+        </Box>
+        {/* Profile Description */}
+        {donor.profileDescription ? (
+          <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 1 }}>
+            {donor.profileDescription.length > 100 
+              ? `${donor.profileDescription.substring(0, 100)}...`
+              : donor.profileDescription
+            }
+          </Typography>
+        ) : (
+          <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 1, fontStyle: 'italic' }}>
+            No profile description provided.
+          </Typography>
+        )}
+        
+        {/* Additional Info */}
+        <Box display="flex" gap={1} flexWrap="wrap">
+          {/* Trust Level */}
+          <Chip 
+            label={
+              <Box display="flex" alignItems="center">
+                <Rating value={donor.trustLevel || 0} size="small" readOnly />
+                <Typography variant="caption" sx={{ ml: 0.5 }}>
+                  ({donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'})
+                </Typography>
+              </Box>
+            }
+            variant="outlined"
+            size="small"
+          />
+          
+          {/* Last Donated */}
+          {donor.bloodDonor?.lastDonated?.[0] && (
+            <Chip 
+              label={`Last donated: ${new Date(donor.bloodDonor.lastDonated[0]).toLocaleDateString()}`}
+              variant="outlined"
+              size="small"
+              color="info"
+            />
+          )}
+          
+          {/* Follower Count */}
+          <Chip 
+            label={`${donor.followerCount || 0} followers`}
+            variant="outlined"
+            size="small"
+          />
         </Box>
       </CardContent>
     </Card>

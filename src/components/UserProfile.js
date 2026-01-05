@@ -334,8 +334,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       email: userData.email,
       phone: userData.phone || '',
       withYou: userData.withYou || false,
-      donate: userData.bloodDonar?.donate || false,
-      bloodGroup: userData.bloodDonar?.bloodGroup || '',
+      donate: userData.bloodDonor?.donate || false,
+      bloodGroup: userData.bloodDonor?.bloodGroup || '',
       profileDescription: userData.profileDescription || '',
       interests: userData.interests || []
     });
@@ -399,9 +399,9 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         email: updated.email,
         phone: phoneNumber,
         withYou: updated.withYou,
-        bloodDonar: {
-          donate: updated.bloodDonar?.donate ?? false,
-          bloodGroup: updated.bloodDonar?.bloodGroup ?? ''
+        bloodDonor: {
+          donate: updated.bloodDonor?.donate ?? false,
+          bloodGroup: updated.bloodDonor?.bloodGroup ?? ''
         },
         profileDescription: updated.profileDescription,
         interests: updated.interests
@@ -845,11 +845,11 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       </Typography>
                     </Box>
                     <Typography variant="body2" color="textSecondary">
-                      {userData?.bloodDonar?.donate === true
-                        ? userData?.bloodDonar?.bloodGroup === "Unknown"
+                      {userData?.bloodDonor?.donate === true
+                        ? userData?.bloodDonor?.bloodGroup === "Unknown"
                           ? "You’re a blood donor — thank you! (Blood group not specified)"
-                          : `You’re a blood donor — thank you! (${userData?.bloodDonar?.bloodGroup})`
-                        : userData?.bloodDonar?.donate === false
+                          : `You’re a blood donor — thank you! (${userData?.bloodDonor?.bloodGroup})`
+                        : userData?.bloodDonor?.donate === false
                         ? "You haven’t enabled blood donation."
                         : "You haven’t set this preference yet."}
                     </Typography>
