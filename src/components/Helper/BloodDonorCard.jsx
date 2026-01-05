@@ -4,6 +4,17 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import VerifiedIcon from '@mui/icons-material/Verified';
 
 const BloodDonorCard = ({ donor, onClick, darkMode }) => {
+
+  const formatDistance = (distance) => {
+    if (distance === null || distance === undefined) return null;
+
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)} m away`;
+    }
+
+    return `${distance.toFixed(1)} km away`;
+  };
+
   return (
     <Card 
       sx={{ 
@@ -61,7 +72,8 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
               <Box display="flex" alignItems="center">
                 <LocationOnIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
                 <Typography variant="body2" color="text.secondary">
-                  {donor.distance?.toFixed(1)} km away
+                  {/* {donor.distance?.toFixed(1)} km away */}
+                  {formatDistance(donor.distance) ? `${formatDistance(donor.distance)}` : ''}
                 </Typography>
               </Box>
             </Box>
