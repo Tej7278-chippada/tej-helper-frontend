@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider, Grid } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider, Grid, Tab, Tabs } from '@mui/material';
 import { fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
 // import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
@@ -11,6 +11,7 @@ import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import FollowDialog from './FollowDialog';
+import UserProfileDetailsSkeleton from '../Skeletons/UserProfileDetailsSkeleton';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -19,11 +20,13 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
   backdropFilter: 'blur(20px)',
   border: darkMode 
     ? '1px solid rgba(255, 255, 255, 0.1)' 
-    : '1px solid rgba(255, 255, 255, 0.2)',
-  boxShadow: darkMode 
-    ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
-    : '0 8px 32px rgba(0, 0, 0, 0.1)',
+    : '1px solid rgba(133, 131, 131, 0.2)',
+  // boxShadow: darkMode 
+  //   ? '0 8px 32px rgba(0, 0, 0, 0.3)' 
+  //   : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
+
+const gradientHover = 'linear-gradient(135deg, #3a56d4 0%, #2d0a8c 50%, #5c0b9b 100%)';
 
 const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, setLoginMessage, setSnackbar, darkMode }) => {
   const navigate = useNavigate();
@@ -256,50 +259,67 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   // tab navigation component
   const renderTabNavigation = () => (
     <Box sx={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      mb: 2,
-      borderBottom: 1,
-      borderColor: 'divider'
-    }}>
-      {/* <Button
-        onClick={() => setActiveTab('reviews')} size="small"
-        sx={{
-          fontWeight: activeTab === 'reviews' ? 'bold' : 'normal',
-          color: activeTab === 'reviews' ? 'primary.main' : 'text.secondary',
-          borderBottom: activeTab === 'reviews' ? '2px solid' : 'none',
-          borderColor: 'primary.main',
-          borderRadius: 0
-        }}
+      // position: 'sticky', top: 56, zIndex: 10, 
+      mb: 1,
+      // borderBottom: 1,
+      // borderColor: 'divider'
+     }}>
+      <Tabs
+        value={activeTab}
+        onChange={(_, v) => setActiveTab(v)}
+        variant="fullWidth"
       >
-        Reviews ({totalReviews})
-      </Button> */}
-      <Button
-        onClick={() => setActiveTab('services')} size="small"
-        sx={{
-          fontWeight: activeTab === 'services' ? 'bold' : 'normal',
-          color: activeTab === 'services' ? 'primary.main' : 'text.secondary',
-          borderBottom: activeTab === 'services' ? '2px solid' : 'none',
-          borderColor: 'primary.main',
-          borderRadius: 0
-        }}
-      >
-        Service History ({serviceHistory.length})
-      </Button>
-      <Button
-        onClick={() => setActiveTab('posts')} size="small"
-        sx={{
-          fontWeight: activeTab === 'posts' ? 'bold' : 'normal',
-          color: activeTab === 'posts' ? 'primary.main' : 'text.secondary',
-          borderBottom: activeTab === 'posts' ? '2px solid' : 'none',
-          borderColor: 'primary.main',
-          borderRadius: 0
-        }}
-      >
-        Posts ({posts.length})
-      </Button>
+        <Tab value="services" label={`Services (${serviceHistory.length})`} />
+        <Tab value="posts" label={`Posts (${posts.length})`} />
+      </Tabs>
     </Box>
   );
+  // const renderTabNavigation = () => (
+  //   <Box sx={{ 
+  //     display: 'flex', 
+  //     justifyContent: 'center', 
+  //     mb: 2,
+  //     borderBottom: 1,
+  //     borderColor: 'divider'
+  //   }}>
+  //     <Button
+  //       onClick={() => setActiveTab('reviews')} size="small"
+  //       sx={{
+  //         fontWeight: activeTab === 'reviews' ? 'bold' : 'normal',
+  //         color: activeTab === 'reviews' ? 'primary.main' : 'text.secondary',
+  //         borderBottom: activeTab === 'reviews' ? '2px solid' : 'none',
+  //         borderColor: 'primary.main',
+  //         borderRadius: 0
+  //       }}
+  //     >
+  //       Reviews ({totalReviews})
+  //     </Button>
+  //     <Button
+  //       onClick={() => setActiveTab('services')} size="small"
+  //       sx={{
+  //         fontWeight: activeTab === 'services' ? 'bold' : 'normal',
+  //         color: activeTab === 'services' ? 'primary.main' : 'text.secondary',
+  //         borderBottom: activeTab === 'services' ? '2px solid' : 'none',
+  //         borderColor: 'primary.main',
+  //         borderRadius: 0
+  //       }}
+  //     >
+  //       Service History ({serviceHistory.length})
+  //     </Button>
+  //     <Button
+  //       onClick={() => setActiveTab('posts')} size="small"
+  //       sx={{
+  //         fontWeight: activeTab === 'posts' ? 'bold' : 'normal',
+  //         color: activeTab === 'posts' ? 'primary.main' : 'text.secondary',
+  //         borderBottom: activeTab === 'posts' ? '2px solid' : 'none',
+  //         borderColor: 'primary.main',
+  //         borderRadius: 0
+  //       }}
+  //     >
+  //       Posts ({posts.length})
+  //     </Button>
+  //   </Box>
+  // );
 
   // service history item component
   const renderServiceItem = (service) => (
@@ -324,8 +344,17 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
           style={{ width: 32, height: 32, borderRadius: '50%' }}
         />
         <Box sx={{width: '100%'}}>
-          <Box sx={{display: 'flex', justifyContent: 'space-between'}}>
-            <Typography fontWeight="bold">
+          <Box sx={{display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap:1}}> {/* wrap for small screens */}
+            <Typography fontWeight="bold" 
+              sx={{
+                flex: 1,
+                minWidth: 0, //critical for ellipsis
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }} 
+              // title={service.ownerId?.username} // tooltip on hover
+            >
               {service.ownerId?.username || "Anonymous"}
             </Typography>
             {service.rating ? <Rating value={service.rating || 0} precision={0.5} readOnly /> :
@@ -506,14 +535,16 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
         </Box>
         
       </DialogTitle>
-      
+      {isFetching ? (
+        <UserProfileDetailsSkeleton open={open} onClose={onClose} isMobile={isMobile} />
+      ) : (
       <DialogContent
        sx={{scrollbarWidth:'none', scrollbarColor: '#aaa transparent', 
         // ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px'
       }}
        > {/*  backgroundColor: "#f5f5f5", */}
-        <Box sx={{ p: 1}}>
-          <Box sx={{ my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+        <Box sx={{ p: 0}}>
+          <Box sx={{ my: 0, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
             <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start', flex: 1, mb: 2 }}>
               {profile?.profilePic ?
                <Avatar
@@ -556,11 +587,11 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 {profile?.idVerificationStatus === 'approved' && (
                   <Typography variant="body2" color="success.main" sx={{ display: 'flex', alignItems: 'center' }}>
                     {/* <VerifiedUserRoundedIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> */}
-                    User verified with government ID of {getDocType(profile?.verifiedDoc)}
+                    User verified with govt ID of {getDocType(profile?.verifiedDoc)}
                   </Typography>
                 )}
-                <Typography variant="body2">
-                  Bio: {profile?.description}
+                <Typography variant="body2" color="textSecondary">
+                  Bio: {profile?.description || 'No bio provided'}
                 </Typography>
                 
 
@@ -574,7 +605,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     <InterestsRoundedIcon fontSize="small" color="primary" />
                     <Typography variant="body1" >Interests:</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 4 }}>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 0 }}>
                     {profile?.interests.map((interest, index) => (
                       <Chip
                         key={index}
@@ -593,7 +624,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 {/* )} */}
               </Grid>
               <Grid item xs={12} sm={12} md={6} >
-                <Box sx={{ my: 1 }}>
+                <Box sx={{ my: 0 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Diversity2RoundedIcon fontSize="small" color="warning" />
@@ -601,16 +632,34 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     </Box>
                     {userId !== localStorage.getItem('userId') && (
                       <Button
-                        variant={isFollowing ? "outlined" : "contained"} size="small"
+                        variant="text" size="small"
                         onClick={isFollowing ? handleUnfollow : handleFollow}
-                        sx={{ borderRadius: '12px', textTransform: 'none' }}
+                        sx={{ borderRadius: 99, textTransform: 'none', px: 1.5,
+                          color: isFollowing ? '#4361ee' : 'white',
+                          background: isFollowing ? 'none' : 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                          border: isFollowing ? '1px solid #4361ee' : 'none',
+                          transition: 'all 0.3s ease',
+                          // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                          '&:hover': {
+                            background: isFollowing ? 'none' : gradientHover,
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                          },
+                          '&:active': {
+                            transform: 'translateY(0)',
+                          },
+                          '&.Mui-disabled': {
+                            background: 'rgba(0, 0, 0, 0.12)',
+                            color: 'rgba(0, 0, 0, 0.26)',
+                          },
+                         }}
                         disabled={!isAuthenticated || isFetching || loadingFollow} // Disable if not logged in
                       >
-                        { loadingFollow ? <CircularProgress size={20} /> : isFollowing ? 'Unfollow' : 'Follow'}
+                        { loadingFollow ? <CircularProgress size={18} sx={{ m: '2px', color: '#3a56d4' }} /> : isFollowing ? 'Following' : 'Follow'}
                       </Button>
                     )}
                   </Box>
-                  <Box sx={{ display: 'flex', gap: 3, ml: 4 }}>
+                  <Box sx={{ display: 'flex', gap: 3, ml: 2 }}>
                     <Typography 
                       variant="body2" 
                       color="text.secondary"
@@ -797,20 +846,21 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
             serviceHistory.length ? (
               serviceHistory.map(renderServiceItem)
             ) : (
-              <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
+              <Typography color="grey" textAlign="center" sx={{ mx: 2, my: 4 }}>
                 No Service History available.
               </Typography>
             )) : activeTab === 'posts' ? (
             posts.length ? (
               posts.map(renderPostItem)
             ) : (
-              <Typography color="grey" textAlign="center" sx={{ m: 2 }}>
+              <Typography color="grey" textAlign="center" sx={{ mx: 2, my: 4 }}>
                 No Posts available.
               </Typography>
             )
           ) : null}
         </Box>
       </DialogContent>
+      )}
       {/* { isRateUserOpen && (
       <DialogActions sx={{gap: 1, m:'10px', display: 'flow', ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
         <Box width="100%">
