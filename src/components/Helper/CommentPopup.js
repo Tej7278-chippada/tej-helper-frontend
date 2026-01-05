@@ -144,9 +144,24 @@ function CommentPopup({ open, onClose, post, onCommentAdded, setLoginMessage, da
           <Button
             onClick={handleAddComment}
             variant="contained"
-            color="primary" 
+            // color="primary" 
             // style={{ width: '150px' }}
-            sx={{borderRadius:2, background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',}}
+            sx={{borderRadius:2, 
+              color: '#fff',
+              background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+              '&:hover': {
+                // background: isFollowing ? 'none' : gradientHover,
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+              },
+              '&:active': {
+                transform: 'translateY(0)',
+              },
+              '&.Mui-disabled': {
+                background: darkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
+                color: darkMode ? 'rgba(255, 255, 255, 0.26)' : 'rgba(0, 0, 0, 0.26)',
+              },
+            }}
             disabled={loading || newComment.trim() === ''}
           >
             {loading ? <CircularProgress size={24} /> : 'Submit'}

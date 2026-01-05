@@ -839,13 +839,39 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
           // border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
         }}>
           {/* <Typography variant="h6" sx={{ mb: 1 }}>Availability</Typography> */}
-          <Box display="flex" alignItems="center" mb={2}>
+          <Box alignItems="center" mb={2} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Avatar sx={{ bgcolor: 'warning.main', mr: 1, height: '32px', width: '32px' }}>
               <Schedule fontSize="small" />
             </Avatar>
             <Typography variant="h6" >
               Availability
             </Typography>
+            </Box>
+            <Button variant="outlined" size="small" 
+              sx={{ borderRadius:'12px', px: 1.5, py: 0.5, textTransform: 'none',
+                color: '#F57C00',
+                border: '1.5px solid #F57C00',
+                transition: 'all 0.3s ease',
+                fontWeight: 600,
+                '&:hover': {
+                  backgroundColor: 'rgba(245, 124, 0, 0.08)',
+                  borderColor: '#EF6C00',
+                  color: '#EF6C00',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(245, 124, 0, 0.35)',
+                },
+                '&:active': {
+                  transform: 'translateY(0)',
+                  boxShadow: '0 3px 10px rgba(245, 124, 0, 0.25)',
+                },
+              }}
+              onClick={() => {
+                setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });
+              }}
+            >
+              Book Slot
+            </Button>
           </Box>
           {post.availability.isAlwaysAvailable ? (
             <Chip label="Always Available 24/7" color="success" variant="outlined" />
@@ -1517,7 +1543,21 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   </Grid>
                   {/* Rate User Button */}
                   <Grid item justifyContent="flex-end" mt={1}>
-                    <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none'}} onClick={handleOpenRateDialog}>
+                    <Button variant="outlined" size="small" sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none',
+                      color: '#4361ee', border: '1px solid #4361ee',
+                      transition: 'all 0.3s ease',
+                      fontWeight: 600,
+                      '&:hover': {
+                        // background: isFollowing ? 'none' : gradientHover,
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                      },
+                      '&:active': {
+                        transform: 'translateY(0)',
+                      },
+                      }}
+                      onClick={handleOpenRateDialog}
+                    >
                       View Profile
                     </Button>
                   </Grid>
