@@ -32,7 +32,9 @@ import {
   FormControlLabel,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Slider,
+  Alert
 } from '@mui/material';
 import {
   Refresh as RefreshIcon,
@@ -52,7 +54,12 @@ import {
   Speed as SpeedIcon,
   DataUsage as DataUsageIcon,
   ClearAll as ClearAllIcon,
-  Search as SearchIcon
+  Search as SearchIcon,
+  Settings as SettingsIcon,
+  ToggleOn as ToggleOnIcon,
+  ToggleOff as ToggleOffIcon,
+  Schedule as ScheduleIcon,
+  Timer as TimerIcon
 } from '@mui/icons-material';
 import Layout from '../Layout';
 import { 
@@ -63,7 +70,8 @@ import {
   flushUserCache,
   flushPostCache,
   clearCacheByPattern,
-  getCacheHealth
+  getCacheHealth,
+  getCacheSettings, updateCacheSettings, toggleCache
 } from '../api/cacheApi';
 import { useSnackbar } from 'notistack';
 
@@ -80,6 +88,89 @@ const CacheManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate,
   const [confirmDialog, setConfirmDialog] = useState({ open: false, action: '', data: null });
   const [autoRefresh, setAutoRefresh] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+  const [cacheSettings, setCacheSettings] = useState({
+    cacheEnabled: true,
+    cacheTTL: 3600,
+    userCacheTTL: 3600,
+    postCacheTTL: 1800,
+    autoWarmUp: false,
+    warmUpSchedule: '03:00'
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+
+  // Add this effect to load cache settings
+  useEffect(() => {
+    const loadCacheSettings = async () => {
+      try {
+        setSettingsLoading(true);
+        const response = await getCacheSettings();
+        if (response.data?.success) {
+          setCacheSettings(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error loading cache settings:', error);
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+    
+    loadCacheSettings();
+  }, []);
+
+  // Add these functions for handling cache settings
+  const handleCacheToggle = async () => {
+    try {
+      setSettingsLoading(true);
+      const enabled = !cacheSettings.cacheEnabled;
+      const response = await toggleCache(enabled);
+      
+      if (response.data?.success) {
+        setCacheSettings(prev => ({ ...prev, cacheEnabled: enabled }));
+        enqueueSnackbar(`Cache ${enabled ? 'enabled' : 'disabled'} successfully`, { 
+          variant: enabled ? 'success' : 'warning' 
+        });
+        // Refresh cache stats
+        fetchData();
+      }
+    } catch (error) {
+      enqueueSnackbar('Failed to toggle cache', { variant: 'error' });
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      setSettingsLoading(true);
+      const response = await updateCacheSettings(cacheSettings);
+      
+      if (response.data?.success) {
+        enqueueSnackbar('Cache settings saved successfully', { variant: 'success' });
+        setEditMode(false);
+        // Refresh cache stats
+        fetchData();
+      }
+    } catch (error) {
+      enqueueSnackbar('Failed to save cache settings', { variant: 'error' });
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
+  const handleTTLChange = (field, value) => {
+    setCacheSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const formatTTL = (seconds) => {
+    if (seconds < 60) return `${seconds} seconds`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours`;
+    return `${Math.floor(seconds / 86400)} days`;
+  };
 
   const fetchData = async () => {
     try {
@@ -345,6 +436,239 @@ const CacheManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate,
     </Card>
   );
 
+  // card component to render cache settings
+  const renderCacheSettingsCard = () => (
+    <Card sx={{ borderRadius: 2, mb: 3 }}>
+      <CardContent>
+        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SettingsIcon /> Cache Settings
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            {editMode ? (
+              <>
+                <Button size="small" onClick={() => setEditMode(false)} disabled={settingsLoading}>
+                  Cancel
+                </Button>
+                <Button 
+                  size="small" 
+                  variant="contained" 
+                  onClick={handleSaveSettings}
+                  disabled={settingsLoading}
+                >
+                  {settingsLoading ? <CircularProgress size={20} /> : 'Save'}
+                </Button>
+              </>
+            ) : (
+              <Button 
+                size="small" 
+                variant="outlined" 
+                onClick={() => setEditMode(true)}
+              >
+                Edit Settings
+              </Button>
+            )}
+          </Stack>
+        </Stack>
+        
+        <Divider sx={{ mb: 3 }} />
+        
+        {/* Cache Toggle */}
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box>
+              <Typography variant="subtitle2">
+                Cache System
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {cacheSettings.cacheEnabled 
+                  ? 'Cache is currently enabled and active' 
+                  : 'Cache is currently disabled'}
+              </Typography>
+            </Box>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={cacheSettings.cacheEnabled}
+                  onChange={handleCacheToggle}
+                  disabled={settingsLoading || editMode}
+                  color="primary"
+                />
+              }
+              label={
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  {cacheSettings.cacheEnabled ? <ToggleOnIcon color="success" /> : <ToggleOffIcon color="disabled" />}
+                  <Typography>
+                    {cacheSettings.cacheEnabled ? 'Enabled' : 'Disabled'}
+                  </Typography>
+                </Stack>
+              }
+            />
+          </Stack>
+        </Paper>
+        
+        {/* TTL Settings */}
+        {editMode && (
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <TimerIcon /> Cache Time-to-Live (TTL) Settings
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={4}>
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    General Cache TTL
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Default cache expiration time
+                  </Typography>
+                  <Box sx={{ px: 2 }}>
+                    <Slider
+                      value={cacheSettings.cacheTTL}
+                      onChange={(e, value) => handleTTLChange('cacheTTL', value)}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => formatTTL(value)}
+                      min={300}
+                      max={86400}
+                      step={300}
+                      marks={[
+                        { value: 300, label: '5m' },
+                        { value: 1800, label: '30m' },
+                        { value: 3600, label: '1h' },
+                        { value: 86400, label: '24h' }
+                      ]}
+                    />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Current: {formatTTL(cacheSettings.cacheTTL)}
+                  </Typography>
+                </Paper>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    User Cache TTL
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    User profile cache expiration
+                  </Typography>
+                  <Box sx={{ px: 2 }}>
+                    <Slider
+                      value={cacheSettings.userCacheTTL}
+                      onChange={(e, value) => handleTTLChange('userCacheTTL', value)}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => formatTTL(value)}
+                      min={300}
+                      max={86400}
+                      step={300}
+                    />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Current: {formatTTL(cacheSettings.userCacheTTL)}
+                  </Typography>
+                </Paper>
+              </Grid>
+              
+              <Grid item xs={12} md={4}>
+                <Paper variant="outlined" sx={{ p: 2 }}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Post Cache TTL
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" paragraph>
+                    Post data cache expiration
+                  </Typography>
+                  <Box sx={{ px: 2 }}>
+                    <Slider
+                      value={cacheSettings.postCacheTTL}
+                      onChange={(e, value) => handleTTLChange('postCacheTTL', value)}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => formatTTL(value)}
+                      min={300}
+                      max={86400}
+                      step={300}
+                    />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Current: {formatTTL(cacheSettings.postCacheTTL)}
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+          </Box>
+        )}
+        
+        {/* Auto Warm Up Settings */}
+        <Paper variant="outlined" sx={{ p: 2 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Box>
+              <Typography variant="subtitle2">
+                Automatic Cache Warm-up
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Pre-load cache during off-peak hours
+              </Typography>
+            </Box>
+            {editMode ? (
+              <Switch
+                checked={cacheSettings.autoWarmUp}
+                onChange={(e) => setCacheSettings(prev => ({
+                  ...prev,
+                  autoWarmUp: e.target.checked
+                }))}
+                color="primary"
+              />
+            ) : (
+              <Chip 
+                label={cacheSettings.autoWarmUp ? 'Enabled' : 'Disabled'} 
+                color={cacheSettings.autoWarmUp ? 'success' : 'default'}
+                size="small"
+              />
+            )}
+          </Stack>
+          
+          {cacheSettings.autoWarmUp && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Warm-up Schedule
+              </Typography>
+              {editMode ? (
+                <TextField
+                  size="small"
+                  value={cacheSettings.warmUpSchedule}
+                  onChange={(e) => setCacheSettings(prev => ({
+                    ...prev,
+                    warmUpSchedule: e.target.value
+                  }))}
+                  placeholder="HH:MM (24-hour format)"
+                  fullWidth
+                  inputProps={{
+                    pattern: '([0-1]?[0-9]|2[0-3]):[0-5][0-9]'
+                  }}
+                  helperText="Time in 24-hour format (e.g., 03:00 for 3 AM)"
+                />
+              ) : (
+                <Typography variant="body1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <ScheduleIcon fontSize="small" />
+                  Daily at {cacheSettings.warmUpSchedule}
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Paper>
+        
+        {!cacheSettings.cacheEnabled && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <Typography variant="body2">
+              Cache is currently disabled. All cache operations will be bypassed and data will be fetched directly from the database.
+            </Typography>
+          </Alert>
+        )}
+      </CardContent>
+    </Card>
+  );
+
   return (
     <Layout 
       darkMode={darkMode} 
@@ -396,6 +720,9 @@ const CacheManagement = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate,
             )}
           </Stack>
         </Box>
+
+        {/* Add Cache Settings Card after the header */}
+        {renderCacheSettingsCard()}
 
         {/* Stats Grid */}
         <Grid container spacing={3} sx={{ mb: 4 }}>

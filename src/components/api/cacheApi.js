@@ -1,6 +1,21 @@
 // src/api/cacheApi.js
 import API from './adminApi';
 
+// Get cache settings
+export const getCacheSettings = () => {
+  return API.get('/api/cache/cache-settings');
+};
+
+// Update cache settings
+export const updateCacheSettings = (settings) => {
+  return API.put('/api/cache/cache-settings', settings);
+};
+
+// Toggle cache on/off
+export const toggleCache = (enabled) => {
+  return API.post('/api/cache/cache-settings/toggle', { enabled });
+};
+
 // Get cache statistics
 export const getCacheStats = () => {
   return API.get('/api/cache/stats');
