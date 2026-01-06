@@ -15,6 +15,50 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
     return `${distance.toFixed(1)} km away`;
   };
 
+  const donationCount = Array.isArray(donor?.bloodDonor?.lastDonated)
+    ? donor.bloodDonor.lastDonated.length
+    : 0;
+
+  const formatDonateDate = (date) =>
+    date ? new Date(date).toLocaleDateString('en-IN', {
+      dateStyle: 'medium',
+      // timeStyle: 'short',
+    }) : '—';
+
+  // const formatDate = (date) =>
+  //   date ? new Date(date).toLocaleString('en-IN', {
+  //     dateStyle: 'medium',
+  //     timeStyle: 'short',
+  //   }) : '—';
+
+  const LAST_DONATION_GAP_DAYS = 56; // 8 weeks
+
+  const lastDonationDate =
+    donationCount > 0
+      ? donor.bloodDonor.lastDonated[donationCount - 1] // latest donation
+      : null;
+
+  const getEligibilityInfo = () => {
+    if (!lastDonationDate) {
+      return { eligible: true, daysLeft: 0 };
+    }
+
+    const lastDate = new Date(lastDonationDate);
+    const today = new Date();
+
+    const diffTime = today.getTime() - lastDate.getTime();
+    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    const daysLeft = LAST_DONATION_GAP_DAYS - daysPassed;
+
+    return {
+      eligible: daysLeft <= 0,
+      daysLeft: daysLeft > 0 ? daysLeft : 0
+    };
+  };
+
+  const eligibility = getEligibilityInfo();
+
   return (
     <Card 
       sx={{ 
@@ -52,12 +96,30 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
           
           <Box flex={1}>
             {/* Username and Verification */}
-            <Box display="flex" alignItems="center" gap={1} mb={1}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                {donor.username}
-              </Typography>
-              {donor.idVerification?.status === 'approved' && (
-                <VerifiedIcon color="success" fontSize="small" />
+            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap', gap:1, mb: 1 }} >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}>
+                <Typography variant="h6"
+                sx={{ fontWeight: 'bold',
+                  // flex: 1,
+                  // minWidth: 0, //critical for ellipsis
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {donor.username}
+                </Typography>
+                {donor.idVerification?.status === 'approved' && (
+                  <VerifiedIcon color="success" fontSize="small" />
+                )}
+              </Box>
+              {donationCount > 0 && (
+                <Chip
+                  label={`Donated ${donationCount} time${donationCount > 1 ? 's' : ''}`}
+                  variant="outlined"
+                  size="small"
+                  // color="success" 
+                  sx={{ ml: 'auto', color: '#F57C00', borderColor: '#F57C00' }}
+                />
               )}
             </Box>
             
@@ -112,14 +174,14 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
           />
           
           {/* Last Donated */}
-          {donor.bloodDonor?.lastDonated?.[0] && (
+          {/* {donor.bloodDonor?.lastDonated?.[0] && (
             <Chip 
               label={`Last donated: ${new Date(donor.bloodDonor.lastDonated[0]).toLocaleDateString()}`}
               variant="outlined"
               size="small"
               color="info"
             />
-          )}
+          )} */}
           
           {/* Follower Count */}
           <Chip 
@@ -128,6 +190,27 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
             size="small"
           />
         </Box>
+        <Typography variant="body2" sx={{ mt: 1, color: 'inherit'  }}>
+          Last donated: {donor.bloodDonor?.lastDonated?.[0] ? formatDonateDate(lastDonationDate) : 'No donation history yet'} {' '}
+          {lastDonationDate && (`(${eligibility.eligible
+            ? 'Eligible to donate now'
+            : `Eligible in ${eligibility.daysLeft} day${eligibility.daysLeft > 1 ? 's' : ''}`})`)}
+        </Typography>
+        {/* {lastDonationDate && (
+          <Chip
+            label={
+              eligibility.eligible
+                ? 'Eligible to donate now'
+                : `Eligible in ${eligibility.daysLeft} day${eligibility.daysLeft > 1 ? 's' : ''}`
+            }
+            color={eligibility.eligible ? 'success' : 'warning'}
+            variant="outlined"
+            size="small"
+          />
+        )} */}
+        {/* <Typography variant="body2" sx={{ mt: 1, color: 'inherit'  }}>
+          Last seen : {formatDate(donor?.lastLoginAt) || 'Not found'}
+        </Typography> */}
       </CardContent>
     </Card>
   );

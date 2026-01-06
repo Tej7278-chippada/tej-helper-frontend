@@ -118,12 +118,12 @@ export const fetchUserPosts = (skip = 0, limit = 12, filters = {} ) => {
 };
 
 // Fetch blood donors
-export const fetchBloodDonors = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '') => {
+export const fetchBloodDonors = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '', sortBy = 'nearest') => {
   const params = { 
     skip, 
     limit,
     bloodGroup: filters.bloodGroup || 'All',
-    sortBy: 'nearest'
+    sortBy
   };
 
   // Add search query parameter

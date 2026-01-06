@@ -364,6 +364,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       globalCache.lastCacheKey = null;
     }
     setShowDistanceRanges(false);
+    setIsExtraFiltersOpen(false);
   };
 
   const [selectedCategory, setSelectedCategory] = useState(() => {
@@ -1309,7 +1310,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         return;
       }
   
-      const response = await fetchBloodDonors(0, 12, userLocation, distanceRange, filters, searchQuery);
+      const response = await fetchBloodDonors(0, 12, userLocation, distanceRange, filters, searchQuery, sortBy);
       const donorsData = response.data.donors || [];
       const totalCount = response.data.totalCount || 0;
 
@@ -1424,7 +1425,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     
     try {
       setLoadingMore(true);
-      const response = await fetchBloodDonors(skip, 12, userLocation, distanceRange, filters, searchQuery);
+      const response = await fetchBloodDonors(skip, 12, userLocation, distanceRange, filters, searchQuery, sortBy);
       const newPosts = response.data.donors || [];
       
       if (newPosts.length > 0) {
@@ -1472,7 +1473,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       // setBloodDonors([]);
       setBloodDonorMarkers([]);
     }
-  }, [userLocation, distanceRange, searchQuery, filters, sortBy, generateCacheKey ]);
+  }, [userLocation, distanceRange, searchQuery, filters, generateCacheKey]);
 
   
   const handleOpenUserProfileDialog = (id) => {
@@ -3715,7 +3716,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   // width: '90%',
                   // maxWidth: '400px',
                   minWidth: isMobile ? '100%' : 'auto',
-                  maxWidth: isMobile ? '100%' : 'auto',
+                  maxWidth: isMobile ? '300px' : '400px',
                   zIndex: 1001,
                   borderRadius: '12px',
                   backdropFilter: 'blur(10px)',
@@ -3841,6 +3842,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             )}
 
           {/* Compare Icon Button */}
+          {selectedCategory !== 'BloodDonors' &&
           <Tooltip title="Compare Posts" arrow>
             <IconButton 
               onClick={() => setCompareMode(!compareMode)}
@@ -3854,7 +3856,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             >
               <CompareRoundedIcon />
             </IconButton>
-          </Tooltip>
+          </Tooltip>}
           {/* Button to Open Distance Menu */}
           {/* Distance Button */}
           {/* <Button
@@ -5221,10 +5223,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 // mx: isMobile ? 1 : 2,
                 mt: 3,
                 mb: 3,
-                background: darkMode
-                  ? 'rgba(255, 255, 255, 0.03)'
-                  : 'rgba(255, 255, 255, 0.7)',
-                backdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                // background: darkMode
+                //   ? 'rgba(255, 255, 255, 0.03)'
+                //   : 'rgba(255, 255, 255, 0.7)',
+                // backdropFilter: 'blur(10px)',
                 borderRadius: 2,
                 border: darkMode
                   ? '1px solid rgba(255, 255, 255, 0.1)'

@@ -1438,10 +1438,11 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             mx: isMobile ? 1 : 2,
             mt: 3,
             mb: 3,
-            background: darkMode
-              ? 'rgba(255, 255, 255, 0.03)'
-              : 'rgba(255, 255, 255, 0.7)',
-            backdropFilter: 'blur(10px)',
+            // background: darkMode
+            //   ? 'rgba(255, 255, 255, 0.03)'
+            //   : 'rgba(255, 255, 255, 0.7)',
+            // backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(25, 118, 210, 0.05)',
             borderRadius: 2,
             border: darkMode
               ? '1px solid rgba(255, 255, 255, 0.1)'
