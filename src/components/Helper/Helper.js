@@ -2652,6 +2652,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       popupAnchor: [0, -40]
                     });
 
+                    const donationCount = Array.isArray(donor?.bloodDonor?.lastDonated)
+                      ? donor.bloodDonor.lastDonated.length
+                      : 0;
+
                     return (
                       <Marker
                         key={`${donor._id}-${index}`}
@@ -2747,11 +2751,29 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                     }
                                   }}
                                 />
+                                {donationCount > 0 && (
+                                  <Chip
+                                    label={`Donated ${donationCount} time${donationCount > 1 ? 's' : ''}`}
+                                    variant="outlined"
+                                    size="small"
+                                    // color="success" 
+                                    sx={{ fontSize: '0.7rem', height: '20px', mr: 0.8, color: '#F57C00', borderColor: '#F57C00',
+                                      '& .MuiChip-label': {
+                                        px: 1
+                                      } 
+                                    }}
+                                  />
+                                )}
                               </Box>
                             </Box>
-                            <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
-                              <strong>Trust Level:</strong> {donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'}
-                            </Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                              <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
+                                <strong>Last donated on:</strong> {donor.bloodDonor?.lastDonated?.[0] ? formatDate(donor.bloodDonor?.lastDonated?.[0]) : 'N/A'}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
+                                <strong>Trust Level:</strong> {donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'}
+                              </Typography>
+                            </Box>
                             {donor.distance !== null && (
                               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                 <LocationOnIcon sx={{ 
@@ -3513,7 +3535,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             <Box>
             <SearchTextField
               variant="outlined"
-              placeholder={expanded ? "Search posts..." : ""}
+              placeholder={expanded ? selectedCategory === 'BloodDonors' ? "Search donors..." : "Search posts..." : ""}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setExpanded(true)}
