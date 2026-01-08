@@ -1570,7 +1570,9 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                     sx={{ width: 40, height: 40, borderRadius: '50%', marginRight: 1 }}
                   />
                 {/* )} */}
-                <Typography variant="body1" style={{ fontWeight: 500 }}>
+                <Typography variant="body1" sx={{ fontWeight: 500, overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap', }}>
                   {post.user?.username}
                 </Typography>
               

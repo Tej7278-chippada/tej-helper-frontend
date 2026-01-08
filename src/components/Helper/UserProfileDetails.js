@@ -179,6 +179,12 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
 //     }
 //   };
 
+  const formatDonateDate = (date) =>
+    date ? new Date(date).toLocaleDateString('en-IN', {
+      dateStyle: 'medium',
+      // timeStyle: 'short',
+    }) : '—';
+
   // Add follow/unfollow functions
   const handleFollow = async () => {
     if (!isAuthenticated) { // Prevent unauthenticated actions
@@ -692,8 +698,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 </Box>
               </Grid>
               {/* Blood Donation */}
-              <Grid item xs={12} sm={12} md={6} >
-                <Box sx={{ mb: 2 }}>
+              {/* <Grid item xs={12} sm={12} md={6} >
+                <Box sx={{ mb: 0 }}>
                   <Box display="flex" alignItems="center" gap={1}>
                     <BloodtypeIcon color="error" fontSize="small" />
                     <Typography variant="body1" fontWeight={500}>
@@ -710,8 +716,18 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       ? "Blood donation is not enabled."
                       : "This preference hasn’t been set yet."}
                   </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Last donated: {profile?.bloodDonor?.lastDonated 
+                      ? formatDonateDate(profile.bloodDonor.lastDonated) 
+                      : 'No donation history yet'}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Next eligibility date: {profile?.bloodDonor?.eligibilityDate 
+                      ? formatDonateDate(profile.bloodDonor.eligibilityDate) 
+                      : 'No donation history yet'}
+                  </Typography>
                 </Box>
-              </Grid>
+              </Grid> */}
               {/* Women Safety */}
               <Grid item xs={12} sm={12} md={6} >
                 <Box>
@@ -732,6 +748,72 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 </Box>
               </Grid>
             </Grid>
+          </Box>
+          <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
+            ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <BloodtypeIcon color="error" fontSize="small" />
+              <Typography variant="body1" fontWeight={500}>
+                Blood Donation
+              </Typography>
+            </Box>
+            <Typography variant="body2" color="textSecondary" >
+              {profile?.bloodDonor?.donate === true
+                ? profile?.bloodDonor?.bloodGroup === "Unknown"
+                  ? "This user donates blood! (Blood group not specified)"
+                  : `This user donates blood! (${profile?.bloodDonor?.bloodGroup})`
+                : profile?.bloodDonor?.donate === false
+                ? "Blood donation is not enabled."
+                : "This preference hasn’t been set yet."}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Last donated: {profile?.bloodDonor?.lastDonated 
+                ? formatDonateDate(profile.bloodDonor.lastDonated) 
+                : 'No donation history yet'}
+                {profile?.bloodDonor?.donationCount > 0 && (
+                  <> (Total Donated: {profile.bloodDonor.donationCount})</>
+                )}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Next eligibility date: {profile?.bloodDonor?.eligibilityDate 
+                ? formatDonateDate(profile.bloodDonor.eligibilityDate) 
+                : 'No donation history yet'}
+            </Typography>
+            <Typography variant="body1" color="textSecondary" style={{ fontWeight: 500 }}>
+              Contact Medium:
+            </Typography>
+            {(profile?.bloodDonor?.contactWay?.phone || profile.bloodDonor.contactWay.email) && (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                {profile.bloodDonor.contactWay.phone && (
+                  <Chip
+                    key="phone"
+                    label={`📱 ${profile.bloodDonor.contactWay.phone}`}
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
+                {profile.bloodDonor.contactWay.email && (
+                  <Chip
+                    key="email"
+                    label={`✉️ ${profile.bloodDonor.contactWay.email}`}
+                    variant="outlined"
+                    size="small"
+                  />
+                )}
+              </Box>
+            )}
+            {profile?.bloodDonor?.contactWay?.socialMedia && profile.bloodDonor.contactWay.socialMedia.length > 0 && (
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+                {profile.bloodDonor.contactWay.socialMedia.map((link, index) => (
+                  <Chip
+                    key={index}
+                    label={link.platform}
+                    variant="outlined"
+                    size="small"
+                  />
+                ))}
+              </Box>
+            )}
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>

@@ -28,7 +28,7 @@ import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
 import RequestCoupon from './Banners/RequestCoupon';
-import { AddRounded, EditNoteRounded, PlaylistAddRounded } from '@mui/icons-material';
+import { AddRounded, CollectionsBookmarkRounded, EditNoteRounded, PlaylistAddRounded } from '@mui/icons-material';
 import AddBloodDonationDataDialog from './BloodDonor/AddBloodDonationDataDialog';
 
 // Set default icon manually
@@ -89,6 +89,8 @@ const getButtonStyle = (darkMode, button) => ({
     transform: 'translateY(-1px)',
   }
 });
+
+const gradientHover = 'linear-gradient(135deg, #3a56d4 0%, #2d0a8c 50%, #5c0b9b 100%)';
 
 // Social media platform options with icons and domain patterns
 const SOCIAL_MEDIA_OPTIONS = [
@@ -973,33 +975,63 @@ const handleDonationAdded = (updatedUser, donationData) => {
             }}>
               <Box
                 flex={isMobile ? "1" : "0 0 30%"}
-                style={{
-                  paddingRight: isMobile ? "0" : "0rem",
-                  display: isMobile ? "flex" : "block",
-                  justifyContent: isMobile ? "center" : "flex-start",
-                  alignItems: isMobile ? "center" : "flex-start",
+                sx={{
+                  display: 'flex',
+                  justifyContent: isMobile ? 'center' : 'flex-start',
+                  alignItems: 'flex-start',
                 }}
               >
-                <Box sx={{ position: 'relative', display: 'inline-block', width: isMobile ? '160px' : '100%', objectFit: 'contain',  }}>
-                  <Avatar
-                    alt={userData.username}
-                    src={
-                      userData.profilePic
-                        ? `data:image/jpeg;base64,${userData.profilePic}`
-                        : 'https://placehold.co/200x200?text=No+Image'
-                    }
-                    sx={{ width: isMobile ? '160px' : '100%', height: isMobile ? '160px' : '100%', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer',
-                      WebkitTapHighlightColor: 'transparent', // Remove tap highlight
-                      WebkitTouchCallout: 'none', // Disable iOS callout
-                      WebkitUserSelect: 'none', // Disable text selection
-                      userSelect: 'none',
-                      '&:active': {
-                        transform: 'scale(0.98)', // Add press feedback instead
-                        transition: 'transform 0.1s ease',
-                      },
-                     }} // fit-content
-                    onClick={() => setProfilePicDialog(true)}
-                  />
+                <Box sx={{ position: 'relative', display: 'inline-block', width: isMobile ? '160px' : '100%', objectFit: 'contain',
+                  aspectRatio: '1 / 1', // makes height = width
+                  }}>
+                  {userData?.profilePic ? 
+                    <Avatar
+                      alt={userData.username}
+                      src={
+                        // userData.profilePic
+                        //   ? 
+                          `data:image/jpeg;base64,${userData.profilePic}`
+                          // : 'https://placehold.co/200x200?text=No+Image'
+                      }
+                      sx={{ width: isMobile ? '160px' : '100%', height: isMobile ? '160px' : '100%', borderRadius: isMobile ? '50%' : '50%', cursor: 'pointer',
+                        WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                        WebkitTouchCallout: 'none', // Disable iOS callout
+                        WebkitUserSelect: 'none', // Disable text selection
+                        userSelect: 'none',
+                        '&:active': {
+                          transform: 'scale(0.98)', // Add press feedback instead
+                          transition: 'transform 0.1s ease',
+                        },
+                      }} // fit-content
+                      onClick={() => setProfilePicDialog(true)}
+                    />
+                    : 
+                    <Box
+                      sx={{
+                        width: isMobile ? '160px' : '100%', 
+                        height: isMobile ? '160px' : '100%',
+                        borderRadius: '50%', cursor: 'pointer',
+                        backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0, mr: 0,
+                        '&:active': {
+                          transform: 'scale(0.98)', // Add press feedback instead
+                          transition: 'transform 0.1s ease',
+                        },
+                      }}
+                      onClick={() => setProfilePicDialog(true)}
+                    >
+                      <Typography 
+                        variant="h6" 
+                        color="textSecondary"
+                        sx={{ textAlign: 'center', px: 2 }}
+                      >
+                        No Image
+                      </Typography>
+                    </Box>
+                  }
                   <IconButton
                     sx={{
                       position: 'absolute',
@@ -1081,7 +1113,7 @@ const handleDonationAdded = (updatedUser, donationData) => {
                       User Phone:
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {userData?.phone}
+                      {userData?.phone || 'Not provided'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={12}>
@@ -1090,7 +1122,7 @@ const handleDonationAdded = (updatedUser, donationData) => {
                       <Chip
                         label={userData?.emailVerified === true ? 'Verified' : 'Not Verified'} 
                         color={userData?.emailVerified === true ? 'success' : 'warning' }
-                        sx={{ height: '24px', ml: 1 }} variant="outlined" size="small"
+                        sx={{ height: '18px', ml: 1, fontSize: '0.7rem', }} variant="outlined" size="small"
                       />
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
@@ -1271,7 +1303,32 @@ const handleDonationAdded = (updatedUser, donationData) => {
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: '8px' }}>
-                <Tooltip title="Edit Blood Donation" arrow>
+                <Button variant="outlined" 
+                  sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none', 
+                    color: '#4361ee',
+                    background: 'none',
+                    border: '1px solid #4361ee',
+                    transition: 'all 0.3s ease',
+                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                    '&:hover': {
+                      background: 'none',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    },
+                    '&.Mui-disabled': {
+                      background: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)',
+                    },
+                  }} 
+                  onClick={handleEditBloodData}
+                  startIcon={<EditNoteRounded />}
+                >
+                  Edit
+                </Button>
+                {/* <Tooltip title="Edit Blood Donation" arrow>
                   <IconButton 
                     onClick={handleEditBloodData}
                     sx={{
@@ -1283,8 +1340,8 @@ const handleDonationAdded = (updatedUser, donationData) => {
                   >
                     <EditNoteRounded />
                   </IconButton>
-                </Tooltip>
-                <Tooltip 
+                </Tooltip> */}
+                {/* <Tooltip 
                   title={
                     !userData?.bloodDonor?.donate 
                       ? "Enable blood donation first" 
@@ -1308,7 +1365,7 @@ const handleDonationAdded = (updatedUser, donationData) => {
                       <PlaylistAddRounded />
                     </IconButton>
                   </span>
-                </Tooltip>
+                </Tooltip> */}
               </Box>
             </Box>
             <Box sx={{display: 'flex', gap:'8px', flexDirection: 'column', borderRadius: '12px'}}>
@@ -1354,36 +1411,96 @@ const handleDonationAdded = (updatedUser, donationData) => {
                   ? formatDonateDate(userData.bloodDonor.lastDonated) 
                   : 'No donation history yet'}
               </Typography>
-              {userData?.bloodDonor?.contactWay && (
-                <Typography variant="body2" color="textSecondary">
-                  Contact: {userData.bloodDonor.contactWay.phone 
-                    ? `📱 ${userData.bloodDonor.contactWay.phone}` 
-                    : ''}
-                  {userData.bloodDonor.contactWay.email 
-                    ? `${userData.bloodDonor.contactWay.phone ? ', ' : ''}✉️ ${userData.bloodDonor.contactWay.email}` 
-                    : ''}
-                </Typography>
-              )}
-              <Typography variant="body2" color="textSecondary" >
-                Contact ways: {userData?.bloodDonor?.contactWay?.phone ? `Phone: ${userData.bloodDonor.contactWay.phone}` : 'Phone: Not provided'} , {' '}
-                {userData?.bloodDonor?.contactWay?.email ? `Email: ${userData.bloodDonor.contactWay.email}` : 'Email: Not provided'}, {' ' }
-                {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0
-                  ? `Social Media: ${userData.bloodDonor.contactWay.socialMedia.map(link => link.platform).join(', ')}`
-                  : 'Social Media: Not provided'}
-                {/* {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    {userData.bloodDonor.contactWay.socialMedia.map((link, index) => (
-                      <Chip
-                        key={index}
-                        label={link.platform}
-                        variant="outlined"
-                        size="small"
-                      />
-                    ))}
-                  </Box>
-                )} */}
+              <Typography variant="body1" color="textSecondary" style={{ fontWeight: 500 }}>
+                Contact Medium:
               </Typography>
-              <Typography variant="caption" color="text.secondary" marginTop={4}>
+              {(userData?.bloodDonor?.contactWay?.phone || userData.bloodDonor.contactWay.email) && (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {userData.bloodDonor.contactWay.phone && (
+                    <Chip
+                      key="phone"
+                      label={`📱 ${userData.bloodDonor.contactWay.phone}`}
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                  {userData.bloodDonor.contactWay.email && (
+                    <Chip
+                      key="email"
+                      label={`✉️ ${userData.bloodDonor.contactWay.email}`}
+                      variant="outlined"
+                      size="small"
+                    />
+                  )}
+                </Box>
+              )}
+              {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                  {userData.bloodDonor.contactWay.socialMedia.map((link, index) => (
+                    <Chip
+                      key={index}
+                      label={link.platform}
+                      variant="outlined"
+                      size="small"
+                    />
+                  ))}
+                </Box>
+              )}
+              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Button
+                  variant="outlined" fullWidth={isMobile}
+                  onClick={handleOpenAddDonationDialog}
+                  // disabled={!eligibilityInfo.eligible || !userData?.bloodDonor?.donate}
+                  startIcon={<PlaylistAddRounded />}
+                  sx={{ borderRadius: '12px', textTransform: 'none',
+                    color: '#4361ee',
+                    background: 'none',
+                    border: '1px solid #4361ee',
+                    transition: 'all 0.3s ease',
+                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                    '&:hover': {
+                      background: 'none',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    },
+                    '&.Mui-disabled': {
+                      background: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)',
+                    },
+                   }}
+                >
+                  Add Donation Memory
+                </Button>
+                <Button
+                  variant="outlined" fullWidth={isMobile}
+                  startIcon={<CollectionsBookmarkRounded />}
+                  sx={{ borderRadius: '12px', textTransform: 'none',
+                    color: '#4361ee',
+                    background: 'none',
+                    border: '1px solid #4361ee',
+                    transition: 'all 0.3s ease',
+                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                    '&:hover': {
+                      background: 'none',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    },
+                    '&.Mui-disabled': {
+                      background: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)',
+                    },
+                   }}
+                >
+                  View Donation Memories
+                </Button>
+              </Box>
+              <Typography variant="caption" color="text.secondary" marginTop={2}>
                 *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
               </Typography>
             </Box>
