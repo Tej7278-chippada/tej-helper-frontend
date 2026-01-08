@@ -2652,8 +2652,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       popupAnchor: [0, -40]
                     });
 
-                    const donationCount = Array.isArray(donor?.bloodDonor?.lastDonated)
-                      ? donor.bloodDonor.lastDonated.length
+                    const donationCount = (donor?.bloodDonor?.donationCount)
+                      ? donor.bloodDonor.donationCount
                       : 0;
 
                     return (
@@ -2768,7 +2768,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             </Box>
                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                               <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
-                                <strong>Last donated on:</strong> {donor.bloodDonor?.lastDonated?.[0] ? formatDate(donor.bloodDonor?.lastDonated?.[0]) : 'N/A'}
+                                <strong>Last donated on:</strong> {donor.bloodDonor?.lastDonated ? formatDate(donor.bloodDonor?.lastDonated) : 'N/A'}
                               </Typography>
                               <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
                                 <strong>Trust Level:</strong> {donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'}

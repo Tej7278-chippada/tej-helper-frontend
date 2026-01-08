@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link} from 'react-router-dom';
 import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem, Switch, FormControl, InputLabel, Select } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, submitIdVerification, updateProfilePicture, updateUserProfile } from './api/api';
+import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, submitIdVerification, updateProfilePicture, updateUserBloodData, updateUserProfile } from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 import EditIcon from '@mui/icons-material/Edit';
@@ -28,6 +28,8 @@ import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
 import RequestCoupon from './Banners/RequestCoupon';
+import { AddRounded, EditNoteRounded, PlaylistAddRounded } from '@mui/icons-material';
+import AddBloodDonationDataDialog from './BloodDonor/AddBloodDonationDataDialog';
 
 // Set default icon manually
 // const customIcon = new L.Icon({
@@ -70,6 +72,38 @@ const getGlassmorphismStyle = (theme, darkMode) => ({
     : '0 8px 32px rgba(0, 0, 0, 0.1)',
 });
 
+const getButtonStyle = (darkMode, button) => ({
+  background: button 
+    ?  (darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)') 
+    : 'transparent',
+  backdropFilter: button ? 'blur(10px)' : 'none',
+  border: button ? (darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)') : 'transparent',
+  color: darkMode ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)',
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    border: button ? (darkMode 
+    ? '1px solid rgba(255, 255, 255, 0.1)' 
+    : '1px solid rgba(255, 255, 255, 0.2)') : 'transparent',
+    transform: 'translateY(-1px)',
+  }
+});
+
+// Social media platform options with icons and domain patterns
+const SOCIAL_MEDIA_OPTIONS = [
+  { id: 'whatsapp', label: 'WhatsApp', domain: 'wa.me/', placeholder: 'wa.me/yournumber' },
+  { id: 'telegram', label: 'Telegram', domain: 't.me/', placeholder: 't.me/username' },
+  { id: 'instagram', label: 'Instagram', domain: 'instagram.com/', placeholder: 'instagram.com/username' },
+  { id: 'facebook', label: 'Facebook', domain: 'facebook.com/', placeholder: 'facebook.com/profile' },
+  { id: 'twitter', label: 'Twitter', domain: 'twitter.com/', placeholder: 'twitter.com/username' },
+  { id: 'linkedin', label: 'LinkedIn', domain: 'linkedin.com/in/', placeholder: 'linkedin.com/in/username' },
+  { id: 'youtube', label: 'YouTube', domain: 'youtube.com/', placeholder: 'youtube.com/c/username' },
+  { id: 'discord', label: 'Discord', domain: 'discord.gg/', placeholder: 'discord.gg/invite-code' },
+  { id: 'snapchat', label: 'Snapchat', domain: 'snapchat.com/add/', placeholder: 'snapchat.com/add/username' },
+  { id: 'other', label: 'Other', domain: '', placeholder: 'Enter full URL' }
+];
+
 
 const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => {
   const { id } = useParams(); // Extract sellerId from URL
@@ -90,8 +124,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     phone: '',
     profileDescription: '',
     withYou: false,
-    donate: false,
-    bloodGroup: '',
+    // donate: false,
+    // bloodGroup: '',
   });
   const [profilePicDialog, setProfilePicDialog] = useState(false);
   const [profilePic, setProfilePic] = useState(null);
@@ -113,6 +147,20 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [userProfileDetailsOpen, setUserProfileDetailsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [showAddDonationDialog, setShowAddDonationDialog] = useState(false);
+  const [eligibilityInfo, setEligibilityInfo] = useState({ eligible: true, daysLeft: 0 });
+  const [showEditDonorDialog, setShowEditDonorDialog] = useState(false);
+  const [bloodData, setBloodData] = useState({
+    donate: false,
+    bloodGroup: '',
+    phone: '',
+    email: '',
+    socialMedia: []
+  });
+  const [newSocialLink, setNewSocialLink] = useState({
+    platform: '',
+    url: ''
+  });
 
   // to handle verification submission
   const handleSubmitVerification = async (formData) => {
@@ -399,10 +447,10 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         email: updated.email,
         phone: phoneNumber,
         withYou: updated.withYou,
-        bloodDonor: {
-          donate: updated.bloodDonor?.donate ?? false,
-          bloodGroup: updated.bloodDonor?.bloodGroup ?? ''
-        },
+        // bloodDonor: {
+        //   donate: updated.bloodDonor?.donate ?? false,
+        //   bloodGroup: updated.bloodDonor?.bloodGroup ?? ''
+        // },
         profileDescription: updated.profileDescription,
         interests: updated.interests
       }));
@@ -572,7 +620,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
 
   const toggleBloodDonate = (e) => {
     const isChecked = e.target.checked;
-    setProfileForm((prev) => ({
+    setBloodData((prev) => ({
       ...prev,
       donate: isChecked,
       // bloodGroup: isChecked ? prev.bloodGroup : '' // remove group if turned off
@@ -594,6 +642,303 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     setUserProfileDetailsOpen(true);
     // setFollowDialogOpen(false);
   };
+
+  // const formatDistance = (distance) => {
+  //   if (distance === null || distance === undefined) return null;
+
+  //   if (distance < 1) {
+  //     return `${Math.round(distance * 1000)} m away`;
+  //   }
+
+  //   return `${distance.toFixed(1)} km away`;
+  // };
+
+  const donationCount = Array.isArray(userData?.bloodDonor?.lastDonated)
+    ? userData.bloodDonor.lastDonated.length
+    : 0;
+
+  const formatDonateDate = (date) =>
+    date ? new Date(date).toLocaleDateString('en-IN', {
+      dateStyle: 'medium',
+      // timeStyle: 'short',
+    }) : '—';
+
+  // const formatDate = (date) =>
+  //   date ? new Date(date).toLocaleString('en-IN', {
+  //     dateStyle: 'medium',
+  //     timeStyle: 'short',
+  //   }) : '—';
+
+  const LAST_DONATION_GAP_DAYS = 56; // 8 weeks
+
+  const lastDonationDate =
+    donationCount > 0
+      ? userData.bloodDonor.lastDonated[donationCount - 1] // latest donation
+      : null;
+
+  const getEligibilityInfo = () => {
+    if (!lastDonationDate) {
+      return { eligible: true, daysLeft: 0 };
+    }
+
+    const lastDate = new Date(lastDonationDate);
+    const today = new Date();
+
+    const diffTime = today.getTime() - lastDate.getTime();
+    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    const daysLeft = LAST_DONATION_GAP_DAYS - daysPassed;
+
+    return {
+      eligible: daysLeft <= 0,
+      daysLeft: daysLeft > 0 ? daysLeft : 0
+    };
+  };
+
+  const eligibility = getEligibilityInfo();
+
+  // Initialize blood data from userData
+  const handleEditBloodData = () => {
+    setBloodData({
+      donate: userData.bloodDonor?.donate || false,
+      bloodGroup: userData.bloodDonor?.bloodGroup || '',
+      phone: userData?.bloodDonor?.contactWay?.phone || '',
+      email: userData?.bloodDonor?.contactWay?.email || '',
+      socialMedia: userData?.bloodDonor?.contactWay?.socialMedia || []
+    });
+    setNewSocialLink({ platform: '', url: '' });
+    setError('');
+    setShowEditDonorDialog(true);
+  };
+
+  const handleBloodDataChange = (e) => {
+    const { name, value } = e.target;
+    setBloodData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle social media platform change
+  const handlePlatformChange = (platformId) => {
+    const selectedPlatform = SOCIAL_MEDIA_OPTIONS.find(opt => opt.id === platformId);
+    setNewSocialLink({
+    platformId,
+    url: selectedPlatform?.domain
+      ? selectedPlatform.domain
+      : ''
+  });
+
+  };
+
+  // Handle social media URL change
+  const handleSocialUrlChange = (e) => {
+    const value = e.target.value;
+    setNewSocialLink(prev => ({
+      ...prev,
+      url: value
+    }));
+  };
+
+  // Add new social media link
+  const addSocialLink = () => {
+    if (!newSocialLink.platformId || !newSocialLink.url.trim()) {
+      setError('Please select a platform and enter URL');
+      return;
+    }
+
+    // Validate URL
+    // const url = newSocialLink.url.trim();
+    // if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    //   setError('Please enter a valid URL starting with http:// or https://');
+    //   return;
+    // }
+
+    setBloodData(prev => ({
+      ...prev,
+      socialMedia: [
+        ...prev.socialMedia,
+        {
+          platform: SOCIAL_MEDIA_OPTIONS.find(
+            opt => opt.id === newSocialLink.platformId
+          )?.label,
+          url: !newSocialLink.url.startsWith('https://') ? `https://${newSocialLink.url.trim()}` : newSocialLink.url.trim()
+        }
+      ]
+    }));
+
+    setNewSocialLink({ platform: '', url: '' });
+    setError('');
+  };
+
+  // Remove social media link
+  const removeSocialLink = (index) => {
+    setBloodData(prev => ({
+      ...prev,
+      socialMedia: prev.socialMedia.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleUpdateBloodData = async () => {
+    try { 
+      setUpdating(true);
+      setError('');
+
+      let emailId = null;
+      // Email validation
+      if (bloodData.email && bloodData.email.length > 0) {
+        if (!bloodData.email.includes('@') || !bloodData.email.endsWith('.com')) {
+          setError('Invalid mail id.');
+          setUpdating(false);
+          return;
+        }
+        emailId = bloodData.email;
+      }
+
+      let phoneNumber = null;
+      // Phone validation
+      if (bloodData.phone && bloodData.phone.length > 0) {
+        if (bloodData.phone.length !== 10 || !/^\d+$/.test(bloodData.phone)) {
+          setError('Invalid mobile number.');
+          setUpdating(false);
+          return;
+        }
+        phoneNumber = bloodData.phone;
+      }
+
+      // Validate social media URLs
+      for (const link of bloodData.socialMedia) {
+        try {
+          new URL(link.url);
+        } catch {
+          setError(`Invalid URL for ${link.platform}. Please check the format.`);
+          setUpdating(false);
+          return;
+        }
+      }
+
+      const response = await updateUserBloodData(id, {
+        // ...bloodData,
+        // interests: Array.isArray(profileForm.interests) ? profileForm.interests : []
+        donate: bloodData.donate,
+        bloodGroup: bloodData.bloodGroup,
+        phone: phoneNumber,
+        email: emailId,
+        socialMedia: bloodData.socialMedia
+      });
+      const updated = response.data.user;
+      setUserData(prev => ({
+        ...prev,
+        // username: updated.username,
+        // email: emailId,
+        // phone: phoneNumber,
+        // withYou: updated.withYou,
+        bloodDonor: { ...prev.bloodDonor,
+          donate: updated.bloodDonor?.donate ?? false,
+          bloodGroup: updated.bloodDonor?.bloodGroup ?? '',
+          contactWay: {
+            phone: phoneNumber,
+            email: emailId,
+            socialMedia: updated.bloodDonor?.contactWay?.socialMedia || []
+          }
+        },
+        // profileDescription: updated.profileDescription,
+        // interests: updated.interests
+      }));
+      setShowEditDonorDialog(false);
+      setSnackbar({ 
+        open: true, 
+        message: 'Profile blood donor data updated successfully!', 
+        severity: 'success' 
+      });
+      setError('');
+    } catch (error) {
+      console.error('Error updating profile blood data:', error);
+      setSnackbar({ 
+        open: true, 
+        message: error.response?.data?.message || 'Error updating profile blood data', 
+        severity: 'error' 
+      });
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Check eligibility on component mount or when userData changes
+useEffect(() => {
+  if (userData?.bloodDonor?.lastDonated) {
+    const lastDonationDate = new Date(userData.bloodDonor.lastDonated);
+    const today = new Date();
+    const MIN_DAYS_BETWEEN_DONATIONS = 56;
+    
+    const diffTime = today.getTime() - lastDonationDate.getTime();
+    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    const daysLeft = MIN_DAYS_BETWEEN_DONATIONS - daysPassed;
+    
+    setEligibilityInfo({
+      eligible: daysPassed >= MIN_DAYS_BETWEEN_DONATIONS,
+      daysLeft: daysLeft > 0 ? daysLeft : 0,
+      lastDonationDate: lastDonationDate
+    });
+  } else {
+    setEligibilityInfo({ eligible: true, daysLeft: 0 });
+  }
+}, [userData]);
+
+// Handle opening donation dialog with eligibility check
+const handleOpenAddDonationDialog = () => {
+  if (!eligibilityInfo.eligible) {
+    setSnackbar({
+      open: true,
+      message: `You can donate again in ${eligibilityInfo.daysLeft} days. Minimum gap is 56 days.`,
+      severity: 'warning'
+    });
+    return;
+  }
+  
+  // Check if user is a blood donor
+  if (!userData?.bloodDonor?.donate) {
+    setSnackbar({
+      open: true,
+      message: 'Please enable blood donation first from Edit Blood Donation.',
+      severity: 'warning'
+    });
+    return;
+  }
+  
+  setShowAddDonationDialog(true);
+};
+
+// Handle successful donation
+const handleDonationAdded = (updatedUser, donationData) => {
+  // Update local state
+  setUserData(prev => ({
+    ...prev,
+    bloodDonor: {
+      ...prev.bloodDonor,
+      lastDonated: donationData.donatedAt,
+      donationCount: updatedUser.bloodDonor.donationCount || ((prev.bloodDonor?.donationCount || 0) + 1)
+    }
+  }));
+  
+  // Update eligibility info
+  const MIN_DAYS_BETWEEN_DONATIONS = 56;
+  const nextEligibilityDate = donationData.donatedAt ? new Date(donationData.donatedAt) : new Date();
+  nextEligibilityDate.setDate(nextEligibilityDate.getDate() + MIN_DAYS_BETWEEN_DONATIONS);
+  
+  setEligibilityInfo({
+    eligible: false,
+    daysLeft: MIN_DAYS_BETWEEN_DONATIONS,
+    lastDonationDate: donationData.donatedAt
+  });
+  
+  setSnackbar({
+    open: true,
+    message: 'Blood donation recorded successfully! Thank you for saving lives.',
+    severity: 'success'
+  });
+};
 
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
@@ -837,7 +1182,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                       *Your profile will be visible to women nearby who may need help in unsafe situations.
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} sm={12} md={6} >
+                  {/* <Grid item xs={12} sm={12} md={6} >
                     <Box display="flex" alignItems="center" gap={1}>
                       <BloodtypeIcon color="error" fontSize="small" />
                       <Typography variant="body1" fontWeight={500}>
@@ -856,7 +1201,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                     <Typography variant="caption" color="text.secondary" marginTop={4}>
                       *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
                     </Typography>
-                  </Grid>
+                  </Grid> */}
                 </Grid>
               </Box>
 
@@ -913,6 +1258,134 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   </Box>
                 </Toolbar>
               </Box> */}
+            </Box>
+          </Box>
+          <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box display="flex" alignItems="center">
+                <Avatar sx={{ bgcolor: 'error.main', mr: 1, height: '32px', width: '32px' }}>
+                  <BloodtypeIcon fontSize="small" />
+                </Avatar>
+                <Typography variant="h6" >
+                  Blood Donation
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: '8px' }}>
+                <Tooltip title="Edit Blood Donation" arrow>
+                  <IconButton 
+                    onClick={handleEditBloodData}
+                    sx={{
+                      minWidth: '40px',
+                      minHeight: '40px',
+                      ...getButtonStyle(darkMode, showEditDonorDialog),
+                      // backgroundColor: showSortMenu ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
+                    }}
+                  >
+                    <EditNoteRounded />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip 
+                  title={
+                    !userData?.bloodDonor?.donate 
+                      ? "Enable blood donation first" 
+                      : !eligibilityInfo.eligible 
+                      ? `Eligible in ${eligibilityInfo.daysLeft} days` 
+                      : "Add Donation"
+                  } 
+                  arrow
+                >
+                  <span>
+                    <IconButton 
+                      onClick={handleOpenAddDonationDialog}
+                      sx={{
+                        minWidth: '40px',
+                        minHeight: '40px',
+                        ...getButtonStyle(darkMode, showAddDonationDialog),
+                        // opacity: (!eligibilityInfo.eligible || !userData?.bloodDonor?.donate) ? 0.5 : 1,
+                      }}
+                      // disabled={!eligibilityInfo.eligible || !userData?.bloodDonor?.donate}
+                    >
+                      <PlaylistAddRounded />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              </Box>
+            </Box>
+            <Box sx={{display: 'flex', gap:'8px', flexDirection: 'column', borderRadius: '12px'}}>
+              <Typography variant="body2" color="textSecondary">
+                {userData?.bloodDonor?.donate === true
+                  ? "You’re a blood donor — thank you!"
+                  : userData?.bloodDonor?.donate === false
+                  ? "You haven’t enabled blood donation."
+                  : "You haven’t set this preference yet."}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <Chip 
+                  label={`Blood Group: ${userData?.bloodDonor?.bloodGroup || 'Unknown'}`}
+                  // color="error"
+                  size="small" variant="outlined"
+                  // sx={{ fontWeight: 'bold' }}
+                />
+                {userData?.bloodDonor?.donationCount > 0 && (
+                  <Chip
+                    label={`${userData.bloodDonor.donationCount} Donation${userData.bloodDonor.donationCount > 1 ? 's' : ''}`}
+                    variant="outlined"
+                    size="small"
+                    sx={{ 
+                      borderColor: 'success.main',
+                      color: 'success.main'
+                    }}
+                  />
+                )}
+                {!eligibilityInfo.eligible && (
+                  <Chip
+                    label={`Eligible in ${eligibilityInfo.daysLeft} days`}
+                    variant="outlined"
+                    size="small"
+                    sx={{ 
+                      borderColor: 'warning.main',
+                      color: 'warning.main'
+                    }}
+                  />
+                )}
+              </Box>
+              <Typography variant="body2" color="textSecondary">
+                Last donated: {userData?.bloodDonor?.lastDonated 
+                  ? formatDonateDate(userData.bloodDonor.lastDonated) 
+                  : 'No donation history yet'}
+              </Typography>
+              {userData?.bloodDonor?.contactWay && (
+                <Typography variant="body2" color="textSecondary">
+                  Contact: {userData.bloodDonor.contactWay.phone 
+                    ? `📱 ${userData.bloodDonor.contactWay.phone}` 
+                    : ''}
+                  {userData.bloodDonor.contactWay.email 
+                    ? `${userData.bloodDonor.contactWay.phone ? ', ' : ''}✉️ ${userData.bloodDonor.contactWay.email}` 
+                    : ''}
+                </Typography>
+              )}
+              <Typography variant="body2" color="textSecondary" >
+                Contact ways: {userData?.bloodDonor?.contactWay?.phone ? `Phone: ${userData.bloodDonor.contactWay.phone}` : 'Phone: Not provided'} , {' '}
+                {userData?.bloodDonor?.contactWay?.email ? `Email: ${userData.bloodDonor.contactWay.email}` : 'Email: Not provided'}, {' ' }
+                {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0
+                  ? `Social Media: ${userData.bloodDonor.contactWay.socialMedia.map(link => link.platform).join(', ')}`
+                  : 'Social Media: Not provided'}
+                {/* {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {userData.bloodDonor.contactWay.socialMedia.map((link, index) => (
+                      <Chip
+                        key={index}
+                        label={link.platform}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ))}
+                  </Box>
+                )} */}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" marginTop={4}>
+                *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
+              </Typography>
             </Box>
           </Box>
           <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
@@ -1330,7 +1803,8 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         open={editProfileOpen}
         onClose={() => setEditProfileOpen(false)}
         maxWidth="xs"
-        fullWidth
+        fullWidth fullScreen={isMobile}
+        aria-labelledby="edit-profile-dialog-title"
         PaperProps={{
           sx: {
             borderRadius: '12px',
@@ -1519,7 +1993,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                   ))}
                 </Box>
               </Box>
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+              {/* <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Typography variant="body2" fontWeight={500}>
                     {profileForm.donate
@@ -1562,7 +2036,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
                 <Typography variant="caption" color="text.secondary" marginTop={4}>
                   *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
                 </Typography>
-              </Box>
+              </Box> */}
               <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Typography variant="body2" fontWeight={500}>
@@ -1601,6 +2075,272 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Edit Blood donation Dialog */}
+      <Dialog
+        open={showEditDonorDialog}
+        onClose={() => setShowEditDonorDialog(false)}
+        maxWidth="xs"
+        fullWidth fullScreen={isMobile}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            overflow: 'visible'
+          }
+        }}
+        TransitionComponent={Slide}
+        TransitionProps={{ direction: 'up' }}
+        sx={{ '& .MuiPaper-root': { borderRadius: '14px', backdropFilter: 'blur(12px)', }, }}
+      >
+        <DialogTitle>Edit Blood Donation Information</DialogTitle>
+        <DialogContent>
+          <Box >
+            <Box >
+              <Box sx={{ p: 2, mb: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Typography variant="body2" fontWeight={500}>
+                    {bloodData.donate
+                      ? "You're donating blood — thank you for helping others!"
+                      : "Would you like to become a blood donor?"}
+                  </Typography>
+
+                  <Switch
+                    checked={bloodData.donate}
+                    onChange={toggleBloodDonate}
+                    color="primary"
+                  />
+                </Box>
+
+                {bloodData.donate && (
+                  <FormControl fullWidth required sx={{ mt: 2 }}>
+                    <InputLabel>Blood Group</InputLabel>
+                    <Select
+                      value={bloodData.bloodGroup || ''}
+                      onChange={(e) =>
+                        setBloodData({ ...bloodData, bloodGroup: e.target.value })
+                      }
+                      label="BloodGroup"
+                      sx={{ borderRadius: 2 }}
+                      required
+                    >
+                      <MenuItem value="A+">A+</MenuItem>
+                      <MenuItem value="A-">A-</MenuItem>
+                      <MenuItem value="B+">B+</MenuItem>
+                      <MenuItem value="B-">B-</MenuItem>
+                      <MenuItem value="AB+">AB+</MenuItem>
+                      <MenuItem value="AB-">AB-</MenuItem>
+                      <MenuItem value="O+">O+</MenuItem>
+                      <MenuItem value="O-">O-</MenuItem>
+                      <MenuItem value="Unknown">I don't know my blood group</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
+
+                <Typography variant="caption" color="text.secondary" marginTop={4}>
+                  *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
+                </Typography>
+              </Box>
+
+              {/* Contact Information */}
+              <Box sx={{ p: 2, bgcolor: 'rgba(25, 210, 34, 0.05)', borderRadius: 2 }}>
+                <Typography variant="h6" fontWeight={500} gutterBottom>
+                  Contact Information
+                </Typography>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  name="phone"
+                  type="number"
+                  value={bloodData.phone}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    if (value.length <= 10) {
+                      setBloodData(prev => ({ ...prev, phone: value }));
+                    }
+                  }}
+                  margin="normal"
+                  // size="small"
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">+91</InputAdornment>,
+                    inputProps: { 
+                      style: { paddingLeft: 8 }, 
+                      maxLength: 10 // restrict to 10 digits after +91 if needed
+                    },
+                  }}
+                  placeholder="Enter 10-digit phone number"
+                  helperText="Optional - Only visible to verified users"
+                  // sx={{ mb: 2 }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      // backgroundColor: '#ffffff',
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#1976d2',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#5f6368',
+                    },
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label="Email"
+                  name="email"
+                  type="email"
+                  value={bloodData.email}
+                  onChange={handleBloodDataChange}
+                  margin="normal"
+                  placeholder="your.email@example.com"
+                  helperText="Optional - For emergency contact"
+                  // required
+                  // size="small"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '8px',
+                      // backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+                      '&:hover .MuiOutlinedInput-notchedOutline': {
+                        borderColor: '#1976d2',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: '#5f6368',
+                    },
+                  }}
+                />
+                {/* Social Media Links Section */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1" fontWeight={500} gutterBottom>
+                    Social Media Links (Optional)
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" paragraph>
+                    Add links to your social media profiles for easier communication
+                  </Typography>
+
+                  {/* Add Social Media Link Form */}
+                  <Box sx={{ display: 'flex', gap: 2, mb: 2, flexWrap: 'wrap', flexDirection: 'column' }}>
+                    <FormControl sx={{ minWidth: 150, flex: 1, borderRadius: 2 }}>
+                      <InputLabel id="platform-label">Platform</InputLabel>
+                      <Select
+                        labelId="platform-label"
+                        id="platform-select"
+                        value={newSocialLink.platformId}
+                        onChange={(e) => handlePlatformChange(e.target.value)}
+                        label="Platform" 
+                        // size="small"
+                        sx={{ borderRadius: 2 }}
+                      >
+                        <MenuItem value="">
+                          <em>Select Platform</em>
+                        </MenuItem>
+                        {SOCIAL_MEDIA_OPTIONS.map((option) => (
+                          <MenuItem key={option.id} value={option.id}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <TextField
+                      fullWidth
+                      label="URL"
+                      value={newSocialLink.url}
+                      onChange={handleSocialUrlChange}
+                      placeholder={
+                        SOCIAL_MEDIA_OPTIONS.find(opt => opt.id === newSocialLink.platformId)?.placeholder || 
+                        'Enter full URL (https://...)'
+                      }
+                      // size="small"
+                      InputProps={{
+                        startAdornment: newSocialLink.url.startsWith('http') ? null : (
+                          <InputAdornment position="start">https://</InputAdornment>
+                        )
+                      }}
+                      sx={{ minWidth: 150, flex: 2, borderRadius: 2,
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '8px',
+                          // backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+                          '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: '#1976d2',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          color: '#5f6368',
+                        },
+                      }}
+                    />
+
+                    <Button
+                      variant="contained"
+                      onClick={addSocialLink}
+                      startIcon={<AddRounded />}
+                      disabled={!newSocialLink.platformId || !newSocialLink.url.trim()}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Add
+                    </Button>
+                  </Box>
+
+                  {/* Display Added Social Media Links */}
+                  {bloodData.socialMedia.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" gutterBottom>
+                        Added Links ({bloodData.socialMedia.length})
+                      </Typography>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {bloodData.socialMedia.map((link, index) => (
+                          <Chip
+                            key={index} fullWidth
+                            label={`${link.platform}: ${link.url.substring(0, 20)}...`}
+                            onDelete={() => removeSocialLink(index)}
+                            // deleteIcon={<Close />}
+                            sx={{
+                              borderRadius: '8px',
+                              // maxWidth: 200,
+                              '& .MuiChip-label': {
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Tip: Add WhatsApp or Telegram links for instant communication during emergencies
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </DialogContent>
+        {error && <Alert  
+            sx={{ mx: 2 , borderRadius: '12px', color: darkMode ? 'error.contrastText' : 'text.primary', border: darkMode ? '1px solid rgba(244, 67, 54, 0.3)' : '1px solid rgba(244, 67, 54, 0.2)', boxShadow: darkMode ? '0 2px 8px rgba(244, 67, 54, 0.15)' : '0 2px 8px rgba(244, 67, 54, 0.1)', }} 
+          severity="error">{error}</Alert>}
+        <DialogActions sx={{p: 2}}>
+          
+          <Button sx={{borderRadius: '12px', textTransform: 'none'}} onClick={() => setShowEditDonorDialog(false)}>Cancel</Button>
+          <Button 
+            onClick={handleUpdateBloodData} 
+            variant="contained"
+            disabled={updating}
+            sx={{
+              textTransform:'none', borderRadius: '12px'
+            }}
+          >
+            {updating ? <CircularProgress size={24} /> : 'Submit'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <AddBloodDonationDataDialog
+        open={showAddDonationDialog}
+        onClose={() => setShowAddDonationDialog(false)}
+        userData={userData}
+        onDonationAdded={handleDonationAdded}
+      />
 
       {/* Profile Picture Dialog */}
       <Dialog

@@ -15,8 +15,8 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
     return `${distance.toFixed(1)} km away`;
   };
 
-  const donationCount = Array.isArray(donor?.bloodDonor?.lastDonated)
-    ? donor.bloodDonor.lastDonated.length
+  const donationCount = (donor?.bloodDonor?.donationCount)
+    ? donor.bloodDonor.donationCount
     : 0;
 
   const formatDonateDate = (date) =>
@@ -35,7 +35,7 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
 
   const lastDonationDate =
     donationCount > 0
-      ? donor.bloodDonor.lastDonated[donationCount - 1] // latest donation
+      ? donor.bloodDonor.lastDonated // latest donation
       : null;
 
   const getEligibilityInfo = () => {

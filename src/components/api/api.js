@@ -378,6 +378,38 @@ export const updateUserProfile = async (userId, userData) => {
   return await API.put(`/api/auth/update-profile/${userId}`, userData, { headers });
 };
 
+// update user blood data
+export const updateUserBloodData = async (userId, userData) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.put(`/api/auth/update-blood-data/${userId}`, userData, { headers });
+};
+
+// Add blood donation
+export const addBloodDonation = (data) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = {
+    'Content-Type': 'multipart/form-data',
+    Authorization: `Bearer ${authToken}`,
+  };
+  return API.post('/api/auth/add-blood-donation', data, { headers });
+};
+
+// Get blood donation history
+export const getBloodDonationHistory = async () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.get('/api/auth/blood-donation-history', { headers });
+};
+
 export const updateProfilePicture = async (userId, profilePic) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { 
