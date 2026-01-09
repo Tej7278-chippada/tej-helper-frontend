@@ -12,6 +12,21 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import FollowDialog from './FollowDialog';
 import UserProfileDetailsSkeleton from '../Skeletons/UserProfileDetailsSkeleton';
+// import { ReportGmailerrorredRounded } from '@mui/icons-material';
+import {
+  WhatsApp as WhatsAppIcon,
+  Telegram as TelegramIcon,
+  Instagram as InstagramIcon,
+  Facebook as FacebookIcon,
+  Twitter as TwitterIcon,
+  LinkedIn as LinkedInIcon,
+  YouTube as YouTubeIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Link as LinkIcon,
+  ChatRounded,
+  QuestionAnswerRounded,
+} from '@mui/icons-material';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -259,6 +274,168 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       case 'voter_id': return 'Voter ID';
       case 'pan_card': return 'Pan Card';
       default: return 'Goberment ID';
+    }
+  };
+
+  
+  // Helper function to detect social platform from URL
+  const detectSocialPlatform = (url) => {
+    if (!url) return 'other';
+    
+    const lowerUrl = url.toLowerCase();
+    
+    for (const [platform, data] of Object.entries(SOCIAL_MEDIA_PLATFORMS)) {
+      if (platform !== 'other' && data.pattern.test(lowerUrl.replace('https://', '').replace('http://', ''))) {
+        return platform;
+      }
+    }
+    
+    return 'other';
+  };
+  
+  // Helper function to format URL for opening
+  const formatSocialUrl = (url, platform) => {
+    if (!url) return '#';
+    
+    // If it's already a full URL, return it
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // Add platform-specific domain if needed
+    const platformData = SOCIAL_MEDIA_PLATFORMS[platform];
+    if (platformData && platformData.domain) {
+      // Remove any existing domain prefix from the stored value
+      const cleanUrl = url.replace(platformData.domain.replace('https://', ''), '');
+      return platformData.domain + cleanUrl;
+    }
+    
+    // Default to https://
+    return 'https://' + url;
+  };
+  
+  // Helper function to get social media icon component
+  const getSocialIcon = (platform, fontSize = 'small', color = 'inherit') => {
+    const icons = {
+      whatsapp: <WhatsAppIcon fontSize={fontSize} sx={{ color }} />,
+      telegram: <TelegramIcon fontSize={fontSize} sx={{ color }} />,
+      instagram: <InstagramIcon fontSize={fontSize} sx={{ color }} />,
+      facebook: <FacebookIcon fontSize={fontSize} sx={{ color }} />,
+      twitter: <TwitterIcon fontSize={fontSize} sx={{ color }} />,
+      linkedin: <LinkedInIcon fontSize={fontSize} sx={{ color }} />,
+      youtube: <YouTubeIcon fontSize={fontSize} sx={{ color }} />,
+      discord: <ChatRounded fontSize={fontSize} sx={{ color }} />,
+      snapchat: <QuestionAnswerRounded fontSize={fontSize} sx={{ color }} />,
+      other: <LinkIcon fontSize={fontSize} sx={{ color }} />
+    };
+    return icons[platform] || <LinkIcon fontSize={fontSize} sx={{ color }} />;
+  };
+  
+  // Function to handle social chip click
+  const handleSocialChipClick = (url, platform) => {
+    const formattedUrl = formatSocialUrl(url, platform);
+    
+    // Check if it's a mobile device for WhatsApp/Telegram
+    if ((platform === 'whatsapp' || platform === 'telegram') && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+      // For mobile, let the OS handle the app opening
+      window.open(formattedUrl, '_blank');
+    } else {
+      // For desktop, open in new tab
+      window.open(formattedUrl, '_blank', 'noopener,noreferrer');
+    }
+  };
+  
+  // Social media platform options with icons, colors, and domain patterns
+  const SOCIAL_MEDIA_PLATFORMS = {
+    whatsapp: {
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      icon: 'WhatsApp',
+      color: '#25D366',
+      domain: 'https://wa.me/',
+      placeholder: 'wa.me/yournumber',
+      pattern: /^wa\.me\/.+/
+    },
+    telegram: {
+      id: 'telegram',
+      label: 'Telegram',
+      icon: 'Telegram',
+      color: '#0088cc',
+      domain: 'https://t.me/',
+      placeholder: 't.me/username',
+      pattern: /^t\.me\/.+/
+    },
+    instagram: {
+      id: 'instagram',
+      label: 'Instagram',
+      icon: 'Instagram',
+      color: '#E4405F',
+      domain: 'https://instagram.com/',
+      placeholder: 'instagram.com/username',
+      pattern: /^instagram\.com\/.+/
+    },
+    facebook: {
+      id: 'facebook',
+      label: 'Facebook',
+      icon: 'Facebook',
+      color: '#1877F2',
+      domain: 'https://facebook.com/',
+      placeholder: 'facebook.com/profile',
+      pattern: /^facebook\.com\/.+/
+    },
+    twitter: {
+      id: 'twitter',
+      label: 'Twitter',
+      icon: 'Twitter',
+      color: '#1DA1F2',
+      domain: 'https://twitter.com/',
+      placeholder: 'twitter.com/username',
+      pattern: /^twitter\.com\/.+/
+    },
+    linkedin: {
+      id: 'linkedin',
+      label: 'LinkedIn',
+      icon: 'LinkedIn',
+      color: '#0A66C2',
+      domain: 'https://linkedin.com/in/',
+      placeholder: 'linkedin.com/in/username',
+      pattern: /^linkedin\.com\/in\/.+/
+    },
+    youtube: {
+      id: 'youtube',
+      label: 'YouTube',
+      icon: 'YouTube',
+      color: '#FF0000',
+      domain: 'https://youtube.com/',
+      placeholder: 'youtube.com/c/username',
+      pattern: /^youtube\.com\/.+/
+    },
+    discord: {
+      id: 'discord',
+      label: 'Discord',
+      icon: 'Discord',
+      color: '#5865F2',
+      domain: 'https://discord.gg/',
+      placeholder: 'discord.gg/invite-code',
+      pattern: /^discord\.gg\/.+/
+    },
+    snapchat: {
+      id: 'snapchat',
+      label: 'Snapchat',
+      icon: 'Snapchat',
+      color: '#FFFC00',
+      domain: 'https://snapchat.com/add/',
+      placeholder: 'snapchat.com/add/username',
+      pattern: /^snapchat\.com\/add\/.+/
+    },
+    other: {
+      id: 'other',
+      label: 'Other',
+      icon: 'Link',
+      color: darkMode ? '#888' : '#666',
+      domain: '',
+      placeholder: 'Enter full URL',
+      pattern: /^https?:\/\/.+/
     }
   };
 
@@ -757,7 +934,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 Blood Donation
               </Typography>
             </Box>
-            <Typography variant="body2" color="textSecondary" >
+            <Typography variant="body2" color="textSecondary" mb={1} >
               {profile?.bloodDonor?.donate === true
                 ? profile?.bloodDonor?.bloodGroup === "Unknown"
                   ? "This user donates blood! (Blood group not specified)"
@@ -766,53 +943,154 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 ? "Blood donation is not enabled."
                 : "This preference hasn’t been set yet."}
             </Typography>
+            {profile?.bloodDonor?.bloodGroup && (
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mb: 1 }}>
+              <Chip 
+                label={`🩸 ${profile?.bloodDonor?.bloodGroup || 'Unknown'}`}
+                // color="error"
+                size="small" variant="filled"
+                // sx={{ fontWeight: 'bold' }}
+                sx={{ 
+                  fontWeight: 'bold',
+                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                  color: 'white',
+                  '&:hover': {
+                    boxShadow: '0 4px 12px rgba(238, 90, 82, 0.4)',
+                  }
+                }}
+              />
+              {profile?.bloodDonor?.donationCount > 0 && (
+                <Chip
+                  label={`🏆 ${profile.bloodDonor.donationCount} Donation${profile.bloodDonor.donationCount > 1 ? 's' : ''}`}
+                  variant="filled"
+                  size="small"
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
+                    color: 'white',
+                    '&:hover': {
+                      boxShadow: '0 4px 12px rgba(46, 125, 50, 0.4)',
+                    }
+                  }}
+                />
+              )}
+              {/* {!eligibilityInfo.eligible && (
+                <Chip
+                  label={`⏳ Eligible in ${eligibilityInfo.daysLeft} days`}
+                  variant="filled"
+                  size="small"
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+                    color: 'white',
+                    '&:hover': {
+                      boxShadow: '0 4px 12px rgba(245, 124, 0, 0.4)',
+                    }
+                  }}
+                />
+              )} */}
+            </Box>)}
             <Typography variant="body2" color="textSecondary">
+              📅 Last donated: {profile?.bloodDonor?.lastDonated 
+                ? formatDonateDate(profile.bloodDonor.lastDonated) 
+                : 'No donation history yet'}
+            </Typography>
+            {/* <Typography variant="body2" color="textSecondary">
               Last donated: {profile?.bloodDonor?.lastDonated 
                 ? formatDonateDate(profile.bloodDonor.lastDonated) 
                 : 'No donation history yet'}
                 {profile?.bloodDonor?.donationCount > 0 && (
                   <> (Total Donated: {profile.bloodDonor.donationCount})</>
                 )}
-            </Typography>
+            </Typography> */}
             <Typography variant="body2" color="textSecondary">
               Next eligibility date: {profile?.bloodDonor?.eligibilityDate 
                 ? formatDonateDate(profile.bloodDonor.eligibilityDate) 
                 : 'No donation history yet'}
             </Typography>
-            <Typography variant="body1" color="textSecondary" style={{ fontWeight: 500 }}>
-              Contact Medium:
-            </Typography>
-            {(profile?.bloodDonor?.contactWay?.phone || profile.bloodDonor.contactWay.email) && (
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {profile.bloodDonor.contactWay.phone && (
-                  <Chip
-                    key="phone"
-                    label={`📱 ${profile.bloodDonor.contactWay.phone}`}
-                    variant="outlined"
-                    size="small"
-                  />
-                )}
-                {profile.bloodDonor.contactWay.email && (
-                  <Chip
-                    key="email"
-                    label={`✉️ ${profile.bloodDonor.contactWay.email}`}
-                    variant="outlined"
-                    size="small"
-                  />
-                )}
-              </Box>
-            )}
-            {profile?.bloodDonor?.contactWay?.socialMedia && profile.bloodDonor.contactWay.socialMedia.length > 0 && (
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-                {profile.bloodDonor.contactWay.socialMedia.map((link, index) => (
-                  <Chip
-                    key={index}
-                    label={link.platform}
-                    variant="outlined"
-                    size="small"
-                  />
-                ))}
-              </Box>
+            {profile?.bloodDonor?.donate === true && (profile?.bloodDonor?.contactWay?.phone || profile?.bloodDonor?.contactWay?.email || (profile?.bloodDonor?.contactWay?.socialMedia && profile?.bloodDonor?.contactWay?.socialMedia?.length > 0)) && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="subtitle1" color="textSecondary" style={{ fontWeight: 500 }}>
+                Contact Medium:
+              </Typography>
+              {(profile?.bloodDonor?.contactWay?.phone || profile.bloodDonor.contactWay.email) && (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                  {profile.bloodDonor.contactWay.phone && (
+                    <Chip
+                      key="phone"
+                      label={`📱 ${profile.bloodDonor.contactWay.phone}`}
+                      variant="outlined"
+                      size="small"
+                      onClick={() => window.open(`tel:${profile.bloodDonor.contactWay.phone}`)}
+                      sx={{ 
+                        borderColor: '#4CAF50',
+                        color: '#4CAF50',
+                        '&:hover': {
+                          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                          borderColor: '#388E3C',
+                          cursor: 'pointer',
+                        }
+                      }}
+                    />
+                  )}
+                  {profile.bloodDonor.contactWay.email && (
+                    <Chip
+                      key="email"
+                      label={`✉️ ${profile.bloodDonor.contactWay.email}`}
+                      variant="outlined"
+                      size="small"
+                      onClick={() => window.open(`mailto:${profile.bloodDonor.contactWay.email}`)}
+                      sx={{ 
+                        borderColor: '#2196F3',
+                        color: '#2196F3',
+                        '&:hover': {
+                          backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                          borderColor: '#1976D2',
+                          cursor: 'pointer',
+                        }
+                      }}
+                    />
+                  )}
+                </Box>
+              )}
+              {profile?.bloodDonor?.contactWay?.socialMedia && profile.bloodDonor.contactWay.socialMedia.length > 0 && (
+                <Box>
+                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                    Connect via social media:
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {profile.bloodDonor.contactWay.socialMedia.map((social, index) => {
+                      const platform = detectSocialPlatform(social.url || social.platform);
+                      const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+                      
+                      return (
+                        <Chip
+                          key={index}
+                          icon={getSocialIcon(platform, 'small', platformData.color)}
+                          label={social.platform || platformData.label}
+                          variant="filled"
+                          size="small"
+                          onClick={() => handleSocialChipClick(social.url, platform)}
+                          sx={{ 
+                            backgroundColor: platformData.color,
+                            color: 'white',
+                            fontWeight: 500, px: 0.5,
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              backgroundColor: platformData.color,
+                              transform: 'translateY(-2px)',
+                              boxShadow: `0 4px 12px ${platformData.color}80`,
+                              cursor: 'pointer',
+                            },
+                            '&:active': {
+                              transform: 'translateY(0)',
+                            }
+                          }}
+                        />
+                      );
+                    })}
+                  </Box>
+                </Box>
+              )}
+            </Box>
             )}
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
@@ -941,6 +1219,11 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
             )
           ) : null}
         </Box>
+        {/* <Button fullWidth variant="outlined" color="error" sx={{ mt: 2, borderRadius: '12px', textTransform: 'none' }}
+          startIcon={<ReportGmailerrorredRounded />}
+        >
+          Report User
+        </Button> */}
       </DialogContent>
       )}
       {/* { isRateUserOpen && (

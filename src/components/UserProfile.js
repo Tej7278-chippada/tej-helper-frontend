@@ -28,8 +28,21 @@ import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
 import RequestCoupon from './Banners/RequestCoupon';
-import { AddRounded, CollectionsBookmarkRounded, EditNoteRounded, PlaylistAddRounded } from '@mui/icons-material';
+import { AddRounded, ChatRounded, CollectionsBookmarkRounded, EditNoteRounded, PlaylistAddRounded, QuestionAnswerRounded } from '@mui/icons-material';
 import AddBloodDonationDataDialog from './BloodDonor/AddBloodDonationDataDialog';
+import {
+  WhatsApp as WhatsAppIcon,
+  Telegram as TelegramIcon,
+  Instagram as InstagramIcon,
+  Facebook as FacebookIcon,
+  Twitter as TwitterIcon,
+  LinkedIn as LinkedInIcon,
+  YouTube as YouTubeIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Link as LinkIcon,
+} from '@mui/icons-material';
+// Note: Discord and Snapchat icons might need to be imported from different packages
 
 // Set default icon manually
 // const customIcon = new L.Icon({
@@ -942,6 +955,167 @@ const handleDonationAdded = (updatedUser, donationData) => {
   });
 };
 
+// Helper function to detect social platform from URL
+const detectSocialPlatform = (url) => {
+  if (!url) return 'other';
+  
+  const lowerUrl = url.toLowerCase();
+  
+  for (const [platform, data] of Object.entries(SOCIAL_MEDIA_PLATFORMS)) {
+    if (platform !== 'other' && data.pattern.test(lowerUrl.replace('https://', '').replace('http://', ''))) {
+      return platform;
+    }
+  }
+  
+  return 'other';
+};
+
+// Helper function to format URL for opening
+const formatSocialUrl = (url, platform) => {
+  if (!url) return '#';
+  
+  // If it's already a full URL, return it
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // Add platform-specific domain if needed
+  const platformData = SOCIAL_MEDIA_PLATFORMS[platform];
+  if (platformData && platformData.domain) {
+    // Remove any existing domain prefix from the stored value
+    const cleanUrl = url.replace(platformData.domain.replace('https://', ''), '');
+    return platformData.domain + cleanUrl;
+  }
+  
+  // Default to https://
+  return 'https://' + url;
+};
+
+// Helper function to get social media icon component
+const getSocialIcon = (platform, fontSize = 'small', color = 'inherit') => {
+  const icons = {
+    whatsapp: <WhatsAppIcon fontSize={fontSize} sx={{ color }} />,
+    telegram: <TelegramIcon fontSize={fontSize} sx={{ color }} />,
+    instagram: <InstagramIcon fontSize={fontSize} sx={{ color }} />,
+    facebook: <FacebookIcon fontSize={fontSize} sx={{ color }} />,
+    twitter: <TwitterIcon fontSize={fontSize} sx={{ color }} />,
+    linkedin: <LinkedInIcon fontSize={fontSize} sx={{ color }} />,
+    youtube: <YouTubeIcon fontSize={fontSize} sx={{ color }} />,
+    discord: <ChatRounded fontSize={fontSize} sx={{ color }} />,
+    snapchat: <QuestionAnswerRounded fontSize={fontSize} sx={{ color }} />,
+    other: <LinkIcon fontSize={fontSize} sx={{ color }} />
+  };
+  return icons[platform] || <LinkIcon fontSize={fontSize} sx={{ color }} />;
+};
+
+// Function to handle social chip click
+const handleSocialChipClick = (url, platform) => {
+  const formattedUrl = formatSocialUrl(url, platform);
+  
+  // Check if it's a mobile device for WhatsApp/Telegram
+  if ((platform === 'whatsapp' || platform === 'telegram') && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    // For mobile, let the OS handle the app opening
+    window.open(formattedUrl, '_blank');
+  } else {
+    // For desktop, open in new tab
+    window.open(formattedUrl, '_blank', 'noopener,noreferrer');
+  }
+};
+
+// Social media platform options with icons, colors, and domain patterns
+const SOCIAL_MEDIA_PLATFORMS = {
+  whatsapp: {
+    id: 'whatsapp',
+    label: 'WhatsApp',
+    icon: 'WhatsApp',
+    color: '#25D366',
+    domain: 'https://wa.me/',
+    placeholder: 'wa.me/yournumber',
+    pattern: /^wa\.me\/.+/
+  },
+  telegram: {
+    id: 'telegram',
+    label: 'Telegram',
+    icon: 'Telegram',
+    color: '#0088cc',
+    domain: 'https://t.me/',
+    placeholder: 't.me/username',
+    pattern: /^t\.me\/.+/
+  },
+  instagram: {
+    id: 'instagram',
+    label: 'Instagram',
+    icon: 'Instagram',
+    color: '#E4405F',
+    domain: 'https://instagram.com/',
+    placeholder: 'instagram.com/username',
+    pattern: /^instagram\.com\/.+/
+  },
+  facebook: {
+    id: 'facebook',
+    label: 'Facebook',
+    icon: 'Facebook',
+    color: '#1877F2',
+    domain: 'https://facebook.com/',
+    placeholder: 'facebook.com/profile',
+    pattern: /^facebook\.com\/.+/
+  },
+  twitter: {
+    id: 'twitter',
+    label: 'Twitter',
+    icon: 'Twitter',
+    color: '#1DA1F2',
+    domain: 'https://twitter.com/',
+    placeholder: 'twitter.com/username',
+    pattern: /^twitter\.com\/.+/
+  },
+  linkedin: {
+    id: 'linkedin',
+    label: 'LinkedIn',
+    icon: 'LinkedIn',
+    color: '#0A66C2',
+    domain: 'https://linkedin.com/in/',
+    placeholder: 'linkedin.com/in/username',
+    pattern: /^linkedin\.com\/in\/.+/
+  },
+  youtube: {
+    id: 'youtube',
+    label: 'YouTube',
+    icon: 'YouTube',
+    color: '#FF0000',
+    domain: 'https://youtube.com/',
+    placeholder: 'youtube.com/c/username',
+    pattern: /^youtube\.com\/.+/
+  },
+  discord: {
+    id: 'discord',
+    label: 'Discord',
+    icon: 'Discord',
+    color: '#5865F2',
+    domain: 'https://discord.gg/',
+    placeholder: 'discord.gg/invite-code',
+    pattern: /^discord\.gg\/.+/
+  },
+  snapchat: {
+    id: 'snapchat',
+    label: 'Snapchat',
+    icon: 'Snapchat',
+    color: '#FFFC00',
+    domain: 'https://snapchat.com/add/',
+    placeholder: 'snapchat.com/add/username',
+    pattern: /^snapchat\.com\/add\/.+/
+  },
+  other: {
+    id: 'other',
+    label: 'Other',
+    icon: 'Link',
+    color: darkMode ? '#888' : '#666',
+    domain: '',
+    placeholder: 'Enter full URL',
+    pattern: /^https?:\/\/.+/
+  }
+};
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Typography variant="h6" sx={{ flexGrow: 1, mx: isMobile ? '10px' : '16px', mt: 1 }} >
@@ -1292,7 +1466,7 @@ const handleDonationAdded = (updatedUser, donationData) => {
               </Box> */}
             </Box>
           </Box>
-          <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
+          <Box sx={{  my: 1, padding: isMobile ? 2 : 3, borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Box display="flex" alignItems="center">
                 <Avatar sx={{ bgcolor: 'error.main', mr: 1, height: '32px', width: '32px' }}>
@@ -1303,24 +1477,17 @@ const handleDonationAdded = (updatedUser, donationData) => {
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: '8px' }}>
-                <Button variant="outlined" 
-                  sx={{borderRadius:'12px', padding: '4px 12px', textTransform: 'none', 
-                    color: '#4361ee',
-                    background: 'none',
-                    border: '1px solid #4361ee',
+                <Button variant="outlined" size="small"
+                  sx={{
+                    background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                    color: '#fff', px: 1.5,
+                    borderRadius: 5,
+                    textTransform: 'none',
+                    // boxShadow: '0 6px 25px rgba(67,97,238,0.35)',
                     transition: 'all 0.3s ease',
-                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
                     '&:hover': {
-                      background: 'none',
                       transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                    },
-                    '&.Mui-disabled': {
-                      background: 'rgba(0, 0, 0, 0.12)',
-                      color: 'rgba(0, 0, 0, 0.26)',
+                      boxShadow: '0 10px 30px rgba(67,97,238,0.45)',
                     },
                   }} 
                   onClick={handleEditBloodData}
@@ -1369,84 +1536,162 @@ const handleDonationAdded = (updatedUser, donationData) => {
               </Box>
             </Box>
             <Box sx={{display: 'flex', gap:'8px', flexDirection: 'column', borderRadius: '12px'}}>
-              <Typography variant="body2" color="textSecondary">
-                {userData?.bloodDonor?.donate === true
-                  ? "You’re a blood donor — thank you!"
-                  : userData?.bloodDonor?.donate === false
-                  ? "You haven’t enabled blood donation."
-                  : "You haven’t set this preference yet."}
-              </Typography>
-              <Box sx={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <Chip 
-                  label={`Blood Group: ${userData?.bloodDonor?.bloodGroup || 'Unknown'}`}
-                  // color="error"
-                  size="small" variant="outlined"
-                  // sx={{ fontWeight: 'bold' }}
-                />
-                {userData?.bloodDonor?.donationCount > 0 && (
-                  <Chip
-                    label={`${userData.bloodDonor.donationCount} Donation${userData.bloodDonor.donationCount > 1 ? 's' : ''}`}
-                    variant="outlined"
-                    size="small"
+              <Box sx={{ 
+                // mb: 3, 
+                // p: 2, 
+                // borderRadius: '12px',
+                // background: darkMode 
+                //   ? 'rgba(255, 255, 255, 0.05)' 
+                //   : 'rgba(67, 97, 238, 0.05)',
+                // border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(67, 97, 238, 0.1)'}`
+              }}>
+                <Typography variant="body2" color="textSecondary" sx={{ mb: 1.5 }} >
+                  {userData?.bloodDonor?.donate === true
+                    ? "🎉 You're a registered blood donor — thank you for being a lifesaver!"
+                    : userData?.bloodDonor?.donate === false
+                    ? "🔒 Blood donation is currently disabled"
+                    : "ℹ️ You haven't set your donation preference yet"}
+                </Typography>
+                {userData?.bloodDonor?.bloodGroup && (
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mb: 1.5 }}>
+                  <Chip 
+                    label={`🩸 ${userData?.bloodDonor?.bloodGroup || 'Unknown'}`}
+                    // color="error"
+                    size="small" variant="filled"
+                    // sx={{ fontWeight: 'bold' }}
                     sx={{ 
-                      borderColor: 'success.main',
-                      color: 'success.main'
+                      fontWeight: 'bold',
+                      background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                      color: 'white',
+                      '&:hover': {
+                        boxShadow: '0 4px 12px rgba(238, 90, 82, 0.4)',
+                      }
                     }}
                   />
+                  {userData?.bloodDonor?.donationCount > 0 && (
+                    <Chip
+                      label={`🏆 ${userData.bloodDonor.donationCount} Donation${userData.bloodDonor.donationCount > 1 ? 's' : ''}`}
+                      variant="filled"
+                      size="small"
+                      sx={{ 
+                        background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
+                        color: 'white',
+                        '&:hover': {
+                          boxShadow: '0 4px 12px rgba(46, 125, 50, 0.4)',
+                        }
+                      }}
+                    />
+                  )}
+                  {!eligibilityInfo.eligible && (
+                    <Chip
+                      label={`⏳ Eligible in ${eligibilityInfo.daysLeft} days`}
+                      variant="filled"
+                      size="small"
+                      sx={{ 
+                        background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+                        color: 'white',
+                        '&:hover': {
+                          boxShadow: '0 4px 12px rgba(245, 124, 0, 0.4)',
+                        }
+                      }}
+                    />
+                  )}
+                </Box>
                 )}
-                {!eligibilityInfo.eligible && (
-                  <Chip
-                    label={`Eligible in ${eligibilityInfo.daysLeft} days`}
-                    variant="outlined"
-                    size="small"
-                    sx={{ 
-                      borderColor: 'warning.main',
-                      color: 'warning.main'
-                    }}
-                  />
+                <Typography variant="body2" color="textSecondary">
+                  📅 Last donated: {userData?.bloodDonor?.lastDonated 
+                    ? formatDonateDate(userData.bloodDonor.lastDonated) 
+                    : 'No donation history yet'}
+                </Typography>
+              </Box>
+              {userData?.bloodDonor?.donate === true && (userData?.bloodDonor?.contactWay?.phone || userData?.bloodDonor?.contactWay?.email || (userData?.bloodDonor?.contactWay?.socialMedia && userData?.bloodDonor?.contactWay?.socialMedia?.length > 0)) && (
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="subtitle1" color="textSecondary" style={{ fontWeight: 500 }}>
+                  Contact Medium:
+                </Typography>
+                {(userData?.bloodDonor?.contactWay?.phone || userData.bloodDonor.contactWay.email) && (
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                    {userData.bloodDonor.contactWay.phone && (
+                      <Chip
+                        key="phone"
+                        label={`📱 ${userData.bloodDonor.contactWay.phone}`}
+                        variant="outlined"
+                        size="small"
+                        onClick={() => window.open(`tel:${userData.bloodDonor.contactWay.phone}`)}
+                        sx={{ 
+                          borderColor: '#4CAF50',
+                          color: '#4CAF50',
+                          '&:hover': {
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            borderColor: '#388E3C',
+                            cursor: 'pointer',
+                          }
+                        }}
+                      />
+                    )}
+                    {userData.bloodDonor.contactWay.email && (
+                      <Chip
+                        key="email"
+                        label={`✉️ ${userData.bloodDonor.contactWay.email}`}
+                        variant="outlined"
+                        size="small"
+                        onClick={() => window.open(`mailto:${userData.bloodDonor.contactWay.email}`)}
+                        sx={{ 
+                          borderColor: '#2196F3',
+                          color: '#2196F3',
+                          '&:hover': {
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            borderColor: '#1976D2',
+                            cursor: 'pointer',
+                          }
+                        }}
+                      />
+                    )}
+                  </Box>
+                )}
+                {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
+                  <Box>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                      Connect via social media:
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                      {userData.bloodDonor.contactWay.socialMedia.map((social, index) => {
+                        const platform = detectSocialPlatform(social.url || social.platform);
+                        const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+                        
+                        return (
+                          <Chip
+                            key={index}
+                            icon={getSocialIcon(platform, 'small', platformData.color)}
+                            label={social.platform || platformData.label}
+                            variant="filled"
+                            size="small"
+                            onClick={() => handleSocialChipClick(social.url, platform)}
+                            sx={{ 
+                              backgroundColor: platformData.color,
+                              color: 'white',
+                              fontWeight: 500, p: 0.5,
+                              transition: 'all 0.2s ease',
+                              '&:hover': {
+                                backgroundColor: platformData.color,
+                                transform: 'translateY(-2px)',
+                                boxShadow: `0 4px 12px ${platformData.color}80`,
+                                cursor: 'pointer',
+                              },
+                              '&:active': {
+                                transform: 'translateY(0)',
+                              }
+                            }}
+                          />
+                        );
+                      })}
+                    </Box>
+                  </Box>
                 )}
               </Box>
-              <Typography variant="body2" color="textSecondary">
-                Last donated: {userData?.bloodDonor?.lastDonated 
-                  ? formatDonateDate(userData.bloodDonor.lastDonated) 
-                  : 'No donation history yet'}
-              </Typography>
-              <Typography variant="body1" color="textSecondary" style={{ fontWeight: 500 }}>
-                Contact Medium:
-              </Typography>
-              {(userData?.bloodDonor?.contactWay?.phone || userData.bloodDonor.contactWay.email) && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {userData.bloodDonor.contactWay.phone && (
-                    <Chip
-                      key="phone"
-                      label={`📱 ${userData.bloodDonor.contactWay.phone}`}
-                      variant="outlined"
-                      size="small"
-                    />
-                  )}
-                  {userData.bloodDonor.contactWay.email && (
-                    <Chip
-                      key="email"
-                      label={`✉️ ${userData.bloodDonor.contactWay.email}`}
-                      variant="outlined"
-                      size="small"
-                    />
-                  )}
-                </Box>
               )}
-              {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  {userData.bloodDonor.contactWay.socialMedia.map((link, index) => (
-                    <Chip
-                      key={index}
-                      label={link.platform}
-                      variant="outlined"
-                      size="small"
-                    />
-                  ))}
-                </Box>
-              )}
-              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {userData?.bloodDonor?.bloodGroup && (
+              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap', px: 1 }}>
                 <Button
                   variant="outlined" fullWidth={isMobile}
                   onClick={handleOpenAddDonationDialog}
@@ -1499,9 +1744,18 @@ const handleDonationAdded = (updatedUser, donationData) => {
                 >
                   View Donation Memories
                 </Button>
-              </Box>
-              <Typography variant="caption" color="text.secondary" marginTop={2}>
-                *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
+              </Box>)}
+              <Typography variant="caption" color="text.secondary" sx={{ 
+                display: 'block',
+                // mt: 3,
+                pt: 2,
+                // borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'}`,
+                fontSize: '0.75rem',
+                lineHeight: 1.4
+              }}>
+                ⚠️ Note: When you enable blood donation, your blood group and contact information 
+                will be visible to nearby people in need of emergency blood support. 
+                You can update your privacy settings anytime.
               </Typography>
             </Box>
           </Box>
@@ -2213,7 +2467,7 @@ const handleDonationAdded = (updatedUser, donationData) => {
         <DialogContent>
           <Box >
             <Box >
-              <Box sx={{ p: 2, mb: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+              <Box sx={{ p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Typography variant="body2" fontWeight={500}>
                     {bloodData.donate
@@ -2259,9 +2513,10 @@ const handleDonationAdded = (updatedUser, donationData) => {
               </Box>
 
               {/* Contact Information */}
-              <Box sx={{ p: 2, bgcolor: 'rgba(25, 210, 34, 0.05)', borderRadius: 2 }}>
+              {bloodData.donate &&
+              <Box sx={{ p: 2, mt: 2, bgcolor: 'rgba(25, 210, 34, 0.05)', borderRadius: 2 }}>
                 <Typography variant="h6" fontWeight={500} gutterBottom>
-                  Contact Information
+                  Contact Medium
                 </Typography>
                 <TextField
                   fullWidth
@@ -2430,6 +2685,7 @@ const handleDonationAdded = (updatedUser, donationData) => {
                   </Typography>
                 </Box>
               </Box>
+              }
             </Box>
           </Box>
         </DialogContent>

@@ -2,6 +2,20 @@ import React from 'react';
 import { Card, CardContent, Typography, Box, Chip, Avatar, Rating } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import {
+  WhatsApp as WhatsAppIcon,
+  Telegram as TelegramIcon,
+  Instagram as InstagramIcon,
+  Facebook as FacebookIcon,
+  Twitter as TwitterIcon,
+  LinkedIn as LinkedInIcon,
+  YouTube as YouTubeIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Link as LinkIcon,
+  ChatRounded,
+  QuestionAnswerRounded,
+} from '@mui/icons-material';
 
 const BloodDonorCard = ({ donor, onClick, darkMode }) => {
 
@@ -58,6 +72,133 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
   };
 
   const eligibility = getEligibilityInfo();
+
+  
+  // Helper function to detect social platform from URL
+  const detectSocialPlatform = (url) => {
+    if (!url) return 'other';
+    
+    const lowerUrl = url.toLowerCase();
+    
+    for (const [platform, data] of Object.entries(SOCIAL_MEDIA_PLATFORMS)) {
+      if (platform !== 'other' && data.pattern.test(lowerUrl.replace('https://', '').replace('http://', ''))) {
+        return platform;
+      }
+    }
+    
+    return 'other';
+  };
+  
+  // Helper function to get social media icon component
+  const getSocialIcon = (platform, fontSize = 'small', color = 'inherit') => {
+    const icons = {
+      whatsapp: <WhatsAppIcon fontSize={fontSize} sx={{ color }} />,
+      telegram: <TelegramIcon fontSize={fontSize} sx={{ color }} />,
+      instagram: <InstagramIcon fontSize={fontSize} sx={{ color }} />,
+      facebook: <FacebookIcon fontSize={fontSize} sx={{ color }} />,
+      twitter: <TwitterIcon fontSize={fontSize} sx={{ color }} />,
+      linkedin: <LinkedInIcon fontSize={fontSize} sx={{ color }} />,
+      youtube: <YouTubeIcon fontSize={fontSize} sx={{ color }} />,
+      discord: <ChatRounded fontSize={fontSize} sx={{ color }} />,
+      snapchat: <QuestionAnswerRounded fontSize={fontSize} sx={{ color }} />,
+      other: <LinkIcon fontSize={fontSize} sx={{ color }} />
+    };
+    return icons[platform] || <LinkIcon fontSize={fontSize} sx={{ color }} />;
+  };
+  
+  // Social media platform options with icons, colors, and domain patterns
+  const SOCIAL_MEDIA_PLATFORMS = {
+    whatsapp: {
+      id: 'whatsapp',
+      label: 'WhatsApp',
+      icon: 'WhatsApp',
+      color: '#25D366',
+      domain: 'https://wa.me/',
+      placeholder: 'wa.me/yournumber',
+      pattern: /^wa\.me\/.+/
+    },
+    telegram: {
+      id: 'telegram',
+      label: 'Telegram',
+      icon: 'Telegram',
+      color: '#0088cc',
+      domain: 'https://t.me/',
+      placeholder: 't.me/username',
+      pattern: /^t\.me\/.+/
+    },
+    instagram: {
+      id: 'instagram',
+      label: 'Instagram',
+      icon: 'Instagram',
+      color: '#E4405F',
+      domain: 'https://instagram.com/',
+      placeholder: 'instagram.com/username',
+      pattern: /^instagram\.com\/.+/
+    },
+    facebook: {
+      id: 'facebook',
+      label: 'Facebook',
+      icon: 'Facebook',
+      color: '#1877F2',
+      domain: 'https://facebook.com/',
+      placeholder: 'facebook.com/profile',
+      pattern: /^facebook\.com\/.+/
+    },
+    twitter: {
+      id: 'twitter',
+      label: 'Twitter',
+      icon: 'Twitter',
+      color: '#1DA1F2',
+      domain: 'https://twitter.com/',
+      placeholder: 'twitter.com/username',
+      pattern: /^twitter\.com\/.+/
+    },
+    linkedin: {
+      id: 'linkedin',
+      label: 'LinkedIn',
+      icon: 'LinkedIn',
+      color: '#0A66C2',
+      domain: 'https://linkedin.com/in/',
+      placeholder: 'linkedin.com/in/username',
+      pattern: /^linkedin\.com\/in\/.+/
+    },
+    youtube: {
+      id: 'youtube',
+      label: 'YouTube',
+      icon: 'YouTube',
+      color: '#FF0000',
+      domain: 'https://youtube.com/',
+      placeholder: 'youtube.com/c/username',
+      pattern: /^youtube\.com\/.+/
+    },
+    discord: {
+      id: 'discord',
+      label: 'Discord',
+      icon: 'Discord',
+      color: '#5865F2',
+      domain: 'https://discord.gg/',
+      placeholder: 'discord.gg/invite-code',
+      pattern: /^discord\.gg\/.+/
+    },
+    snapchat: {
+      id: 'snapchat',
+      label: 'Snapchat',
+      icon: 'Snapchat',
+      color: '#FFFC00',
+      domain: 'https://snapchat.com/add/',
+      placeholder: 'snapchat.com/add/username',
+      pattern: /^snapchat\.com\/add\/.+/
+    },
+    other: {
+      id: 'other',
+      label: 'Other',
+      icon: 'Link',
+      color: darkMode ? '#888' : '#666',
+      domain: '',
+      placeholder: 'Enter full URL',
+      pattern: /^https?:\/\/.+/
+    }
+  };
 
   return (
     <Card 
@@ -189,6 +330,33 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
             variant="outlined"
             size="small"
           />
+        </Box>
+        <Box sx={{ my: 1 }}>
+          <Typography variant="body2" mb={0.5} >
+            Contact Medium:
+          </Typography>
+          {(donor?.bloodDonor?.contactWay?.phone || donor?.bloodDonor?.contactWay?.email ||  donor?.bloodDonor?.contactWay?.socialMedia?.length > 0) ? (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {donor.bloodDonor.contactWay.phone && <PhoneIcon fontSize="small" sx={{ color: '#0088cc' }} />}
+              {donor.bloodDonor.contactWay.email && <EmailIcon fontSize="small" sx={{ color: '#E4405F' }} />}
+
+              {donor.bloodDonor.contactWay.socialMedia.map((social, index) => {
+                const platform = detectSocialPlatform(social.url || social.platform);
+                const platformData =
+                  SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+
+                return (
+                  <Box key={index} sx={{ color: platformData.color }}> {/* platformData.color */}
+                    {getSocialIcon(platform, 'small')}
+                  </Box>
+                );
+              })}
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary" mb={1.5} >
+              N/A
+            </Typography>
+          )}
         </Box>
         <Typography variant="body2" sx={{ mt: 1, color: 'inherit'  }}>
           Last donated: {donor.bloodDonor?.lastDonated?.[0] ? formatDonateDate(lastDonationDate) : 'No donation history yet'} {' '}
