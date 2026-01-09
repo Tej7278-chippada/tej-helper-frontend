@@ -457,6 +457,31 @@ export const checkPostReported = async (postId) => {
   return response.data.hasReported;
 };
 
+// Report a user
+export const reportUser = async (userId, reportTypes, comment) => {
+  const authToken = localStorage.getItem('authToken');
+  return await API.post('/api/user-reports/report-user', {
+    userId,
+    reportTypes,
+    comment
+  }, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+};
+
+// Check if user is reported by user
+export const checkUserReported = async (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  const response = await API.get(`/api/user-reports/check-user-reported/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    },
+  });
+  return response.data.hasReported;
+};
+
 // get user posts
 export const fetchProfilePosts = async (userId) => {
   const authToken = localStorage.getItem('authToken');

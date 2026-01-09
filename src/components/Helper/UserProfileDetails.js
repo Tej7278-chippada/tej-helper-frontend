@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider, Grid, Tab, Tabs } from '@mui/material';
-import { fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
+import { checkUserReported, fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
 // import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -12,7 +12,7 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import FollowDialog from './FollowDialog';
 import UserProfileDetailsSkeleton from '../Skeletons/UserProfileDetailsSkeleton';
-// import { ReportGmailerrorredRounded } from '@mui/icons-material';
+import { CheckCircleRounded, ReportGmailerrorredRounded } from '@mui/icons-material';
 import {
   WhatsApp as WhatsAppIcon,
   Telegram as TelegramIcon,
@@ -27,6 +27,7 @@ import {
   ChatRounded,
   QuestionAnswerRounded,
 } from '@mui/icons-material';
+import ReportUser from '../Reports/ReportUser';
 
 const getGlassmorphismStyle = (theme, darkMode) => ({
   background: darkMode 
@@ -68,10 +69,14 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   const [followType, setFollowType] = useState(''); // 'followers' or 'following'
   const [selectedUser, setSelectedUser] = useState(null);
   const [nestedProfileOpen, setNestedProfileOpen] = useState(false);
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
+  const [checkingReport, setCheckingReport] = useState(false);
+  const [userReportSuccess, setUserReportSuccess] = useState(false);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
     if (open) {
+      setUserReportSuccess(false);
       fetchUserProfile();
       fetchUserPosts();
       // fetchUserRatings();
@@ -124,26 +129,26 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   };
 
   // Handle browser back button
-  useEffect(() => {
-    if (!open) return;
+  // useEffect(() => {
+  //   if (!open) return;
 
-    const handleBackButton = (e) => {
-      e.preventDefault();
-      onClose(false);
-    };
+  //   const handleBackButton = (e) => {
+  //     e.preventDefault();
+  //     onClose(false);
+  //   };
 
-    // Add event listener when dialog opens
-    window.history.pushState(null, '', window.location.pathname);
-    window.addEventListener('popstate', handleBackButton);
+  //   // Add event listener when dialog opens
+  //   window.history.pushState(null, '', window.location.pathname);
+  //   window.addEventListener('popstate', handleBackButton);
 
-    // Clean up event listener when dialog closes
-    return () => {
-      window.removeEventListener('popstate', handleBackButton);
-      if (window.history.state === null) {
-        window.history.back();
-      }
-    };
-  }, [open, onClose]);
+  //   // Clean up event listener when dialog closes
+  //   return () => {
+  //     window.removeEventListener('popstate', handleBackButton);
+  //     if (window.history.state === null) {
+  //       window.history.back();
+  //     }
+  //   };
+  // }, [open, onClose]);
 
   // const fetchUserRatings = async () => {
   //   setIsFetching(true);
@@ -210,6 +215,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       });
       return;
     } 
+    if (userId === localStorage.getItem('userId')) return;
     try {
       setLoadingFollow(true);
       await followUser(userId);
@@ -232,6 +238,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       });
       return;
     } 
+    if (userId === localStorage.getItem('userId')) return;
     try {
       setLoadingFollow(true);
       await unfollowUser(userId);
@@ -436,6 +443,44 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       domain: '',
       placeholder: 'Enter full URL',
       pattern: /^https?:\/\/.+/
+    }
+  };
+
+  // function to handle report button click
+  const handleReportClick = async () => {
+    if (!isAuthenticated) {
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    }
+    if (userId === localStorage.getItem('userId')) return;
+
+    try {
+      setCheckingReport(true);
+      const response = await checkUserReported(userId);
+      
+      if (response) {
+        setSnackbar({
+          open: true,
+          message: 'You have already reported this user.',
+          severity: 'info'
+        });
+        setUserReportSuccess(true);
+      } else {
+        setReportDialogOpen(true);
+      }
+    } catch (error) {
+      console.error('Error checking report status:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error checking report status. Please try again later.',
+        severity: 'error'
+      });
+    } finally {
+      setCheckingReport(false);
     }
   };
 
@@ -1219,11 +1264,14 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
             )
           ) : null}
         </Box>
-        {/* <Button fullWidth variant="outlined" color="error" sx={{ mt: 2, borderRadius: '12px', textTransform: 'none' }}
-          startIcon={<ReportGmailerrorredRounded />}
+        {userId !== localStorage.getItem('userId') && (
+        <Button fullWidth variant="outlined" color="error" 
+          sx={{ mt: 2, borderRadius: '12px', textTransform: 'none' }}
+          startIcon={checkingReport ? <CircularProgress size={18} /> : userReportSuccess ? <CheckCircleRounded/> : <ReportGmailerrorredRounded />}
+          onClick={handleReportClick} disabled={checkingReport || userReportSuccess}
         >
-          Report User
-        </Button> */}
+          {userReportSuccess ? 'Reported successfully' : 'Report User'}
+        </Button>)}
       </DialogContent>
       )}
       {/* { isRateUserOpen && (
@@ -1308,6 +1356,21 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
         isAuthenticated={isAuthenticated}
         setLoginMessage={setLoginMessage}
         setSnackbar={setSnackbar}
+        darkMode={darkMode}
+      />
+
+      <ReportUser
+        open={reportDialogOpen}
+        onClose={() => setReportDialogOpen(false)}
+        onReportSuccess={() => {
+          setSnackbar({
+            open: true,
+            message: 'User reported successfully! Thank you for keeping our community safe.',
+            severity: 'success'
+          });
+          setUserReportSuccess(true);
+        }}
+        userId={userId}
         darkMode={darkMode}
       />
     </Dialog>

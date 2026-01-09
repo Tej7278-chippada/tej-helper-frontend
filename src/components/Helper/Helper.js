@@ -4733,20 +4733,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               label={formatPrice(post.price)}
                               size="small"
                               sx={(theme) => ({
-                                backgroundColor:
-                                  // darkMode
-                                  //   ?
-                                     'rgba(102, 187, 106, 0.18)', // muted green
-                                    // : theme.palette.success.main,
+                                backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                                // backgroundColor:
+                                //   // darkMode
+                                //   //   ?
+                                //      'rgba(102, 187, 106, 0.18)', // muted green
+                                //     // : theme.palette.success.main,
                                 color:
                                   // darkMode
                                   //   ? 
-                                    theme.palette.success.light,
-                                    // : '#fff',
+                                    // theme.palette.success.light,
+                                    '#fff',
                                 border:
                                   // darkMode
                                   //   ? 
-                                    '1px solid rgba(102, 187, 106, 0.45)',
+                                    // '1px solid rgba(102, 187, 106, 0.45)',
+                                    '1px solid rgba(145, 145, 145, 0.45)',
                                     // : 'none',
                                 pr: 0.75,
                                 height: '22px',

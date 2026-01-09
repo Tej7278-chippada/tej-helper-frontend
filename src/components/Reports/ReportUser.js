@@ -1,4 +1,4 @@
-// /src/components/Reports/ReportPost.js
+// /src/components/Reports/ReportUser.js
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -22,7 +22,7 @@ import {
 } from '@mui/material';
 import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
 import PeopleAltRoundedIcon from '@mui/icons-material/PeopleAltRounded';
-import { reportPost } from '../api/api';
+import { reportPost, reportUser } from '../api/api';
 
 const reportTypes = [
   { value: 'Fraud', label: 'Fraud or Scam', description: 'Misleading information or potential scam' },
@@ -35,7 +35,7 @@ const reportTypes = [
   { value: 'Other', label: 'Other', description: 'Other issues not listed above' }
 ];
 
-const ReportPost = ({ open, onClose, onReportSuccess, post, darkMode }) => {
+const ReportUser = ({ open, onClose, onReportSuccess, userId, darkMode }) => {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,26 +62,30 @@ const ReportPost = ({ open, onClose, onReportSuccess, post, darkMode }) => {
     // setSuccess('');
 
     try {
-      const response = await reportPost(post._id, selectedTypes, comment.trim());
+      const response = await reportUser(userId, selectedTypes, comment.trim());
 
       if (response.data.success) {
-        // setSuccess(`Post reported successfully! This post has been reported ${response.data.totalReports} times.`);
         
         // Call the success callback
         if (onReportSuccess) {
           onReportSuccess();
         }
+
+        // Reset form state
+        setSelectedTypes([]);
+        setComment('');
+        setError('');
         
         // Auto close after success
-        // setTimeout(() => {
+        setTimeout(() => {
           handleClose();
-        // }, 2000);
+        }, 2000);
       }
     } catch (error) {
-      console.error('Error reporting post:', error);
+      console.error('Error reporting user:', error);
       const errorMessage = error.response?.data?.message || 
-        (error.response?.status === 400 ? 'You have already reported this post' : 
-         'Failed to report post. Please try again.');
+        (error.response?.status === 400 ? 'You have already reported this user' : 
+         'Failed to report user. Please try again.');
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -140,37 +144,15 @@ const ReportPost = ({ open, onClose, onReportSuccess, post, darkMode }) => {
       }}>
         <ReportGmailerrorredRoundedIcon color="error" />
         <Typography variant="h6" component="span">
-          Report Post
+          Report User
         </Typography>
       </DialogTitle>
 
       <DialogContent sx={{ pt: 3 }}>
-        
-        
-        {/* {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
-          </Alert>
-        )}
-
-        {!success && ( */}
           <>
-            {/* <Card sx={{ mb: 2, bgcolor: darkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)' }}>
-              <CardContent>
-                <Typography variant="subtitle2" color="textSecondary">
-                  Reporting Post:
-                </Typography>
-                <Typography variant="body1" fontWeight="500">
-                  "{post?.title}"
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {post?.postType === 'ServiceOffering' ? 'Service' : 'Help Request'} • {post?.serviceType || post?.categories}
-                </Typography>
-              </CardContent>
-            </Card> */}
 
             <Typography variant="body1" sx={{ my: 2, fontWeight: 500 }}>
-              Why are you reporting this post?
+              Why are you reporting this user?
             </Typography>
             <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
               Select all reasons that apply. Your report helps keep our community safe.
@@ -236,7 +218,7 @@ const ReportPost = ({ open, onClose, onReportSuccess, post, darkMode }) => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 variant="outlined"
-                placeholder="Please provide specific details about what's wrong with this post..."
+                placeholder="Please provide specific details about what's wrong with this user..."
                 inputProps={{ 
                   maxLength: 500,
                   disabled: loading
@@ -271,14 +253,12 @@ const ReportPost = ({ open, onClose, onReportSuccess, post, darkMode }) => {
               </Box>
             )}
           </>
-        {/* )} */}
       </DialogContent>
         {error && (
           <Alert severity="error" sx={{ mb: 0 }} onClose={() => setError('')}>
             {error}
           </Alert>
         )}
-      {/* {!success && ( */}
         <DialogActions sx={{ 
           p: 2, 
           gap: 2,
@@ -300,25 +280,11 @@ const ReportPost = ({ open, onClose, onReportSuccess, post, darkMode }) => {
             startIcon={loading ? <CircularProgress size={20} sx={{mr: 1}}/> : <ReportGmailerrorredRoundedIcon />}
             sx={{ minWidth: 140, borderRadius: '12px', textTransform: 'none' }}
           >
-            {loading ? 'Reporting...' : 'Report Post'}
+            {loading ? 'Reporting...' : 'Report User'}
           </Button>
         </DialogActions>
-      {/* )}
-
-      {success && (
-        <DialogActions sx={{ p: 3 }}>
-          <Button 
-            onClick={handleClose}
-            color="primary"
-            size="large"
-            variant="contained"
-          >
-            Close
-          </Button>
-        </DialogActions>
-      )} */}
     </Dialog>
   );
 };
 
-export default ReportPost;
+export default ReportUser;

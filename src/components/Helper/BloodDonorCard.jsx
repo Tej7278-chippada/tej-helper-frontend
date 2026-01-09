@@ -267,9 +267,9 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
             {/* Blood Group and Distance */}
             <Box display="flex" gap={1} alignItems="center" mb={1}>
               <Chip 
-                label={`Blood Group: ${donor.bloodDonor?.bloodGroup || 'Unknown'}`}
-                color="error"
-                size="small"
+                label={`🩸 ${donor.bloodDonor?.bloodGroup || 'Unknown'}`}
+                // color="error"
+                size="small" variant="outlined"
                 sx={{ fontWeight: 'bold' }}
               />
               <Box display="flex" alignItems="center">

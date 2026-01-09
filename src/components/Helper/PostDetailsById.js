@@ -29,7 +29,7 @@ import axios from 'axios';
 import PaidIcon from '@mui/icons-material/Paid';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import EmergencyIcon from '@mui/icons-material/Emergency';
-import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, ChildCare, CleaningServices, Restaurant, School, Pets, LocalShipping, Handyman, HomeWork, Landscape, MoreHoriz, CurrencyRupee, Schedule } from '@mui/icons-material';
+import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, ChildCare, CleaningServices, Restaurant, School, Pets, LocalShipping, Handyman, HomeWork, Landscape, MoreHoriz, CurrencyRupee, Schedule, CheckCircleRounded } from '@mui/icons-material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
 import ReportPost from '../Reports/ReportPost';
@@ -118,6 +118,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const [chatData, setChatData] = useState({});
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [checkingReport, setCheckingReport] = useState(false);
+  const [postReportSuccess, setPostReportSuccess] = useState(false);
 
   
   useEffect(() => {
@@ -1011,6 +1012,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
           message: 'You have already reported this post.',
           severity: 'info'
         });
+        setPostReportSuccess(true);
       } else {
         setReportDialogOpen(true);
       }
@@ -1449,10 +1451,10 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 />
                 {/* Repost post button */}
                 <Chip 
-                  icon={checkingReport ? <CircularProgress size={18} /> : <ReportGmailerrorredRoundedIcon />}
+                  icon={checkingReport ? <CircularProgress size={18} /> : postReportSuccess ? <CheckCircleRounded/> : <ReportGmailerrorredRoundedIcon />}
                   variant="outlined" 
                   size="small" 
-                  onClick={handleReportClick} disabled={checkingReport}
+                  onClick={handleReportClick} disabled={checkingReport || postReportSuccess}
                   aria-label="Report Post"
                   title="Report Post" 
                   color="error"
@@ -1642,6 +1644,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                 message: 'Post reported successfully! Thank you for keeping our community safe.',
                 severity: 'success'
               });
+              setPostReportSuccess(true);
             }}
             post={post}
             darkMode={darkMode}
