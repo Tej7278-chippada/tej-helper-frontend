@@ -41,6 +41,7 @@ import AboutHelper from './components/Banners/AboutHelper';
 // import GoogleAdsTracker from './utils/GoogleAdsTracker';
 import CacheManagement from './components/Admin/CacheManagement';
 import { SnackbarProvider } from 'notistack';
+import UserReports from './components/Admin/UserReports';
 // import AppInstaller from './components/AppInstaller';
 
 const getDesignTokens = (mode) => ({
@@ -542,6 +543,11 @@ function App() {
           <Route path="/post-reports" element={
             <PrivateRoute adminOnly>
               <PostReports darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
+            </PrivateRoute>
+          } />
+          <Route path="/user-reports" element={
+            <PrivateRoute adminOnly>
+              <UserReports darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate} username={username}/>
             </PrivateRoute>
           } />
           <Route path="/profile-verification" element={

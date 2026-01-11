@@ -21,7 +21,8 @@ import {
   Campaign as BannerIcon,
   AdminPanelSettings as AdminIcon,
   CardGiftcardRounded,
-  Cached as CacheIcon
+  Cached as CacheIcon,
+  NoAccountsRounded
 } from "@mui/icons-material";
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
@@ -52,12 +53,20 @@ const AdminPage = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, usern
       bgGradient: "linear-gradient(135deg, #ff9800 0%, #ff5722 100%)"
     },
     {
-      title: "Reports Management",
+      title: "User Reports Management",
+      description: "Review reported users, take actions, and manage content moderation",
+      icon: <NoAccountsRounded sx={{ fontSize: 40 }} />,
+      color: "#f44336",
+      route: "/user-reports",
+      bgGradient: "linear-gradient(135deg, #f44336 0%, #e91e63 100%)"
+    },
+    {
+      title: "Post Reports Management",
       description: "Review reported posts, take actions, and manage content moderation",
       icon: <ReportGmailerrorredRoundedIcon sx={{ fontSize: 40 }} />,
-      color: "#f44336",
+      color: "#673ab7",
       route: "/post-reports",
-      bgGradient: "linear-gradient(135deg, #f44336 0%, #e91e63 100%)"
+      bgGradient: "linear-gradient(135deg, #673ab7 0%, #512da8 100%)"
     },
     {
       title: "User Feedback",

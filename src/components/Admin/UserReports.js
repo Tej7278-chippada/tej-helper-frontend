@@ -1,4 +1,4 @@
-// src/components/Admin/PostReports.js
+// src/components/Admin/UserReports.js
 import React, { useState, useEffect } from 'react';
 import {
   Box,
@@ -44,16 +44,16 @@ import {
   Refresh as RefreshIcon,
   Edit as EditIcon
 } from '@mui/icons-material';
-import { getReports, updateReport, suspendPostFromReport, getReportStatistics } from '../api/adminApi';
+import { getUserReports, getUserReportStatistics, suspendUserFromUserReport, updateUserReport } from '../api/adminApi';
 import Layout from '../Layout';
 import { useTheme } from '@emotion/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link} from 'react-router-dom';
 import UserProfileDetails from '../Helper/UserProfileDetails';
 
-const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
+const UserReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, username }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -61,7 +61,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
   const [actionDialogOpen, setActionDialogOpen] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
   const [action, setAction] = useState('');
-  const [postStatus, setPostStatus] = useState('Suspended');
+  const [userStatus, setUserStatus] = useState('suspended');
   const [pagination, setPagination] = useState({
     page: 1,
     totalPages: 1,
@@ -95,7 +95,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
         limit: 10,
         ...filters
       };
-      const response = await getReports(params);
+      const response = await getUserReports(params);
       if (response.data.success) {
         setReports(response.data.reports);
         setPagination(prev => ({
@@ -114,7 +114,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
 
   const fetchStatistics = async () => {
     try {
-      const response = await getReportStatistics();
+      const response = await getUserReportStatistics();
       if (response.data.success) {
         setStatistics(response.data.statistics);
       }
@@ -139,7 +139,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     setAction(actionType);
     // Pre-fill existing admin notes when editing
     setAdminNotes(report.adminNotes || '');
-    setPostStatus('Suspended');
+    setUserStatus('suspended');
     setActionDialogOpen(true);
   };
 
@@ -148,12 +148,12 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
       let response;
       
       if (action === 'suspend') {
-        response = await suspendPostFromReport(selectedReport._id, {
-          postStatus,
+        response = await suspendUserFromUserReport(selectedReport._id, {
+          userStatus,
           adminNotes
         });
       } else {
-        response = await updateReport(selectedReport._id, {
+        response = await updateUserReport(selectedReport._id, {
           status: action === 'resolve' ? 'Resolved' : 'UnderReview',
           adminNotes
         });
@@ -168,9 +168,9 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                   ...report, 
                   status: response.data.report.status,
                   adminNotes: response.data.report.adminNotes,
-                  post: {
-                    ...report.post,
-                    postStatus: response.data.report.postId?.postStatus || report.post.postStatus
+                  user: {
+                    ...report.user,
+                    accountStatus: response.data.report.userId?.accountStatus || report.pouserst.userStatus
                   }
                 } 
               : report
@@ -233,10 +233,6 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
     }
   };
 
-  const openPostDetail = (postId) => {
-    navigate(`/post/${postId}`);
-  };
-
   const handleOpenUserProfileDialog = (id) => {
     if (!isAuthenticated) { // Prevent unauthenticated actions
       setLoginMessage({
@@ -294,10 +290,10 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
         <Box>
           <Typography variant={isMobile ? 'h5' : 'h4'} gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <ReportIcon color="error" />
-            Reported Posts Management
+            Reported Users Management
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Review and take action on reported posts
+            Review and take action on reported users
           </Typography>
         </Box>
         <Tooltip title="Refresh Data">
@@ -434,8 +430,8 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                 <Table>
                 <TableHead>
                     <TableRow>
-                    <TableCell>Post</TableCell>
-                    <TableCell>Owner</TableCell>
+                    <TableCell>User</TableCell>
+                    {/* <TableCell>Owner</TableCell> */}
                     <TableCell>Reports</TableCell>
                     <TableCell>Severity</TableCell>
                     <TableCell>Status</TableCell>
@@ -463,40 +459,38 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                         <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <Avatar
-                                src={report.post?.media?.[0] ? (`data:image/jpeg;base64,${report.post.media[0]}`) : 'https://placehold.co/80x80?text=No+Image'}
+                                src={report.user?.profilePic ? (`data:image/jpeg;base64,${report.user.profilePic}`) : 'https://placehold.co/80x80?text=No+Image'}
                                 variant="rounded" 
-                                onClick={() => openPostDetail(report.post._id)}
+                                onClick={() => handleOpenUserProfileDialog(report.user._id)}
                                 sx={{ width: 40, height: 40, cursor: 'pointer' }}
                             />
                             <Box>
-                            <Typography variant="body2" fontWeight="bold" onClick={() => openPostDetail(report.post._id)} sx={{ cursor: 'pointer' }}>
-                                {report.post?.title}
+                            <Typography variant="body2" fontWeight="bold" onClick={() => handleOpenUserProfileDialog(report.user._id)} sx={{ cursor: 'pointer' }}>
+                                {report.user?.username}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
+                            {/* <Typography variant="caption" color="text.secondary">
                                 {report.post?.postType} • {report.post?.serviceType || report.post?.categories}
-                            </Typography>
+                            </Typography> */}
                             <Typography variant="caption" display="block" color={
-                                report.post?.postStatus === 'Suspended' ? 'error' : 
-                                report.post?.postStatus === 'Active' ? 'success' : 'warning'
+                                report.user?.accountStatus === 'suspended' ? 'error' : 
+                                report.user?.accountStatus === 'active' ? 'success' : 'warning'
                             }>
-                                Status: {report.post?.postStatus}
+                                Status: {report.user?.accountStatus}
                             </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {formatDate(report.post?.createdAt)}
-                            </Typography>
+                            {/* <Typography variant="caption" color="text.secondary">
+                              {formatDate(report.user?.lastLoginAt)}
+                            </Typography> */}
                             </Box>
                         </Box>
                         </TableCell>
-                        <TableCell>
-                        <Typography variant="body2" sx={{ cursor: 'pointer' }}
-                          onClick={() => handleOpenUserProfileDialog(report.postOwner._id)}
-                        >
+                        {/* <TableCell>
+                        <Typography variant="body2">
                             {report.postOwner?.username}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                             {report.postOwner?.userCode}
                         </Typography>
-                        </TableCell>
+                        </TableCell> */}
                         <TableCell>
                         <Typography variant="body2" fontWeight="bold">
                             {report.stats.totalReports}
@@ -551,7 +545,7 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
                                 <EditIcon />
                             </IconButton>
                             </Tooltip>
-                            <Tooltip title="Suspend Post">
+                            <Tooltip title="Suspend User">
                             <IconButton
                                 size="small"
                                 color="error"
@@ -614,19 +608,20 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
           {selectedReport && (
             <Box>
               <Typography variant="h6" gutterBottom>
-                Post Information
+                User Information
               </Typography>
               <Card sx={{ p: 2, mb: 2, borderRadius: '12px' }}>
-                <Typography><strong>Title:</strong> {selectedReport.post?.title}</Typography>
-                <Typography><strong>Type:</strong> {selectedReport.post?.postType}</Typography>
-                <Typography><strong>Category:</strong> {selectedReport.post?.serviceType || selectedReport.post?.categories}</Typography>
+                <Typography><strong>Username:</strong> {selectedReport.user?.username}</Typography>
+                {/* <Typography><strong>Type:</strong> {selectedReport.user?.postType}</Typography> */}
+                {/* <Typography><strong>Category:</strong> {selectedReport.post?.serviceType || selectedReport.post?.categories}</Typography> */}
                 <Typography color={
-                  selectedReport.post?.postStatus === 'Suspended' ? 'error' : 
-                  selectedReport.post?.postStatus === 'Active' ? 'success' : 'warning'
+                  selectedReport.user?.accountStatus === 'suspended' ? 'error' : 
+                  selectedReport.user?.accountStatus === 'active' ? 'success' : 'warning'
                 }>
-                  <strong>Status:</strong> {selectedReport.post?.postStatus}
+                  <strong>Status:</strong> {selectedReport.user?.accountStatus}
                 </Typography>
-                <Typography><strong>Created:</strong> {formatDate(selectedReport.post?.createdAt)}</Typography>
+                <Typography><strong> AccountCreated:</strong> {formatDate(selectedReport.user?.accountCreatedAt)}</Typography>
+                <Typography><strong> Last Login:</strong> {formatDate(selectedReport.user?.lastLoginAt)}</Typography>
               </Card>
 
               <Typography variant="h6" gutterBottom>
@@ -713,22 +708,22 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
           {action === 'suspend' && <SuspendIcon color="error" />}
           {action === 'resolve' && <ResolveIcon color="success" />}
           {action === 'edit' && <EditIcon color="info" />}
-          {action === 'suspend' ? 'Suspend Post' : 
-           action === 'resolve' ? 'Resolve Report' : 
+          {action === 'suspend' ? 'Suspend User' : 
+           action === 'resolve' ? 'Resolve User Report' : 
            'Edit Admin Notes'}
         </DialogTitle>
         <DialogContent>
           {action === 'suspend' && (
             <FormControl fullWidth sx={{ mt: 1 }}>
-              <InputLabel>Post Status</InputLabel>
+              <InputLabel>User Status</InputLabel>
               <Select
-                value={postStatus}
-                label="Post Status"
-                onChange={(e) => setPostStatus(e.target.value)}
+                value={userStatus}
+                label="User Status"
+                onChange={(e) => setUserStatus(e.target.value)}
               >
-                <MenuItem value="Suspended">Suspend</MenuItem>
-                <MenuItem value="Closed">Close</MenuItem>
-                <MenuItem value="InActive">Make Inactive</MenuItem>
+                <MenuItem value="suspended">Suspend</MenuItem>
+                <MenuItem value="deleted">Deleted</MenuItem>
+                <MenuItem value="inactive">Make Inactive</MenuItem>
               </Select>
             </FormControl>
           )}
@@ -764,8 +759,8 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
               'primary'
             }
           >
-            {action === 'suspend' ? `Make status as ${postStatus}` : 
-             action === 'resolve' ? 'Resolve Report' : 
+            {action === 'suspend' ? `Make account as ${userStatus}` : 
+             action === 'resolve' ? 'Resolve User Report' : 
              'Update Notes'}
           </Button>
         </DialogActions>
@@ -852,4 +847,4 @@ const PostReports = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate, use
   );
 };
 
-export default PostReports;
+export default UserReports;

@@ -339,3 +339,44 @@ export const getCouponRequestDetails = (requestId) => {
 export const reviewCouponRequest = (requestId, data) => {
   return API.put(`/api/coupon/admin/request/${requestId}/review`, data);
 };
+
+// Get user reports for admin
+export const getUserReports = (params = {}) => {
+  const authToken = localStorage.getItem('authToken');
+  const queryParams = new URLSearchParams(params).toString();
+  return API.get(`/api/user-reports/admin/user-reports?${queryParams}`, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Get user report details for a specific user
+export const getUserReportDetails = (userId) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.get(`/api/user-reports/admin/user-reports/user/${userId}`, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Update user report status
+export const updateUserReport = (reportId, data) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.put(`/api/user-reports/admin/user-reports/${reportId}`, data, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Suspend user from user reports
+export const suspendUserFromUserReport = (reportId, data) => {
+  const authToken = localStorage.getItem('authToken');
+  return API.post(`/api/user-reports/admin/user-reports/${reportId}/suspend-user`, data, {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
+
+// Get user report statistics
+export const getUserReportStatistics = () => {
+  const authToken = localStorage.getItem('authToken');
+  return API.get('/api/user-reports/admin/user-report-statistics', {
+    headers: { Authorization: `Bearer ${authToken}` }
+  });
+};
