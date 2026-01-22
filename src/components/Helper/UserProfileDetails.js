@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, Button, TextField, Rating, Box, Typography, LinearProgress, CircularProgress, Avatar, IconButton, Slide, Chip, Tooltip, Divider, Grid, Tab, Tabs } from '@mui/material';
-import { checkUserReported, fetchProfilePosts, fetchUserProfileData, followUser, unfollowUser } from '../api/api';
+import { cancelBloodRequest, checkUserReported, fetchProfilePosts, fetchUserProfileData, followUser, requestBloodDonation, unfollowUser } from '../api/api';
 // import { userData } from '../../utils/userData';
 import CloseIcon from '@mui/icons-material/Close';
 import { useTheme } from '@emotion/react';
@@ -72,11 +72,14 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   const [reportDialogOpen, setReportDialogOpen] = useState(false);
   const [checkingReport, setCheckingReport] = useState(false);
   const [userReportSuccess, setUserReportSuccess] = useState(false);
+  const [bloodRequestStatus, setBloodRequestStatus] = useState('request'); // 'request', 'requested', 'accepted', 'rejected'
+  const [loadingBloodRequest, setLoadingBloodRequest] = useState(false);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
     if (open) {
       setUserReportSuccess(false);
+      setBloodRequestStatus('request');
       fetchUserProfile();
       fetchUserPosts();
       // fetchUserRatings();
@@ -109,6 +112,11 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       // setRatings(response.data.ratings);
       setServiceHistory(response.data.serviceHistory || []);
 
+      // Set blood request status if available
+      if (response.data.bloodRequestStatus) {
+        setBloodRequestStatus(response.data.bloodRequestStatus);
+      }
+
       // Autofill if logged-in user already rated this user
       // const existingRating = response.data.ratings.find(
       //   (r) => r.userId?._id === loggedUserData?.userId || ''
@@ -122,7 +130,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       //   setComment('');
       // }
     } catch (error) {
-      console.error('Error fetching user rating:', error);
+      console.error('Error fetching user details:', error);
     } finally {
       setIsFetching(false);
     }
@@ -249,6 +257,56 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       setSnackbar({ open: true, message: error.response?.data?.message || 'Error unfollowing user', severity: 'error' });
     } finally {
       setLoadingFollow(false);
+    }
+  };
+
+  const handleRequestBlood = async () => {
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    if (userId === localStorage.getItem('userId')) return;
+
+    try {
+      setLoadingBloodRequest(true);
+      
+      if (bloodRequestStatus === 'request' || bloodRequestStatus === 'cancelled') {
+        // Make new request or reactivate cancelled request
+        const response = await requestBloodDonation(userId);
+        setBloodRequestStatus('pending');
+        setSnackbar({ 
+          open: true, 
+          message: response.data.message || 'Blood donation request sent successfully', 
+          severity: 'success' 
+        });
+      } else if (bloodRequestStatus === 'pending') {
+        // Cancel existing request
+        await cancelBloodRequest(userId);
+        setBloodRequestStatus('cancelled');
+        setSnackbar({ 
+          open: true, 
+          message: 'Blood donation request cancelled', 
+          severity: 'info' 
+        });
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Error processing blood donation request';
+      setSnackbar({ 
+        open: true, 
+        message: errorMessage, 
+        severity: 'error' 
+      });
+      
+      // Update status based on error response
+      if (error.response?.data?.status) {
+        setBloodRequestStatus(error.response.data.status);
+      }
+    } finally {
+      setLoadingBloodRequest(false);
     }
   };
 
@@ -973,21 +1031,101 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <BloodtypeIcon color="error" fontSize="small" />
-              <Typography variant="body1" fontWeight={500}>
-                Blood Donation
-              </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+              <Box>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <BloodtypeIcon color="error" fontSize="small" />
+                  <Typography variant="body1" fontWeight={500}>
+                    Blood Donation
+                  </Typography>
+                </Box>
+                <Typography variant="body2" color="textSecondary" mb={1} >
+                  {profile?.bloodDonor?.donate === true
+                    ? profile?.bloodDonor?.bloodGroup === "Unknown"
+                      ? "This user donates blood! (Blood group not specified)"
+                      : `This user donates blood! (${profile?.bloodDonor?.bloodGroup})`
+                    : profile?.bloodDonor?.donate === false
+                    ? "Blood donation is not enabled."
+                    : "This preference hasn’t been set yet."}
+                </Typography>
+              </Box>
+              {userId !== localStorage.getItem('userId') && (profile?.bloodDonor?.donate === true) && (
+                <Button
+                  variant="text" size="small"
+                  onClick={handleRequestBlood}
+                  sx={{ 
+                    borderRadius: 99, 
+                    textTransform: 'none', 
+                    px: 1.5,
+                    color: bloodRequestStatus === 'pending' ? '#4361ee' : 'white',
+                    background: bloodRequestStatus === 'pending' 
+                      ? 'rgba(67, 97, 238, 0.1)' 
+                      : bloodRequestStatus === 'accepted' 
+                      ? 'linear-gradient(135deg, #43ee6e 0%, #37c93e 100%)'
+                      : bloodRequestStatus === 'rejected'
+                      ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5252 100%)'
+                      : bloodRequestStatus === 'cancelled'
+                      ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
+                      : 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                    border: bloodRequestStatus === 'pending' 
+                      ? '1px solid #4361ee' 
+                      : bloodRequestStatus === 'accepted' 
+                      ? '1px solid #43ee6e'
+                      : bloodRequestStatus === 'rejected'
+                      ? '1px solid #ff6b6b'
+                      : bloodRequestStatus === 'cancelled'
+                      ? '1px solid #ffa726'
+                      : 'none',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      background: bloodRequestStatus === 'pending' 
+                        ? 'rgba(67, 97, 238, 0.2)' 
+                        : bloodRequestStatus === 'accepted' 
+                        ? 'linear-gradient(135deg, #43ee6e 0%, #37c93e 100%)'
+                        : bloodRequestStatus === 'rejected'
+                        ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5252 100%)'
+                        : bloodRequestStatus === 'cancelled'
+                        ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
+                        : gradientHover,
+                      transform: 'translateY(-2px)',
+                      boxShadow: bloodRequestStatus === 'pending' 
+                        ? '0 6px 25px rgba(67, 97, 238, 0.4)'
+                        : bloodRequestStatus === 'cancelled'
+                        ? '0 6px 25px rgba(255, 167, 38, 0.4)'
+                        : bloodRequestStatus === 'accepted' 
+                        ? 'none'
+                        : bloodRequestStatus === 'rejected'
+                        ? 'none'
+                        : '0 6px 25px rgba(67, 97, 238, 0.4)',
+                    },
+                    '&:active': {
+                      transform: 'translateY(0)',
+                    },
+                    '&.Mui-disabled': {
+                      background: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)',
+                      border: 'none',
+                    },
+                  }}
+                  disabled={!isAuthenticated || isFetching || loadingBloodRequest}
+                    //  || bloodRequestStatus === 'accepted' || bloodRequestStatus === 'rejected'}
+                >
+                  {loadingBloodRequest ? (
+                    <CircularProgress size={18} sx={{ m: '2px', color: '#3a56d4' }} />
+                  ) : bloodRequestStatus === 'pending' ? (
+                    'Cancel Request'
+                  ) : bloodRequestStatus === 'accepted' ? (
+                    'Request Accepted'
+                  ) : bloodRequestStatus === 'rejected' ? (
+                    'Request Rejected'
+                  ) : bloodRequestStatus === 'cancelled' ? (
+                    'Request Again'
+                  ) : (
+                    'Request Blood'
+                  )}
+                </Button>
+              )}
             </Box>
-            <Typography variant="body2" color="textSecondary" mb={1} >
-              {profile?.bloodDonor?.donate === true
-                ? profile?.bloodDonor?.bloodGroup === "Unknown"
-                  ? "This user donates blood! (Blood group not specified)"
-                  : `This user donates blood! (${profile?.bloodDonor?.bloodGroup})`
-                : profile?.bloodDonor?.donate === false
-                ? "Blood donation is not enabled."
-                : "This preference hasn’t been set yet."}
-            </Typography>
             {profile?.bloodDonor?.bloodGroup && (
             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mb: 1 }}>
               <Chip 

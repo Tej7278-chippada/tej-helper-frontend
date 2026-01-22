@@ -410,6 +410,49 @@ export const getBloodDonationHistory = async () => {
   return await API.get('/api/auth/blood-donation-history', { headers });
 };
 
+// API to request blood donation
+export const requestBloodDonation = async (donorUserId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.post(`/api/auth/request-blood-donation/${donorUserId}`, {}, { headers });
+};
+
+// API to cancel blood donation request
+export const cancelBloodRequest = async (donorUserId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.post(`/api/auth/cancel-blood-request/${donorUserId}`, {}, { headers });
+};
+
+// API to get blood donation requests (for donor)
+export const getBloodDonationRequests = async () => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`
+  } : {};
+  
+  return await API.get('/api/auth/blood-donation-requests', { headers });
+};
+
+// API to update blood request status (accept/reject)
+export const updateBloodRequestStatus = async (requesterId, status) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.put(`/api/auth/update-blood-request/${requesterId}`, { status }, { headers });
+};
+
 export const updateProfilePicture = async (userId, profilePic) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { 
