@@ -386,7 +386,7 @@ export const updateUserBloodData = async (userId, userData) => {
     'Content-Type': 'application/json'
   } : {};
   
-  return await API.put(`/api/auth/update-blood-data/${userId}`, userData, { headers });
+  return await API.put(`/api/blood-donation/update-blood-data/${userId}`, userData, { headers });
 };
 
 // Add blood donation
@@ -396,7 +396,7 @@ export const addBloodDonation = (data) => {
     'Content-Type': 'multipart/form-data',
     Authorization: `Bearer ${authToken}`,
   };
-  return API.post('/api/auth/add-blood-donation', data, { headers });
+  return API.post('/api/blood-donation/add-blood-donation', data, { headers });
 };
 
 // Get blood donation history
@@ -407,7 +407,7 @@ export const getBloodDonationHistory = async () => {
     'Content-Type': 'application/json'
   } : {};
   
-  return await API.get('/api/auth/blood-donation-history', { headers });
+  return await API.get('/api/blood-donation/blood-donation-history', { headers });
 };
 
 // API to request blood donation
@@ -418,7 +418,7 @@ export const requestBloodDonation = async (donorUserId) => {
     'Content-Type': 'application/json'
   } : {};
   
-  return await API.post(`/api/auth/request-blood-donation/${donorUserId}`, {}, { headers });
+  return await API.post(`/api/blood-donation/request-blood-donation/${donorUserId}`, {}, { headers });
 };
 
 // API to cancel blood donation request
@@ -429,7 +429,7 @@ export const cancelBloodRequest = async (donorUserId) => {
     'Content-Type': 'application/json'
   } : {};
   
-  return await API.post(`/api/auth/cancel-blood-request/${donorUserId}`, {}, { headers });
+  return await API.post(`/api/blood-donation/cancel-blood-request/${donorUserId}`, {}, { headers });
 };
 
 // API to get blood donation requests (for donor)
@@ -439,7 +439,7 @@ export const getBloodDonationRequests = async () => {
     Authorization: `Bearer ${authToken}`
   } : {};
   
-  return await API.get('/api/auth/blood-donation-requests', { headers });
+  return await API.get('/api/blood-donation/blood-donation-requests', { headers });
 };
 
 // API to update blood request status (accept/reject)
@@ -450,7 +450,7 @@ export const updateBloodRequestStatus = async (requesterId, status) => {
     'Content-Type': 'application/json'
   } : {};
   
-  return await API.put(`/api/auth/update-blood-request/${requesterId}`, { status }, { headers });
+  return await API.put(`/api/blood-donation/update-blood-request/${requesterId}`, { status }, { headers });
 };
 
 export const updateProfilePicture = async (userId, profilePic) => {

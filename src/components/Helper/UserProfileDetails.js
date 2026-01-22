@@ -52,6 +52,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   const [averageRating, setAverageRating] = useState(null);
   const [totalReviews, setTotalReviews] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
+  const [isPostsFetching, setIsPostsFetching] = useState(true);
   // const [ratings, setRatings] = useState([]);
   // const loggedUserData = userData();
   // const [isRateUserOpen, setIsRateUserOpen] = useState(false);
@@ -90,12 +91,15 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   }, [open]);
 
   const fetchUserPosts = async () => {
+    setIsPostsFetching(true);
     try {
       const response = await fetchProfilePosts(userId);
       setPosts(response.data.posts || []);
     } catch (error) {
       console.error('Error fetching user posts:', error);
       setPosts([]);
+    } finally {
+      setIsPostsFetching(false);
     }
   };
 
@@ -1337,7 +1341,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
           }}
         >
           {/* {post.user.ratings && post.user.ratings.length ? ( */}
-          {isFetching ? (
+          {isPostsFetching ? (
             <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" height="200px" gap="1rem">
               <LinearProgress sx={{ width: 84, height: 4, borderRadius: 2, mt: 0 }}/>
               <Typography color='grey' variant='body2'>Loading Ratings...</Typography>

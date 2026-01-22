@@ -4,7 +4,7 @@ import { useParams, useNavigate, Link} from 'react-router-dom';
 import { Box, Typography, Avatar, IconButton, Alert, useMediaQuery, Grid, Button, Snackbar, Dialog, DialogTitle, DialogContent, DialogActions, Tooltip, CircularProgress, Card, CardContent, Rating, TextField, Chip, InputAdornment, Slide, MenuItem, Switch, FormControl, InputLabel, Select } from '@mui/material';
 import { useTheme } from '@emotion/react';
 import DeleteForeverRoundedIcon from '@mui/icons-material/DeleteForeverRounded';
-import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, getBloodDonationHistory, getBloodDonationRequests, submitIdVerification, updateBloodRequestStatus, updateProfilePicture, updateUserBloodData, updateUserProfile } from './api/api';
+import API, { cancelIdVerification, deleteProfilePicture, fetchUserProfile, submitIdVerification, updateProfilePicture, updateUserBloodData, updateUserProfile } from './api/api';
 import Layout from './Layout';
 import SkeletonProductDetail from './SkeletonProductDetail';
 import EditIcon from '@mui/icons-material/Edit';
@@ -181,10 +181,6 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [showBloodRequestsDialog, setShowBloodRequestsDialog] = useState(false);
   const [showDonationHistoryDialog, setShowDonationHistoryDialog] = useState(false);
-  const [bloodRequests, setBloodRequests] = useState([]);
-  const [donationHistory, setDonationHistory] = useState([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
-  const [loadingHistory, setLoadingHistory] = useState(false);
 
   // to handle verification submission
   const handleSubmitVerification = async (formData) => {
@@ -1128,79 +1124,6 @@ const SOCIAL_MEDIA_PLATFORMS = {
   }
 };
 
-  const handleOpenBloodRequests = async () => {
-    try {
-      setLoadingRequests(true);
-      const response = await getBloodDonationRequests();
-      setBloodRequests(response.data.requests || []);
-      setShowBloodRequestsDialog(true);
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Failed to load blood requests',
-        severity: 'error'
-      });
-    } finally {
-      setLoadingRequests(false);
-    }
-  };
-
-  const handleOpenDonationHistory = async () => {
-    try {
-      setLoadingHistory(true);
-      const response = await getBloodDonationHistory();
-      setDonationHistory(response.data.donationHistory || []);
-      setShowDonationHistoryDialog(true);
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Failed to load donation history',
-        severity: 'error'
-      });
-    } finally {
-      setLoadingHistory(false);
-    }
-  };
-
-  const handleUpdateRequestStatus = async (requesterId, status) => {
-    try {
-      await updateBloodRequestStatus(requesterId, status);
-      
-      // Update local state
-      setBloodRequests(prev => 
-        prev.map(req => 
-          req.userId._id === requesterId 
-            ? { ...req, status }
-            : req
-        )
-      );
-      
-      // Update pending count
-      if (status !== 'pending') {
-        setPendingRequestsCount(prev => Math.max(0, prev - 1));
-      }
-      
-      setSnackbar({
-        open: true,
-        message: `Request ${status} successfully`,
-        severity: 'success'
-      });
-      
-      // Refresh user data to update counts
-      const response = await fetchUserProfile(id);
-      if (response.data.pendingBloodRequests) {
-        setPendingRequestsCount(response.data.pendingBloodRequests);
-      }
-      
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Failed to update request status',
-        severity: 'error'
-      });
-    }
-  };
-
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Typography variant="h6" sx={{ flexGrow: 1, mx: isMobile ? '10px' : '16px', mt: 1 }} >
@@ -1807,7 +1730,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                 <Button
                   variant="outlined" fullWidth={isMobile}
                   startIcon={<CollectionsBookmarkRounded />}
-                  onClick={handleOpenDonationHistory}
+                  onClick={() => setShowDonationHistoryDialog(true)}
                   sx={{ borderRadius: '12px', textTransform: 'none',
                     color: '#4361ee',
                     background: 'none',
@@ -1833,7 +1756,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                 <Button
                   variant="outlined" fullWidth={isMobile}
                   startIcon={<NewReleasesRounded />}
-                  onClick={handleOpenBloodRequests}
+                  onClick={() => setShowBloodRequestsDialog(true)}
                   sx={{ borderRadius: '12px', textTransform: 'none',
                     color: '#4361ee',
                     background: 'none',
@@ -2852,21 +2775,19 @@ const SOCIAL_MEDIA_PLATFORMS = {
       <BloodDonationRequestsDialog
         open={showBloodRequestsDialog}
         onClose={() => setShowBloodRequestsDialog(false)}
-        requests={bloodRequests}
-        loading={loadingRequests}
-        onUpdateStatus={handleUpdateRequestStatus}
+        setPendingRequestsCount={setPendingRequestsCount}
         isMobile={isMobile}
         darkMode={darkMode}
+        setSnackbar={setSnackbar}
       />
 
       {/* Blood Donation History Dialog */}
       <BloodDonationHistoryDialog
         open={showDonationHistoryDialog}
         onClose={() => setShowDonationHistoryDialog(false)}
-        donationHistory={donationHistory}
-        loading={loadingHistory}
         isMobile={isMobile}
         darkMode={darkMode}
+        setSnackbar={setSnackbar}
       />
 
       {/* Profile Picture Dialog */}

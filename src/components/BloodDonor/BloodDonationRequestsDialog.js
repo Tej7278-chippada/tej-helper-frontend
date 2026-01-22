@@ -1,5 +1,5 @@
 // src/components/BloodDonor/BloodDonationRequestsDialog.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -25,16 +25,26 @@ import {
   EmailRounded,
   BloodtypeRounded,
 } from '@mui/icons-material';
+import { getBloodDonationRequests, updateBloodRequestStatus } from '../api/api';
 
 const BloodDonationRequestsDialog = ({
   open,
   onClose,
-  requests,
-  loading,
-  onUpdateStatus,
+  // requests,
+  // loading,
+  // onUpdateStatus,
+  setPendingRequestsCount,
   isMobile,
   darkMode,
+  setSnackbar
 }) => {
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [bloodRequests, setBloodRequests] = useState([]);
+  const [updatingRequest, setUpdatingRequest] = useState({
+    requesterId: null,
+    status: null,
+  });
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'warning';
@@ -62,6 +72,71 @@ const BloodDonationRequestsDialog = ({
     });
   };
 
+  // Fetch user's requests when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchBloodRequests();
+    }
+  }, [open]);
+
+  const fetchBloodRequests = async () => {
+    try {
+      setLoadingRequests(true);
+      const response = await getBloodDonationRequests();
+      setBloodRequests(response.data.requests || []);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Failed to load blood requests',
+        severity: 'error'
+      });
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleUpdateRequestStatus = async (requesterId, status) => {
+    setUpdatingRequest({ requesterId, status });
+    try {
+      await updateBloodRequestStatus(requesterId, status);
+      
+      // Update local state
+      setBloodRequests(prev => 
+        prev.map(req => 
+          req.userId._id === requesterId 
+            ? { ...req, status }
+            : req
+        )
+      );
+      
+      // Update pending count
+      if (status !== 'pending') {
+        setPendingRequestsCount(prev => Math.max(0, prev - 1));
+      }
+      
+      setSnackbar({
+        open: true,
+        message: `Request ${status} successfully`,
+        severity: 'success'
+      });
+      
+      // Refresh user data to update counts
+      // const response = await fetchUserProfile(id);
+      // if (response.data.pendingBloodRequests) {
+      //   setPendingRequestsCount(response.data.pendingBloodRequests);
+      // }
+      
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Failed to update request status',
+        severity: 'error'
+      });
+    } finally {
+      setUpdatingRequest({ requesterId: null, status: null });
+    }
+  };
+
   return (
     <Dialog
       open={open}
@@ -82,7 +157,7 @@ const BloodDonationRequestsDialog = ({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6">Blood Donation Requests</Typography>
           <Chip
-            label={`${requests.filter(r => r.status === 'pending').length} Pending`}
+            label={`${bloodRequests.filter(r => r.status === 'pending').length} Pending`}
             color="warning"
             size="small"
           />
@@ -90,19 +165,21 @@ const BloodDonationRequestsDialog = ({
       </DialogTitle>
 
       <DialogContent sx={{ p: 2 }}>
-        {loading ? (
-          <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+        {loadingRequests ? (
+          <Box display="flex" justifyContent="center" alignItems="center" p={4}>
             <CircularProgress />
           </Box>
-        ) : requests.length === 0 ? (
+        ) : bloodRequests.length === 0 ? (
           <Box textAlign="center" py={4}>
             <Typography color="textSecondary">
               No blood donation requests found
             </Typography>
           </Box>
         ) : (
-          <Box sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-            {requests.map((request, index) => (
+          <Box 
+          // sx={{ maxHeight: '60vh', overflowY: 'auto' }}
+          >
+            {bloodRequests.map((request, index) => (
               <Box
                 key={request._id}
                 sx={{
@@ -210,20 +287,44 @@ const BloodDonationRequestsDialog = ({
                         <Button
                           variant="contained"
                           color="success"
-                          startIcon={<CheckCircleRounded />}
-                          onClick={() => onUpdateStatus(request.userId._id, 'accepted')}
+                          startIcon={
+                            updatingRequest.requesterId === request.userId._id &&
+                            updatingRequest.status === 'accepted' ? (
+                              <CircularProgress size={16} color="inherit" />
+                            ) : (
+                              <CheckCircleRounded />
+                            )
+                          }
+                          onClick={() => handleUpdateRequestStatus(request.userId._id, 'accepted')}
+                          disabled={
+                            updatingRequest.requesterId === request.userId._id
+                          }
                           size="small"
-                          sx={{ borderRadius: '8px' }}
+                          sx={{ borderRadius: '8px', textTransform: 'none' }}
                         >
                           Accept
                         </Button>
                         <Button
                           variant="outlined"
                           color="error"
-                          startIcon={<CancelRounded />}
-                          onClick={() => onUpdateStatus(request.userId._id, 'rejected')}
+                          startIcon={
+                            updatingRequest.requesterId === request.userId._id &&
+                            updatingRequest.status === 'rejected' ? (
+                              <CircularProgress size={16} color="inherit" />
+                            ) : (
+                              <CancelRounded />
+                            )
+                          }
+                          onClick={() => handleUpdateRequestStatus(request.userId._id, 'rejected')}
+                          disabled={
+                            updatingRequest.requesterId === request.userId._id
+                          }
+                          loading={
+                            updatingRequest.requesterId === request.userId._id &&
+                            updatingRequest.status === 'rejected'
+                          }
                           size="small"
-                          sx={{ borderRadius: '8px' }}
+                          sx={{ borderRadius: '8px', textTransform: 'none' }}
                         >
                           Reject
                         </Button>

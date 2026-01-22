@@ -1,5 +1,5 @@
 // src/components/BloodDonor/BloodDonationHistoryDialog.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -23,15 +23,20 @@ import {
   ImageRounded,
   BloodtypeRounded,
 } from '@mui/icons-material';
+import { getBloodDonationHistory } from '../api/api';
 
 const BloodDonationHistoryDialog = ({
   open,
   onClose,
-  donationHistory,
-  loading,
+  // donationHistory,
+  // loading,
   isMobile,
   darkMode,
+  setSnackbar
 }) => {
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [donationHistory, setDonationHistory] = useState([]);
+
   const formatDate = (date) => {
     return new Date(date).toLocaleString('en-IN', {
       dateStyle: 'medium',
@@ -43,6 +48,29 @@ const BloodDonationHistoryDialog = ({
     if (!location) return 'Location not specified';
     if (location.address) return location.address;
     // return `${location.latitude?.toFixed(4)}, ${location.longitude?.toFixed(4)}`;
+  };
+
+  // Fetch user's donation history when dialog opens
+  useEffect(() => {
+    if (open) {
+      fetchDonationHistory();
+    }
+  }, [open]);
+
+  const fetchDonationHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const response = await getBloodDonationHistory();
+      setDonationHistory(response.data.donationHistory || []);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Failed to load donation history',
+        severity: 'error'
+      });
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
   return (
@@ -73,7 +101,7 @@ const BloodDonationHistoryDialog = ({
       </DialogTitle>
 
       <DialogContent sx={{ p: 2 }}>
-        {loading ? (
+        {loadingHistory ? (
           <Box display="flex" justifyContent="center" alignItems="center" py={4}>
             <CircularProgress />
           </Box>
