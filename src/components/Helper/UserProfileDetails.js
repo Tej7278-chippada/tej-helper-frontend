@@ -1139,28 +1139,28 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
               <Chip 
                 label={`🩸 ${profile?.bloodDonor?.bloodGroup || 'Unknown'}`}
                 // color="error"
-                size="small" variant="filled"
+                size="small" variant="outlined"
                 // sx={{ fontWeight: 'bold' }}
                 sx={{ 
                   fontWeight: 'bold',
-                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
-                  color: 'white',
-                  '&:hover': {
-                    boxShadow: '0 4px 12px rgba(238, 90, 82, 0.4)',
-                  }
+                  // background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
+                  // color: 'white',
+                  // '&:hover': {
+                  //   boxShadow: '0 4px 12px rgba(238, 90, 82, 0.4)',
+                  // }
                 }}
               />
               {profile?.bloodDonor?.donationCount > 0 && (
                 <Chip
                   label={`🏆 ${profile.bloodDonor.donationCount} Donation${profile.bloodDonor.donationCount > 1 ? 's' : ''}`}
-                  variant="filled"
+                  variant="outlined"
                   size="small"
                   sx={{ 
-                    background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
-                    color: 'white',
-                    '&:hover': {
-                      boxShadow: '0 4px 12px rgba(46, 125, 50, 0.4)',
-                    }
+                    // background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
+                    // color: 'white',
+                    // '&:hover': {
+                    //   boxShadow: '0 4px 12px rgba(46, 125, 50, 0.4)',
+                    // }
                   }}
                 />
               )}
@@ -1212,8 +1212,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       size="small"
                       onClick={() => window.open(`tel:${profile.bloodDonor.contactWay.phone}`)}
                       sx={{ 
-                        borderColor: '#4CAF50',
-                        color: '#4CAF50',
+                        // borderColor: '#4CAF50',
+                        // color: '#4CAF50',
                         '&:hover': {
                           backgroundColor: 'rgba(76, 175, 80, 0.1)',
                           borderColor: '#388E3C',
@@ -1230,8 +1230,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       size="small"
                       onClick={() => window.open(`mailto:${profile.bloodDonor.contactWay.email}`)}
                       sx={{ 
-                        borderColor: '#2196F3',
-                        color: '#2196F3',
+                        // borderColor: '#2196F3',
+                        // color: '#2196F3',
                         '&:hover': {
                           backgroundColor: 'rgba(33, 150, 243, 0.1)',
                           borderColor: '#1976D2',
@@ -1257,12 +1257,12 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                           key={index}
                           icon={getSocialIcon(platform, 'small', platformData.color)}
                           label={social.platform || platformData.label}
-                          variant="filled"
+                          variant="outlined"
                           size="small"
                           onClick={() => handleSocialChipClick(social.url, platform)}
                           sx={{ 
-                            backgroundColor: platformData.color,
-                            color: 'white',
+                            // backgroundColor: platformData.color,
+                            // color: 'white',
                             fontWeight: 500, px: 0.5,
                             transition: 'all 0.2s ease',
                             '&:hover': {
