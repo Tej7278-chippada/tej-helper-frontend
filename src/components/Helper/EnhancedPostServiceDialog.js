@@ -2490,7 +2490,12 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   startIcon={<AutoAwesomeIcon />}
                   onClick={() => fetchUnsplashImages(formData.title)}
                   disabled={loadingGeneration || !formData.title}
-                  sx={{ borderRadius: 2, px: isMobile ? '24px' : 'null', textTransform: 'none', background: 'linear-gradient(135deg, #1976d2 0%, #9c27b0 100%)', color: '#fff' }}
+                  sx={{ borderRadius: 2, px: isMobile ? '24px' : 'null', textTransform: 'none', background: 'linear-gradient(135deg, #1976d2 0%, #9c27b0 100%)', color: '#fff',
+                    '&.Mui-disabled': {
+                      background: 'rgba(0, 0, 0, 0.12)',
+                      color: 'rgba(0, 0, 0, 0.26)',
+                    },
+                  }}
                 >
                   Generate Images
                 </Button>

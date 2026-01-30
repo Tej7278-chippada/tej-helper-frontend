@@ -365,7 +365,8 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
           </Box>
         </Toolbar>
 
-        <NotificationsContainer sx={{ p: '10px 12px', borderRadius: 3 }} elevation={3}> {/* Paper bgcolor: '#f5f5f5', */}
+        {/* <NotificationsContainer sx={{ p: '10px 12px', borderRadius: 3 }} elevation={3}>  */}
+          {/* Paper bgcolor: '#f5f5f5', */}
           {loading ? (
             <SkeletonChats />
           ) : (
@@ -392,7 +393,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
                           transition: 'transform 0.2s, box-shadow 0.2s, border-radius 0.2s',
                           WebkitTapHighlightColor: 'transparent', // Removes the default tap highlight
                           '&:hover': {
-                            bgcolor: darkMode ? 'grey.800' : 'grey.100',
+                            // bgcolor: darkMode ? 'grey.800' : 'grey.100',
                             transform: 'scale(1.01)',
                             boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
                           },
@@ -450,7 +451,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
               )}
             </List>
           )}
-        </NotificationsContainer>
+        {/* </NotificationsContainer> */}
       </Box>
       {/* Rating Dialog */}
       <UserProfileDetails
