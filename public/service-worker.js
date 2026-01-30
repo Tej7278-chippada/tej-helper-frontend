@@ -93,15 +93,69 @@ self.addEventListener('push', (event) => {
     };
   }
 
+  // Custom handling for blood requests
+  if (payload.data?.type === 'blood_request') {
+    payload = {
+      title: payload.title || '🩸 Blood Donation Request',
+      body: payload.body || 'Someone needs your help!',
+      icon: '/logo192.png',
+      badge: '/logo192.png',
+      data: {
+        url: payload.data.url || '/',
+        type: 'blood_request',
+        requesterId: payload.data.requesterId,
+        donorId: payload.data.donorId
+      },
+      vibrate: [300, 100, 300],
+      timestamp: Date.now(),
+      actions: [
+        {
+          action: 'accept',
+          title: '✅ Accept',
+          icon: '/accept-icon.png'
+        },
+        {
+          action: 'reject',
+          title: '❌ Reject',
+          icon: '/reject-icon.png'
+        },
+        {
+          action: 'view',
+          title: '👁️ View',
+          icon: '/view-icon.png'
+        }
+      ]
+    };
+  }
+
+  // Custom handling for blood request updates
+  if (payload.data?.type === 'blood_request_update') {
+    payload = {
+      title: payload.title || 'Blood Request Update',
+      body: payload.body || 'Update on your blood request',
+      icon: payload.data.status === 'accepted' ? '/accepted-icon.png' : '/logo192.png',
+      badge: '/logo192.png',
+      data: {
+        url: payload.data.url || '/',
+        type: 'blood_request_update',
+        donorId: payload.data.donorId,
+        status: payload.data.status
+      },
+      vibrate: [200, 100, 200],
+      timestamp: Date.now()
+    };
+  }
+
   const options = {
     body: payload.body,
     icon: payload.icon || '/logo192.png',
     badge: '/logo192.png',
     data: payload.data || { url: '/' },
-    vibrate: [200, 100, 200], // Add vibration for chat messages
+    vibrate: payload.vibrate || [200, 100, 200], // Add vibration for chat messages
     timestamp: payload.timestamp,
     tag: payload.data?.type, // Group notifications by type
-    requireInteraction: payload.requireInteraction || false
+    requireInteraction: payload.requireInteraction || false,
+    actions: payload.actions || []
   };
 
   event.waitUntil(
@@ -114,6 +168,91 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+
+  const notificationData = event.notification.data;
+  const action = event.action;
+
+  // Handle blood request notifications with actions
+  if (notificationData.type === 'blood_request') {
+    if (action === 'accept') {
+      // Send accept request to backend
+      event.waitUntil(
+        clients.matchAll().then((clientList) => {
+          const url = `${self.origin}/api/auth/update-blood-request/${notificationData.requesterId}`;
+          
+          for (const client of clientList) {
+            if (client.url.includes('/user/') && 'focus' in client) {
+              // Send message to client to update status
+              client.postMessage({
+                type: 'blood_request_action',
+                action: 'accept',
+                requesterId: notificationData.requesterId,
+                donorId: notificationData.donorId
+              });
+              return client.focus();
+            }
+          }
+          return clients.openWindow(`/user/${notificationData.donorId}`);
+        })
+      );
+    } else if (action === 'reject') {
+      // Send reject request to backend
+      event.waitUntil(
+        clients.matchAll().then((clientList) => {
+          for (const client of clientList) {
+            if (client.url.includes('/user/') && 'focus' in client) {
+              client.postMessage({
+                type: 'blood_request_action',
+                action: 'reject',
+                requesterId: notificationData.requesterId,
+                donorId: notificationData.donorId
+              });
+              return client.focus();
+            }
+          }
+          return clients.openWindow(`/user/${notificationData.donorId}`);
+        })
+      );
+    } else if (action === 'view' || !action) {
+      // Default action: view the user profile
+      event.waitUntil(
+        clients.matchAll({
+          type: 'window',
+          includeUncontrolled: true
+        }).then((clientList) => {
+          const userUrl = `/user/${notificationData.donorId}`;
+          
+          for (const client of clientList) {
+            if (client.url.includes(userUrl) && 'focus' in client) {
+              return client.focus();
+            }
+          }
+          return clients.openWindow(userUrl);
+        })
+      );
+    }
+  } 
+  // Handle blood request update notifications
+  else if (notificationData.type === 'blood_request_update') {
+    const userUrl = notificationData.status === 'accepted' 
+      ? `/user/${notificationData.donorId}` 
+      : '/blood-donors';
+    
+    event.waitUntil(
+      clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true
+      }).then((clientList) => {
+        for (const client of clientList) {
+          if (client.url.includes(userUrl) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        return clients.openWindow(userUrl);
+      })
+    );
+  }
+
   // Handle nearby posts
   if (event.notification.data.type === 'nearby_post') {
     const postUrl = `/post/${event.notification.data.postId}`;

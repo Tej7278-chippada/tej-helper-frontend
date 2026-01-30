@@ -1035,7 +1035,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Box>
                 <Box display="flex" alignItems="center" gap={1}>
                   <BloodtypeIcon color="error" fontSize="small" />
@@ -1043,11 +1043,12 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     Blood Donation
                   </Typography>
                 </Box>
-                <Typography variant="body2" color="textSecondary" mb={1} >
+                <Typography variant="body2" color="textSecondary">
                   {profile?.bloodDonor?.donate === true
-                    ? profile?.bloodDonor?.bloodGroup === "Unknown"
-                      ? "This user donates blood! (Blood group not specified)"
-                      : `This user donates blood! (${profile?.bloodDonor?.bloodGroup})`
+                    ? "This user donates blood!"
+                    // ? profile?.bloodDonor?.bloodGroup === "Unknown"
+                    //   ? "This user donates blood! (Blood group not specified)"
+                    //   : `This user donates blood! (${profile?.bloodDonor?.bloodGroup})`
                     : profile?.bloodDonor?.donate === false
                     ? "Blood donation is not enabled."
                     : "This preference hasn’t been set yet."}
@@ -1070,7 +1071,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5252 100%)'
                       : bloodRequestStatus === 'cancelled'
                       ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
-                      : 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                      : 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)',
+                      // 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
                     border: bloodRequestStatus === 'pending' 
                       ? '1px solid #4361ee' 
                       : bloodRequestStatus === 'accepted' 
@@ -1090,7 +1092,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                         ? 'linear-gradient(135deg, #ff6b6b 0%, #ee5252 100%)'
                         : bloodRequestStatus === 'cancelled'
                         ? 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)'
-                        : gradientHover,
+                        // : gradientHover,
+                        : 'linear-gradient(135deg, #ffa726 0%, #ff9800 100%)',
                       transform: 'translateY(-2px)',
                       boxShadow: bloodRequestStatus === 'pending' 
                         ? '0 6px 25px rgba(67, 97, 238, 0.4)'
@@ -1100,7 +1103,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                         ? 'none'
                         : bloodRequestStatus === 'rejected'
                         ? 'none'
-                        : '0 6px 25px rgba(67, 97, 238, 0.4)',
+                        // : '0 6px 25px rgba(67, 97, 238, 0.4)',
+                        : '0 6px 25px rgba(255, 167, 38, 0.4)',
                     },
                     '&:active': {
                       transform: 'translateY(0)',

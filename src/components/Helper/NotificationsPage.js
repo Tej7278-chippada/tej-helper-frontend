@@ -17,9 +17,11 @@ import {
   Alert,
   styled,
   alpha,
-  Card
+  Card,
+  Chip,
+  Button
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import API, { clearAllNotifications, fetchNotifications, markNotificationAsRead } from '../api/api';
 import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
@@ -28,6 +30,8 @@ import { io } from 'socket.io-client';
 import ClearAllRoundedIcon from '@mui/icons-material/ClearAllRounded';
 import { urlBase64ToUint8Array } from '../../utils/pushNotifications';
 import SkeletonChats from '../Chat/SkeletonChats';
+import { BloodtypeRounded, CheckCircleRounded, CancelRounded } from '@mui/icons-material';
+import UserProfileDetails from './UserProfileDetails';
 
 // Enhanced styled components
 const NotificationsContainer = styled(Card)(({ theme }) => ({
@@ -60,6 +64,10 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
   const [loadingToggle, setLoadingToggle] = useState(false);
   const [loadingClear, setLoadingClear] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
+  const [isUserProfileOpen, setUserProfileOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
   
   // Add this effect to check current notification status
   // useEffect(() => {
@@ -100,6 +108,8 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
   useEffect(() => {
     const newSocket = io(`${process.env.REACT_APP_API_URL}`); // Replace with your backend URL
     setSocket(newSocket);
+    const authToken = localStorage.getItem('authToken');
+    setIsAuthenticated(!!authToken);
 
     return () => {
       if (newSocket) newSocket.disconnect();
@@ -155,7 +165,13 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
         setLoadingView(null);
       }
     }
-    navigate(`/post/${notification.postId._id}`);
+    if(notification.notificationType === 'blood_request') {
+      navigate(`/user/${notification.userId}`);
+    } else if (notification.notificationType === 'blood_request_update') {
+      handleOpenUserProfileDialog(notification.otherUserId);
+    } else {
+      navigate(`/post/${notification.postId._id}`);
+    }
   };
 
   // Add this function to request notification permissions
@@ -271,6 +287,38 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
 
   const handleCloseSnackbar = () => setSnackbar({ ...snackbar, open: false });
 
+  const handleOpenUserProfileDialog = (id) => {
+    if (!isAuthenticated) { // Prevent unauthenticated actions
+      setLoginMessage({
+        open: true,
+        message: 'Please log in first. Click here to login.',
+        severity: 'warning',
+      });
+      return;
+    } 
+    setSelectedUserId(id);
+    setUserProfileOpen(true);
+  };
+  
+  const handleCloseUserProfileDialog = () => {
+    setUserProfileOpen(false);
+    setSelectedUserId(null);
+  };
+
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }) : '—';
+
+  const formatNotificationType = (type) => {
+    if (!type) return "";
+    return type
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box sx={{ p: isMobile ? '6px' : '10px', maxWidth: '800px', mx: 'auto' }}>
@@ -354,14 +402,39 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
                             borderRadius: '14px'
                           },
                           borderLeft: !notification.isRead 
-                            ? `4px solid ${theme.palette.primary.main}`
+                              ? notification.notificationType === ('blood_request' || 'blood_request_update') ? `4px solid #ff5252` : `4px solid ${theme.palette.primary.main}`
                             : 'null', // 4px solid transparent
                           // transition: 'border-left 0.3s ease'
                       }}
                     >
+                      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, width: '100%' }}>
+                      {/* {notification.notificationType === 'blood_request' && (
+                        <BloodtypeRounded sx={{ color: '#ff5252', mt: 0.5 }} />
+                      )}
+                      {notification.notificationType === 'blood_request_update' && (
+                        notification.message.includes('accepted') 
+                          ? <CheckCircleRounded sx={{ color: '#4caf50', mt: 0.5 }} />
+                          : <CancelRounded sx={{ color: '#ff5252', mt: 0.5 }} />
+                      )} */}
                       <ListItemText
                         primary={notification.message}
-                        secondary={new Date(notification.createdAt).toLocaleString()}
+                        secondary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'space-between', mt: 1 }}>
+                            {/* {notification.notificationType === 'blood_request' && ( */}
+                              <Chip
+                                label={formatNotificationType(notification.notificationType)}
+                                size="small" 
+                                sx={{ 
+                                  // backgroundColor: '#ffebee', 
+                                  // color: '#d32f2f',
+                                  fontSize: '0.7rem',
+                                  height: 20
+                                }} 
+                              />
+                            {/* )} */}
+                            {formatDate(notification.createdAt)}
+                          </Box>
+                          }
                         sx={{ color: darkMode ? !notification.isRead ? '#ffffff' : 'text.secondary' : !notification.isRead ? 'black' : 'text.secondary' }}
                       />
                       {loadingView === notification._id ? (
@@ -369,6 +442,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
                       ) : (
                         !notification.isRead && <Badge color="primary" variant="dot" />
                       )}
+                      </Box>
                     </ListItem>
                     {/* <Divider sx={{ width: '90%', mx: 'auto' }} /> */}
                   </React.Fragment>
@@ -378,6 +452,15 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
           )}
         </NotificationsContainer>
       </Box>
+      {/* Rating Dialog */}
+      <UserProfileDetails
+        userId={selectedUserId}
+        open={isUserProfileOpen}
+        onClose={handleCloseUserProfileDialog}
+        // post={post}
+        isMobile={isMobile}
+        isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
+      />
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -386,6 +469,63 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%', borderRadius:'1rem' }}>
           {snackbar.message}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={loginMessage.open}
+        autoHideDuration={9000}
+        onClose={() => setLoginMessage({ ...loginMessage, open: false })}
+        message={
+          <span>
+            Please log in first.{" "}
+            <Link
+              to="/login"
+              style={{ color: "yellow", textDecoration: "underline", cursor: "pointer" }}
+            >
+              Click here to login
+            </Link>
+          </span>
+        }
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert
+          severity="warning"
+          variant="filled"
+          sx={{
+            backgroundColor: "#333",
+            color: "#fff",
+            borderRadius: "10px",
+            fontSize: "16px",
+            display: "flex",
+            alignItems: "center",
+            // padding: "12px 20px",
+            width: "100%",
+            maxWidth: "400px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+          }}
+          action={
+            <Button
+              component={Link}
+              to="/login"
+              size="small"
+              sx={{
+                color: "#ffd700",
+                fontWeight: "bold",
+                textTransform: "none",
+                border: "1px solid rgba(255, 215, 0, 0.5)",
+                borderRadius: "5px",
+                // padding: "3px 8px",
+                marginLeft: "10px",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 215, 0, 0.2)",
+                },
+              }}
+            >
+              Login
+            </Button>
+          }
+        >
+          Please log in first.
         </Alert>
       </Snackbar>
     </Layout>
