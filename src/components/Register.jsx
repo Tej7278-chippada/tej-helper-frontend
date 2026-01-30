@@ -374,15 +374,42 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   <Typography variant="body2">Your Profile Pic</Typography>
                 </div>
               ) : (
-                <div>
-                  <img
-                    src="https://placehold.co/400?text=Add+Photo"
-                    alt="Dummy Profile"
-                    style={{ width: '180px', height: '180px', borderRadius: '50%', cursor: 'pointer' }}
-                    onClick={() => setCropDialog(true)}
-                  />
-                  <Typography variant="body2">Add Profile Pic</Typography>
-                </div>
+                // <div>
+                //   <img
+                //     src="https://placehold.co/400?text=Add+Photo"
+                //     alt="Dummy Profile"
+                //     style={{ width: '180px', height: '180px', borderRadius: '50%', cursor: 'pointer' }}
+                //     onClick={() => setCropDialog(true)}
+                //   />
+                //   <Typography variant="body2">Add Profile Pic</Typography>
+                // </div>
+                <Box
+                  sx={{
+                    width: '180px', height: '180px', borderRadius: '50%', cursor: 'pointer',
+                    backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    '&:active': {
+                      transform: 'scale(0.98)', // Add press feedback instead
+                      transition: 'transform 0.1s ease',
+                    },
+                    WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                    WebkitTouchCallout: 'none', // Disable iOS callout
+                    WebkitUserSelect: 'none', // Disable text selection
+                    userSelect: 'none',
+                  }}
+                  onClick={() => setCropDialog(true)}
+                >
+                  <Typography 
+                    variant="body1" 
+                    color="textSecondary"
+                    sx={{ textAlign: 'center', px: 1 }}
+                  >
+                    Add Profile Pic
+                  </Typography>
+                </Box>
               )}
               {/* <Typography variant="body2">Profile Pic</Typography> */}
               <Box sx={{display: 'flow', width: '280px', maxWidth: '400px' }}>
@@ -470,7 +497,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                 <Button 
                   variant="text"  
                   component="label" size="small"
-                  sx={{ m: 1, borderRadius: "8px", textTransform: "none", bgcolor:'rgba(24, 170, 248, 0.07)' }}
+                  sx={{ m: 1, p: '8px 18px', borderRadius: "12px", textTransform: "none", bgcolor:'rgba(24, 170, 248, 0.07)' }}
                 >
                   Choose Photo
                   <input 
@@ -503,7 +530,7 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                         // border: '2px solid #4caf50',
                         borderRadius: '20px',
                         overflow: 'hidden',
-                        marginTop: '7rem', marginBottom:'4rem',
+                        marginTop: '8rem', marginBottom:'4rem',
                       },
                       mediaStyle: {
                         filter: 'brightness(1.05) contrast(1.1)',
@@ -524,10 +551,10 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
 
 
               </DialogContent>
-              <DialogActions sx={{display: 'flex', justifyContent: 'space-between'}}>
+              <DialogActions sx={{display: 'flex', justifyContent: 'space-between', p: '8px 12px'}}>
                 <Box sx={{display: 'flex', gap: '4px'}}>
                   {finalPic && 
-                    <Button variant='contained' color="error" onClick={handleDeleteImg} sx={{borderRadius: '12px'}}>
+                    <Button variant='contained' color="error" onClick={handleDeleteImg} sx={{borderRadius: '12px', textTransform: 'none'}}>
                       Delete
                     </Button>
                   }
@@ -541,7 +568,16 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   {/* <Button onClick={handleCancelImg} sx={{borderRadius: '12px'}}>Cancel</Button> */}
                   <Button variant="contained"
                     onClick={handleSaveImg}
-                    disabled={!profilePic} sx={{borderRadius: '12px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)'}}
+                    disabled={!profilePic} 
+                    sx={{
+                      borderRadius: '12px', 
+                      background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
+                      '&.Mui-disabled': {
+                        background: 'rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.26)',
+                      },
+                      textTransform: 'none'
+                    }}
                   >
                     Save
                   </Button>

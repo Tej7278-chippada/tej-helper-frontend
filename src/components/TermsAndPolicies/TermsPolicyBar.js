@@ -70,7 +70,7 @@ const TermsPolicyBar = ({isMobile, darkMode}) => {
             variant="caption"
             sx={{ opacity: 0.6, color: darkMode ? '#aaa' : '#666' }}
           >
-            © 2025 • Tej Tech • Helper • Built for local communities
+            © 2026 • Tej Tech • Helper • Built for local communities
           </Typography>
         </Box>
       </Box>
