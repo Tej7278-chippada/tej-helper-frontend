@@ -131,6 +131,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [loadingDeletingAccount, setLoadingDeletingAccount] = useState(false);
   // const [hoveredId, setHoveredId] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
   const tokenUsername = localStorage.getItem('tokenUsername');
@@ -276,6 +277,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const handleDeleteAccount = async () => {
 
     try {
+      setLoadingDeletingAccount(true);
       const authToken = localStorage.getItem('authToken');
       await API.delete(`/api/auth/${id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
@@ -286,6 +288,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     } catch (err) {
       setSnackbar({ open: true, message: 'Failed to delete account. Please try again later.', severity: 'error' });
     } finally {
+      setLoadingDeletingAccount(false);
       setDeleteDialogOpen(false);
     }
   };
@@ -2215,10 +2218,13 @@ const SOCIAL_MEDIA_PLATFORMS = {
           </Typography>
         </DialogContent>
         <DialogActions style={{ padding: '1rem' }}>
-          <Button onClick={handleDeleteAccount} variant='contained' color="error" sx={{ marginRight: '10px', borderRadius:'8px' }}>
-            Yes, permanently delete my account
+          <Button onClick={handleDeleteAccount} variant='contained' color="error"
+           disabled={loadingDeletingAccount}
+           startIcon={loadingDeletingAccount ? <CircularProgress size={18} color="inherit" sx={{ml: 1}}/> : null}
+           sx={{ marginRight: '10px', borderRadius:'8px', textTransform: 'none' }}>
+            {loadingDeletingAccount ? 'Deleting account...'  : 'Yes, permanently delete my account'}
           </Button>
-          <Button onClick={handleCloseDeleteDialog} variant='outlined' color="primary" sx={{borderRadius:'8px'}}>
+          <Button onClick={handleCloseDeleteDialog} variant='outlined' color="primary" disabled={loadingDeletingAccount} sx={{borderRadius:'8px', textTransform: 'none'}}>
             Cancel
           </Button>
 

@@ -1383,7 +1383,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       // pincode: locationDetails.pincode,
       address: fakeAddress ? fakeAddress : finalLocation.address,
       coordinates: [finalLocation.longitude, finalLocation.latitude],
-      type: 'Point',
+      // type: 'Point',
       isProtected: protectLocation,
     }));
 

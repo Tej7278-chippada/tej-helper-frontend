@@ -86,7 +86,7 @@ const RequestCoupon = ({setSnackbar, id, isAuthenticated, followerCount }) => {
     
       // Add these useEffect calls:
       useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && followerCount >= 50) {
           fetchCouponRequest();
           fetchUserCoupon();
         }
