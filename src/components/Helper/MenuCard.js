@@ -388,6 +388,11 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
                       isselected={(selectedCategory === category.value).toString()}
                       customcolor={category.color}
                       onClick={() => handleHelpCategorySelect(category.value)}
+                      sx={{ WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                        WebkitTouchCallout: 'none', // Disable iOS callout
+                        WebkitUserSelect: 'none', // Disable text selection
+                        userSelect: 'none', 
+                      }}
                     >
                       <CategoryImage 
                         src={categoryImages[category.value]} 
@@ -473,6 +478,10 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'flex-start',
+                        WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                        WebkitTouchCallout: 'none', // Disable iOS callout
+                        WebkitUserSelect: 'none', // Disable text selection
+                        userSelect: 'none'
                       }}
                       isselected={(selectedCategory === service.value).toString()}
                       customcolor={service.color}
@@ -514,6 +523,11 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
                       isselected={(selectedCategory === service.value).toString()}
                       customcolor={service.color}
                       onClick={() => handleServiceCategorySelect(service.value)}
+                      sx={{ WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                        WebkitTouchCallout: 'none', // Disable iOS callout
+                        WebkitUserSelect: 'none', // Disable text selection
+                        userSelect: 'none', 
+                      }}
                     >
                       <CategoryImage 
                         src={categoryImages[service.value]} 

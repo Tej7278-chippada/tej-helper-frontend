@@ -368,7 +368,12 @@ const Register = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate }) => {
                   <img
                     src={finalPic}
                     alt="Cropped Profile"
-                    style={{ width: '180px', height: '180px', borderRadius: '50%', cursor: 'pointer' }}
+                    style={{ width: '180px', height: '180px', borderRadius: '50%', cursor: 'pointer',
+                      WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                      WebkitTouchCallout: 'none', // Disable iOS callout
+                      WebkitUserSelect: 'none', // Disable text selection
+                      userSelect: 'none', 
+                     }}
                     onClick={() => setCropDialog(true)}
                   />
                   <Typography variant="body2">Your Profile Pic</Typography>
