@@ -4466,8 +4466,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       </Typography>
                       {searchQuery && (
                         <Button 
-                          variant="outlined" 
-                          sx={{ mt: 2, borderRadius: '12px' }}
+                          variant="outlined" size="small"
+                          sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
+                            px: 1.5,
+                            color: '#4361ee',
+                            background: 'none',
+                            border: '1px solid #4361ee',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              background: 'none',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                            },
+                            '&:active': {
+                              transform: 'translateY(0)',
+                            },
+                           }}
                           onClick={handleClearSearch}
                         >
                           Clear Search
@@ -4475,9 +4489,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       )}
                       {!searchQuery && (
                         <Button 
-                          variant="outlined" 
+                          variant="outlined" size="small"
                           disabled={distanceRange >= 100}
-                          sx={{ mt: 2, borderRadius: '12px' }}
+                          sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
+                            px: 1.5,
+                            color: '#4361ee',
+                            background: 'none',
+                            border: '1px solid #4361ee',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              background: 'none',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                            },
+                            '&:active': {
+                              transform: 'translateY(0)',
+                            },
+                           }}
                           onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
                         >
                           Increase Search Radius
@@ -5194,8 +5222,22 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 </Typography>
                 {searchQuery && (
                   <Button 
-                    variant="outlined" 
-                    sx={{ mt: 2, borderRadius: '12px' }}
+                    variant="outlined" size="small"
+                    sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
+                      px: 1.5,
+                      color: '#4361ee',
+                      background: 'none',
+                      border: '1px solid #4361ee',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'none',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                      },
+                      '&:active': {
+                        transform: 'translateY(0)',
+                      },
+                     }}
                     onClick={handleClearSearch}
                   >
                     Clear Search
@@ -5203,9 +5245,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 )}
                 {!searchQuery && (
                   <Button 
-                    variant="outlined" 
+                    variant="outlined" size="small"
                     disabled={distanceRange >= 100}
-                    sx={{ m: 2, borderRadius: '12px', textTransform: 'none' }}
+                    sx={{ m: 2, borderRadius: '12px', textTransform: 'none',
+                      px: 1.5,
+                      color: '#4361ee',
+                      background: 'none',
+                      border: '1px solid #4361ee',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'none',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                      },
+                      '&:active': {
+                        transform: 'translateY(0)',
+                      },
+                     }}
                     onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
                   >
                     Increase Search Radius

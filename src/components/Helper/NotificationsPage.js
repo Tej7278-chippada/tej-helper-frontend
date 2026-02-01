@@ -24,24 +24,25 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import API, { clearAllNotifications, fetchNotifications, markNotificationAsRead } from '../api/api';
 import Layout from '../Layout';
-import SkeletonCards from './SkeletonCards';
-import { NotificationsActiveRounded, NotificationsOffRounded } from '@mui/icons-material';
+// import SkeletonCards from './SkeletonCards';
+import { SettingsSuggestRounded } from '@mui/icons-material';
 import { io } from 'socket.io-client';
 import ClearAllRoundedIcon from '@mui/icons-material/ClearAllRounded';
-import { urlBase64ToUint8Array } from '../../utils/pushNotifications';
+// import { urlBase64ToUint8Array } from '../../utils/pushNotifications';
 import SkeletonChats from '../Chat/SkeletonChats';
-import { BloodtypeRounded, CheckCircleRounded, CancelRounded } from '@mui/icons-material';
+// import { BloodtypeRounded, CheckCircleRounded, CancelRounded } from '@mui/icons-material';
 import UserProfileDetails from './UserProfileDetails';
+import NotificationSettings from '../Notifications/NotificationSettings';
 
 // Enhanced styled components
-const NotificationsContainer = styled(Card)(({ theme }) => ({
-  background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
-  borderRadius: '16px',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
-  overflow: 'hidden',
-  backgroundClip: 'padding-box', // border vertices radius exact match
-}));
+// const NotificationsContainer = styled(Card)(({ theme }) => ({
+//   background: `linear-gradient(135deg, ${theme.palette.background.paper} 0%, ${alpha(theme.palette.primary.light, 0.05)} 100%)`,
+//   borderRadius: '16px',
+//   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+//   border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+//   overflow: 'hidden',
+//   backgroundClip: 'padding-box', // border vertices radius exact match
+// }));
 
 // Enhanced glassmorphism styles
 const getGlassmorphismStyle = (opacity = 0.15, blur = 20) => ({
@@ -59,15 +60,16 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [loadingView, setLoadingView] = useState(null);
   // Add this to your PostService.js component
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  // const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: '' });
-  const [loadingToggle, setLoadingToggle] = useState(false);
+  // const [loadingToggle, setLoadingToggle] = useState(false);
   const [loadingClear, setLoadingClear] = useState(false);
   const tokenUsername = localStorage.getItem('tokenUsername');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loginMessage, setLoginMessage] = useState({ open: false, message: "", severity: "info" });
   const [isUserProfileOpen, setUserProfileOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
+  const [showNotificationDialog, setShowNotificationDialog] = useState(false);
   
   // Add this effect to check current notification status
   // useEffect(() => {
@@ -128,22 +130,22 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
       }
     };
 
-    const checkNotificationStatus = async () => {
-      try {
-        const authToken = localStorage.getItem('authToken');
-        const response = await API.get('/api/notifications/notification-status', {
-          headers: {
-            Authorization: `Bearer ${authToken}`
-          }
-        });
-        setNotificationsEnabled(response.data.notificationEnabled);
-      } catch (error) {
-        console.error('Error checking notification status:', error);
-      }
-    };
+    // const checkNotificationStatus = async () => {
+    //   try {
+    //     const authToken = localStorage.getItem('authToken');
+    //     const response = await API.get('/api/notifications/notification-status', {
+    //       headers: {
+    //         Authorization: `Bearer ${authToken}`
+    //       }
+    //     });
+    //     setNotificationsEnabled(response.data.notificationEnabled);
+    //   } catch (error) {
+    //     console.error('Error checking notification status:', error);
+    //   }
+    // };
 
     fetchNotificationsData();
-    checkNotificationStatus();
+    // checkNotificationStatus();
   }, []);
 
   const handleNotificationClick = async (notification) => {
@@ -175,88 +177,88 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
   };
 
   // Add this function to request notification permissions
-  const toggleNotifications  = async () => {
-    setLoadingToggle(true);
-    try {
-      // Check if service worker and push manager are supported
-      if (!('serviceWorker' in navigator)) {
-        throw new Error('Service workers not supported in this browser');
-      }
-      if (!('PushManager' in window)) {
-        throw new Error('Push notifications not supported in this browser');
-      }
+  // const toggleNotifications  = async () => {
+  //   setLoadingToggle(true);
+  //   try {
+  //     // Check if service worker and push manager are supported
+  //     if (!('serviceWorker' in navigator)) {
+  //       throw new Error('Service workers not supported in this browser');
+  //     }
+  //     if (!('PushManager' in window)) {
+  //       throw new Error('Push notifications not supported in this browser');
+  //     }
 
-      if (loadingToggle) return null;
+  //     if (loadingToggle) return null;
 
-      if (!notificationsEnabled) {
+  //     if (!notificationsEnabled) {
   
-        // Request permission
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') {
-          throw new Error(' Browser Notifications Permission not granted');
-        }
-        // console.log('VAPID Public Key:', process.env.REACT_APP_VAPID_PUBLIC_KEY);
+  //       // Request permission
+  //       const permission = await Notification.requestPermission();
+  //       if (permission !== 'granted') {
+  //         throw new Error(' Browser Notifications Permission not granted');
+  //       }
+  //       // console.log('VAPID Public Key:', process.env.REACT_APP_VAPID_PUBLIC_KEY);
     
-        // Register service worker and get subscription
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY)
-        });
+  //       // Register service worker and get subscription
+  //       const registration = await navigator.serviceWorker.ready;
+  //       const subscription = await registration.pushManager.subscribe({
+  //         userVisibleOnly: true,
+  //         applicationServerKey: urlBase64ToUint8Array(process.env.REACT_APP_VAPID_PUBLIC_KEY)
+  //       });
     
-        // Send to backend with proper auth header
-        await API.post('/api/notifications/enable-push', {
-          token: JSON.stringify(subscription),
-          enabled: true
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
+  //       // Send to backend with proper auth header
+  //       await API.post('/api/notifications/enable-push', {
+  //         token: JSON.stringify(subscription),
+  //         enabled: true
+  //       }, {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+  //         }
+  //       });
     
-        setNotificationsEnabled(true);
-        setSnackbar({ 
-          open: true, 
-          message: 'Notifications enabled successfully!', 
-          severity: 'success' 
-        });
+  //       setNotificationsEnabled(true);
+  //       setSnackbar({ 
+  //         open: true, 
+  //         message: 'Notifications enabled successfully!', 
+  //         severity: 'success' 
+  //       });
 
-        // Reconnect socket to ensure notifications are received
-        if (socket) {
-          socket.emit('joinRoom', userId);
-        }
+  //       // Reconnect socket to ensure notifications are received
+  //       if (socket) {
+  //         socket.emit('joinRoom', userId);
+  //       }
 
-      } else {
-        // Disable notifications
-        await API.post('/api/notifications/enable-push', {
-          token: null,
-          enabled: false
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-          }
-        });
+  //     } else {
+  //       // Disable notifications
+  //       await API.post('/api/notifications/enable-push', {
+  //         token: null,
+  //         enabled: false
+  //       }, {
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+  //         }
+  //       });
 
-        setNotificationsEnabled(false);
-        setSnackbar({ 
-          open: true, 
-          message: 'Notifications Disabled!', 
-          severity: 'info' 
-        });
-      }
-    } catch (error) {
-      console.error('Error toggling notifications:', error);
-      setSnackbar({ 
-        open: true, 
-        message: `Failed to toggling notifications: ${error.message}`,
-        severity: 'error' 
-      });
-    } finally {
-      setLoadingToggle(false);
-    }
-  };
+  //       setNotificationsEnabled(false);
+  //       setSnackbar({ 
+  //         open: true, 
+  //         message: 'Notifications Disabled!', 
+  //         severity: 'info' 
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('Error toggling notifications:', error);
+  //     setSnackbar({ 
+  //       open: true, 
+  //       message: `Failed to toggling notifications: ${error.message}`,
+  //       severity: 'error' 
+  //     });
+  //   } finally {
+  //     setLoadingToggle(false);
+  //   }
+  // };
 
   const handleClearAll = async () => {
     setLoadingClear(true);
@@ -319,6 +321,19 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
       .join(" ");
   };
 
+  // notification dialog handler
+  const handleNotificationDialogClose = (enabled) => {
+    setShowNotificationDialog(false);
+    localStorage.setItem('notificationPermissionRequested', enabled ? 'granted' : 'denied');
+    if (enabled) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Notifications enabled successfully', 
+        severity: 'success' 
+      });
+    }
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box sx={{ p: isMobile ? '6px' : '10px', maxWidth: '800px', mx: 'auto' }}>
@@ -356,11 +371,25 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
           <IconButton sx={{ backgroundColor: '#1976d2', color: '#fff', '&:hover': { backgroundColor: '#1565c0' } }}>
             <NotificationsActive />
           </IconButton> */}
-          <IconButton 
+          {/* <IconButton 
             onClick={toggleNotifications} disabled={loading}
             sx={{ backgroundColor: notificationsEnabled ? '#2e7d32' : '#d32f2f', color: '#fff', '&:hover': { backgroundColor: '#1565c0', opacity: 0.8 } }}
           >
             {!loadingToggle ?  (notificationsEnabled ? <NotificationsActiveRounded /> : <NotificationsOffRounded />) : <CircularProgress size={24} color='white'/>}
+          </IconButton> */}
+          <IconButton 
+            onClick={() => setShowNotificationDialog(true)}
+            disabled={loading}
+            sx={{ 
+              color: 'text.secondary',
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+              '&:hover': { 
+                color: '#fff',
+                backgroundColor: '#1565c0' 
+              }
+            }}
+          >
+            <SettingsSuggestRounded/>
           </IconButton>
           </Box>
         </Toolbar>
@@ -461,6 +490,16 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
         // post={post}
         isMobile={isMobile}
         isAuthenticated={isAuthenticated} setLoginMessage={setLoginMessage}  setSnackbar={setSnackbar} darkMode={darkMode}
+      />
+
+      <NotificationSettings
+        open={showNotificationDialog}
+        onClose={handleNotificationDialogClose}
+        darkMode={darkMode}
+        isMobile={isMobile}
+        setSnackbar={setSnackbar}
+        socket={socket}
+        userId={userId}
       />
       <Snackbar
         open={snackbar.open}

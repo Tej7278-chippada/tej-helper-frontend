@@ -134,7 +134,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       //   setComment('');
       // }
     } catch (error) {
-      console.error('Error fetching user details:', error);
+      // console.error('Error fetching user details:', error);
+      setSnackbar({ open: true, message: 'User details not found!', severity: 'error' });
     } finally {
       setIsFetching(false);
     }
