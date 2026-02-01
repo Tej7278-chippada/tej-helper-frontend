@@ -1488,7 +1488,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', gap: '8px' }}>
-                <Button variant="outlined" size="small"
+                {/* <Button variant="outlined" size="small"
                   sx={{
                     background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
                     color: '#fff', px: 1.5,
@@ -1505,7 +1505,13 @@ const SOCIAL_MEDIA_PLATFORMS = {
                   startIcon={<EditNoteRounded />}
                 >
                   Edit
-                </Button>
+                </Button> */}
+                <Switch
+                  checked={userData?.bloodDonor?.donate}
+                  // onChange={toggleBloodDonate}
+                  color="primary"
+                  onClick={handleEditBloodData}
+                />
                 {/* <Tooltip title="Edit Blood Donation" arrow>
                   <IconButton 
                     onClick={handleEditBloodData}
