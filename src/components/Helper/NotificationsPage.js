@@ -169,7 +169,7 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
     }
     if(notification.notificationType === 'blood_request') {
       navigate(`/user/${notification.userId}`);
-    } else if (notification.notificationType === 'blood_request_update') {
+    } else if (notification.notificationType === 'blood_request_update' || 'follower') {
       handleOpenUserProfileDialog(notification.otherUserId);
     } else {
       navigate(`/post/${notification.postId._id}`);

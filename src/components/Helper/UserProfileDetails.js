@@ -81,8 +81,10 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
     if (open) {
       setUserReportSuccess(false);
       setBloodRequestStatus('request');
-      fetchUserProfile();
-      fetchUserPosts();
+      if(userId) {
+        fetchUserProfile();
+        fetchUserPosts();
+      }
       // fetchUserRatings();
     }
     // if (post) {
@@ -866,8 +868,13 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
               }
               <Box sx={{ width: '100%'}}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="h6" >{profile?.username}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flex: 1 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 500,
+                      maxWidth: isMobile ? '220px' : 'none',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }} >{profile?.username || 'User name not found'}</Typography>
                     {(profile?.idVerificationStatus === 'approved') &&
                     <Tooltip title="Verified User" placement="top" arrow>
                       <VerifiedRoundedIcon sx={{ fontSize: '20px', color: 'Highlight' }} />  
