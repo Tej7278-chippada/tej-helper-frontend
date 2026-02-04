@@ -93,7 +93,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   // const [products, setProducts] = useState([]);
   // const [selectedProduct, setSelectedProduct] = useState(null);
   const [commentPopupOpen, setCommentPopupOpen] = useState(false);
-  const [wishlist, setWishlist] = useState(new Set());
+  // const [wishlist, setWishlist] = useState(new Set());
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -104,6 +104,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const [likeLoading, setLikeLoading] = useState(false); // For like progress
   const [wishStatusLoading, setWishStatusLoading] = useState(false);
   const [wishLoading, setWishLoading] = useState(false); // For like progress
+  const [isInWishlist, setIsInWishlist] = useState(false);
 //   const navigate = useNavigate();
   const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "info" });
   const [successMessage, setSuccessMessage] = useState('');
@@ -193,9 +194,10 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
       if (isAuthenticated && post) {
         setWishStatusLoading(true);
         try {
-          const isInWishlist = await checkPostInWishlist(post._id);
-          setWishlist(new Set(isInWishlist ? [post._id] : []));
-          setWishStatusLoading(false);
+          const wishlistStatus = await checkPostInWishlist(post._id);
+          setIsInWishlist(wishlistStatus);
+          // setWishlist(new Set(isInWishlist ? [post._id] : []));
+          // setWishStatusLoading(false);
         } catch (error) {
           console.error('Error checking wishlist status:', error);
         } finally {
@@ -315,22 +317,29 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
       });
       return;
     } 
+    if (wishLoading) return;
     setWishLoading(true); // Start the progress indicator
     try {
-      if (wishlist.has(postId)) {
-        setWishlist((prevWishlist) => {
-          const newWishlist = new Set(prevWishlist);
-          newWishlist.delete(postId);
-          return newWishlist;
-        }); // Optimistically update the UI
+      if (isInWishlist) {
+      // if (wishlist.has(postId)) {
+      //   setWishlist((prevWishlist) => {
+      //     const newWishlist = new Set(prevWishlist);
+      //     newWishlist.delete(postId);
+      //     return newWishlist;
+      //   }); // Optimistically update the UI
+        setIsInWishlist(false);
         await removeFromWishlist(postId);
+        // setSnackbar({ open: true, message: "Post removed from wishlist.", severity: "warning" });
       } else {
-        setWishlist((prevWishlist) => new Set([...prevWishlist, postId])); // Optimistically update the UI
+        // setWishlist((prevWishlist) => new Set([...prevWishlist, postId])); // Optimistically update the UI
+        setIsInWishlist(true);
         await addToWishlist(postId);
+        setSnackbar({ open: true, message: "Post added to wishlist.", severity: "success" });
       }
     } catch (error) {
+      setIsInWishlist(!isInWishlist);
       console.error('Error toggling wishlist:', error);
-      alert('Failed to update wishlist status!');
+      // alert('Failed to update wishlist status!');
     } finally {
       setWishLoading(false); // End the progress indicator
     }
@@ -1138,19 +1147,24 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                           aria-label="Share Post"
                           title="Share Post"
                         >
-                          <CustomTooltip title="Share this post" arrow placement="right">
+                          {/* <CustomTooltip title="Share this post" arrow placement="right"> */}
                             <ShareIcon />
-                          </CustomTooltip >
+                          {/* </CustomTooltip > */}
                         </IconButton>
                         <IconButton
-                          onClick={() => handleWishlistToggle(post._id)}
-                          sx={{ display: 'inline-block', float: 'right', fontWeight: '500', /* backgroundColor: 'rgba(255, 255, 255, 0.8)', */
+                          onClick={wishLoading ? null : () => handleWishlistToggle(post._id)}
+                          sx={{ 
+                            // display: 'inline-block', 
+                            float: 'right', fontWeight: '500', /* backgroundColor: 'rgba(255, 255, 255, 0.8)', */
                             // ...getGlassmorphismStyle(theme, darkMode),
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-                            color: wishlist.has(post._id) ? 'red' : 'gray',
-                          }} disabled={wishLoading || wishStatusLoading} // Disable button while loading
+                            // color: wishlist.has(post._id) ? 'red' : 'gray',
+                            color: isInWishlist ? 'red' : 'gray',
+                          }} disabled={wishStatusLoading} // Disable button while loading // wishLoading || 
+                          aria-label={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+                          title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
                         >
-                          <Tooltip
+                          {/* <Tooltip
                             title={wishlist.has(post._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
                             arrow
                             placement="right"
@@ -1165,15 +1179,19 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                                 position: 'relative',
                                 transition: 'transform 0.3s ease',
                               }}
-                            >{wishLoading ? (
-                              <CircularProgress size={24} color="inherit" /> // Show spinner while loading
-                            ) : wishlist.has(post._id) ? (
+                            > */}
+                              {
+                            //   wishLoading ? (
+                            //   <CircularProgress size={24} color="inherit" /> // Show spinner while loading
+                            // // ) : wishlist.has(post._id) ? (
+                            // ) : 
+                            isInWishlist ? (
                               <FavoriteIcon />
                             ) : (
                               <FavoriteBorderIcon />
                             )}
-                            </span>
-                          </Tooltip>
+                            {/* </span>
+                          </Tooltip> */}
                         </IconButton>
                         {post.isFullTime && 
                           <Typography sx={{ px: 2, py: 0.5, mx: 1, bgcolor: '#e0f7fa', color: '#006064', borderRadius: '999px', display: 'inline-block', float: 'right', fontWeight: '600', fontSize: '0.875rem' }}>

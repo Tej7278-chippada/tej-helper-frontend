@@ -230,14 +230,18 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       });
       return;
     } 
-    if (userId === localStorage.getItem('userId')) return;
+    if ((userId === localStorage.getItem('userId'))  || loadingFollow) return;
     try {
       setLoadingFollow(true);
-      await followUser(userId);
       setIsFollowing(true);
       setFollowerCount(prev => prev + 1);
-      // setSnackbar({ open: true, message: 'Successfully followed user', severity: 'success' });
+      await followUser(userId);
+      // setIsFollowing(true);
+      // setFollowerCount(prev => prev + 1);
+      setSnackbar({ open: true, message: 'Successfully followed user', severity: 'success' });
     } catch (error) {
+      setIsFollowing(false);
+      setFollowerCount(prev => prev - 1);
       setSnackbar({ open: true, message: error.response?.data?.message || 'Error following user', severity: 'error' });
     } finally {
       setLoadingFollow(false);
@@ -253,14 +257,18 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       });
       return;
     } 
-    if (userId === localStorage.getItem('userId')) return;
+    if ((userId === localStorage.getItem('userId')) || loadingFollow) return;
     try {
       setLoadingFollow(true);
-      await unfollowUser(userId);
       setIsFollowing(false);
       setFollowerCount(prev => prev - 1);
-      // setSnackbar({ open: true, message: 'Successfully unfollowed user', severity: 'success' });
+      await unfollowUser(userId);
+      // setIsFollowing(false);
+      // setFollowerCount(prev => prev - 1);
+      // setSnackbar({ open: true, message: 'Successfully unfollowed user', severity: 'warning' });
     } catch (error) {
+      setIsFollowing(true);
+      setFollowerCount(prev => prev + 1);
       setSnackbar({ open: true, message: error.response?.data?.message || 'Error unfollowing user', severity: 'error' });
     } finally {
       setLoadingFollow(false);
@@ -931,7 +939,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     {userId !== localStorage.getItem('userId') && (
                       <Button
                         variant="text" size="small"
-                        onClick={isFollowing ? handleUnfollow : handleFollow}
+                        onClick={loadingFollow ? null : isFollowing ? handleUnfollow : handleFollow}
                         sx={{ borderRadius: 99, textTransform: 'none', px: 1.5,
                           color: isFollowing ? '#4361ee' : 'white',
                           background: isFollowing ? 'none' : 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
@@ -951,9 +959,10 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                             color: 'rgba(0, 0, 0, 0.26)',
                           },
                          }}
-                        disabled={!isAuthenticated || isFetching || loadingFollow} // Disable if not logged in
+                        disabled={!isAuthenticated || isFetching} // Disable if not logged in  || loadingFollow
                       >
-                        { loadingFollow ? <CircularProgress size={18} sx={{ m: '2px', color: '#3a56d4' }} /> : isFollowing ? 'Following' : 'Follow'}
+                        {/* { loadingFollow ? <CircularProgress size={18} sx={{ m: '2px', color: '#3a56d4' }} /> : isFollowing ? 'Following' : 'Follow'} */}
+                        {isFollowing ? 'Following' : 'Follow'}
                       </Button>
                     )}
                   </Box>
