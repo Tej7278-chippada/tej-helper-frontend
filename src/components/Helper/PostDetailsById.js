@@ -96,6 +96,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   // const [wishlist, setWishlist] = useState(new Set());
   const { id } = useParams();
   const [post, setPost] = useState(null);
+  const [commentsCount, setCommentsCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -145,6 +146,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
           likedByUser, // Set the liked status
           likes: likesCount,
         });
+        setCommentsCount(response.data?.comments.length);
         // setStockCountId(response.data.stockCount); // Set initial stock count
 
       } catch (error) {
@@ -262,34 +264,13 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
     // setSelectedProduct(product); // Pass the product to ensure it gets updated in the popup
   };
 
-  const onCommentAdded = async () => {
-    try {
-      // const updatedPosts = await fetchPosts(); // This fetches all products after a comment is added
-      // setPost(updatedPosts.data); // Update the product list in the state
-      // setCommentPopupOpen(false); // Close the CommentPopup
-      
-      // Fetch the updated likes count after a comment is added
-      const updatedLikesCount = await fetchLikesCount(id);
-      
-      // Update the post state with the new likes count
-      // setPost((prevPost) => ({
-      //   ...prevPost,
-      //   likes: updatedLikesCount,
-      // }));
-
-      // Optionally, you can also fetch the updated post details if needed
-      const updatedPost = await fetchPostById(id);
-      setPost((prevPost) => ({
-        ...prevPost,
-        comments: updatedPost.data.comments,
-        likes: updatedLikesCount,
-      }));
-    } catch (error) {
-      console.error("Error fetching likes count or post details after comment added.", error);
-    // } finally {
-      // setCommentPopupOpen(false); // Close the comment popup
-    }
+  const onCommentAdded = () => {
+    setCommentsCount(prev => prev + 1);
   };
+
+  const onCommentDeleted = () => {
+    setCommentsCount(prev => prev - 1);
+  }
 
   const openRouteMapDialog = (post) => {
     // setSelectedProduct(product);
@@ -1446,7 +1427,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   <ChatRoundedIcon /> {post.comments?.length || 0}
                 </IconButton> */}
                 <Chip 
-                  label={post.comments?.length || 0} icon={<ChatRoundedIcon fontSize="small"/>}
+                  label={commentsCount} icon={<ChatRoundedIcon fontSize="small"/>}
                   // color="primary"
                   variant="outlined" size="small" 
                   onClick={() => openComments(post)}
@@ -1632,6 +1613,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
             onClose={() => setCommentPopupOpen(false)}
             post={post} // Pass the current product
             onCommentAdded={onCommentAdded}  // Passing the comment added handler
+            onCommentDeleted={onCommentDeleted}
             setLoginMessage={setLoginMessage} darkMode={darkMode} getGlassmorphismStyle={getGlassmorphismStyle}
           />
           <RouteMapDialog

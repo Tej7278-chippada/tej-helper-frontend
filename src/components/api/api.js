@@ -288,6 +288,16 @@ export const fetchLikesCount = async (id) => {
   return response.data.likes;
 };
 
+export const fetchComments = async (postId) => {
+  try {
+    const response = await API.get(`/api/posts/${postId}/comments`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    throw error;
+  }
+};
+
 export const addComment = async (id, comment) => {
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
@@ -298,6 +308,39 @@ export const addComment = async (id, comment) => {
   } catch (error) {
       console.error('Error adding comment:', error);
       throw error;
+  }
+};
+
+export const editComment = async (postId, commentId, updatedComment) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  try {
+    const response = await API.put(
+      `/api/posts/${postId}/comment/${commentId}`,
+      updatedComment,
+      { headers }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error editing comment:', error);
+    throw error;
+  }
+};
+
+export const deleteComment = async (postId, commentId) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  try {
+    const response = await API.delete(
+      `/api/posts/${postId}/comment/${commentId}`,
+      { headers }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    throw error;
   }
 };
 
