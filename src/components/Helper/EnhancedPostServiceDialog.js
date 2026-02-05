@@ -199,6 +199,15 @@ const getDurationUnit = (pricingModel) => {
 // to get service type examples on the general services name input
 const getServiceTypeExamples = (serviceType) => {
   switch (serviceType) {
+    case 'Grocery':
+      return [
+        'Daily Grocery Delivery',
+        'Vegetables & Fruits Delivery',
+        'Organic Products',
+        'Bulk Grocery Supply',
+        'Home Essentials Delivery',
+        'Supermarket Pickup Service'
+      ];
     case 'Cleaning':
       return [
         'Basic House Cleaning',
@@ -235,6 +244,15 @@ const getServiceTypeExamples = (serviceType) => {
         'Pet Training',
         'Pet Boarding'
       ];
+    case 'Driver':
+      return [
+        'Daily Office Driver',
+        'Outstation Trips',
+        'Airport Drop/Pickup',
+        'Valet Driver',
+        'Personal Chauffeur',
+        'Night Driving Assistance'
+      ];
     case 'Delivery':
       return [
         'Food Delivery',
@@ -252,6 +270,15 @@ const getServiceTypeExamples = (serviceType) => {
         'Appliance Repair',
         'Carpentry Work',
         'Painting Service'
+      ];
+    case 'VechileMech':
+      return [
+        'Bike Repair Service',
+        'Car Repair & Maintenance',
+        'Battery Jumpstart',
+        'Puncture & Tyre Service',
+        'Engine Oil Change',
+        'On-Spot Breakdown Assistance'
       ];
     case 'Laundry':
       return [
@@ -342,6 +369,18 @@ const SERVICE_FEATURES = {
   ParkingSpace: ['24/7 Available', 'Covered Parking', 'Security Surveillance', 'Well Lit Area', 'EV Charging Station', 'Valet Service', 'Monthly Discount', 'Reserved Spot', 'Accessible Parking', 'Indoor Parking'],
   VehicleRental: ['Insurance Included', 'Free Delivery', '24/7 Support', 'Multiple Payment Options', 'Child Seats Available', 'GPS Navigation', 'Unlimited Mileage', 'Roadside Assistance', 'Fuel Included', 'Airport Delivery'],
   FurnitureRental: ['Free Delivery & Setup', 'Assembly Included', 'Flexible Rental Terms', 'Damage Waiver', 'Upgrade Options', 'Maintenance Included', 'Quick Delivery', 'Eco-Friendly Furniture', 'Customization Available', 'Storage Solutions'],
+  Grocery: [
+    'Fresh Produce Guaranteed',
+    'Fast Delivery',
+    'Daily Essentials Available',
+    'Bulk Order Support',
+    'Organic Products Option',
+    'Scheduled Delivery',
+    'Contactless Delivery',
+    'Multiple Payment Options',
+    'Store-to-Door Delivery',
+    'Special Discounts & Offers'
+  ],
   Laundry: ['Pickup & Delivery', 'Same Day Service', 'Eco-Friendly Detergents', 'Ironing Included', 'Dry Cleaning', 'Stain Removal', 'Fold & Pack', 'Bulk Discounts', 'Emergency Service', 'Special Fabric Care'],
   Events: ['Full Planning Service', 'Venue Decoration', 'Catering Options', 'Audio-Visual Equipment', 'Photography/Videography', 'Entertainment Arrangements', 'Guest Management', 'Budget Planning', 'Theme Development', 'Cleanup Service'],
   Playgrounds: ['Safety Certified', 'Supervision Included', 'Party Packages', 'Indoor Facility', 'Weather Protected', 'Educational Toys', 'Snack Bar', 'Birthday Decorations', 'Group Discounts', 'Special Needs Accessible'],
@@ -349,8 +388,32 @@ const SERVICE_FEATURES = {
   Cooking: ['Diet Specific Meals', 'Meal Prep Service', 'Local Cuisine', 'International Dishes', 'Ingredients Provided', 'Cooking Classes', 'Party Catering', 'Healthy Options', 'Custom Menu', 'Food Safety Certified'],
   Tutoring: ['Certified Tutors', 'Online Sessions', 'Group Discounts', 'Exam Preparation', 'Homework Help', 'Special Needs Support', 'Progress Reports', 'Flexible Scheduling', 'Multiple Subjects', 'Study Materials Included'],
   PetCare: ['Veterinary Background', 'Pet Grooming', 'Medication Administration', 'Daily Updates', 'Emergency Care', 'Multiple Pets Discount', 'Pet Training', 'Playtime Included', 'Special Diet Management', '24/7 Availability'],
+  Driver: [
+    'Experienced Drivers',
+    'Background Verified',
+    'Hourly / Daily Booking',
+    'Outstation Trips',
+    'Airport Pickup & Drop',
+    'Night Driving Support',
+    'Valet Parking Service',
+    'Flexible Shift Timings',
+    'Emergency On-call Driver',
+    'Multi-Language Support'
+  ],
   Delivery: ['Express Delivery', 'Same Day Service', 'Tracking Available', 'Fragile Handling', 'Large Items Delivery', 'Multiple Stops', 'Cash on Delivery', 'Temperature Controlled', 'Weekend Service', 'Real-time Updates'],
   Maintenance: ['Emergency Repair', '24/7 Service', 'Warranty Included', 'Free Diagnosis', 'Quality Parts', 'Senior Discount', 'Regular Maintenance Plans', 'Eco-Friendly Solutions', 'Licensed Technicians', 'Same Day Service'],
+  VechileMech: [
+    'On-Spot Repair',
+    'Emergency Breakdown Assistance',
+    'Genuine Spare Parts',
+    'Free Diagnosis',
+    'Tyre/Puncture Service',
+    'Battery Jumpstart',
+    'Oil Change Service',
+    'Pickup & Drop Facility',
+    'Maintenance Packages',
+    'Certified Mechanics'
+  ],
   HouseSaleLease: ['Legal Documentation Help', 'Property Valuation', 'Virtual Tours', 'Negotiation Support', 'Home Inspection', 'Financing Assistance', 'Interior Staging', 'Photography Service', 'Flexible Viewing', 'Tenant Screening'],
   LandSaleLease: ['Surveying Services', 'Zoning Information', 'Development Potential', 'Legal Assistance', 'Financing Options', 'Environmental Assessment', 'Infrastructure Details', 'Investment Analysis', 'Long-term Lease Options', 'Multiple Payment Plans'],
   Other: ['Customizable Service', 'Quick Response', 'Quality Guarantee', 'Affordable Pricing', 'Experienced Professional', 'Free Consultation', 'Satisfaction Guaranteed', 'Emergency Service', 'Eco-Friendly', 'Technology Enabled']
@@ -475,6 +538,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     { value: 'ParkingSpace', label: 'Parking Space', icon: '🅿️' },
     { value: 'VehicleRental', label: 'Vehicle Rental', icon: '🚗' },
     { value: 'FurnitureRental', label: 'Furniture Rental', icon: '🛋️' },
+    { value: 'Grocery', label: 'Grocery', icon: '🍅' },
     { value: 'Laundry', label: 'Laundry Service', icon: '👕' },
     { value: 'Events', label: 'Events', icon: '🕺' },
     { value: 'Playgrounds', label: 'Playgrounds', icon: '🏸' },
@@ -482,8 +546,10 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
     { value: 'Cooking', label: 'Cooking Service', icon: '👨‍🍳' },
     { value: 'Tutoring', label: 'Tutoring', icon: '📚' },
     { value: 'PetCare', label: 'Pet Care', icon: '🐕' },
+    { value: 'Driver', label: 'Driver', icon: '🧑‍✈️' },
     { value: 'Delivery', label: 'Delivery Service', icon: '📦' },
-    { value: 'Maintenance', label: 'Maintenance', icon: '🔧' },
+    { value: 'Maintenance', label: 'Maintenance', icon: '🪛' },
+    { value: 'VehicleMech', label: 'Vehicle Mechanic', icon: '🔧' },
     { value: 'HouseSaleLease', label: 'House Sale/Lease', icon: '🏠' },
     { value: 'LandSaleLease', label: 'Land Sale/Lease', icon: '⛰️' },
     { value: 'Other', label: 'Other Services', icon: '⚙️' }

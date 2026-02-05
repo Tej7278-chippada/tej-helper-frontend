@@ -384,8 +384,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     // Determine if the selected value is a category or service
     const isCategory = ['', 'Paid', 'UnPaid', 'Emergency', 'Friends'].includes(value);
     const isService = [
-      'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
-      'Cooking', 'Tutoring', 'PetCare', 'Delivery', 'Maintenance', 'HouseSaleLease', 'LandSaleLease', 'Other'
+      'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Grocery', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
+      'Cooking', 'Tutoring', 'PetCare', 'Driver', 'Delivery', 'Maintenance', 'VehicleMech', 'HouseSaleLease', 'LandSaleLease', 'Other'
     ].includes(value);
     const isNearbyUser = ['BloodDonors', 'StandwithWomen'].includes(value);
 

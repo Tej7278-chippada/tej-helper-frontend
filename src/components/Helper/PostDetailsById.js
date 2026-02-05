@@ -29,7 +29,7 @@ import axios from 'axios';
 import PaidIcon from '@mui/icons-material/Paid';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import EmergencyIcon from '@mui/icons-material/Emergency';
-import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, ChildCare, CleaningServices, Restaurant, School, Pets, LocalShipping, Handyman, HomeWork, Landscape, MoreHoriz, CurrencyRupee, Schedule, CheckCircleRounded } from '@mui/icons-material';
+import { LocalParking, DirectionsCar, EventSeat, LocalLaundryService, Event, ChildCare, CleaningServices, Restaurant, School, Pets, LocalShipping, Handyman, HomeWork, Landscape, MoreHoriz, CurrencyRupee, Schedule, CheckCircleRounded, ShoppingBasket, EmojiTransportation, Build } from '@mui/icons-material';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import ReportGmailerrorredRoundedIcon from '@mui/icons-material/ReportGmailerrorredRounded';
 import ReportPost from '../Reports/ReportPost';
@@ -43,6 +43,7 @@ const getServiceIcon = (serviceType) => {
     case 'ParkingSpace': return <LocalParking />;
     case 'VehicleRental': return <DirectionsCar />;
     case 'FurnitureRental': return <EventSeat />;
+    case 'Grocery': return <ShoppingBasket />;
     case 'Laundry': return <LocalLaundryService />;
     case 'Events': return <Event />;
     case 'Playgrounds': return <ChildCare />;
@@ -50,8 +51,10 @@ const getServiceIcon = (serviceType) => {
     case 'Cooking': return <Restaurant />;
     case 'Tutoring': return <School />;
     case 'PetCare': return <Pets />;
+    case 'Driver':  <EmojiTransportation />; // or <DriveEta />
     case 'Delivery': return <LocalShipping />;
     case 'Maintenance': return <Handyman />;
+    case 'VechileMech': return <Build />; // or <Engineering />
     case 'HouseSaleLease': return <HomeWork />;
     case 'LandSaleLease': return <Landscape />;
     default: return <MoreHoriz />;
