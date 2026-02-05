@@ -103,7 +103,9 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
   const isMobile1 = useMediaQuery(theme.breakpoints.down("md"));
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Track authentication
   const [likeLoading, setLikeLoading] = useState(false); // For like progress
-  const [wishStatusLoading, setWishStatusLoading] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [isLikedByUser, setIsLikedByUser] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false);
   const [wishLoading, setWishLoading] = useState(false); // For like progress
   const [isInWishlist, setIsInWishlist] = useState(false);
 //   const navigate = useNavigate();
@@ -128,31 +130,38 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
     const fetchPostDetails = async () => {
       setLoading(true);
       try {
-        const likesCount = await fetchLikesCount(id);
+        // const likesCount = await fetchLikesCount(id);
         const authToken = localStorage.getItem('authToken');
         setIsAuthenticated(!!authToken); // Check if user is authenticated
   
         // Fetch post details
         const response = await fetchPostById(id);
-  
-        let likedByUser = false; // Default to false for unauthenticated users
+        // const likesCount = await fetchLikesCount(id);
+        setPost(response.data);
+        setCommentsCount(response.data?.comments.length);
+        setLikesCount(response.data.likesCount || 0);
+        // setIsLikedByUser(response.data.likedByUser);
+        // setStockCountId(response.data.stockCount); // Set initial stock count
         if (authToken) {
           // Only check if the post is liked by the user if the user is authenticated
-          likedByUser = await checkIfLiked(id);
+          setStatusLoading(true);
+          try {
+            const wishlistStatus = await checkPostInWishlist(id);
+            setIsInWishlist(wishlistStatus);
+            const likedByUser = await checkIfLiked(id);
+            setIsLikedByUser(likedByUser);
+          } catch (error) {
+            console.error('Error checking wishlist status:', error);
+          } finally {
+            setStatusLoading(false);
+          }
+          
         }
-  
-        setPost({
-          ...response.data,
-          likedByUser, // Set the liked status
-          likes: likesCount,
-        });
-        setCommentsCount(response.data?.comments.length);
-        // setStockCountId(response.data.stockCount); // Set initial stock count
 
       } catch (error) {
         if (error.response && error.response.status === 404) {
           console.error('Post Unavailable.', error);
-          setSnackbar({ open: true, message: "Post Unavailable.", severity: "warning" });
+          setSnackbar({ open: true, message: "Post Unavailable or Deleted.", severity: "warning" });
         } else if (error.response && error.response.status === 401) {
           console.error('Error fetching post details:', error);
         } else {
@@ -191,25 +200,25 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
     };
   }, [routeMapDialogOpen, setRouteMapDialogOpen, chatDialogOpen, setChatDialogOpen, commentPopupOpen, setCommentPopupOpen, selectedImage, setSelectedImage]);
 
-  useEffect(() => {
-    const checkWishlistStatus = async () => {
-      if (isAuthenticated && post) {
-        setWishStatusLoading(true);
-        try {
-          const wishlistStatus = await checkPostInWishlist(post._id);
-          setIsInWishlist(wishlistStatus);
-          // setWishlist(new Set(isInWishlist ? [post._id] : []));
-          // setWishStatusLoading(false);
-        } catch (error) {
-          console.error('Error checking wishlist status:', error);
-        } finally {
-          setWishStatusLoading(false);
-        }
-      }
-    };
+  // useEffect(() => {
+    // const checkWishlistStatus = async () => {
+    //   if (isAuthenticated && post) {
+    //     setWishStatusLoading(true);
+    //     try {
+    //       const wishlistStatus = await checkPostInWishlist(post._id);
+    //       setIsInWishlist(wishlistStatus);
+    //       // setWishlist(new Set(isInWishlist ? [post._id] : []));
+    //       // setWishStatusLoading(false);
+    //     } catch (error) {
+    //       console.error('Error checking wishlist status:', error);
+    //     } finally {
+    //       setWishStatusLoading(false);
+    //     }
+    //   }
+    // };
   
-    checkWishlistStatus();
-  }, [post, isAuthenticated]);
+  //   checkWishlistStatus();
+  // }, [post, isAuthenticated]);
 
 //   useEffect(() => {
 //     // Periodically fetch stock count
@@ -242,18 +251,34 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
       });
       return;
     } 
+    // Save old state for rollback
+    const prevLiked = isLikedByUser;
+    const prevLikes = likesCount;
     setLikeLoading(true); // Start the progress indicator
     try {
-      const newLikedByUser = !post.likedByUser;
-      setPost((prevProduct) => ({
-        ...prevProduct,
-        likedByUser: newLikedByUser,
-        likes: newLikedByUser ? prevProduct.likes + 1 : prevProduct.likes - 1,
-      }));
-      await likePost(id);
+      // Optimistic update
+      const optimisticLiked = !prevLiked;
+      const optimisticLikes = optimisticLiked ? prevLikes + 1 : prevLikes - 1;
+
+      setIsLikedByUser(optimisticLiked);
+      setLikesCount(optimisticLikes);
+      // Make the API call
+      const response = await likePost(id);
+      
+      // Sync with server response if mismatch
+      if (response?.likesCount !== optimisticLikes) {
+        setLikesCount(response.likesCount);
+      }
     } catch (error) {
       console.error('Error toggling like:', error);
-      alert('Error toggling like.');
+      // ROLLBACK optimistic changes
+      setIsLikedByUser(prevLiked);
+      setLikesCount(prevLikes);
+      setSnackbar({ 
+        open: true, 
+        message: 'Error toggling like. Please try again.', 
+        severity: "error" 
+      });
     } finally {
       setLikeLoading(false); // End the progress indicator
     }
@@ -1133,7 +1158,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                           {/* </CustomTooltip > */}
                         </IconButton>
                         <IconButton
-                          onClick={wishLoading ? null : () => handleWishlistToggle(post._id)}
+                          onClick={(wishLoading || statusLoading) ? null : () => handleWishlistToggle(post._id)}
                           sx={{ 
                             // display: 'inline-block', 
                             float: 'right', fontWeight: '500', /* backgroundColor: 'rgba(255, 255, 255, 0.8)', */
@@ -1141,7 +1166,8 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                             boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
                             // color: wishlist.has(post._id) ? 'red' : 'gray',
                             color: isInWishlist ? 'red' : 'gray',
-                          }} disabled={wishStatusLoading} // Disable button while loading // wishLoading || 
+                          }} 
+                          // disabled={wishStatusLoading} // Disable button while loading // wishLoading || 
                           aria-label={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
                           title={isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
                         >
@@ -1395,17 +1421,19 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                   {post.likes}
                 </IconButton> */}
                 <Chip 
-                  label={post.likes} 
-                  icon={likeLoading ? (
-                    <CircularProgress size={20} color="inherit" /> // Show spinner while loading
-                  ) : post.likedByUser ? (
+                  label={likesCount || 0} 
+                  icon={
+                  //   likeLoading ? (
+                  //   <CircularProgress size={20} color="inherit" /> // Show spinner while loading
+                  // ) : 
+                  isLikedByUser ? (
                     <ThumbUpRoundedIcon fontSize="small"/>
                   ) : (
                     <ThumbUpOutlinedIcon fontSize="small" />
                   )}
                   // color="primary"
                   variant="outlined"
-                  onClick={handleLike}
+                  onClick={(likeLoading || statusLoading) ? null : handleLike}
                   sx={{pl: 1, fontWeight: 500, fontSize: '1rem', 
                     background: darkMode 
                       ? 'rgba(30, 30, 30, 0.85)' 
@@ -1419,7 +1447,7 @@ function PostDetailsById({ onClose, user, darkMode, toggleDarkMode, unreadCount,
                     // flexShrink: 0,
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   }}
-                  disabled={likeLoading}
+                  // disabled={likeLoading}
                 />
                 {/* <IconButton sx={{gap:'2px'}}
                   onClick={() => openComments(post)}
