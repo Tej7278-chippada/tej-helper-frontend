@@ -1520,11 +1520,49 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
       handleCloseDialog();       // Close dialog
     } catch (error) {
       console.error("Error submitting post:", error);
-      setSnackbar({
-        open: true, message: editingProduct
-          ? `${formData.title} details can't be updated, please try again later.`
-          : `New post can't be added, please try again later.`, severity: 'error'
-      });
+      
+      if (error.response && error.response.data && error.response.data.message) {
+        const errorMessage = error.response.data.message;
+        
+        // Check if it's a post limit error (contains keywords)
+        if (
+          errorMessage.includes('only have') || 
+          errorMessage.includes('active') || 
+          errorMessage.includes('Please close or delete') ||
+          errorMessage.includes('Cannot activate') ||
+          errorMessage.includes('deactivate another') ||
+          errorMessage.includes('already have') ||
+          errorMessage.includes('active posts')
+        ) {
+          setSnackbar({
+            open: true, 
+            message: errorMessage, 
+            severity: 'warning',  // Use 'warning' instead of 'error' for limit messages
+            autoHideDuration: 10000 // Show longer (10 seconds) for important messages
+          });
+          
+          // Also show an alert in the dialog itself
+          setSubmitError(errorMessage);
+        } else {
+          // Regular error
+          setSnackbar({
+            open: true, 
+            message: editingProduct
+              ? `${formData.title} details can't be updated, please try again later.`
+              : `New post can't be added, please try again later.`, 
+            severity: 'error'
+          });
+        }
+      } else {
+        // Generic error
+        setSnackbar({
+          open: true, 
+          message: editingProduct
+            ? `${formData.title} details can't be updated, please try again later.`
+            : `New post can't be added, please try again later.`, 
+          severity: 'error'
+        });
+      }
     } finally {
       setLoadingSubmit(false); // Stop loading state
     }
@@ -3467,7 +3505,7 @@ const EnhancedPostServiceDialog = ({ openDialog, onCloseDialog, theme, isMobile,
                   <strong>Target Gender:</strong> {formData.gender || 'Not specified'}
                 </Typography>
                 <Typography variant="body2">
-                  <strong>Post Address:</strong> {fakeAddress || currentAddress || 'Loading location...'}
+                  <strong>Post Address:</strong> {finalLocation.address || fakeAddress || currentAddress || 'Loading location...'}
                 </Typography>
                 <Typography variant="body2" style={{
                   whiteSpace: "pre-wrap", // Retain line breaks and tabs

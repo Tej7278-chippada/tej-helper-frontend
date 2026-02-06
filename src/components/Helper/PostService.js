@@ -1469,6 +1469,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             <br />• Unpaid or volunteer support
             <br />• Emergency needs (urgent, nearby help, medical emergency)
             <br />⏳ Post Validity: Active until the selected <b>Service Required Date</b>
+            <br />⚡ Active Post Limits Per User: Paid Help Requests - <b>2</b>, Volunteer Help Requests - <b>2</b>, Emergency Requests - <b>2</b>
           </Typography>
 
           {/* Service Offering */}
@@ -1482,6 +1483,7 @@ function PostService({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) {
             <br />• Electrician, Plumber, Maintenance, Technician
             <br />• Local business or professional services
             <br />⏳ Post Validity: Active for <b>7 days</b> from the posted or last updated date
+            <br />⚡ Active Post Limits Per User: Service Offerings - <b>3</b>
           </Typography>
 
           {/* Why Post */}
