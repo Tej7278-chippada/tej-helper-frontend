@@ -33,6 +33,7 @@ import SkeletonChats from '../Chat/SkeletonChats';
 // import { BloodtypeRounded, CheckCircleRounded, CancelRounded } from '@mui/icons-material';
 import UserProfileDetails from './UserProfileDetails';
 import NotificationSettings from '../Notifications/NotificationSettings';
+import BloodDonationRequestsDialog from '../BloodDonor/BloodDonationRequestsDialog';
 
 // Enhanced styled components
 // const NotificationsContainer = styled(Card)(({ theme }) => ({
@@ -70,6 +71,8 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
   const [isUserProfileOpen, setUserProfileOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [showNotificationDialog, setShowNotificationDialog] = useState(false);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [showBloodRequestsDialog, setShowBloodRequestsDialog] = useState(false);
   
   // Add this effect to check current notification status
   // useEffect(() => {
@@ -168,7 +171,8 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
       }
     }
     if(notification.notificationType === 'blood_request') {
-      navigate(`/user/${notification.userId}`);
+      // navigate(`/user/${notification.userId}`);
+      setShowBloodRequestsDialog(true);
     } else if ((notification.notificationType === 'blood_request_update') || (notification.notificationType === 'follower')) {
       handleOpenUserProfileDialog(notification.otherUserId);
     } else {
@@ -500,6 +504,15 @@ function NotificationsPage({darkMode, toggleDarkMode, unreadCount, setUnreadCoun
         setSnackbar={setSnackbar}
         socket={socket}
         userId={userId}
+      />
+      {/* Blood Donation Requests Dialog */}
+      <BloodDonationRequestsDialog
+        open={showBloodRequestsDialog}
+        onClose={() => setShowBloodRequestsDialog(false)}
+        setPendingRequestsCount={setPendingRequestsCount}
+        isMobile={isMobile}
+        darkMode={darkMode}
+        setSnackbar={setSnackbar}
       />
       <Snackbar
         open={snackbar.open}
