@@ -231,7 +231,8 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
 
   const nearbyPeople = [
     { value: 'BloodDonors', label: 'Blood Donors', sublabel: 'Find Blood donors nearby', color: '#ef4444', bgColor: 'rgba(239, 68, 68, 0.1)' },
-    { value: 'StandwithWomen', label: 'Stand with Women', sublabel: 'People nearby stand for women safety', color: '#ec4899', bgColor: 'rgba(236, 72, 153, 0.1)' }
+    { value: 'Friends', label: 'Friends Nearby', sublabel: 'Find Friends near you', color: '#ec4899', bgColor: 'rgba(236, 72, 153, 0.1)' },
+    // { value: 'StandwithWomen', label: 'Stand with Women', sublabel: 'People nearby stand for women safety', color: '#ec4899', bgColor: 'rgba(236, 72, 153, 0.1)' }
   ];
 
   const serviceCategories = [
@@ -251,8 +252,8 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
     { value: 'Delivery', label: 'Delivery', color: '#0ea5e9', bgColor: 'rgba(14, 165, 233, 0.1)' },
     { value: 'Maintenance', label: 'Maintenance', color: '#64748b', bgColor: 'rgba(100, 116, 139, 0.1)' },
     { value: 'VehicleMech', label: 'Vehicle Mechanic', color: '#f43f5e', bgColor: 'rgba(244, 63, 94, 0.1)' },
-    { value: 'HouseSaleLease', label: 'House Sale/Lease', color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.1)' },
-    { value: 'LandSaleLease', label: 'Land Sale/Lease', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.1)' },
+    { value: 'HouseSaleLease', label: 'House Sale/Rent', color: '#8b5cf6', bgColor: 'rgba(139, 92, 246, 0.1)' },
+    { value: 'LandSaleLease', label: 'Land Sale/Rent', color: '#10b981', bgColor: 'rgba(16, 185, 129, 0.1)' },
     { value: 'Other', label: 'Other', color: '#94a3b8', bgColor: 'rgba(148, 163, 184, 0.1)' }
   ];
 
