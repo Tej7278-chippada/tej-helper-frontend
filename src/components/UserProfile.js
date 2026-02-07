@@ -28,7 +28,7 @@ import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
 import RequestCoupon from './Banners/RequestCoupon';
-import { AddRounded, ChatRounded, CollectionsBookmarkRounded, EditNoteRounded, NewReleasesRounded, PlaylistAddRounded, QuestionAnswerRounded } from '@mui/icons-material';
+import { AddRounded, ChatRounded, CollectionsBookmarkRounded, Diversity1Rounded, EditNoteRounded, NewReleasesRounded, PlaylistAddRounded, QuestionAnswerRounded } from '@mui/icons-material';
 import AddBloodDonationDataDialog from './BloodDonor/AddBloodDonationDataDialog';
 import {
   WhatsApp as WhatsAppIcon,
@@ -41,9 +41,24 @@ import {
   Phone as PhoneIcon,
   Email as EmailIcon,
   Link as LinkIcon,
+  PersonRounded,
+  CakeRounded,
+  TransgenderRounded,
+  SearchRounded,
+  ConnectWithoutContactRounded,
+  MessageRounded,
+  PhoneRounded,
+  EmailRounded,
+  ShareRounded,
+  LaunchRounded,
+  InfoRounded,
+  EditRounded,
+  CircleRounded,
+  // Grid
 } from '@mui/icons-material';
 import BloodDonationRequestsDialog from './BloodDonor/BloodDonationRequestsDialog';
 import BloodDonationHistoryDialog from './BloodDonor/BloodDonationHistoryDialog';
+import FriendsProfileDialog from './Friends/FriendsProfileDialog';
 // Note: Discord and Snapchat icons might need to be imported from different packages
 
 // Set default icon manually
@@ -182,6 +197,19 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
   const [showBloodRequestsDialog, setShowBloodRequestsDialog] = useState(false);
   const [showDonationHistoryDialog, setShowDonationHistoryDialog] = useState(false);
+  const [showEditFriendsDialog, setShowEditFriendsDialog] = useState(false);
+  const [friendsProfileData, setFriendsProfileData] = useState({
+    friend: false,
+    gender: '',
+    phone: '',
+    email: '',
+    socialMedia: [],
+    hobbies: [],
+    age: null,
+    inAppMessaging: false,
+    lookingFor: []
+  });
+  
 
   // to handle verification submission
   const handleSubmitVerification = async (formData) => {
@@ -263,6 +291,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         if (response.data.pendingBloodRequests) {
           setPendingRequestsCount(response.data.pendingBloodRequests);
         }
+        setFriendsProfileData(response.data.friendsProfile);
         
       } catch (err) {
         setSnackbar({ open: true, message: 'Failed to fetch User details. Please try again later.', severity: 'error' });
@@ -1127,6 +1156,24 @@ const SOCIAL_MEDIA_PLATFORMS = {
   }
 };
 
+  // Initialize blood data from userData
+  const handleEditFriendsProfileData = () => {
+    setFriendsProfileData({
+      friend: friendsProfileData?.friend || false,
+      gender: friendsProfileData?.gender || '',
+      phone: friendsProfileData?.contactWay?.phone || '',
+      email: friendsProfileData?.contactWay?.email || '',
+      socialMedia: friendsProfileData?.contactWay?.socialMedia || [],
+      hobbies: friendsProfileData?.hobbies || [],
+      age: friendsProfileData?.age || null,
+      inAppMessaging: friendsProfileData?.inAppMessaging || false,
+      lookingFor: friendsProfileData?.lookingFor || []
+    });
+    setNewSocialLink({ platform: '', url: '' });
+    setError('');
+    setShowEditFriendsDialog(true);
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Typography variant="h6" sx={{ flexGrow: 1, mx: isMobile ? '10px' : '16px', mt: 1 }} >
@@ -1381,7 +1428,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                     </Box>
                     <RequestCoupon id={id} isAuthenticated={isAuthenticated} followerCount={followerCount} setSnackbar={setSnackbar} />
                   </Grid>
-                  <Grid item xs={12} sm={12} md={6} >
+                  {/* <Grid item xs={12} sm={12} md={6} >
                     <Box display="flex" alignItems="center" gap={1}>
                       <VolunteerActivismIcon color="success" fontSize="small" />
                       <Typography variant="body1" style={{ fontWeight: 500 }}>
@@ -1398,7 +1445,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                     <Typography variant="caption" color="text.secondary" marginTop={4}>
                       *Your profile will be visible to women nearby who may need help in unsafe situations.
                     </Typography>
-                  </Grid>
+                  </Grid> */}
                   {/* <Grid item xs={12} sm={12} md={6} >
                     <Box display="flex" alignItems="center" gap={1}>
                       <BloodtypeIcon color="error" fontSize="small" />
@@ -1824,10 +1871,417 @@ const SOCIAL_MEDIA_PLATFORMS = {
               </Typography>
             </Box>
           </Box>
+          <Box sx={{ my: 1, padding: isMobile ? 2 : 3, borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box display="flex" alignItems="center">
+                <Avatar sx={{ bgcolor: 'primary.main', mr: 1.5, height: '36px', width: '36px' }}>
+                  <Diversity1Rounded fontSize="small" />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6">
+                    Friends Profile
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {friendsProfileData?.friend 
+                      ? "🟢 Profile is public" 
+                      : "🔴 Profile is private"}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Typography variant="body2" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  {friendsProfileData?.friend ? 'Public' : 'Private'}
+                </Typography>
+                <Switch
+                  checked={friendsProfileData?.friend}
+                  color="primary"
+                  onClick={handleEditFriendsProfileData}
+                />
+              </Box>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: '12px', flexDirection: 'column', borderRadius: '12px' }}>
+              {/* Status Message */}
+              <Box sx={{ 
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: friendsProfileData?.friend 
+                  ? 'rgba(76, 175, 80, 0.08)' 
+                  : 'rgba(244, 67, 54, 0.08)',
+                border: `1px solid ${friendsProfileData?.friend ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)'}`
+              }}>
+                <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 1 }}>
+                  {friendsProfileData?.friend === true
+                    ? <>🎉 <span style={{ fontWeight: 500 }}>Your friends profile is active!</span> Others can discover you nearby.</>
+                    : friendsProfileData?.friend === false
+                    ? <>🔒 <span style={{ fontWeight: 500 }}>Your friends profile is private.</span> Only you can see this information.</>
+                    : <>ℹ️ <span style={{ fontWeight: 500 }}>Setup incomplete.</span> Tap the switch to configure your friends profile.</>}
+                </Typography>
+              </Box>
+
+              {/* Display only when friend profile is active */}
+              {friendsProfileData?.friend === true && (
+                <>
+                  {/* Basic Information Section */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderRadius: 2, 
+                    bgcolor: 'rgba(33, 150, 243, 0.05)',
+                    border: '1px solid rgba(33, 150, 243, 0.1)'
+                  }}>
+                    <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <PersonRounded fontSize="small" />
+                      Basic Information
+                    </Typography>
+                    
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                          <CakeRounded fontSize="small" color="action" />
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">
+                              Age
+                            </Typography>
+                            <Typography variant="body1" fontWeight={500}>
+                              {friendsProfileData?.age 
+                                ? `${friendsProfileData.age} years` 
+                                : <Typography variant="body2" color="text.disabled">Not specified</Typography>}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={6}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                          <TransgenderRounded fontSize="small" color="action" />
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">
+                              Gender
+                            </Typography>
+                            <Typography variant="body1" fontWeight={500}>
+                              {friendsProfileData?.gender && friendsProfileData.gender !== 'Unknown'
+                                ? friendsProfileData.gender
+                                : <Typography variant="body2" color="text.disabled">Not specified</Typography>}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+
+                      {/* Looking For Section */}
+                      {friendsProfileData?.lookingFor && friendsProfileData.lookingFor.length > 0 && (
+                        <Grid item xs={12}>
+                          <Box sx={{ mt: 1 }}>
+                            <Typography variant="body2" fontWeight={500} color="textSecondary" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <SearchRounded fontSize="small" />
+                              Looking For
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                              {friendsProfileData.lookingFor.map((item, index) => (
+                                <Chip
+                                  key={index}
+                                  label={item}
+                                  size="small"
+                                  sx={{
+                                    borderRadius: '8px',
+                                    bgcolor: 'primary.main',
+                                    color: 'white',
+                                    fontWeight: 500,
+                                    '&:hover': { bgcolor: 'primary.dark' }
+                                  }}
+                                />
+                              ))}
+                            </Box>
+                          </Box>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+
+                  {/* Hobbies Section */}
+                  {friendsProfileData?.hobbies && friendsProfileData.hobbies.length > 0 && (
+                    <Box sx={{ 
+                      p: 2, 
+                      borderRadius: 2, 
+                      bgcolor: 'rgba(156, 39, 176, 0.05)',
+                      border: '1px solid rgba(156, 39, 176, 0.1)'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Typography variant="subtitle1" fontWeight={600} color="secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <InterestsRoundedIcon fontSize="small" />
+                          Hobbies & Interests
+                        </Typography>
+                        <Chip 
+                          label={`${friendsProfileData.hobbies.length} ${friendsProfileData.hobbies.length === 1 ? 'hobby' : 'hobbies'}`} 
+                          size="small" 
+                          variant="outlined"
+                          color="secondary"
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {friendsProfileData.hobbies.map((hobby, index) => (
+                          <Chip
+                            key={index}
+                            label={hobby}
+                            variant="outlined"
+                            size="medium"
+                            color="secondary"
+                            icon={<CircleRounded sx={{ fontSize: '8px' }} />}
+                            sx={{ 
+                              borderRadius: '20px',
+                              px: 1.5,
+                              py: 1,
+                              borderWidth: '2px',
+                              '&:hover': {
+                                bgcolor: 'secondary.light',
+                                color: 'white',
+                                transform: 'translateY(-2px)',
+                                transition: 'all 0.2s'
+                              }
+                            }}
+                          />
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+
+                  {/* Contact Information Section */}
+                  <Box sx={{ 
+                    p: 2, 
+                    borderRadius: 2, 
+                    bgcolor: 'rgba(76, 175, 80, 0.05)',
+                    border: '1px solid rgba(76, 175, 80, 0.1)'
+                  }}>
+                    <Typography variant="subtitle1" fontWeight={600} color="success.main" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <ConnectWithoutContactRounded fontSize="small" />
+                      Contact Information
+                    </Typography>
+
+                    {/* In-App Messaging Status */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between', 
+                      mb: 3, 
+                      p: 1.5, 
+                      borderRadius: 1.5,
+                      bgcolor: friendsProfileData?.inAppMessaging 
+                        ? 'rgba(76, 175, 80, 0.1)' 
+                        : 'rgba(158, 158, 158, 0.1)'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <MessageRounded fontSize="small" color={friendsProfileData?.inAppMessaging ? "success" : "action"} />
+                        <Box>
+                          <Typography variant="body1" fontWeight={500}>
+                            In-App Messaging
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            {friendsProfileData?.inAppMessaging 
+                              ? "Users can message you directly" 
+                              : "Messaging is disabled"}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      <Chip 
+                        label={friendsProfileData?.inAppMessaging ? "Enabled" : "Disabled"} 
+                        size="small" 
+                        color={friendsProfileData?.inAppMessaging ? "success" : "default"}
+                        variant="outlined"
+                      />
+                    </Box>
+
+                    {/* Contact Methods */}
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" fontWeight={500} color="textSecondary" sx={{ mb: 1.5 }}>
+                        Available Contact Methods:
+                      </Typography>
+                      
+                      {/* Phone */}
+                      {friendsProfileData?.contactWay?.phone && (
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2, 
+                          p: 1.5, 
+                          mb: 1, 
+                          borderRadius: 1.5,
+                          bgcolor: 'rgba(255, 255, 255, 0.05)',
+                          '&:hover': { bgcolor: 'rgba(76, 175, 80, 0.08)', cursor: 'pointer' }
+                        }} onClick={() => window.open(`tel:${friendsProfileData.contactWay.phone}`)}>
+                          <Avatar sx={{ bgcolor: '#4CAF50', width: 36, height: 36 }}>
+                            <PhoneRounded fontSize="small" />
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" fontWeight={500}>
+                              Phone
+                            </Typography>
+                            <Typography variant="body1">
+                              +91 {friendsProfileData.contactWay.phone}
+                            </Typography>
+                          </Box>
+                          <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            Tap to call
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {/* Email */}
+                      {friendsProfileData?.contactWay?.email && (
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2, 
+                          p: 1.5, 
+                          mb: 1, 
+                          borderRadius: 1.5,
+                          bgcolor: 'rgba(255, 255, 255, 0.05)',
+                          '&:hover': { bgcolor: 'rgba(33, 150, 243, 0.08)', cursor: 'pointer' }
+                        }} onClick={() => window.open(`mailto:${friendsProfileData.contactWay.email}`)}>
+                          <Avatar sx={{ bgcolor: '#2196F3', width: 36, height: 36 }}>
+                            <EmailRounded fontSize="small" />
+                          </Avatar>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="body2" fontWeight={500}>
+                              Email
+                            </Typography>
+                            <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                              {friendsProfileData.contactWay.email}
+                            </Typography>
+                          </Box>
+                          <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                            Tap to email
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Social Media Links */}
+                    {friendsProfileData?.contactWay?.socialMedia && friendsProfileData.contactWay.socialMedia.length > 0 && (
+                      <Box>
+                        <Typography variant="body2" fontWeight={500} color="textSecondary" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <ShareRounded fontSize="small" />
+                          Social Media Profiles
+                        </Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1 }}>
+                          {friendsProfileData.contactWay.socialMedia.map((social, index) => {
+                            const platform = detectSocialPlatform(social.url || social.platform);
+                            const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+                            
+                            return (
+                              <Box
+                                key={index}
+                                sx={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 1.5,
+                                  p: 1.5,
+                                  borderRadius: 1.5,
+                                  bgcolor: 'rgba(255, 255, 255, 0.05)',
+                                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                                  transition: 'all 0.2s ease',
+                                  '&:hover': {
+                                    bgcolor: `${platformData.color}15`,
+                                    borderColor: platformData.color,
+                                    transform: 'translateY(-2px)',
+                                    cursor: 'pointer',
+                                    boxShadow: `0 4px 12px ${platformData.color}30`
+                                  }
+                                }}
+                                onClick={() => handleSocialChipClick(social.url, platform)}
+                              >
+                                <Avatar sx={{ 
+                                  bgcolor: platformData.color, 
+                                  width: 32, 
+                                  height: 32,
+                                  fontSize: '16px'
+                                }}>
+                                  {getSocialIcon(platform, 'small', 'white')}
+                                </Avatar>
+                                <Box sx={{ flex: 1, minWidth: 0 }}>
+                                  <Typography variant="body2" fontWeight={500} noWrap>
+                                    {social.platform || platformData.label}
+                                  </Typography>
+                                  <Typography variant="caption" color="textSecondary" noWrap sx={{ display: 'block' }}>
+                                    {social.url.replace('https://', '').substring(0, 30)}...
+                                  </Typography>
+                                </Box>
+                                <LaunchRounded fontSize="small" color="action" />
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* No Contact Info Message */}
+                  {(!friendsProfileData?.contactWay?.phone && 
+                    !friendsProfileData?.contactWay?.email && 
+                    (!friendsProfileData?.contactWay?.socialMedia || friendsProfileData.contactWay.socialMedia.length === 0)) && (
+                    <Box sx={{ 
+                      p: 2, 
+                      textAlign: 'center', 
+                      borderRadius: 2, 
+                      bgcolor: 'rgba(255, 193, 7, 0.08)',
+                      border: '1px solid rgba(255, 193, 7, 0.2)'
+                    }}>
+                      <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+                        <InfoRounded fontSize="small" />
+                        No contact information added
+                      </Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        Add contact methods in settings to help others connect with you
+                      </Typography>
+                    </Box>
+                  )}
+                </>
+              )}
+
+              {/* Edit Button */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<EditRounded />}
+                  onClick={handleEditFriendsProfileData}
+                  sx={{
+                    borderRadius: '20px',
+                    px: 3,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    borderWidth: '2px',
+                    '&:hover': {
+                      borderWidth: '2px'
+                    }
+                  }}
+                >
+                  {friendsProfileData?.friend ? 'Edit Friends Profile' : 'Setup Friends Profile'}
+                </Button>
+              </Box>
+
+              {/* Note Section */}
+              <Box sx={{ 
+                mt: 2, 
+                pt: 2, 
+                borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
+              }}>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 1,
+                  lineHeight: 1.5
+                }}>
+                  <InfoRounded fontSize="small" sx={{ mt: '2px', flexShrink: 0 }} />
+                  <span>
+                    <strong>Note:</strong> When friends profile is enabled, your information becomes visible to nearby users. 
+                    You control what information is shared and can update privacy settings anytime.
+                  </span>
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
           <Box sx={{  my: 1, padding: '1rem', borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
               <Box display="flex" alignItems="center">
-                <Avatar sx={{ bgcolor: 'primary.main', mr: 1, height: '32px', width: '32px' }}>
+                <Avatar sx={{ bgcolor: 'success.main', mr: 1, height: '32px', width: '32px' }}>
                   <ReviewsRoundedIcon fontSize="small" />
                 </Avatar>
                 <Typography variant="h6" >
@@ -2800,6 +3254,23 @@ const SOCIAL_MEDIA_PLATFORMS = {
         isMobile={isMobile}
         darkMode={darkMode}
         setSnackbar={setSnackbar}
+      />
+
+      {/* Edit Friends Profile Dialog */}
+      <FriendsProfileDialog
+        showEditFriendsDialog={showEditFriendsDialog}
+        setShowEditFriendsDialog={setShowEditFriendsDialog}
+        isMobile={isMobile}
+        darkMode={darkMode}
+        setSnackbar={setSnackbar}
+        friendsProfileData={friendsProfileData}
+        setFriendsProfileData={setFriendsProfileData}
+        userData={userData}
+        error={error}
+        setError={setError}
+        newSocialLink={newSocialLink}
+        setNewSocialLink={setNewSocialLink}
+        id={id}
       />
 
       {/* Profile Picture Dialog */}

@@ -117,6 +117,65 @@ export const fetchUserPosts = (skip = 0, limit = 12, filters = {} ) => {
   return API.get('/api/posts/my-posts', { headers, params });
 };
 
+// Fetch nearby users
+export const fetchNearbyUsers = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '', sortBy = 'nearest', selectedCategory = 'BloodDonors') => {
+  const params = { 
+    skip, 
+    limit,
+    bloodGroup: filters.bloodGroup || 'All',
+    gender: filters.gender || 'All',
+    sortBy
+  };
+
+  // Add search query parameter
+  if (searchQuery && searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
+  
+  // Add location parameters if provided
+  if (userLocation && distanceRange) {
+    params.userLat = userLocation.latitude;
+    params.userLng = userLocation.longitude;
+    params.distance = distanceRange;
+  }
+
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+  
+  return API.get(selectedCategory === 'BloodDonors' ? '/api/posts/blood-donors' : '/api/posts/friends-nearby', { headers, params });
+};
+
+// Fetch nearby users locations
+export const fetchNearbyUsersLocations = (userLocation, distanceRange, filters = {}, searchQuery = '', selectedCategory = 'BloodDonors') => {
+  const params = {
+    userLat: userLocation.latitude,
+    userLng: userLocation.longitude,
+    distance: distanceRange,
+    bloodGroup: filters.bloodGroup || 'All',
+    gender: filters.gender || 'All',
+  };
+
+  if (searchQuery && searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
+
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  return API.get(selectedCategory === 'BloodDonors' ? '/api/posts/blood-donors/locations' : '/api/posts/friends-nearby/locations', { headers, params });
+};
+
+// Update user friends profile data
+export const updateUserFriendsProfile = async (userId, userData) => {
+  const authToken = localStorage.getItem('authToken');
+  const headers = authToken ? { 
+    Authorization: `Bearer ${authToken}`,
+    'Content-Type': 'application/json'
+  } : {};
+  
+  return await API.put(`/api/friendsProfile/update-friendsProfile-data/${userId}`, userData, { headers });
+};
+
 // Fetch blood donors
 export const fetchBloodDonors = (skip = 0, limit = 12, userLocation = null, distanceRange = null, filters = {}, searchQuery = '', sortBy = 'nearest') => {
   const params = { 
