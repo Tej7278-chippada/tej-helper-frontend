@@ -73,10 +73,12 @@ import { VerifiedRounded,
   HandshakeRounded,
   InfoRounded,
   ClearRounded,
+  FilterListRounded,
+  Diversity1Rounded,
  } from '@mui/icons-material';
 import UserProfileDetails from './UserProfileDetails';
-import FriendsCard from './FriendsCard';
 import { Slider } from '@mui/material';
+import FriendsCard from '../Friends/FriendsCard';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -1481,15 +1483,15 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       }
   
       const response = await fetchNearbyUsers(0, 12, userLocation, distanceRange, filters, searchQuery, sortBy, selectedCategory);
-      const donorsData = response.data.donors || response.data.friends || [];
+      const usersData = response.data.donors || response.data.friends || [];
       const totalCount = response.data.totalCount || 0;
 
       globalCache.totalPostsCount = (response.data.totalCount);
       // Update global cache
       globalCache.data[currentCacheKey] = {
-        posts: donorsData,
+        posts: usersData,
         skip: 12,
-        hasMore: donorsData.length > 0 && response.data.totalCount > 12,
+        hasMore: usersData.length > 0 && response.data.totalCount > 12,
         timestamp: Date.now()
       };
       globalCache.lastCacheKey = currentCacheKey;
@@ -1502,17 +1504,17 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         }
       });
   
-      // setBloodDonors(donorsData);
-      setPosts(donorsData);
+      // setBloodDonors(usersData);
+      setPosts(usersData);
       setTotalPosts(totalCount);
       setSkip(12); // Set skip to 24 after initial load
       // Check if there are more posts to load
-      setHasMore(donorsData.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
-      console.log(`Blood donors fetched: ${donorsData.length} donors`);
+      setHasMore(usersData.length > 0 && response.data.totalCount > 12); // If we got 24, there might be more
+      console.log(`Nearby users fetched: ${usersData.length} users`);
   
     } catch (error) {
-      console.error("Error fetching blood donors:", error);
-      setSnackbar({ open: true, message: 'Failed to fetch blood donors.', severity: 'error' });
+      console.error("Error fetching users data:", error);
+      setSnackbar({ open: true, message: `Failed to fetch nearby ${selectedCategory === 'BloodDonors' ? 'Blood Donors' : 'Friends'}.`, severity: 'error' });
     } finally {
       setLoading(false);
       setIsSearching(false);
@@ -1585,7 +1587,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       // console.log('blood donors locations', locationsData.length );
   
     } catch (error) {
-      console.error("Error fetching blood donor locations:", error);
+      console.error("Error fetching users locations:", error);
     }
   };
   
@@ -5070,16 +5072,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       )}
                     </Box>
                   )
-            ) : selectedCategory === 'Friends' ? ( // Check if showing blood donors
-              /* BLOOD DONORS DISPLAY */
+            ) : selectedCategory === 'Friends' ? ( 
               posts.length > 0 ? (
                 <Grid container spacing={isMobile ? 1.5 : 1.5}>
-                  {posts.map((donor, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={`${donor._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${donor._id}`}>
+                  {posts.map((user, index) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={`${user._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${user._id}`}>
                       <FriendsCard
-                        donor={donor} 
-                        // onClick={() => handleDonorClick(donor._id)} // You'll need to implement this function
-                        onClick={() => handleOpenUserProfileDialog(donor._id)}
+                        user={user} 
+                        onClick={() => handleOpenUserProfileDialog(user._id)}
                         darkMode={darkMode}
                       />
                     </Grid>
@@ -5091,71 +5091,122 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: '50vh',
+                  // height: '50vh',
                   textAlign: 'center',
+                  p: 2
                 }}>
-                  <img 
-                    src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
-                    alt="No Friends found" 
-                    style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
-                  />
-                  <Typography variant="body1" color="text.secondary">
+                  <Box sx={{ 
+                    width: 120, 
+                    height: 120, 
+                    borderRadius: '50%', 
+                    backgroundColor: darkMode ? 'rgba(33, 150, 243, 0.1)' : 'rgba(33, 150, 243, 0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 3
+                  }}>
+                    <Diversity1Rounded sx={{ fontSize: 60, color: '#2196f3', opacity: 0.7 }} />
+                  </Box>
+                  
+                  <Typography variant="h6" color="text.primary" gutterBottom>
                     {searchQuery 
-                      ? `No friends found for "${searchQuery}" within ${distanceRange} km`
-                      : `No friends found within ${distanceRange} km of your location...`
+                      ? `No friends found for "${searchQuery}"`
+                      : `No friends nearby yet`
                     }
                   </Typography>
-                  {searchQuery && (
-                    <Button 
-                      variant="outlined" size="small"
-                      sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
-                        px: 1.5,
-                        color: '#4361ee',
-                        background: 'none',
-                        border: '1px solid #4361ee',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          background: 'none',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
-                        },
-                        '&:active': {
-                          transform: 'translateY(0)',
-                        },
+                  
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mb: 3 }}>
+                    {searchQuery 
+                      ? `Try adjusting your search or expanding the search radius to find more friends.`
+                      : `Friends within ${distanceRange} km will appear here. Try increasing your search radius or adjusting your filters.`
+                    }
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+                    {searchQuery ? (
+                      <Button 
+                        variant="outlined" 
+                        startIcon={<ClearRounded />}
+                        onClick={handleClearSearch}
+                        sx={{ 
+                          borderRadius: '20px',
+                          textTransform: 'none',
+                          px: 3,
+                          borderWidth: 2,
+                          '&:hover': {
+                            borderWidth: 2
+                          }
                         }}
-                      onClick={handleClearSearch}
+                      >
+                        Clear Search
+                      </Button>
+                    ) : (
+                      <Button 
+                        variant="outlined"
+                        startIcon={<LocationOnIcon />}
+                        disabled={distanceRange >= 1000}
+                        onClick={() => setDistanceRange(prev => Math.min(prev + 10, 1000))}
+                        sx={{ 
+                          borderRadius: '20px',
+                          textTransform: 'none',
+                          px: 3,
+                          borderWidth: 2,
+                          '&:hover': {
+                            borderWidth: 2
+                          }
+                        }}
+                      >
+                        Increase Radius (+10 km)
+                      </Button>
+                    )}
+                    
+                    <Button 
+                      variant="contained"
+                      startIcon={<FilterListRounded/>}
+                      onClick={() => setIsExtraFiltersOpen(true)}
+                      sx={{ 
+                        borderRadius: '20px',
+                        textTransform: 'none',
+                        px: 3,
+                        backgroundColor: '#2196f3',
+                        '&:hover': {
+                          backgroundColor: '#1976d2',
+                        }
+                      }}
                     >
-                      Clear Search
+                      Adjust Filters
                     </Button>
-                  )}
+                  </Box>
+                  
+                  {/* Tips Section */}
                   {!searchQuery && (
-                    <Button 
-                      variant="outlined" size="small"
-                      disabled={distanceRange >= 100}
-                      sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
-                        px: 1.5,
-                        color: '#4361ee',
-                        background: 'none',
-                        border: '1px solid #4361ee',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          background: 'none',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
-                        },
-                        '&:active': {
-                          transform: 'translateY(0)',
-                        },
-                        }}
-                      onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
-                    >
-                      Increase Search Radius
-                    </Button>
+                    <Box sx={{ 
+                      mt: 4, 
+                      p: 2, 
+                      borderRadius: 2, 
+                      backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                      maxWidth: 500,
+                      textAlign: 'left'
+                    }}>
+                      <Typography variant="subtitle2" color="primary" gutterBottom>
+                        💡 Tips to find more friends:
+                      </Typography>
+                      <Box component="ul" sx={{ 
+                        pl: 2, 
+                        mb: 0,
+                        '& li': { mb: 1, fontSize: '0.875rem', color: 'text.secondary' }
+                      }}>
+                        <li>Increase search radius to find friends in nearby areas</li>
+                        <li>Adjust filters (age, interests, looking for) to broaden your search</li>
+                        {/* <li>Add your own friends profile to appear in others' searches</li> */}
+                        <li>Check back later as more people join the platform</li>
+                      </Box>
+                    </Box>
                   )}
                 </Box>
               )
-            ) : ( // Regular posts display
-                      
+            ) : ( 
+            // Regular posts display       
             posts.length > 0 ? (
               <Grid container spacing={isMobile ? 1.5 : 1.5}>
                 {posts.map((post, index) => (

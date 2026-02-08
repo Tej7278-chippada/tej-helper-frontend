@@ -283,6 +283,7 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
                                     >
                                         <MenuItem value="Male">Male</MenuItem>
                                         <MenuItem value="Female">Female</MenuItem>
+                                        <MenuItem value="Non-binary">Non-binary</MenuItem>
                                         <MenuItem value="Other">Other</MenuItem>
                                         <MenuItem value="Unknown">I don't know my gender</MenuItem>
                                     </Select>
