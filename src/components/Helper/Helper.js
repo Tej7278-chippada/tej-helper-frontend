@@ -55,9 +55,28 @@ import LocationPermissionDialog from '../Maps/LocationPermissionDialog';
 import NotificationPermissionDialog from '../Notifications/NotificationPermissionDialog';
 import ComparePostsDialog from './ComparePostsDialog';
 import BloodDonorCard from './BloodDonorCard';
-import { VerifiedRounded } from '@mui/icons-material';
+import { VerifiedRounded, 
+  ExpandLess,
+  ExpandMore,
+  TransgenderRounded,
+  ManRounded,
+  WomanRounded,
+  PersonRounded,
+  CakeRounded,
+  SearchRounded,
+  PeopleRounded,
+  FavoriteRounded,
+  BusinessCenterRounded,
+  SportsSoccerRounded,
+  FlightRounded,
+  SchoolRounded,
+  HandshakeRounded,
+  InfoRounded,
+  ClearRounded,
+ } from '@mui/icons-material';
 import UserProfileDetails from './UserProfileDetails';
 import FriendsCard from './FriendsCard';
+import { Slider } from '@mui/material';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -329,16 +348,17 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   // State for temporary filters before applying
   const [localFilters, setLocalFilters] = useState(filters);
+  const [activeFriendFilters, setActiveFriendFilters] = useState({
+    gender: false,
+    ageRange: false,
+    lookingFor: false
+  });
   const isDefaultFilters = useMemo(() => {
     return JSON.stringify(localFilters) === JSON.stringify(DEFAULT_FILTERS);
   }, [localFilters]);
   // Add a ref to track if we've restored scroll position
   const hasRestoredScroll = useRef(false);
-  // Save filters to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('helperFilters', JSON.stringify(filters));
-    globalCache.lastFilters = filters;
-  }, [filters]);
+  
 
   // Handle filter changes
   const handleFilterChange = (e) => {
@@ -366,11 +386,29 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // Handle friends age range changes
   const handleFriendsAgeRangeChange = (e, type) => {
     const value = Number(e.target.value);
+    setLocalFilters(prev => {
+      const newAgeRange = type === 'min' 
+        ? [value, prev.friendsAgeRange[1]] 
+        : [prev.friendsAgeRange[0], value];
+      
+      // Validate min <= max
+      if (newAgeRange[0] > newAgeRange[1]) {
+        if (type === 'min') {
+          return { ...prev, friendsAgeRange: [value, value] };
+        } else {
+          return { ...prev, friendsAgeRange: [newAgeRange[0], newAgeRange[0]] };
+        }
+      }
+      
+      return { ...prev, friendsAgeRange: newAgeRange };
+    });
+  };
+
+  // Quick age range presets
+  const handleQuickAgeRange = (range) => {
     setLocalFilters(prev => ({
       ...prev,
-      friendsAgeRange: type === 'min' 
-        ? [value, prev.friendsAgeRange[1]] 
-        : [prev.friendsAgeRange[0], value]
+      friendsAgeRange: range
     }));
   };
 
@@ -382,7 +420,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   }));
   // };
 
-  // Handle looking for filter (multi-select)
+  // Handle looking for filter (multi-select) with toggle functionality
   const handleLookingForChange = (event) => {
     const {
       target: { value },
@@ -391,6 +429,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       ...prev,
       friendsLookingFor: typeof value === 'string' ? value.split(',') : value,
     }));
+  };
+
+  // Toggle individual lookingFor items
+  const toggleLookingForItem = (item) => {
+    setLocalFilters(prev => {
+      const currentLookingFor = prev.friendsLookingFor || [];
+      const newLookingFor = currentLookingFor?.includes(item)
+        ? currentLookingFor.filter(i => i !== item)
+        : [...currentLookingFor, item];
+      
+      return { ...prev, friendsLookingFor: newLookingFor };
+    });
+  };
+
+  // Clear all lookingFor items
+  const clearLookingFor = () => {
+    setLocalFilters(prev => ({ ...prev, friendsLookingFor: [] }));
   };
 
   // Handle hobbies filter
@@ -402,24 +457,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   }));
   // };
 
-  // Apply filters
-  const handleApplyFilters = () => {
-    if (localFilters.priceRange[0] > localFilters.priceRange[1]) {
-      // alert("Min price cannot be greater than max price");
-      setSnackbar({ open: true, message: 'Min price cannot be greater than max price', severity: 'warning' });
-      return;
-    }
-    // Only update if filters actually changed
-    if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
-      setFilters(localFilters);
-      setSkip(0); // Reset pagination when filters change
-      // setPosts([]); // Clear existing posts
-      // Clear cache for the old filter combination
-      globalCache.lastCacheKey = null;
-    }
-    setShowDistanceRanges(false);
-    setIsExtraFiltersOpen(false);
-  };
+  
 
   const [selectedCategory, setSelectedCategory] = useState(() => {
     const savedFilters = localStorage.getItem('helperFilters');
@@ -468,6 +506,65 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     localStorage.setItem('helperFilters', JSON.stringify(newFilters));
   };
 
+  // Save filters to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('helperFilters', JSON.stringify(filters));
+    globalCache.lastFilters = filters;
+    // Update active filters state based on current filters
+    if (selectedCategory === 'Friends') {
+      setActiveFriendFilters({
+        gender: !!filters?.friendsGender && filters?.friendsGender !== '',
+        ageRange: !(filters?.friendsAgeRange?.[0] === 18 && filters?.friendsAgeRange?.[1] === 65),
+        lookingFor: filters?.friendsLookingFor && filters?.friendsLookingFor?.length > 0
+      });
+    }
+  }, [filters, selectedCategory]);
+
+  // Apply filters
+  const handleApplyFilters = () => {
+    if (selectedCategory !== 'Friends' && localFilters.priceRange[0] > localFilters.priceRange[1]) {
+      setSnackbar({ open: true, message: 'Min price cannot be greater than max price', severity: 'warning' });
+      return;
+    }
+    
+    // Validate age range for friends
+    if (selectedCategory === 'Friends' && localFilters?.friendsAgeRange?.[0] > localFilters?.friendsAgeRange?.[1]) {
+      setSnackbar({ open: true, message: 'Min age cannot be greater than max age', severity: 'warning' });
+      return;
+    }
+    // Only update if filters actually changed
+    if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
+      setFilters(localFilters);
+      setSkip(0); // Reset pagination when filters change
+      // setPosts([]); // Clear existing posts
+      // Clear cache for the old filter combination
+      globalCache.lastCacheKey = null;
+    }
+    setShowDistanceRanges(false);
+    setIsExtraFiltersOpen(false);
+    // Show success message
+    if (selectedCategory === 'Friends') {
+      const appliedFilters = [];
+      if (localFilters?.friendsGender && localFilters?.friendsGender !== '') {
+        appliedFilters.push(`Gender: ${localFilters?.friendsGender}`);
+      }
+      if (!(localFilters?.friendsAgeRange?.[0] === 18 && localFilters?.friendsAgeRange?.[1] === 65)) {
+        appliedFilters.push(`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`);
+      }
+      if (localFilters?.friendsLookingFor && localFilters?.friendsLookingFor?.length > 0) {
+        appliedFilters.push(`Looking for: ${localFilters?.friendsLookingFor?.length} item(s)`);
+      }
+      
+      if (appliedFilters.length > 0) {
+        setSnackbar({ 
+          open: true, 
+          message: `Applied ${appliedFilters.length} friend filter(s)`, 
+          severity: 'success' 
+        });
+      }
+    }
+  };
+
   // Reset filters
   const handleResetFilters = () => {
     setLocalFilters(DEFAULT_FILTERS);
@@ -480,6 +577,24 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     globalCache.lastCacheKey = null;
     localStorage.removeItem('helperFilters');
     setShowDistanceRanges(false);
+  };
+
+  // Reset specific friend filters
+  const resetFriendFilters = () => {
+    setLocalFilters(prev => ({
+      ...prev,
+      friendsGender: '',
+      friendsAgeRange: [18, 65],
+      friendsLookingFor: []
+    }));
+  };
+
+  // Toggle filter sections
+  const toggleFilterSection = (section) => {
+    setActiveFriendFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const [sortBy, setSortBy] = useState(() => {
@@ -3788,23 +3903,25 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </IconButton>
             </Tooltip>
             {isExtraFiltersOpen &&  (
-              <Card
+              <Box
                 sx={{
                   position: 'absolute',
                   top: isMobile ? '45px' : '45px',
-                  right: '1px', ml: '4px',
+                  right: '1px', ml: '4px', p: 2,
                   // width: '90%',
                   // maxWidth: '400px',
                   minWidth: isMobile ? '100%' : 'auto',
-                  maxWidth: isMobile ? '300px' : '400px',
+                  maxWidth: isMobile ? '100%' : '400px',
                   zIndex: 1001,
                   borderRadius: '12px',
                   backdropFilter: 'blur(10px)',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  minWidth: '200px'
+                  backgroundColor: darkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  minWidth: '200px',
+                  maxHeight: '60vh',
+                  overflowY: 'auto',
                 }}
               >
-                <CardContent>
+                <Box >
                   <Typography variant="h6" gutterBottom >
                     { selectedCategory === 'BloodDonors' ? 'Blood Donor filters' : selectedCategory === 'Friends' ? 'Friends filters' : 'Filters'}
                   </Typography>
@@ -3819,7 +3936,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     <CloseIcon />
                   </IconButton>
                   
-                  <Box display="flex" gap={2} flexWrap="wrap" sx={{mt: 2}}>
+                  <Box sx={{ mt: 2}}>
 
                     {selectedCategory === 'BloodDonors' ? 
                     <>
@@ -3844,138 +3961,389 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       </Select>
                     </FormControl>
                     </> : 
-                    selectedCategory === 'Friends' ?
+                    selectedCategory === 'Friends' ? (
                     <>
-                      {/* Friends Gender Filter */}
-                      <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
-                        <InputLabel>Gender</InputLabel>
-                        <Select
-                          name="friendsGender"
-                          value={localFilters.friendsGender}
-                          onChange={handleFriendsFilterChange}
-                          label="Gender"
-                        >
-                          <MenuItem value="">All Genders</MenuItem>
-                          <MenuItem value="Male">Male</MenuItem>
-                          <MenuItem value="Female">Female</MenuItem>
-                          <MenuItem value="Non-binary">Non-binary</MenuItem>
-                          <MenuItem value="Other">Other</MenuItem>
-                        </Select>
-                      </FormControl>
-
-                      {/* Friends Status Filter */}
-                      {/* <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
-                        <InputLabel>Status</InputLabel>
-                        <Select
-                          name="friendsStatus"
-                          value={localFilters.friendsStatus}
-                          onChange={handleFriendsFilterChange}
-                          label="Status"
-                        >
-                          <MenuItem value="active">Active Only</MenuItem>
-                          <MenuItem value="all">All Status</MenuItem>
-                          <MenuItem value="available">Available Now</MenuItem>
-                          <MenuItem value="busy">Busy</MenuItem>
-                        </Select>
-                      </FormControl> */}
-
-                      {/* In-App Messaging Filter */}
-                      {/* <FormControl size='small' sx={{ flex: '1 1 160px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
-                        <InputLabel>Messaging</InputLabel>
-                        <Select
-                          name="friendsInAppMessaging"
-                          value={localFilters.friendsInAppMessaging}
-                          onChange={handleFriendsFilterChange}
-                          label="Messaging"
-                        >
-                          <MenuItem value="all">All Users</MenuItem>
-                          <MenuItem value="enabled">Messaging Enabled</MenuItem>
-                          <MenuItem value="disabled">Messaging Disabled</MenuItem>
-                        </Select>
-                      </FormControl> */}
-
-                      {/* Age Range */}
-                      <Box sx={{ width: '100%', mb: 0 }}>
-                        <Typography variant="body2" mb={2}>
-                          Age Range: {localFilters.friendsAgeRange[0]} - {localFilters.friendsAgeRange[1]}
-                        </Typography>
-                        <Box display="flex" gap={2} alignItems="center">
-                          <TextField
-                            label="Min Age"
-                            type="number"
-                            size='small'
-                            value={localFilters.friendsAgeRange[0]}
-                            onChange={(e) => handleFriendsAgeRangeChange(e, 'min')}
-                            inputProps={{ min: 18, max: 120 }}
-                            sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                          />
-                          <Typography variant="body2">to</Typography>
-                          <TextField
-                            label="Max Age"
-                            type="number"
-                            size='small'
-                            value={localFilters.friendsAgeRange[1]}
-                            onChange={(e) => handleFriendsAgeRangeChange(e, 'max')}
-                            inputProps={{ min: 18, max: 120 }}
-                            sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                          />
+                      {/* Filter Summary Bar */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        gap: 1, 
+                        mb: 2, 
+                        flexWrap: 'wrap',
+                        alignItems: 'center'
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                            Active filters:
+                          </Typography>
+                          {(activeFriendFilters.gender || activeFriendFilters.ageRange || activeFriendFilters.lookingFor) && (
+                            <Button
+                              size="small"
+                              onClick={resetFriendFilters}
+                              sx={{ ml: 'auto', fontSize: '0.75rem' }}
+                            >
+                              Clear All
+                            </Button>
+                          )}
                         </Box>
+                        
+                        {activeFriendFilters.gender && (
+                          <Chip
+                            size="small"
+                            label={`Gender: ${localFilters.friendsGender}`}
+                            onDelete={() => setLocalFilters(prev => ({ ...prev, friendsGender: '' }))}
+                            color="primary"
+                            variant="outlined"
+                          />
+                        )}
+                        
+                        {activeFriendFilters?.ageRange && (
+                          <Chip
+                            size="small"
+                            label={`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`}
+                            onDelete={() => setLocalFilters(prev => ({ ...prev, friendsAgeRange: [18, 65] }))}
+                            color="primary"
+                            variant="outlined"
+                          />
+                        )}
+                        
+                        {activeFriendFilters?.lookingFor && localFilters?.friendsLookingFor?.length > 0 && (
+                          <Chip
+                            size="small"
+                            label={`Looking for: ${localFilters?.friendsLookingFor?.length}`}
+                            onDelete={clearLookingFor}
+                            color="primary"
+                            variant="outlined"
+                          />
+                        )}
+                        
+                        
                       </Box>
 
-                      {/* Max Distance */}
-                      {/* <Box sx={{ width: '100%', mb: 2 }}>
-                        <Typography variant="body2" gutterBottom>
-                          Max Distance: {localFilters.friendsMaxDistance} km
-                        </Typography>
-                        <Slider
-                          value={localFilters.friendsMaxDistance}
-                          onChange={(e, value) => handleFriendsDistanceChange(value)}
-                          min={1}
-                          max={1000}
-                          step={1}
-                          valueLabelDisplay="auto"
-                          sx={{ width: '100%' }}
-                        />
-                        <Box display="flex" justifyContent="space-between" mt={0.5}>
-                          <Typography variant="caption">1 km</Typography>
-                          <Typography variant="caption">1000 km</Typography>
-                        </Box>
-                      </Box> */}
-
-                      {/* Looking For (Multi-select) */}
-                      <FormControl size='small' sx={{ width: '100%', '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
-                        <InputLabel>Looking For</InputLabel>
-                        <Select
-                          multiple
-                          name="friendsLookingFor"
-                          value={localFilters.friendsLookingFor}
-                          onChange={handleLookingForChange}
-                          label="Looking For"
-                          renderValue={(selected) => selected.join(', ')}
+                      {/* Friends Gender Filter - Enhanced */}
+                      <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(25, 118, 210, 0.05)' }}>
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            mb: activeFriendFilters.gender ? 2 : 0
+                          }}
+                          onClick={() => toggleFilterSection('gender')}
                         >
-                          <MenuItem value="Friendship">Friendship</MenuItem>
-                          <MenuItem value="Dating">Dating</MenuItem>
-                          <MenuItem value="Networking">Networking</MenuItem>
-                          <MenuItem value="Activity Partners">Activity Partners</MenuItem>
-                          <MenuItem value="Travel Buddies">Travel Buddies</MenuItem>
-                          <MenuItem value="Study Partners">Study Partners</MenuItem>
-                          <MenuItem value="Business Connections">Business Connections</MenuItem>
-                        </Select>
-                      </FormControl>
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            <TransgenderRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                            Gender Preference
+                          </Typography>
+                          <IconButton size="small">
+                            {activeFriendFilters.gender ? <ExpandLess /> : <ExpandMore />}
+                          </IconButton>
+                        </Box>
+                        
+                        {activeFriendFilters.gender && (
+                          <Box sx={{ mt: 2 }}>
+                            <FormControl fullWidth size="small">
+                              <InputLabel>Select Gender</InputLabel>
+                              <Select
+                                name="friendsGender"
+                                value={localFilters.friendsGender}
+                                onChange={handleFriendsFilterChange}
+                                label="Select Gender"
+                                sx={{ borderRadius: '12px' }}
+                              >
+                                <MenuItem value="">
+                                  {/* <em>All Genders</em> */}
+                                  All Genders
+                                </MenuItem>
+                                <MenuItem value="Male">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <ManRounded fontSize="small" />
+                                    Male
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Female">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <WomanRounded fontSize="small" />
+                                    Female
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Non-binary">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <TransgenderRounded fontSize="small" />
+                                    Non-binary
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Other">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <PersonRounded fontSize="small" />
+                                    Other / Prefer not to say
+                                  </Box>
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                          </Box>
+                        )}
+                      </Box>
 
-                      {/* Hobbies Filter */}
-                      {/* <TextField
-                        label="Hobbies (comma separated)"
-                        name="friendsHobbies"
-                        value={localFilters.friendsHobbies.join(', ')}
-                        onChange={handleHobbiesChange}
-                        size='small'
-                        sx={{ width: '100%', mt: 2, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
-                        placeholder="e.g., hiking, reading, cooking"
-                        helperText="Enter hobbies separated by commas"
-                      /> */}
-                    </> :
-                    <>
+                      {/* Age Range Filter - Enhanced */}
+                      <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(156, 39, 176, 0.05)' }}>
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            mb: activeFriendFilters.ageRange ? 2 : 0
+                          }}
+                          onClick={() => toggleFilterSection('ageRange')}
+                        >
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            <CakeRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                            Age Range
+                            {activeFriendFilters.ageRange && (
+                              <Typography component="span" variant="caption" sx={{ ml: 1, color: 'primary.main' }}>
+                                ({localFilters?.friendsAgeRange?.[0]}-{localFilters?.friendsAgeRange?.[1]})
+                              </Typography>
+                            )}
+                          </Typography>
+                          <IconButton size="small">
+                            {activeFriendFilters.ageRange ? <ExpandLess /> : <ExpandMore />}
+                          </IconButton>
+                        </Box>
+                        
+                        {activeFriendFilters?.ageRange && (
+                          <>
+                            {/* Age Slider */}
+                            <Box sx={{ mt: 2, px: 1 }}>
+                              <Slider
+                                value={localFilters.friendsAgeRange}
+                                onChange={(event, newValue) => {
+                                  setLocalFilters(prev => ({ 
+                                    ...prev, 
+                                    friendsAgeRange: newValue 
+                                  }));
+                                }}
+                                onChangeCommitted={() => {
+                                  // Optional: Add debounce here if needed
+                                }}
+                                valueLabelDisplay="auto"
+                                min={18}
+                                max={65}
+                                sx={{
+                                  '& .MuiSlider-valueLabel': {
+                                    backgroundColor: 'primary.main',
+                                    borderRadius: '8px',
+                                    padding: '4px 8px'
+                                  }
+                                }}
+                              />
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                                <Typography variant="caption" color="text.secondary">18</Typography>
+                                <Typography variant="caption" color="text.secondary">65+</Typography>
+                              </Box>
+                            </Box>
+                            
+                            {/* Age Inputs */}
+                            <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                              <TextField
+                                fullWidth
+                                label="Min Age"
+                                type="number"
+                                size="small"
+                                value={localFilters?.friendsAgeRange?.[0]}
+                                onChange={(e) => handleFriendsAgeRangeChange(e, 'min')}
+                                InputProps={{
+                                  inputProps: { min: 18, max: localFilters?.friendsAgeRange?.[1] }
+                                }}
+                                sx={{ borderRadius: '12px' }}
+                              />
+                              <TextField
+                                fullWidth
+                                label="Max Age"
+                                type="number"
+                                size="small"
+                                value={localFilters?.friendsAgeRange?.[1]}
+                                onChange={(e) => handleFriendsAgeRangeChange(e, 'max')}
+                                InputProps={{
+                                  inputProps: { min: localFilters?.friendsAgeRange?.[0], max: 120 }
+                                }}
+                                sx={{ borderRadius: '12px' }}
+                              />
+                            </Box>
+                            
+                            {/* Quick Age Presets */}
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 3, mb: 1, display: 'block' }}>
+                              Quick presets:
+                            </Typography>
+                            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                              {[
+                                { label: '18-25', range: [18, 25] },
+                                { label: '26-35', range: [26, 35] },
+                                { label: '36-45', range: [36, 45] },
+                                { label: '46-55', range: [46, 55] },
+                                { label: '56+', range: [56, 65] }
+                              ].map((preset) => (
+                                <Chip
+                                  key={preset.label}
+                                  label={preset.label}
+                                  size="small"
+                                  onClick={() => handleQuickAgeRange(preset.range)}
+                                  variant={
+                                    localFilters?.friendsAgeRange?.[0] === preset.range[0] && 
+                                    localFilters?.friendsAgeRange?.[1] === preset.range[1] 
+                                      ? "filled" 
+                                      : "outlined"
+                                  }
+                                  color="primary"
+                                  sx={{ borderRadius: '8px' }}
+                                />
+                              ))}
+                            </Box>
+                          </>
+                        )}
+                      </Box>
+
+                      {/* Looking For Filter - Enhanced */}
+                      <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(76, 175, 80, 0.05)' }}>
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            mb: activeFriendFilters.lookingFor ? 2 : 0
+                          }}
+                          onClick={() => toggleFilterSection('lookingFor')}
+                        >
+                          <Typography variant="subtitle2" fontWeight={600}>
+                            <SearchRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                            Looking For
+                            {activeFriendFilters?.lookingFor && localFilters?.friendsLookingFor?.length > 0 && (
+                              <Typography component="span" variant="caption" sx={{ ml: 1, color: 'success.main' }}>
+                                ({localFilters?.friendsLookingFor?.length} selected)
+                              </Typography>
+                            )}
+                          </Typography>
+                          <IconButton size="small">
+                            {activeFriendFilters.lookingFor ? <ExpandLess /> : <ExpandMore />}
+                          </IconButton>
+                        </Box>
+                        
+                        {activeFriendFilters.lookingFor && (
+                          <Box>
+                            {/* Multi-select dropdown */}
+                            <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                              <InputLabel>What are they looking for?</InputLabel>
+                              <Select
+                                multiple
+                                name="friendsLookingFor"
+                                value={localFilters?.friendsLookingFor || []}
+                                onChange={handleLookingForChange}
+                                label="What are they looking for?"
+                                renderValue={(selected) => selected.join(', ')}
+                                sx={{ borderRadius: '12px' }}
+                              >
+                                <MenuItem value="Friendship">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <PeopleRounded fontSize="small" />
+                                    Friendship
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Dating">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <FavoriteRounded fontSize="small" />
+                                    Dating
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Networking">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <BusinessCenterRounded fontSize="small" />
+                                    Networking
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Activity Partners">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <SportsSoccerRounded fontSize="small" />
+                                    Activity Partners
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Travel Buddies">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <FlightRounded fontSize="small" />
+                                    Travel Buddies
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Study Partners">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <SchoolRounded fontSize="small" />
+                                    Study Partners
+                                  </Box>
+                                </MenuItem>
+                                <MenuItem value="Business Connections">
+                                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <HandshakeRounded fontSize="small" />
+                                    Business Connections
+                                  </Box>
+                                </MenuItem>
+                              </Select>
+                            </FormControl>
+                            
+                            {/* Quick toggle chips */}
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 3, mb: 1, display: 'block' }}>
+                              Select quickly:
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                              {['Friendship', 'Dating', 'Networking', 'Activity Partners', 'Travel Buddies', 'Study Partners', 'Business Connections'].map((item) => (
+                                <Chip
+                                  key={item}
+                                  label={item}
+                                  size="small"
+                                  onClick={() => toggleLookingForItem(item)}
+                                  variant={localFilters?.friendsLookingFor?.includes(item) ? "filled" : "outlined"}
+                                  color="success"
+                                  sx={{ borderRadius: '8px' }}
+                                />
+                              ))}
+                            </Box>
+                            
+                            {localFilters?.friendsLookingFor?.length > 0 && (
+                              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                                <Button
+                                  size="small"
+                                  onClick={clearLookingFor}
+                                  startIcon={<ClearRounded />}
+                                  sx={{ fontSize: '0.75rem' }}
+                                >
+                                  Clear Selection
+                                </Button>
+                              </Box>
+                            )}
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Stats and Info */}
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        bgcolor: 'rgba(255, 193, 7, 0.05)',
+                        border: '1px solid rgba(255, 193, 7, 0.1)'
+                      }}>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <InfoRounded fontSize="small" />
+                          <Box>
+                            <strong>Tips:</strong> 
+                            <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
+                              <li>Use age range to find friends in your preferred age group</li>
+                              <li>Select multiple "Looking For" options to broaden your search</li>
+                              <li>Filters are saved automatically for your next visit</li>
+                            </ul>
+                          </Box>
+                        </Typography>
+                      </Box>
+                    </>
+                    ) : 
+                    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
                     {/* Gender Filter */}
                     <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
                       <InputLabel>Gender</InputLabel>
@@ -4026,7 +4394,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
                       />
                     </Box>
-                    </>}
+                    </Box>}
                   </Box>
 
                   {/* Action Buttons */}
@@ -4048,8 +4416,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       Apply
                     </Button>
                   </Box>
-                </CardContent>
-              </Card>
+                </Box>
+              </Box>
             )}
 
           {/* Compare Icon Button */}
