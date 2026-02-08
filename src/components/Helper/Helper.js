@@ -1,7 +1,8 @@
 // components/Helper/Helper.js
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {Alert, alpha, Box, Button, Card, CardContent, CardMedia, Chip, CircularProgress, Divider, FormControl, Grid, IconButton, InputAdornment, InputLabel, LinearProgress, MenuItem, Paper, Select, Snackbar, Stack, styled, Switch, TextField, Toolbar, Tooltip, Typography, useMediaQuery, ListItemIcon,
-  Fade, Fab } from '@mui/material';
+  Fade, Fab, 
+  CardActions} from '@mui/material';
 import Layout from '../Layout';
 // import { useTheme } from '@emotion/react';
 // import FilterListIcon from "@mui/icons-material/FilterList";
@@ -3905,11 +3906,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </IconButton>
             </Tooltip>
             {isExtraFiltersOpen &&  (
-              <Box
+              <Card
                 sx={{
                   position: 'absolute',
                   top: isMobile ? '45px' : '45px',
-                  right: '1px', ml: '4px', p: 2,
+                  right: '1px', ml: '4px', 
                   // width: '90%',
                   // maxWidth: '400px',
                   minWidth: isMobile ? '100%' : 'auto',
@@ -3917,13 +3918,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   zIndex: 1001,
                   borderRadius: '12px',
                   backdropFilter: 'blur(10px)',
-                  backgroundColor: darkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                   minWidth: '200px',
                   maxHeight: '60vh',
                   overflowY: 'auto',
                 }}
               >
-                <Box >
+                <CardContent >
                   <Typography variant="h6" gutterBottom >
                     { selectedCategory === 'BloodDonors' ? 'Blood Donor filters' : selectedCategory === 'Friends' ? 'Friends filters' : 'Filters'}
                   </Typography>
@@ -4400,7 +4400,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   </Box>
 
                   {/* Action Buttons */}
-                  <Box gap={2} mt={3} sx={{display:'flex'}}>
+                  {/* <Box gap={2} mt={3} sx={{display:'flex'}}>
                     <Button
                       variant="outlined"
                       onClick={handleResetFilters}
@@ -4417,9 +4417,34 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                     >
                       Apply
                     </Button>
-                  </Box>
-                </Box>
-              </Box>
+                  </Box> */}
+                </CardContent>
+                <CardActions sx={{ position: 'sticky', bottom: 0, justifyContent: 'center', p: 2, 
+                  background: darkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                   backdropFilter: 'blur(10px)',
+                   borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
+                 }}>
+                  {/* Action Buttons */}
+                  {/* <Box gap={2} mt={3} sx={{display:'flex'}}> */}
+                    <Button
+                      variant="outlined"
+                      onClick={handleResetFilters}
+                      disabled={isDefaultFilters}
+                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none' }}
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      variant="contained" 
+                      onClick={handleApplyFilters}
+                      disabled={isDefaultFilters}
+                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none'}}
+                    >
+                      Apply
+                    </Button>
+                  {/* </Box> */}
+                </CardActions>
+              </Card>
             )}
 
           {/* Compare Icon Button */}
