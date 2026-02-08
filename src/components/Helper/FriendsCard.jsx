@@ -39,11 +39,11 @@ const FriendsCard = ({ donor, onClick, darkMode }) => {
       // timeStyle: 'short',
     }) : '—';
 
-  // const formatDate = (date) =>
-  //   date ? new Date(date).toLocaleString('en-IN', {
-  //     dateStyle: 'medium',
-  //     timeStyle: 'short',
-  //   }) : '—';
+  const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }) : '—';
 
   const LAST_DONATION_GAP_DAYS = 56; // 8 weeks
 
@@ -377,7 +377,7 @@ const FriendsCard = ({ donor, onClick, darkMode }) => {
           />
         )} */}
         <Typography variant="body2" sx={{ color: 'inherit'  }}>
-          Last seen: {formatLastSeenDate(donor?.lastLoginAt) || 'Not found'}
+          Last seen: {formatDate(donor?.lastLoginAt) || 'Not found'}
         </Typography>
       </CardContent>
     </Card>

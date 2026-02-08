@@ -497,6 +497,8 @@ const MenuCard = ({ selectedCategory, onCategorySelect, filters, darkMode, isMob
                       onClick={() => {
                         if (service.value === 'BloodDonors') {
                           handleServiceCategorySelect(service.value);
+                        } else if (service.value === 'Friends') {
+                          handleServiceCategorySelect(service.value);
                         } else {
                           setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });
                         }

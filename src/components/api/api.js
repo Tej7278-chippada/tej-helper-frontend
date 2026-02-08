@@ -122,8 +122,8 @@ export const fetchNearbyUsers = (skip = 0, limit = 12, userLocation = null, dist
   const params = { 
     skip, 
     limit,
-    bloodGroup: filters.bloodGroup || 'All',
-    gender: filters.gender || 'All',
+    // bloodGroup: filters.bloodGroup || 'All',
+    // gender: filters.gender || 'All',
     sortBy
   };
 
@@ -139,10 +139,50 @@ export const fetchNearbyUsers = (skip = 0, limit = 12, userLocation = null, dist
     params.distance = distanceRange;
   }
 
+  // Add category-specific filters
+  if (selectedCategory === 'BloodDonors') {
+    params.bloodGroup = filters.bloodGroup || 'All';
+    // params.gender = filters.gender || 'All';
+  } else {
+    // Friends-specific filters
+    params.gender = filters.friendsGender || '';
+    // Handle ageRange - send as comma-separated string
+    if (filters.friendsAgeRange && Array.isArray(filters.friendsAgeRange)) {
+      params.ageRange = filters.friendsAgeRange.join(',');
+    }
+    // params.maxDistance = filters.friendsMaxDistance || 50;
+    // Handle lookingFor - send as comma-separated string
+    if (filters.friendsLookingFor && Array.isArray(filters.friendsLookingFor)) {
+      params.lookingFor = filters.friendsLookingFor.join(',');
+    }
+    // Handle hobbies - send as comma-separated string
+    // if (filters.friendsHobbies && Array.isArray(filters.friendsHobbies)) {
+    //   params.hobbies = filters.friendsHobbies.join(',');
+    // }
+    // params.inAppMessaging = filters.friendsInAppMessaging || 'all';
+    // params.status = filters.friendsStatus || 'active';
+  // } else {
+  //   // Regular post filters
+  //   params.gender = filters.gender || '';
+  //   params.postStatus = filters.postStatus || '';
+  //   params.minPrice = filters.priceRange?.[0] || 0;
+  //   params.maxPrice = filters.priceRange?.[1] || 10000000;
+  }
+
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
+
+  // Determine endpoint based on category
+  let endpoint;
+  if (selectedCategory === 'BloodDonors') {
+    endpoint = '/api/posts/blood-donors';
+  } else {
+    endpoint = '/api/posts/friends-nearby';
+  // } else {
+  //   endpoint = '/api/posts/all';
+  }
   
-  return API.get(selectedCategory === 'BloodDonors' ? '/api/posts/blood-donors' : '/api/posts/friends-nearby', { headers, params });
+  return API.get(endpoint, { headers, params });
 };
 
 // Fetch nearby users locations
@@ -151,18 +191,58 @@ export const fetchNearbyUsersLocations = (userLocation, distanceRange, filters =
     userLat: userLocation.latitude,
     userLng: userLocation.longitude,
     distance: distanceRange,
-    bloodGroup: filters.bloodGroup || 'All',
-    gender: filters.gender || 'All',
+    // bloodGroup: filters.bloodGroup || 'All',
+    // gender: filters.gender || 'All',
   };
 
   if (searchQuery && searchQuery.trim()) {
     params.search = searchQuery.trim();
   }
 
+  // Add category-specific filters
+  if (selectedCategory === 'BloodDonors') {
+    params.bloodGroup = filters.bloodGroup || 'All';
+    // params.gender = filters.gender || 'All';
+  } else {
+    // Friends-specific filters
+    params.gender = filters.friendsGender || '';
+    // Handle ageRange - send as comma-separated string
+    if (filters.friendsAgeRange && Array.isArray(filters.friendsAgeRange)) {
+      params.ageRange = filters.friendsAgeRange.join(',');
+    }
+    // params.maxDistance = filters.friendsMaxDistance || 50;
+    // Handle lookingFor - send as comma-separated string
+    if (filters.friendsLookingFor && Array.isArray(filters.friendsLookingFor)) {
+      params.lookingFor = filters.friendsLookingFor.join(',');
+    }
+    // // Handle hobbies - send as comma-separated string
+    // if (filters.friendsHobbies && Array.isArray(filters.friendsHobbies)) {
+    //   params.hobbies = filters.friendsHobbies.join(',');
+    // }
+    // params.inAppMessaging = filters.friendsInAppMessaging || 'all';
+    // params.status = filters.friendsStatus || 'active';
+  // } else {
+  //   // Regular post filters
+  //   params.gender = filters.gender || '';
+  //   params.postStatus = filters.postStatus || '';
+  //   params.minPrice = filters.priceRange?.[0] || 0;
+  //   params.maxPrice = filters.priceRange?.[1] || 10000000;
+  }
+
   const authToken = localStorage.getItem('authToken');
   const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {};
 
-  return API.get(selectedCategory === 'BloodDonors' ? '/api/posts/blood-donors/locations' : '/api/posts/friends-nearby/locations', { headers, params });
+  // Determine endpoint based on category
+  let endpoint;
+  if (selectedCategory === 'BloodDonors') {
+    endpoint = '/api/posts/blood-donors/locations';
+  } else {
+    endpoint = '/api/posts/friends-nearby/locations';
+  // } else {
+  //   endpoint = '/api/posts/all/locations';
+  }
+
+  return API.get(endpoint, { headers, params });
 };
 
 // Update user friends profile data

@@ -10,7 +10,7 @@ import Layout from '../Layout';
 import SkeletonCards from './SkeletonCards';
 import LazyImage from './LazyImage';
 import { useTheme } from '@emotion/react';
-import API, { fetchBloodDonorLocations, fetchBloodDonors, fetchPostById, fetchPostLocations, fetchPosts } from '../api/api';
+import API, { fetchBloodDonorLocations, fetchBloodDonors, fetchNearbyUsers, fetchNearbyUsersLocations, fetchPostById, fetchPostLocations, fetchPosts } from '../api/api';
 import { Link, useNavigate } from 'react-router-dom';
 // import FilterPosts from './FilterPosts';
 import CloseIcon from '@mui/icons-material/Close';
@@ -57,6 +57,7 @@ import ComparePostsDialog from './ComparePostsDialog';
 import BloodDonorCard from './BloodDonorCard';
 import { VerifiedRounded } from '@mui/icons-material';
 import UserProfileDetails from './UserProfileDetails';
+import FriendsCard from './FriendsCard';
 
 // Component to handle map events
 function MapEvents({ setMap }) {
@@ -97,7 +98,15 @@ const DEFAULT_FILTERS = {
   postStatus: '',
   priceRange: [0, 10000000],
   postType: 'HelpRequest', // added this line for only shows the Helper posts on ALL section
-  bloodGroup: 'All'
+  bloodGroup: 'All',
+  // Friends-specific filters
+  friendsGender: '',
+  friendsLookingFor: [],
+  friendsAgeRange: [18, 65],
+  // friendsMaxDistance: 50,
+  // friendsInAppMessaging: 'all',
+  // friendsHobbies: [],
+  // friendsStatus: 'active'
 };
 
 // component to handle map view persistence
@@ -348,6 +357,51 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     }));
   };
 
+  // Add friends-specific filter handlers
+  const handleFriendsFilterChange = (e) => {
+    const { name, value } = e.target;
+    setLocalFilters(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle friends age range changes
+  const handleFriendsAgeRangeChange = (e, type) => {
+    const value = Number(e.target.value);
+    setLocalFilters(prev => ({
+      ...prev,
+      friendsAgeRange: type === 'min' 
+        ? [value, prev.friendsAgeRange[1]] 
+        : [prev.friendsAgeRange[0], value]
+    }));
+  };
+
+  // Handle friends distance change
+  // const handleFriendsDistanceChange = (value) => {
+  //   setLocalFilters(prev => ({
+  //     ...prev,
+  //     friendsMaxDistance: value
+  //   }));
+  // };
+
+  // Handle looking for filter (multi-select)
+  const handleLookingForChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setLocalFilters(prev => ({
+      ...prev,
+      friendsLookingFor: typeof value === 'string' ? value.split(',') : value,
+    }));
+  };
+
+  // Handle hobbies filter
+  // const handleHobbiesChange = (e) => {
+  //   const value = e.target.value;
+  //   setLocalFilters(prev => ({
+  //     ...prev,
+  //     friendsHobbies: value ? value.split(',').map(h => h.trim()) : []
+  //   }));
+  // };
+
   // Apply filters
   const handleApplyFilters = () => {
     if (localFilters.priceRange[0] > localFilters.priceRange[1]) {
@@ -382,12 +436,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   const handleCategorySelect = (value) => {
     setSelectedCategory(value);
     // Determine if the selected value is a category or service
-    const isCategory = ['', 'Paid', 'UnPaid', 'Emergency', 'Friends'].includes(value);
+    const isCategory = ['', 'Paid', 'UnPaid', 'Emergency'].includes(value);
     const isService = [
       'ParkingSpace', 'VehicleRental', 'FurnitureRental', 'Grocery', 'Laundry', 'Events', 'Playgrounds', 'Cleaning',
       'Cooking', 'Tutoring', 'PetCare', 'Driver', 'Delivery', 'Maintenance', 'VehicleMech', 'HouseSaleLease', 'LandSaleLease', 'Other'
     ].includes(value);
-    const isNearbyUser = ['BloodDonors', 'StandwithWomen'].includes(value);
+    const isNearbyUser = ['BloodDonors', 'Friends', 'StandwithWomen'].includes(value);
 
     if (isNearbyUser) {
       setPostMarkers([]); // Clear post markers
@@ -1139,6 +1193,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // Posts locations mapping code starts here
   const [postMarkers, setPostMarkers] = useState([]);
   const [bloodDonorMarkers, setBloodDonorMarkers] = useState([]);
+  const [nearbyUserMarkers, setNearbyUserMarkers] = useState([]);
   const postIconCache = useRef({});
   // const [allPostLocations, setAllPostLocations] = useState([]);
   // const [selectedPost, setSelectedPost] = useState(null);
@@ -1310,8 +1365,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         return;
       }
   
-      const response = await fetchBloodDonors(0, 12, userLocation, distanceRange, filters, searchQuery, sortBy);
-      const donorsData = response.data.donors || [];
+      const response = await fetchNearbyUsers(0, 12, userLocation, distanceRange, filters, searchQuery, sortBy, selectedCategory);
+      const donorsData = response.data.donors || response.data.friends || [];
       const totalCount = response.data.totalCount || 0;
 
       globalCache.totalPostsCount = (response.data.totalCount);
@@ -1351,7 +1406,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   
   // Function to fetch blood donor locations for map - FIXED
   const fetchBloodDonorLocationsData = async () => {
-    if (!userLocation || !distanceRange || selectedCategory !== 'BloodDonors') return;
+    if (!userLocation || !distanceRange || (selectedCategory !== 'BloodDonors' && selectedCategory !== 'Friends')) return;
 
     const currentLocationsCacheKey = generateCacheKey('locations');
     
@@ -1381,7 +1436,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       // Get current map bounds for viewport-based loading
       const bounds = mapRef.current.getBounds();
 
-      const response = await fetchBloodDonorLocations(userLocation, distanceRange, filters, searchQuery);
+      const response = await fetchNearbyUsersLocations(userLocation, distanceRange, filters, searchQuery, selectedCategory);
       const locationsData = response.data.locations || [];
       const totalCount = response.data.totalCount || 0;
 
@@ -1425,8 +1480,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     
     try {
       setLoadingMore(true);
-      const response = await fetchBloodDonors(skip, 12, userLocation, distanceRange, filters, searchQuery, sortBy);
-      const newPosts = response.data.donors || [];
+      const response = await fetchNearbyUsers(skip, 12, userLocation, distanceRange, filters, searchQuery, sortBy, selectedCategory);
+      const newPosts = response.data.donors || response.data.friends || [];
       
       if (newPosts.length > 0) {
         // setBloodDonors(prev => [...prev, ...newDonors]);
@@ -1465,7 +1520,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   
   // Update useEffect to handle blood donors
   useEffect(() => {
-    if (selectedCategory === 'BloodDonors') {
+    if (selectedCategory === 'BloodDonors' || selectedCategory === 'Friends') {
       fetchBloodDonorLocationsData();
       fetchBloodDonorsData();
     } else {
@@ -1531,7 +1586,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // to fetch all post locations with viewport-based loading
   useEffect(() => {
     // Don't fetch post locations if BloodDonors is selected
-    if (selectedCategory === 'BloodDonors') {
+    if (selectedCategory === 'BloodDonors' || selectedCategory === 'Friends') {
       setPostMarkers([]); // Clear post markers
       return;
     }
@@ -1812,7 +1867,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setPosts([]);
       return;
     }
-    if (selectedCategory === 'BloodDonors') {
+    if (selectedCategory === 'BloodDonors' || selectedCategory === 'Friends') {
       return; // Skip fetching posts if BloodDonors is selected
     }
     const currentCacheKey = generateCacheKey('posts');
@@ -1898,7 +1953,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     
     try {
       setLoadingMore(true);
-      if (selectedCategory === 'BloodDonors') {
+      if (selectedCategory === 'BloodDonors' || selectedCategory === 'Friends') {
         console.log('loading more.. 1');
       // Load more blood donors
       await loadMoreBloodDonors();
@@ -2288,7 +2343,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             )}
             {/* // Update the MapContainer component to include MarkerClusterGroup
             // Replace the individual markers rendering with clustered markers */}
-            {selectedCategory !== 'BloodDonors' && postMarkers.length > 0 && (
+            {(selectedCategory !== 'BloodDonors' || selectedCategory !== 'Friends') && postMarkers.length > 0 && (
               <MarkerClusterGroup
                 chunkedLoading
                 chunkDelay={100}
@@ -2593,7 +2648,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               </MarkerClusterGroup>
             )}
             {/* Blood Donor Markers - Only show when in BloodDonors mode */}
-            {selectedCategory === 'BloodDonors' && bloodDonorMarkers.length > 0 && (
+            {(selectedCategory === 'BloodDonors' || selectedCategory === 'Friends') && bloodDonorMarkers.length > 0 && (
               <MarkerClusterGroup
                 chunkedLoading
                 chunkDelay={100}
@@ -2661,7 +2716,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         key={`${donor._id}-${index}`}
                         position={[donor.location.latitude, donor.location.longitude]}
                         // icon={customIcon}
-                        icon={postsMappingIcon(donor.bloodDonor?.bloodGroup, '#dc3545', darkMode, 'bloodDonor')}
+                        icon={selectedCategory === 'BloodDonors' ? postsMappingIcon(donor.bloodDonor?.bloodGroup, '#dc3545', darkMode, 'bloodDonor') : postsMappingIcon(donor?.username, '#007bff', darkMode, 'friends')}
                         eventHandlers={{
                           click: (e) => {
                             e.originalEvent.stopPropagation();
@@ -2730,7 +2785,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 <strong>Trust Level:</strong> {donor.trustLevel}/5
                               </p>
                             )} */}
-                            <Box sx={{ 
+                            {selectedCategory === 'BloodDonors' && (
+                              <Box sx={{ 
                               mb: 1, 
                               display: 'flex', 
                               flexDirection: 'row', 
@@ -2765,11 +2821,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   />
                                 )}
                               </Box>
-                            </Box>
+                            </Box>)}
                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                              <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
-                                <strong>Last donated on:</strong> {donor.bloodDonor?.lastDonated ? formatDate(donor.bloodDonor?.lastDonated) : 'N/A'}
-                              </Typography>
+                              {selectedCategory === 'BloodDonors' && (
+                                <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
+                                  <strong>Last donated on:</strong> {donor.bloodDonor?.lastDonated ? formatDate(donor.bloodDonor?.lastDonated) : 'N/A'}
+                                </Typography>
+                              )}
                               <Typography variant="caption" sx={{ color: darkMode ? '#d1d5db' : '#6b7280', }}>
                                 <strong>Trust Level:</strong> {donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'}
                               </Typography>
@@ -3535,7 +3593,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             <Box>
             <SearchTextField
               variant="outlined"
-              placeholder={expanded ? selectedCategory === 'BloodDonors' ? "Search donors..." : "Search posts..." : ""}
+              placeholder={expanded ? selectedCategory === 'BloodDonors' ? "Search donors..." : selectedCategory === 'Friends' ? "Search friends..." : "Search posts..." : ""}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => setExpanded(true)}
@@ -3748,7 +3806,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               >
                 <CardContent>
                   <Typography variant="h6" gutterBottom >
-                    { selectedCategory === 'BloodDonors' ? 'Blood Donor filters' : 'Filters'}
+                    { selectedCategory === 'BloodDonors' ? 'Blood Donor filters' : selectedCategory === 'Friends' ? 'Friends filters' : 'Filters'}
                   </Typography>
                   <IconButton
                     onClick={() => setIsExtraFiltersOpen(false)}
@@ -3786,6 +3844,137 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       </Select>
                     </FormControl>
                     </> : 
+                    selectedCategory === 'Friends' ?
+                    <>
+                      {/* Friends Gender Filter */}
+                      <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                        <InputLabel>Gender</InputLabel>
+                        <Select
+                          name="friendsGender"
+                          value={localFilters.friendsGender}
+                          onChange={handleFriendsFilterChange}
+                          label="Gender"
+                        >
+                          <MenuItem value="">All Genders</MenuItem>
+                          <MenuItem value="Male">Male</MenuItem>
+                          <MenuItem value="Female">Female</MenuItem>
+                          <MenuItem value="Non-binary">Non-binary</MenuItem>
+                          <MenuItem value="Other">Other</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Friends Status Filter */}
+                      {/* <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          name="friendsStatus"
+                          value={localFilters.friendsStatus}
+                          onChange={handleFriendsFilterChange}
+                          label="Status"
+                        >
+                          <MenuItem value="active">Active Only</MenuItem>
+                          <MenuItem value="all">All Status</MenuItem>
+                          <MenuItem value="available">Available Now</MenuItem>
+                          <MenuItem value="busy">Busy</MenuItem>
+                        </Select>
+                      </FormControl> */}
+
+                      {/* In-App Messaging Filter */}
+                      {/* <FormControl size='small' sx={{ flex: '1 1 160px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
+                        <InputLabel>Messaging</InputLabel>
+                        <Select
+                          name="friendsInAppMessaging"
+                          value={localFilters.friendsInAppMessaging}
+                          onChange={handleFriendsFilterChange}
+                          label="Messaging"
+                        >
+                          <MenuItem value="all">All Users</MenuItem>
+                          <MenuItem value="enabled">Messaging Enabled</MenuItem>
+                          <MenuItem value="disabled">Messaging Disabled</MenuItem>
+                        </Select>
+                      </FormControl> */}
+
+                      {/* Age Range */}
+                      <Box sx={{ width: '100%', mb: 0 }}>
+                        <Typography variant="body2" mb={2}>
+                          Age Range: {localFilters.friendsAgeRange[0]} - {localFilters.friendsAgeRange[1]}
+                        </Typography>
+                        <Box display="flex" gap={2} alignItems="center">
+                          <TextField
+                            label="Min Age"
+                            type="number"
+                            size='small'
+                            value={localFilters.friendsAgeRange[0]}
+                            onChange={(e) => handleFriendsAgeRangeChange(e, 'min')}
+                            inputProps={{ min: 18, max: 120 }}
+                            sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                          />
+                          <Typography variant="body2">to</Typography>
+                          <TextField
+                            label="Max Age"
+                            type="number"
+                            size='small'
+                            value={localFilters.friendsAgeRange[1]}
+                            onChange={(e) => handleFriendsAgeRangeChange(e, 'max')}
+                            inputProps={{ min: 18, max: 120 }}
+                            sx={{ flex: 1, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                          />
+                        </Box>
+                      </Box>
+
+                      {/* Max Distance */}
+                      {/* <Box sx={{ width: '100%', mb: 2 }}>
+                        <Typography variant="body2" gutterBottom>
+                          Max Distance: {localFilters.friendsMaxDistance} km
+                        </Typography>
+                        <Slider
+                          value={localFilters.friendsMaxDistance}
+                          onChange={(e, value) => handleFriendsDistanceChange(value)}
+                          min={1}
+                          max={1000}
+                          step={1}
+                          valueLabelDisplay="auto"
+                          sx={{ width: '100%' }}
+                        />
+                        <Box display="flex" justifyContent="space-between" mt={0.5}>
+                          <Typography variant="caption">1 km</Typography>
+                          <Typography variant="caption">1000 km</Typography>
+                        </Box>
+                      </Box> */}
+
+                      {/* Looking For (Multi-select) */}
+                      <FormControl size='small' sx={{ width: '100%', '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}>
+                        <InputLabel>Looking For</InputLabel>
+                        <Select
+                          multiple
+                          name="friendsLookingFor"
+                          value={localFilters.friendsLookingFor}
+                          onChange={handleLookingForChange}
+                          label="Looking For"
+                          renderValue={(selected) => selected.join(', ')}
+                        >
+                          <MenuItem value="Friendship">Friendship</MenuItem>
+                          <MenuItem value="Dating">Dating</MenuItem>
+                          <MenuItem value="Networking">Networking</MenuItem>
+                          <MenuItem value="Activity Partners">Activity Partners</MenuItem>
+                          <MenuItem value="Travel Buddies">Travel Buddies</MenuItem>
+                          <MenuItem value="Study Partners">Study Partners</MenuItem>
+                          <MenuItem value="Business Connections">Business Connections</MenuItem>
+                        </Select>
+                      </FormControl>
+
+                      {/* Hobbies Filter */}
+                      {/* <TextField
+                        label="Hobbies (comma separated)"
+                        name="friendsHobbies"
+                        value={localFilters.friendsHobbies.join(', ')}
+                        onChange={handleHobbiesChange}
+                        size='small'
+                        sx={{ width: '100%', mt: 2, '& .MuiOutlinedInput-root': { borderRadius: '12px' } }}
+                        placeholder="e.g., hiking, reading, cooking"
+                        helperText="Enter hobbies separated by commas"
+                      /> */}
+                    </> :
                     <>
                     {/* Gender Filter */}
                     <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
@@ -3864,7 +4053,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
             )}
 
           {/* Compare Icon Button */}
-          {selectedCategory !== 'BloodDonors' &&
+          {(selectedCategory !== 'BloodDonors' && selectedCategory !== 'Friends') &&
           <Tooltip title="Compare Posts" arrow>
             <IconButton 
               onClick={() => setCompareMode(!compareMode)}
@@ -4331,23 +4520,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
           </SearchContainer> } */}
 
         {/* Friends profile visibility */}
-        {selectedCategory === 'Friends' && (
+        {/* {selectedCategory === 'Friends' && (
            <Box sx={{ 
               flex: 1, 
               overflow: 'auto',
               maxHeight: 'calc(90vh - 140px)' // Adjust based on your header heights
             }}>
-          {/* <Box sx={{display: 'flex', justifyContent: 'center', m: '12px', alignItems: 'center', gap: '4px'}}>
+          <Box sx={{display: 'flex', justifyContent: 'center', m: '12px', alignItems: 'center', gap: '4px'}}>
             <Typography color="text.secondary">Do u want ot visible your profile to nearby Friends!</Typography>
             <Switch
               // checked={protectLocation}
               // onChange={toggleLocationPrivacy}
               color="primary"
             />
-          </Box> */}
+          </Box>
           <Friends isMobile={isMobile} darkMode={darkMode} setSnackbar={setSnackbar} />
           </Box>
-        )}
+        )} */}
         {/* compare floating buttons */}
         {selectedPosts.length > 0 && compareMode && (
           <Box sx={{ display: 'flex', flexDirection: 'row', position: 'fixed', gap: 1, bottom: 16, right: 16, zIndex: 1100 }} >
@@ -4396,7 +4585,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         )}
 
 
-        {selectedCategory !== 'Friends' && (
+        {/* {selectedCategory !== 'Friends' && ( */}
           <Box
             ref={postsContainerRef}
             sx={{ 
@@ -4513,7 +4702,91 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       )}
                     </Box>
                   )
-                ) : ( // Regular posts display
+            ) : selectedCategory === 'Friends' ? ( // Check if showing blood donors
+              /* BLOOD DONORS DISPLAY */
+              posts.length > 0 ? (
+                <Grid container spacing={isMobile ? 1.5 : 1.5}>
+                  {posts.map((donor, index) => (
+                    <Grid item xs={12} sm={6} md={4} key={`${donor._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${donor._id}`}>
+                      <FriendsCard
+                        donor={donor} 
+                        // onClick={() => handleDonorClick(donor._id)} // You'll need to implement this function
+                        onClick={() => handleOpenUserProfileDialog(donor._id)}
+                        darkMode={darkMode}
+                      />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : ( 
+                <Box sx={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '50vh',
+                  textAlign: 'center',
+                }}>
+                  <img 
+                    src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
+                    alt="No Friends found" 
+                    style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
+                  />
+                  <Typography variant="body1" color="text.secondary">
+                    {searchQuery 
+                      ? `No friends found for "${searchQuery}" within ${distanceRange} km`
+                      : `No friends found within ${distanceRange} km of your location...`
+                    }
+                  </Typography>
+                  {searchQuery && (
+                    <Button 
+                      variant="outlined" size="small"
+                      sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
+                        px: 1.5,
+                        color: '#4361ee',
+                        background: 'none',
+                        border: '1px solid #4361ee',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'none',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                        },
+                        '&:active': {
+                          transform: 'translateY(0)',
+                        },
+                        }}
+                      onClick={handleClearSearch}
+                    >
+                      Clear Search
+                    </Button>
+                  )}
+                  {!searchQuery && (
+                    <Button 
+                      variant="outlined" size="small"
+                      disabled={distanceRange >= 100}
+                      sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
+                        px: 1.5,
+                        color: '#4361ee',
+                        background: 'none',
+                        border: '1px solid #4361ee',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'none',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                        },
+                        '&:active': {
+                          transform: 'translateY(0)',
+                        },
+                        }}
+                      onClick={() => setDistanceRange(prev => Math.min(prev + 5, 100))}
+                    >
+                      Increase Search Radius
+                    </Button>
+                  )}
+                </Box>
+              )
+            ) : ( // Regular posts display
                       
             posts.length > 0 ? (
               <Grid container spacing={isMobile ? 1.5 : 1.5}>
@@ -5377,7 +5650,8 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 or earning today.
               </Typography>
             </Box>
-          </Box>)}
+          </Box>
+         {/* )} */}
 
 
       </Box>
