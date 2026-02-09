@@ -255,11 +255,11 @@ const LocationPermissionDialog = ({ open, onClose, darkMode, isMobile, setSnackb
       open={open} 
       onClose={() => step === 1 && onClose(false, 'later')}
       maxWidth="sm"
-      fullScreen={isMobile}
+      fullScreen={isMobile && step === 1} // Only full screen on mobile for the first step
       fullWidth
       disableEscapeKeyDown={loading}
       sx={{ 
-        m: isMobile ? 2 : 0,
+        m: (isMobile && step === 1) ? 1.5 : 0,
         '& .MuiPaper-root': { 
           borderRadius: '16px', 
           backdropFilter: 'blur(20px)',

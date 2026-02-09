@@ -911,13 +911,18 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                     <InterestsRoundedIcon fontSize="small" color="primary" />
                     <Typography variant="body1" >Interests:</Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, ml: 0 }}>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, ml: 0 }}>
                     {profile?.interests.map((interest, index) => (
                       <Chip
                         key={index}
                         label={interest}
-                        variant="outlined" size="small" color="textSecondary"
-                        sx={{ borderRadius: '12px', padding: '4px 6px' }}
+                        variant="outlined" size="small" color="text.secondary"
+                        sx={{ borderRadius: '8px', 
+                          fontSize: '0.8rem',
+                          height: '20px',
+                          borderColor: darkMode ? '#555555' : '#9e9e9e',
+                          // color: darkMode ? '#757575' : '#616161'
+                         }}
                       />
                     ))}
                     {profile?.interests?.length === 0 && (
@@ -1030,7 +1035,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 </Box>
               </Grid> */}
               {/* Women Safety */}
-              <Grid item xs={12} sm={12} md={6} >
+              {/* <Grid item xs={12} sm={12} md={6} >
                 <Box>
                   <Box display="flex" alignItems="center" gap={1}>
                     <VolunteerActivismIcon color="success" fontSize="small" />
@@ -1047,7 +1052,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       : "This preference hasn’t been set yet."}
                   </Typography>
                 </Box>
-              </Grid>
+              </Grid> */}
             </Grid>
           </Box>
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,

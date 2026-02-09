@@ -48,6 +48,8 @@ import {
   ManRounded,
   WomanRounded,
   PersonRounded,
+  EmailRounded,
+  PhoneRounded,
 } from '@mui/icons-material';
 
 const FriendsCard = ({ user, onClick, darkMode }) => {
@@ -395,11 +397,12 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   size="small"
                   icon={lookingForIcons[item] || <SearchRounded fontSize="small" />}
                   sx={{
-                    borderRadius: '6px',
-                    backgroundColor: darkMode ? '#f5f5f5' : '#e3f2fd',
+                    borderRadius: '12px',
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
                     color: '#1565c0',
                     fontSize: '0.7rem',
                     height: 20,
+                    backdropFilter: 'blur(4px)',
                     '& .MuiChip-icon': { fontSize: '0.8rem', color: '#1565c0' }
                   }}
                 />
@@ -410,7 +413,7 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   size="small"
                   sx={{
                     borderRadius: '6px',
-                    backgroundColor: darkMode ? '#f5f5f5' : '#e3f2fd',
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
                     color: '#1565c0',
                     fontSize: '0.7rem',
                     height: 20
@@ -436,11 +439,11 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   size="small"
                   variant="outlined"
                   sx={{
-                    borderRadius: '8px',
+                    borderRadius: '12px',
                     fontSize: '0.7rem',
                     height: 20,
-                    borderColor: '#9c27b0',
-                    color: '#9c27b0'
+                    borderColor: darkMode ? '#555555' : '#9e9e9e',
+                    color: darkMode ? '#757575' : '#616161'
                   }}
                 />
               ))}
@@ -451,6 +454,8 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   variant="outlined"
                   sx={{
                     borderRadius: '8px',
+                    borderColor: darkMode ? '#555555' : '#9e9e9e',
+                    color: darkMode ? '#757575' : '#616161',
                     fontSize: '0.7rem',
                     height: 20
                   }}
@@ -505,7 +510,7 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                 <MessageRounded sx={{ 
                   fontSize: 18, 
                   color: '#4caf50',
-                  backgroundColor: darkMode ? '#333333' : '#e8f5e9',
+                  backgroundColor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
                   borderRadius: '50%',
                   p: 0.5
                 }} />
@@ -517,19 +522,56 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
               <Box sx={{ display: 'flex', gap: 0.5 }}>
                 {user.friendsProfile.contactWay.phone && (
                   <Tooltip title="Phone available">
-                    <PhoneIcon sx={{ fontSize: 18, color: '#0088cc' }} />
+                    <Avatar sx={{ bgcolor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)', color:'#2196F3', width: 24, height: 24 }}>
+                      <PhoneRounded sx={{ fontSize: 18 }} />
+                    </Avatar>
                   </Tooltip>
                 )}
-                {user.friendsProfile.contactWay.email && (
+                {/* {user.friendsProfile.contactWay.email && (
                   <Tooltip title="Email available">
-                    <EmailIcon sx={{ fontSize: 18, color: '#e4405f' }} />
+                    <Avatar sx={{ bgcolor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)', color:'#2196F3', width: 24, height: 24 }}>
+                      <EmailRounded fontSize="small" />
+                    </Avatar>
                   </Tooltip>
-                )}
+                )} */}
               </Box>
+            )}
+
+            {user?.friendsProfile?.contactWay?.socialMedia.slice(0, 2).map((social, index) => {
+              const platform = detectSocialPlatform(social.url || social.platform);
+              const platformData =
+                SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+
+              return (
+                <Tooltip title={`${platformData.label}`}>
+                <Avatar key={index} sx={{ 
+                  bgcolor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                  color: platformData.color, 
+                  width: 24, 
+                  height: 24, borderRadius: '50%' }}> {/* platformData.color */}
+                  {getSocialIcon(platform, '18', platformData.color)}
+                </Avatar>
+                </Tooltip>
+              );
+            })}
+
+            {user?.friendsProfile?.contactWay?.socialMedia?.length > 2 && (
+              <Tooltip title={`+${user.friendsProfile.contactWay.socialMedia.length - 2} more social profiles`}>
+              <Chip
+                label={`+${user.friendsProfile.contactWay.socialMedia.length - 2}`}
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.7rem',
+                  backgroundColor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                  color: darkMode ? '#757575' : '#616161'
+                }}
+              />
+              </Tooltip>
             )}
             
             {/* Social Media Count */}
-            {user.friendsProfile?.contactWay?.socialMedia && user.friendsProfile.contactWay.socialMedia.length > 0 && (
+            {/* {user.friendsProfile?.contactWay?.socialMedia && user.friendsProfile.contactWay.socialMedia.length > 0 && (
               <Tooltip title={`${user.friendsProfile.contactWay.socialMedia.length} social profiles`}>
                 <Chip
                   label={user.friendsProfile.contactWay.socialMedia.length}
@@ -541,7 +583,7 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   }}
                 />
               </Tooltip>
-            )}
+            )} */}
           </Box>
         </Box>
         

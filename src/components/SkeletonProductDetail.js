@@ -16,7 +16,7 @@ const SkeletonProductDetail = () => {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     return (
         <Box sx={{ padding: '0rem' }}>
-            <Grid container spacing={2}>
+            <Grid container spacing={1}>
                 {/* Media Section Skeleton */}
                 <Grid item xs={12} md={6}>
                     <Card sx={{ height: isMobile ? 250 : 300, borderRadius: 3 , ...getGlassmorphismStyle(0.1, 10),}}>
