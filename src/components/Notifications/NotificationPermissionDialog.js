@@ -23,6 +23,7 @@ import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import { urlBase64ToUint8Array } from '../../utils/pushNotifications';
 import API from '../api/api';
 import DistanceSlider from '../Helper/DistanceSlider';
+import { InfoRounded } from '@mui/icons-material';
 
 const NotificationPermissionDialog = ({ open, onClose, darkMode, isMobile }) => {
   const [loading, setLoading] = useState(false);
@@ -145,7 +146,7 @@ const NotificationPermissionDialog = ({ open, onClose, darkMode, isMobile }) => 
       case 1:
         return (
           <>
-            <Typography variant="body1" mt={0} paragraph>
+            <Typography variant="body1" mt={isMobile ? 2 : 0} paragraph>
               Stay updated with nearby posts and never miss important updates in your area!
             </Typography>
             
@@ -219,18 +220,23 @@ const NotificationPermissionDialog = ({ open, onClose, darkMode, isMobile }) => 
               </Typography>
             </Box>
 
-            <Alert 
-              severity="info" 
-              sx={{ 
-                mt: 2,
-                borderRadius: 2,
-                '& .MuiAlert-icon': { alignItems: 'center' }
-              }}
-            >
-              <Typography variant="body2">
-                <strong>Push Notifications:</strong> Receive alerts even when Helper App is closed
+            {/* Note Section */}
+            <Box sx={{ 
+              mt: 2, 
+              // borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
+            }}>
+              <Typography variant="caption" color="text.secondary" sx={{ 
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: 1,
+                lineHeight: 1.5
+              }}>
+                <InfoRounded fontSize="small" sx={{ mt: '2px', flexShrink: 0 }} />
+                <span>
+                  <strong>Push Notifications:</strong> Receive alerts even when Helper App is closed. Requires additional permissions but ensures you never miss important updates.
+                </span>
               </Typography>
-            </Alert>
+            </Box>
 
             {notificationStatus === 'denied' && (
               <Alert 
@@ -349,9 +355,11 @@ const NotificationPermissionDialog = ({ open, onClose, darkMode, isMobile }) => 
       open={open} 
       onClose={() => step === 1 && handleDialogClose(false)}
       maxWidth="sm"
+      fullScreen={isMobile}
       fullWidth
       disableEscapeKeyDown={loading}
       sx={{ 
+        m: isMobile ? 2 : 0,
         '& .MuiPaper-root': { 
           borderRadius: '16px', 
           backdropFilter: 'blur(20px)',

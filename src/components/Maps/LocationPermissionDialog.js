@@ -255,9 +255,11 @@ const LocationPermissionDialog = ({ open, onClose, darkMode, isMobile, setSnackb
       open={open} 
       onClose={() => step === 1 && onClose(false, 'later')}
       maxWidth="sm"
+      fullScreen={isMobile}
       fullWidth
       disableEscapeKeyDown={loading}
       sx={{ 
+        m: isMobile ? 2 : 0,
         '& .MuiPaper-root': { 
           borderRadius: '16px', 
           backdropFilter: 'blur(20px)',
@@ -303,7 +305,7 @@ const LocationPermissionDialog = ({ open, onClose, darkMode, isMobile, setSnackb
             </Box>
             <Box>
               <Typography variant="h6" fontWeight="700">
-                Enable Location Services
+                Location Access
               </Typography>
               {/* {isFirstDialog && (
                 <Chip 

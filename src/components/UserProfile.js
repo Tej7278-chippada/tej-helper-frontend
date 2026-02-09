@@ -54,6 +54,9 @@ import {
   InfoRounded,
   EditRounded,
   CircleRounded,
+  CalendarTodayRounded,
+  CheckCircleRounded,
+  ScheduleRounded,
   // Grid
 } from '@mui/icons-material';
 import BloodDonationRequestsDialog from './BloodDonor/BloodDonationRequestsDialog';
@@ -1545,351 +1548,474 @@ const SOCIAL_MEDIA_PLATFORMS = {
               </Box> */}
             </Box>
           </Box>
-          <Box sx={{  my: 1, padding: isMobile ? 2 : 3, borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode), }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box sx={{ my: 1, padding: isMobile ? 2 : 3, borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box display="flex" alignItems="center">
-                <Avatar sx={{ bgcolor: 'error.main', mr: 1, height: '32px', width: '32px' }}>
+                <Avatar sx={{ bgcolor: 'error.main', mr: 1.5, height: '36px', width: '36px' }}>
                   <BloodtypeIcon fontSize="small" />
                 </Avatar>
-                <Typography variant="h6" >
-                  Blood Donation
-                </Typography>
+                <Box>
+                  <Typography variant="h6">
+                    Blood Donor Profile
+                  </Typography>
+                  <Typography variant="caption" color="textSecondary">
+                    {userData?.bloodDonor?.donate 
+                      ? "🩸 Ready to help save lives" 
+                      : "🔴 Blood donation disabled"}
+                  </Typography>
+                </Box>
               </Box>
-              <Box sx={{ display: 'flex', gap: '8px' }}>
-                {/* <Button variant="outlined" size="small"
-                  sx={{
-                    background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)',
-                    color: '#fff', px: 1.5,
-                    borderRadius: 5,
-                    textTransform: 'none',
-                    // boxShadow: '0 6px 25px rgba(67,97,238,0.35)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 10px 30px rgba(67,97,238,0.45)',
-                    },
-                  }} 
-                  onClick={handleEditBloodData}
-                  startIcon={<EditNoteRounded />}
-                >
-                  Edit
-                </Button> */}
+              <Box sx={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <Typography variant="body2" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                  {userData?.bloodDonor?.donate ? 'Active' : 'Inactive'}
+                </Typography>
                 <Switch
                   checked={userData?.bloodDonor?.donate}
-                  // onChange={toggleBloodDonate}
                   color="primary"
                   onClick={handleEditBloodData}
                 />
-                {/* <Tooltip title="Edit Blood Donation" arrow>
-                  <IconButton 
-                    onClick={handleEditBloodData}
-                    sx={{
-                      minWidth: '40px',
-                      minHeight: '40px',
-                      ...getButtonStyle(darkMode, showEditDonorDialog),
-                      // backgroundColor: showSortMenu ? darkMode ? 'rgba(255, 255, 255, 0.1)'  : 'rgba(0, 0, 0, 0.05)' : 'transparent',
-                    }}
-                  >
-                    <EditNoteRounded />
-                  </IconButton>
-                </Tooltip> */}
-                {/* <Tooltip 
-                  title={
-                    !userData?.bloodDonor?.donate 
-                      ? "Enable blood donation first" 
-                      : !eligibilityInfo.eligible 
-                      ? `Eligible in ${eligibilityInfo.daysLeft} days` 
-                      : "Add Donation"
-                  } 
-                  arrow
-                >
-                  <span>
-                    <IconButton 
-                      onClick={handleOpenAddDonationDialog}
-                      sx={{
-                        minWidth: '40px',
-                        minHeight: '40px',
-                        ...getButtonStyle(darkMode, showAddDonationDialog),
-                        // opacity: (!eligibilityInfo.eligible || !userData?.bloodDonor?.donate) ? 0.5 : 1,
-                      }}
-                      // disabled={!eligibilityInfo.eligible || !userData?.bloodDonor?.donate}
-                    >
-                      <PlaylistAddRounded />
-                    </IconButton>
-                  </span>
-                </Tooltip> */}
               </Box>
             </Box>
-            <Box sx={{display: 'flex', gap:'8px', flexDirection: 'column', borderRadius: '12px'}}>
+
+            <Box sx={{ display: 'flex', gap: '12px', flexDirection: 'column', borderRadius: '12px' }}>
+              {/* Status Message */}
               <Box sx={{ 
-                // mb: 3, 
-                // p: 2, 
-                // borderRadius: '12px',
-                // background: darkMode 
-                //   ? 'rgba(255, 255, 255, 0.05)' 
-                //   : 'rgba(67, 97, 238, 0.05)',
-                // border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(67, 97, 238, 0.1)'}`
+                p: 1.5, 
+                borderRadius: 2, 
+                bgcolor: userData?.bloodDonor?.donate 
+                  ? 'rgba(220, 53, 69, 0.08)' 
+                  : 'rgba(108, 117, 125, 0.08)',
+                border: `1px solid ${userData?.bloodDonor?.donate ? 'rgba(220, 53, 69, 0.2)' : 'rgba(108, 117, 125, 0.2)'}`
               }}>
-                <Typography variant="body2" color="textSecondary" sx={{ mb: 1.5 }} >
+                <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', flexDirection: 'column', gap: 1 }}>
                   {userData?.bloodDonor?.donate === true
-                    ? "🎉 You're a registered blood donor — thank you for being a lifesaver!"
+                    ? <>🎉 <span style={{ fontWeight: 500 }}>You're a registered blood donor!</span> Thank you for being a lifesaver.</>
                     : userData?.bloodDonor?.donate === false
-                    ? "🔒 Blood donation is currently disabled"
-                    : "ℹ️ You haven't set your donation preference yet"}
+                    ? <>🔒 <span style={{ fontWeight: 500 }}>Blood donation is currently disabled.</span> Enable to help others in need.</>
+                    : <>ℹ️ <span style={{ fontWeight: 500 }}>Setup incomplete.</span> Tap the switch to configure your blood donor profile.</>}
                 </Typography>
-                {userData?.bloodDonor?.bloodGroup && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', mb: 1.5 }}>
-                  <Chip 
-                    label={`🩸 ${userData?.bloodDonor?.bloodGroup || 'Unknown'}`}
-                    // color="error"
-                    size="small" variant="outlined"
-                    // sx={{ fontWeight: 'bold' }}
-                    sx={{ 
-                      fontWeight: 'bold',
-                      // background: 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)',
-                      // color: 'white',
-                      // '&:hover': {
-                      //   boxShadow: '0 4px 12px rgba(238, 90, 82, 0.4)',
-                      // }
-                    }}
-                  />
-                  {userData?.bloodDonor?.donationCount > 0 && (
-                    <Chip
-                      label={`🏆 ${userData.bloodDonor.donationCount} Donation${userData.bloodDonor.donationCount > 1 ? 's' : ''}`}
-                      variant="outlined"
-                      size="small"
-                      sx={{ 
-                        // background: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
-                        // color: 'white',
-                        // '&:hover': {
-                        //   boxShadow: '0 4px 12px rgba(46, 125, 50, 0.4)',
-                        // }
-                      }}
-                    />
-                  )}
-                  {!eligibilityInfo.eligible && (
-                    <Chip
-                      label={`⏳ Eligible in ${eligibilityInfo.daysLeft} days`}
-                      variant="outlined"
-                      size="small"
-                      sx={{ 
-                        // background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
-                        // color: 'white',
-                        // '&:hover': {
-                        //   boxShadow: '0 4px 12px rgba(245, 124, 0, 0.4)',
-                        // }
-                      }}
-                    />
-                  )}
+              </Box>
+              
+              {userData?.bloodDonor?.donate && (
+              <>
+                {/* Collapsible Section Toggle */}
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent',
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    userSelect: 'none',
+                  }}
+                  onClick={() => toggleActiveCards('bloodDonor')}
+                >
+                  <Typography variant="subtitle2" color="textSecondary">
+                    {activeCards.bloodDonor ? "Hide Blood Donor Details" : "View Blood Donor Details"}
+                  </Typography>
+                  <IconButton size="small">
+                    {activeCards.bloodDonor ? <ExpandLess /> : <ExpandMore />}
+                  </IconButton>
                 </Box>
-                )}
-                <Typography variant="body2" color="textSecondary">
-                  📅 Last donated: {userData?.bloodDonor?.lastDonated 
-                    ? formatDonateDate(userData.bloodDonor.lastDonated) 
-                    : 'No donation history yet'}
-                </Typography>
-              </Box>
-              {userData?.bloodDonor?.donate === true && (userData?.bloodDonor?.contactWay?.phone || userData?.bloodDonor?.contactWay?.email || (userData?.bloodDonor?.contactWay?.socialMedia && userData?.bloodDonor?.contactWay?.socialMedia?.length > 0)) && (
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="subtitle1" color="textSecondary" style={{ fontWeight: 500 }}>
-                  Contact Medium:
-                </Typography>
-                {(userData?.bloodDonor?.contactWay?.phone || userData.bloodDonor.contactWay.email) && (
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
-                    {userData.bloodDonor.contactWay.phone && (
-                      <Chip
-                        key="phone"
-                        label={`📱 ${userData.bloodDonor.contactWay.phone}`}
-                        variant="outlined"
-                        size="small"
-                        onClick={() => window.open(`tel:${userData.bloodDonor.contactWay.phone}`)}
-                        sx={{ 
-                          // borderColor: '#4CAF50',
-                          // color: '#4CAF50',
-                          '&:hover': {
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                            borderColor: '#388E3C',
-                            cursor: 'pointer',
-                          }
-                        }}
-                      />
+
+                {/* Contact Information Section - Collapsible */}
+                {activeCards.bloodDonor && (
+                  <>
+                    {/* Blood Group and Stats */}
+                    {userData?.bloodDonor?.bloodGroup && (
+                      <Box sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        bgcolor: 'rgba(220, 53, 69, 0.05)',
+                        border: '1px solid rgba(220, 53, 69, 0.1)'
+                      }}>
+                        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                            <Box sx={{ 
+                              width: 50, 
+                              height: 50, 
+                              borderRadius: '50%', 
+                              backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              border: '2px solid #dc3545'
+                            }}>
+                              <Typography variant="h6" fontWeight={700} color="#dc3545">
+                                {userData.bloodDonor.bloodGroup.replace('+', '⁺').replace('-', '⁻')}
+                              </Typography>
+                            </Box>
+                            <Box>
+                              <Typography variant="body2" color="textSecondary">
+                                Blood Type
+                              </Typography>
+                              <Typography variant="h6" fontWeight={600} color="#dc3545">
+                                {userData.bloodDonor.bloodGroup}
+                              </Typography>
+                            </Box>
+                          </Box>
+
+                          {/* Donation Stats */}
+                          {userData?.bloodDonor?.donationCount >= 0 && (
+                            <Box sx={{ textAlign: 'center' }}>
+                              <Typography variant="h5" fontWeight={700} color="#dc3545">
+                                {userData.bloodDonor.donationCount}
+                              </Typography>
+                              <Typography variant="caption" color="textSecondary">
+                                {userData.bloodDonor.donationCount === 1 ? 'Donation' : 'Donations'}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+
+                        {/* Last Donation and Eligibility */}
+                        <Grid container spacing={2} sx={{ mt: 1 }}>
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <CalendarTodayRounded fontSize="small" color="action" />
+                              <Box>
+                                <Typography variant="caption" color="textSecondary">
+                                  Last Donated
+                                </Typography>
+                                <Typography variant="body2" fontWeight={500}>
+                                  {userData?.bloodDonor?.lastDonated 
+                                    ? formatDonateDate(userData.bloodDonor.lastDonated)
+                                    : 'Never donated'}
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </Grid>
+                          
+                          <Grid item xs={12} sm={6}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                              {eligibilityInfo.eligible ? (
+                                <>
+                                  <CheckCircleRounded fontSize="small" sx={{ color: '#28a745' }} />
+                                  <Box>
+                                    <Typography variant="caption" color="textSecondary">
+                                      Eligibility Status
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={500} sx={{ color: '#28a745' }}>
+                                      Eligible to donate
+                                    </Typography>
+                                  </Box>
+                                </>
+                              ) : (
+                                <>
+                                  <ScheduleRounded fontSize="small" sx={{ color: '#ffc107' }} />
+                                  <Box>
+                                    <Typography variant="caption" color="textSecondary">
+                                      Next eligible in
+                                    </Typography>
+                                    <Typography variant="body2" fontWeight={500} sx={{ color: '#ffc107' }}>
+                                      {eligibilityInfo.daysLeft} days
+                                    </Typography>
+                                  </Box>
+                                </>
+                              )}
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Box>
                     )}
-                    {userData.bloodDonor.contactWay.email && (
-                      <Chip
-                        key="email"
-                        label={`✉️ ${userData.bloodDonor.contactWay.email}`}
-                        variant="outlined"
-                        size="small"
-                        onClick={() => window.open(`mailto:${userData.bloodDonor.contactWay.email}`)}
-                        sx={{ 
-                          // borderColor: '#2196F3',
-                          // color: '#2196F3',
-                          '&:hover': {
-                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                            borderColor: '#1976D2',
-                            cursor: 'pointer',
-                          }
-                        }}
-                      />
-                    )}
-                  </Box>
-                )}
-                {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
-                  <Box>
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                      Connect via social media:
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                      {userData.bloodDonor.contactWay.socialMedia.map((social, index) => {
-                        const platform = detectSocialPlatform(social.url || social.platform);
-                        const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+                    <Box sx={{ 
+                      p: 2, 
+                      borderRadius: 2, 
+                      bgcolor: 'rgba(33, 150, 243, 0.05)',
+                      border: '1px solid rgba(33, 150, 243, 0.1)'
+                    }}>
+                      <Typography variant="subtitle1" fontWeight={600} color="primary" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ConnectWithoutContactRounded fontSize="small" />
+                        Emergency Contact Information
+                      </Typography>
+
+                      {/* Contact Methods */}
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" fontWeight={500} color="textSecondary" sx={{ mb: 1.5 }}>
+                          Available for emergency contact:
+                        </Typography>
+                        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1 }}>
+                        {/* Phone */}
+                        {userData?.bloodDonor?.contactWay?.phone && (
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 2, 
+                            p: 1.5, 
+                            // mb: 1, 
+                            borderRadius: 1.5,
+                            bgcolor: 'rgba(255, 255, 255, 0.05)',
+                            '&:hover': { bgcolor: 'rgba(76, 175, 80, 0.08)', cursor: 'pointer' }
+                          }} onClick={() => window.open(`tel:${userData.bloodDonor.contactWay.phone}`)}>
+                            <Avatar sx={{ bgcolor: '#4CAF50', width: 36, height: 36 }}>
+                              <PhoneRounded fontSize="small" />
+                            </Avatar>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" fontWeight={500}>
+                                Emergency Phone
+                              </Typography>
+                              <Typography variant="body1">
+                                +91 {userData.bloodDonor.contactWay.phone}
+                              </Typography>
+                            </Box>
+                            <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                              Tap to call
+                            </Typography>
+                          </Box>
+                        )}
+
+                        {/* Email */}
+                        {userData?.bloodDonor?.contactWay?.email && (
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 2, 
+                            p: 1.5, 
+                            // mb: 1, 
+                            borderRadius: 1.5,
+                            bgcolor: 'rgba(255, 255, 255, 0.05)',
+                            '&:hover': { bgcolor: 'rgba(33, 150, 243, 0.08)', cursor: 'pointer' }
+                          }} onClick={() => window.open(`mailto:${userData.bloodDonor.contactWay.email}`)}>
+                            <Avatar sx={{ bgcolor: '#2196F3', width: 36, height: 36 }}>
+                              <EmailRounded fontSize="small" />
+                            </Avatar>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="body2" fontWeight={500}>
+                                Emergency Email
+                              </Typography>
+                              <Typography variant="body1" sx={{ wordBreak: 'break-word' }}>
+                                {userData.bloodDonor.contactWay.email}
+                              </Typography>
+                            </Box>
+                            <Typography variant="caption" color="textSecondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                              Tap to email
+                            </Typography>
+                          </Box>
+                        )}
+                        </Box>
+                      </Box>
+
+                      {/* Social Media Links */}
+                      {userData?.bloodDonor?.contactWay?.socialMedia && userData.bloodDonor.contactWay.socialMedia.length > 0 && (
+                        <Box>
+                          <Typography variant="body2" fontWeight={500} color="textSecondary" sx={{ mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <ShareRounded fontSize="small" />
+                            Social Media Profiles
+                          </Typography>
+                          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1 }}>
+                            {userData.bloodDonor.contactWay.socialMedia.map((social, index) => {
+                              const platform = detectSocialPlatform(social.url || social.platform);
+                              const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+                              
+                              return (
+                                <Box
+                                  key={index}
+                                  sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 1.5,
+                                    p: 1.5,
+                                    borderRadius: 1.5,
+                                    bgcolor: 'rgba(255, 255, 255, 0.05)',
+                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                      bgcolor: `${platformData.color}15`,
+                                      borderColor: platformData.color,
+                                      transform: 'translateY(-2px)',
+                                      cursor: 'pointer',
+                                      boxShadow: `0 4px 12px ${platformData.color}30`
+                                    }
+                                  }}
+                                  onClick={() => handleSocialChipClick(social.url, platform)}
+                                >
+                                  <Avatar sx={{ 
+                                    bgcolor: platformData.color, 
+                                    width: 32, 
+                                    height: 32,
+                                    fontSize: '16px'
+                                  }}>
+                                    {getSocialIcon(platform, 'small', 'white')}
+                                  </Avatar>
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Typography variant="body2" fontWeight={500} noWrap>
+                                      {social.platform || platformData.label}
+                                    </Typography>
+                                    <Typography variant="caption" color="textSecondary" noWrap sx={{ display: 'block' }}>
+                                      {social.url.replace('https://', '').substring(0, 30)}...
+                                    </Typography>
+                                  </Box>
+                                  <LaunchRounded fontSize="small" color="action" />
+                                </Box>
+                              );
+                            })}
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* No Contact Info Message */}
+                      {(!userData?.bloodDonor?.contactWay?.phone && 
+                        !userData?.bloodDonor?.contactWay?.email && 
+                        (!userData?.bloodDonor?.contactWay?.socialMedia || userData.bloodDonor.contactWay.socialMedia.length === 0)) && (
+                        <Box sx={{ 
+                          p: 2, 
+                          textAlign: 'center', 
+                          borderRadius: 2, 
+                          bgcolor: 'rgba(255, 193, 7, 0.08)',
+                          border: '1px solid rgba(255, 193, 7, 0.2)'
+                        }}>
+                          <Typography variant="body2" color="textSecondary" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1, mb: 1 }}>
+                            <InfoRounded fontSize="small" />
+                            No emergency contact information added
+                          </Typography>
+                          <Typography variant="caption" color="textSecondary">
+                            Add contact methods in settings to help people reach you during emergencies
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {/* Action Buttons */}
+                    {userData?.bloodDonor?.bloodGroup && (
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: isMobile ? 'column' : 'row', 
+                        gap: 2, 
+                        flexWrap: 'wrap',
+                        justifyContent: 'center' ,
+                        mt: 2
+                      }}>
+                        <Button
+                          variant="outlined"
+                          fullWidth={isMobile}
+                          onClick={handleOpenAddDonationDialog}
+                          disabled={!eligibilityInfo.eligible}
+                          startIcon={<PlaylistAddRounded />}
+                          sx={{
+                            borderRadius: '20px',
+                            textTransform: 'none',
+                            px: 3,
+                            borderWidth: '2px',
+                            // borderColor: eligibilityInfo.eligible ? '#4361ee' : '#ccc',
+                            // color: eligibilityInfo.eligible ? '#4361ee' : '#999',
+                            '&:hover': {
+                              borderWidth: '2px',
+                              // borderColor: eligibilityInfo.eligible ? '#4361ee' : '#ccc',
+                              // backgroundColor: eligibilityInfo.eligible ? 'rgba(67, 97, 238, 0.04)' : 'transparent'
+                            }
+                          }}
+                        >
+                          {eligibilityInfo.eligible ? 'Add Donation Memory' : `Eligible in ${eligibilityInfo.daysLeft} days`}
+                        </Button>
                         
-                        return (
-                          <Chip
-                            key={index}
-                            icon={getSocialIcon(platform, 'small', platformData.color)}
-                            label={social.platform || platformData.label}
-                            variant="outlined"
-                            size="small"
-                            onClick={() => handleSocialChipClick(social.url, platform)}
-                            sx={{ 
-                              // backgroundColor: platformData.color,
-                              // color: 'white',
-                              fontWeight: 500, p: 0.5,
-                              transition: 'all 0.2s ease',
-                              '&:hover': {
-                                backgroundColor: platformData.color,
-                                transform: 'translateY(-2px)',
-                                boxShadow: `0 4px 12px ${platformData.color}80`,
-                                cursor: 'pointer',
-                              },
-                              '&:active': {
-                                transform: 'translateY(0)',
-                              }
-                            }}
-                          />
-                        );
-                      })}
-                    </Box>
-                  </Box>
+                        <Button
+                          variant="outlined"
+                          fullWidth={isMobile}
+                          startIcon={<CollectionsBookmarkRounded />}
+                          onClick={() => setShowDonationHistoryDialog(true)}
+                          sx={{
+                            borderRadius: '20px',
+                            textTransform: 'none',
+                            px: 3,
+                            borderWidth: '2px',
+                            '&:hover': {
+                              borderWidth: '2px'
+                            }
+                          }}
+                        >
+                          View Donation History
+                        </Button>
+                        
+                        <Button
+                          variant="outlined"
+                          fullWidth={isMobile}
+                          startIcon={<NewReleasesRounded />}
+                          onClick={() => setShowBloodRequestsDialog(true)}
+                          sx={{
+                            borderRadius: '20px',
+                            textTransform: 'none',
+                            px: 3,
+                            borderWidth: '2px',
+                            position: 'relative',
+                            '&:hover': {
+                              borderWidth: '2px'
+                            }
+                          }}
+                        >
+                          Blood Requests
+                          {pendingRequestsCount > 0 && (
+                            <Box
+                              sx={{
+                                position: 'absolute',
+                                top: -8,
+                                right: -8,
+                                backgroundColor: 'error.main',
+                                color: 'white',
+                                borderRadius: '50%',
+                                width: 24,
+                                height: 24,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.75rem',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              {pendingRequestsCount}
+                            </Box>
+                          )}
+                        </Button>
+                      </Box>
+                    )}
+                  </>
                 )}
-              </Box>
+
+              </>
               )}
-              {userData?.bloodDonor?.bloodGroup && (
-              <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap', px: 1 }}>
+
+              {/* Edit Button */}
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                 <Button
-                  variant="outlined" fullWidth={isMobile}
-                  onClick={handleOpenAddDonationDialog}
-                  // disabled={!eligibilityInfo.eligible || !userData?.bloodDonor?.donate}
-                  startIcon={<PlaylistAddRounded />}
-                  sx={{ borderRadius: '12px', textTransform: 'none',
-                    color: '#4361ee',
-                    background: 'none',
-                    border: '1px solid #4361ee',
-                    transition: 'all 0.3s ease',
-                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                  variant="outlined"
+                  startIcon={<EditRounded />}
+                  onClick={handleEditBloodData}
+                  sx={{
+                    borderRadius: '20px',
+                    px: 3,
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    borderWidth: '2px',
                     '&:hover': {
-                      background: 'none',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                    },
-                    '&.Mui-disabled': {
-                      background: 'rgba(0, 0, 0, 0.12)',
-                      color: 'rgba(0, 0, 0, 0.26)',
-                    },
-                   }}
+                      borderWidth: '2px'
+                    }
+                  }}
                 >
-                  Add Donation Memory
+                  {userData?.bloodDonor?.donate ? 'Edit Blood Donor Profile' : 'Setup Blood Donor Profile'}
                 </Button>
-                <Button
-                  variant="outlined" fullWidth={isMobile}
-                  startIcon={<CollectionsBookmarkRounded />}
-                  onClick={() => setShowDonationHistoryDialog(true)}
-                  sx={{ borderRadius: '12px', textTransform: 'none',
-                    color: '#4361ee',
-                    background: 'none',
-                    border: '1px solid #4361ee',
-                    transition: 'all 0.3s ease',
-                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
-                    '&:hover': {
-                      background: 'none',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                    },
-                    '&.Mui-disabled': {
-                      background: 'rgba(0, 0, 0, 0.12)',
-                      color: 'rgba(0, 0, 0, 0.26)',
-                    },
-                   }}
-                >
-                  View Donation Memories
-                </Button>
-                <Button
-                  variant="outlined" fullWidth={isMobile}
-                  startIcon={<NewReleasesRounded />}
-                  onClick={() => setShowBloodRequestsDialog(true)}
-                  sx={{ borderRadius: '12px', textTransform: 'none',
-                    color: '#4361ee',
-                    background: 'none',
-                    border: '1px solid #4361ee',
-                    transition: 'all 0.3s ease',
-                    // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
-                    '&:hover': {
-                      background: 'none',
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
-                    },
-                    '&:active': {
-                      transform: 'translateY(0)',
-                    },
-                    '&.Mui-disabled': {
-                      background: 'rgba(0, 0, 0, 0.12)',
-                      color: 'rgba(0, 0, 0, 0.26)',
-                    },
-                   }}
-                >
-                  View Blood Requests 
-                  {pendingRequestsCount > 0 && (
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: -8,
-                        right: -8,
-                        backgroundColor: 'error.main',
-                        color: 'white',
-                        borderRadius: '50%',
-                        width: 20,
-                        height: 20,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '0.75rem',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {pendingRequestsCount}
-                    </Box>
-                  )}
-                </Button>
-              </Box>)}
-              <Typography variant="caption" color="text.secondary" sx={{ 
-                display: 'block',
-                // mt: 3,
-                pt: 2,
-                // borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'}`,
-                fontSize: '0.75rem',
-                lineHeight: 1.4
+              </Box>
+
+              {/* Note Section */}
+              <Box sx={{ 
+                mt: 2, 
+                pt: 2, 
+                borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
               }}>
-                ⚠️ Note: When you enable blood donation, your blood group and contact information 
-                will be visible to nearby people in need of emergency blood support. 
-                You can update your privacy settings anytime.
-              </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ 
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: 1,
+                  lineHeight: 1.5
+                }}>
+                  <InfoRounded fontSize="small" sx={{ mt: '2px', flexShrink: 0 }} />
+                  <span>
+                    <strong>Note:</strong> When blood donation is enabled, your blood group and contact information 
+                    become visible to nearby users in need of emergency blood support. 
+                    You can update your privacy settings anytime.
+                  </span>
+                </Typography>
+              </Box>
             </Box>
           </Box>
           <Box sx={{ my: 1, padding: isMobile ? 2 : 3, borderRadius: 3, ...getGlassmorphismStyle(theme, darkMode) }}>
@@ -1981,24 +2107,8 @@ const SOCIAL_MEDIA_PLATFORMS = {
                     </Typography>
                     
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-                          <CakeRounded fontSize="small" color="action" />
-                          <Box>
-                            <Typography variant="caption" color="textSecondary">
-                              Age
-                            </Typography>
-                            <Typography variant="body1" fontWeight={500}>
-                              {friendsProfileData?.age 
-                                ? `${friendsProfileData.age} years` 
-                                : <Typography variant="body2" color="text.disabled">Not specified</Typography>}
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Grid>
-                      
-                      <Grid item xs={12} sm={6}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                      <Grid item xs={6} sm={6}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                           <TransgenderRounded fontSize="small" color="action" />
                           <Box>
                             <Typography variant="caption" color="textSecondary">
@@ -2007,6 +2117,21 @@ const SOCIAL_MEDIA_PLATFORMS = {
                             <Typography variant="body1" fontWeight={500}>
                               {friendsProfileData?.gender && friendsProfileData.gender !== 'Unknown'
                                 ? friendsProfileData.gender
+                                : <Typography variant="body2" color="text.disabled">Not specified</Typography>}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Grid>
+                      <Grid item xs={6} sm={6}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <CakeRounded fontSize="small" color="action" />
+                          <Box>
+                            <Typography variant="caption" color="textSecondary">
+                              Age
+                            </Typography>
+                            <Typography variant="body1" fontWeight={500}>
+                              {friendsProfileData?.age 
+                                ? `${friendsProfileData.age} years` 
                                 : <Typography variant="body2" color="text.disabled">Not specified</Typography>}
                             </Typography>
                           </Box>
@@ -2142,7 +2267,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                       <Typography variant="body2" fontWeight={500} color="textSecondary" sx={{ mb: 1.5 }}>
                         Available Contact Methods:
                       </Typography>
-                      
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1 }}>
                       {/* Phone */}
                       {friendsProfileData?.contactWay?.phone && (
                         <Box sx={{ 
@@ -2150,7 +2275,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                           alignItems: 'center', 
                           gap: 2, 
                           p: 1.5, 
-                          mb: 1, 
+                          // mb: 1, 
                           borderRadius: 1.5,
                           bgcolor: 'rgba(255, 255, 255, 0.05)',
                           '&:hover': { bgcolor: 'rgba(76, 175, 80, 0.08)', cursor: 'pointer' }
@@ -2179,7 +2304,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                           alignItems: 'center', 
                           gap: 2, 
                           p: 1.5, 
-                          mb: 1, 
+                          // mb: 1, 
                           borderRadius: 1.5,
                           bgcolor: 'rgba(255, 255, 255, 0.05)',
                           '&:hover': { bgcolor: 'rgba(33, 150, 243, 0.08)', cursor: 'pointer' }
@@ -2200,6 +2325,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                           </Typography>
                         </Box>
                       )}
+                      </Box>
                     </Box>
 
                     {/* Social Media Links */}
