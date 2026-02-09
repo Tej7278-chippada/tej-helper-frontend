@@ -28,7 +28,7 @@ import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
 import FollowDialog from './Helper/FollowDialog';
 import RequestCoupon from './Banners/RequestCoupon';
-import { AddRounded, ChatRounded, CollectionsBookmarkRounded, Diversity1Rounded, EditNoteRounded, NewReleasesRounded, PlaylistAddRounded, QuestionAnswerRounded } from '@mui/icons-material';
+import { AddRounded, BusinessCenterRounded, ChatRounded, CollectionsBookmarkRounded, Diversity1Rounded, EditNoteRounded, ExpandLess, ExpandMore, FavoriteRounded, FlightRounded, HandshakeRounded, NewReleasesRounded, PeopleRounded, PlaylistAddRounded, QuestionAnswerRounded, SchoolRounded, SportsSoccerRounded } from '@mui/icons-material';
 import AddBloodDonationDataDialog from './BloodDonor/AddBloodDonationDataDialog';
 import {
   WhatsApp as WhatsAppIcon,
@@ -209,6 +209,17 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     inAppMessaging: false,
     lookingFor: []
   });
+  const [activeCards, setActiveCards] = useState({
+    bloodDonor: false,
+    friends: false
+  });
+
+  const toggleActiveCards = (card) => {
+    setActiveCards(prev => ({
+      ...prev,
+      [card]: !prev[card]
+    }));
+  };
   
 
   // to handle verification submission
@@ -1174,6 +1185,16 @@ const SOCIAL_MEDIA_PLATFORMS = {
     setShowEditFriendsDialog(true);
   };
 
+  const lookingForIcons = {
+    'Friendship': <PeopleRounded fontSize="small" />,
+    'Dating': <FavoriteRounded fontSize="small" />,
+    'Networking': <HandshakeRounded fontSize="small" />,
+    'Activity Partners': <SportsSoccerRounded fontSize="small" />,
+    'Travel Buddies': <FlightRounded fontSize="small" />,
+    'Study Partners': <SchoolRounded fontSize="small" />,
+    'Business Connections': <BusinessCenterRounded fontSize="small" />
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Typography variant="h6" sx={{ flexGrow: 1, mx: isMobile ? '10px' : '16px', mt: 1 }} >
@@ -1922,6 +1943,31 @@ const SOCIAL_MEDIA_PLATFORMS = {
               {/* Display only when friend profile is active */}
               {friendsProfileData?.friend === true && (
                 <>
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      // mb: activeCards.friends ? 2 : 0,
+                      WebkitTapHighlightColor: 'transparent',
+                      WebkitTouchCallout: 'none',
+                      WebkitUserSelect: 'none',
+                      userSelect: 'none',
+                    }}
+                    onClick={() => toggleActiveCards('friends')}
+                  >
+                    <Typography variant="subtitle2" color="textSecondary">
+                      {/* <TransgenderRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} /> */}
+                      {activeCards.friends ? "Hide Friends Profile Details" : "View Friends Profile Details"}
+                    </Typography>
+                    <IconButton size="small">
+                      {activeCards.friends ? <ExpandLess /> : <ExpandMore />}
+                    </IconButton>
+                  </Box>
+                  
+                  {activeCards.friends && (
+                  <>
                   {/* Basic Information Section */}
                   <Box sx={{ 
                     p: 2, 
@@ -1980,13 +2026,15 @@ const SOCIAL_MEDIA_PLATFORMS = {
                                 <Chip
                                   key={index}
                                   label={item}
+                                  icon={lookingForIcons[item] || <SearchRounded fontSize="small" />}
                                   size="small"
                                   sx={{
                                     borderRadius: '8px',
-                                    bgcolor: 'primary.main',
-                                    color: 'white',
-                                    fontWeight: 500,
-                                    '&:hover': { bgcolor: 'primary.dark' }
+                                    bgcolor: darkMode ? 'primary.dark' : 'primary.main',
+                                    color: '#fff',
+                                    fontWeight: 500, gap: 0.2, p: '4px 6px',
+                                    '&:hover': { bgcolor: 'primary.dark' },
+                                    '& .MuiChip-icon': { fontSize: '0.8rem', color: '#fff' }
                                   }}
                                 />
                               ))}
@@ -2032,7 +2080,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                               py: 1,
                               borderWidth: '2px',
                               '&:hover': {
-                                bgcolor: 'secondary.light',
+                                bgcolor: darkMode ? 'secondary.dark' : 'secondary.light',
                                 color: 'white',
                                 transform: 'translateY(-2px)',
                                 transition: 'all 0.2s'
@@ -2232,6 +2280,8 @@ const SOCIAL_MEDIA_PLATFORMS = {
                         Add contact methods in settings to help others connect with you
                       </Typography>
                     </Box>
+                  )}
+                  </>
                   )}
                 </>
               )}

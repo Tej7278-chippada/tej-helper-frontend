@@ -226,11 +226,11 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
   const lookingForIcons = {
     'Friendship': <PeopleRounded fontSize="small" />,
     'Dating': <FavoriteRounded fontSize="small" />,
-    'Networking': <BusinessCenterRounded fontSize="small" />,
+    'Networking': <HandshakeRounded fontSize="small" />,
     'Activity Partners': <SportsSoccerRounded fontSize="small" />,
     'Travel Buddies': <FlightRounded fontSize="small" />,
     'Study Partners': <SchoolRounded fontSize="small" />,
-    'Business Connections': <HandshakeRounded fontSize="small" />
+    'Business Connections': <BusinessCenterRounded fontSize="small" />
   };
 
   const activityStatus = getActivityStatus(user.lastLoginAt);

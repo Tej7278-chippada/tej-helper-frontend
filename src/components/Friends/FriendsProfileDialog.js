@@ -14,7 +14,7 @@ import {
     Slide, FormGroup, FormControlLabel, Checkbox,
     Switch, Alert, useMediaQuery, Snackbar, Tooltip,  Card, CardContent, Rating, TextField, InputAdornment, MenuItem, FormControl, InputLabel, Select
 } from '@mui/material';
-import { AddRounded } from '@mui/icons-material';
+import { AddRounded, BusinessCenterRounded, FavoriteRounded, FlightRounded, HandshakeRounded, ManRounded, PeopleRounded, PersonRounded, SchoolRounded, SearchRounded, SportsSoccerRounded, TransgenderRounded, WomanRounded } from '@mui/icons-material';
 import { updateUserFriendsProfile } from '../api/api';
 
 
@@ -170,8 +170,8 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
                 ageValue = null;
             } else if (friendsProfileData.age !== undefined && friendsProfileData.age !== '') {
                 const ageNum = parseInt(friendsProfileData.age);
-                if (isNaN(ageNum) || ageNum < 18 || ageNum > 120) {
-                    setError('Age must be between 18 and 120.');
+                if (isNaN(ageNum) || ageNum < 18 || ageNum > 80) {
+                    setError('Age must be between 18 and 80.');
                     setUpdating(false);
                     return;
                 }
@@ -234,6 +234,16 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
         }
     };
 
+    const lookingForIcons = {
+        'Friendship': <PeopleRounded fontSize="small" />,
+        'Dating': <FavoriteRounded fontSize="small" />,
+        'Networking': <HandshakeRounded fontSize="small" />,
+        'Activity Partners': <SportsSoccerRounded fontSize="small" />,
+        'Travel Buddies': <FlightRounded fontSize="small" />,
+        'Study Partners': <SchoolRounded fontSize="small" />,
+        'Business Connections': <BusinessCenterRounded fontSize="small" />
+    };
+
     return (
         <Dialog
             open={showEditFriendsDialog}
@@ -270,6 +280,8 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
                             </Box>
 
                             {friendsProfileData.friend && (
+                            <>
+                                <Box sx={{ mt: 2, display: 'flex', flexDirection: 'row', gap: 2 }}>
                                 <FormControl fullWidth required sx={{ mt: 2 }}>
                                     <InputLabel>Gender</InputLabel>
                                     <Select
@@ -281,21 +293,130 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
                                         sx={{ borderRadius: 2 }}
                                         required
                                     >
-                                        <MenuItem value="Male">Male</MenuItem>
-                                        <MenuItem value="Female">Female</MenuItem>
-                                        <MenuItem value="Non-binary">Non-binary</MenuItem>
-                                        <MenuItem value="Other">Other</MenuItem>
+                                        <MenuItem value="Male">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <ManRounded fontSize="small" />
+                                                Male
+                                            </Box>
+                                        </MenuItem>
+                                        <MenuItem value="Female">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <WomanRounded fontSize="small" />
+                                                Female
+                                            </Box>
+                                        </MenuItem>
+                                        <MenuItem value="Non-binary">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <TransgenderRounded fontSize="small" />
+                                                Non-binary
+                                            </Box>
+                                        </MenuItem>
+                                        <MenuItem value="Other">
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                <PersonRounded fontSize="small" />
+                                                Other
+                                            </Box>
+                                        </MenuItem>
                                         <MenuItem value="Unknown">I don't know my gender</MenuItem>
                                     </Select>
                                 </FormControl>
+
+                                <TextField
+                                    fullWidth
+                                    label="Age"
+                                    name="age"
+                                    type="number"
+                                    value={friendsProfileData.age || ''}
+                                    onChange={(e) => {
+                                        setError('');
+                                        const value = e.target.value;
+                                        // Allow empty or numeric values only
+                                        if (value === '' || /^\d+$/.test(value)) {
+                                            if (value.length <= 2) {
+                                                setFriendsProfileData(prev => ({ 
+                                                    ...prev, 
+                                                    age: value === '' ? '' : value 
+                                                }));
+                                            }
+                                        }
+                                    }}
+                                    margin="normal"
+                                    InputProps={{
+                                        inputProps: { 
+                                        min: 18, 
+                                        max: 80 ,
+                                        maxLength: 2 // restrict to 10 digits after +91 if needed
+                                        }
+                                    }}
+                                    placeholder="Optional"
+                                    // helperText="Your age will help others find suitable friends"
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': {
+                                        borderRadius: '8px',
+                                        },
+                                    }}
+                                />
+                                </Box>
+                                <Typography variant="caption" color="text.secondary" marginTop={4}>
+                                    *Your gender, age will help others find suitable friends.
+                                </Typography>
+                            </>
                             )}
 
-                            {/* <Typography variant="caption" color="text.secondary" marginTop={4}>
-                *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
-                </Typography> */}
                         </Box>
                         {friendsProfileData.friend &&
                         <>
+                        <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Looking For
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" paragraph>
+                                Select what you're interested in finding through the friends feature
+                            </Typography>
+                            <FormGroup>
+                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {LOOKING_FOR_OPTIONS.map((option) => (
+                                    <FormControlLabel
+                                    key={option}
+                                    control={
+                                        <Checkbox
+                                        checked={friendsProfileData.lookingFor?.includes(option) || false}
+                                        onChange={(e) => {
+                                            const isChecked = e.target.checked;
+                                            setFriendsProfileData(prev => {
+                                            const currentLookingFor = prev.lookingFor || [];
+                                            return {
+                                                ...prev,
+                                                lookingFor: isChecked
+                                                ? [...currentLookingFor, option]
+                                                : currentLookingFor.filter(item => item !== option)
+                                            };
+                                            });
+                                        }}
+                                        size="small"
+                                        />
+                                    }
+                                    label={
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                            <Box sx={{ opacity: 0.6, display: 'flex' }}>
+                                                {lookingForIcons[option] || <SearchRounded fontSize="small" />}
+                                            </Box>
+                                            <span>{option}</span>
+                                        </Box>
+                                    }
+                                    sx={{ 
+                                        m: 0,
+                                        '& .MuiFormControlLabel-label': { fontSize: '0.875rem' }
+                                    }}
+                                    />
+                                ))}
+                                </Box>
+                            </FormGroup>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                                Selected: {friendsProfileData.lookingFor?.length || 0} items
+                            </Typography>
+                        </Box>
+
                         <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                             <TextField
                                 fullWidth
@@ -363,7 +484,7 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
                             </Box>
                         </Box>
 
-                        <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+                        <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 210, 34, 0.05)', borderRadius: 2 }}>
                             <Box display="flex" alignItems="center" justifyContent="space-between">
                                 <Typography variant="body2" fontWeight={500}>
                                 {friendsProfileData.inAppMessaging
@@ -380,86 +501,6 @@ const FriendsProfileDialog = ({ showEditFriendsDialog,setShowEditFriendsDialog, 
                                 *If you enable this, users can chat with you in app messaging.
                             </Typography>
                         </Box>
-
-                        <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
-                            <TextField
-                                fullWidth
-                                label="Age"
-                                name="age"
-                                type="number"
-                                value={friendsProfileData.age || ''}
-                                onChange={(e) => {
-                                    const value = e.target.value;
-                                    // Allow empty or numeric values only
-                                    if (value === '' || /^\d+$/.test(value)) {
-                                    setFriendsProfileData(prev => ({ 
-                                        ...prev, 
-                                        age: value === '' ? '' : value 
-                                    }));
-                                    }
-                                }}
-                                margin="normal"
-                                InputProps={{
-                                    inputProps: { 
-                                    min: 1, 
-                                    max: 120 
-                                    }
-                                }}
-                                placeholder="Optional"
-                                helperText="Your age will help others find suitable friends"
-                                sx={{
-                                    '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                    },
-                                }}
-                            />
-                        </Box>
-
-                        <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
-                            <Typography variant="subtitle1" gutterBottom>
-                                Looking For
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" paragraph>
-                                Select what you're interested in finding through the friends feature
-                            </Typography>
-                            <FormGroup>
-                                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                                {LOOKING_FOR_OPTIONS.map((option) => (
-                                    <FormControlLabel
-                                    key={option}
-                                    control={
-                                        <Checkbox
-                                        checked={friendsProfileData.lookingFor?.includes(option) || false}
-                                        onChange={(e) => {
-                                            const isChecked = e.target.checked;
-                                            setFriendsProfileData(prev => {
-                                            const currentLookingFor = prev.lookingFor || [];
-                                            return {
-                                                ...prev,
-                                                lookingFor: isChecked
-                                                ? [...currentLookingFor, option]
-                                                : currentLookingFor.filter(item => item !== option)
-                                            };
-                                            });
-                                        }}
-                                        size="small"
-                                        />
-                                    }
-                                    label={option}
-                                    sx={{ 
-                                        m: 0,
-                                        '& .MuiFormControlLabel-label': { fontSize: '0.875rem' }
-                                    }}
-                                    />
-                                ))}
-                                </Box>
-                            </FormGroup>
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                                Selected: {friendsProfileData.lookingFor?.length || 0} items
-                            </Typography>
-                        </Box>
-
-                        {/* Contact Information */}
                         
                         <Box sx={{ p: 2, mt: 2, bgcolor: 'rgba(25, 210, 34, 0.05)', borderRadius: 2 }}>
                             <Typography variant="h6" fontWeight={500} gutterBottom>

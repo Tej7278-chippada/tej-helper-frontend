@@ -2337,6 +2337,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       // timeStyle: 'short',
     }) : '—';
 
+  const lookingForIcons = {
+    'Friendship': <PeopleRounded fontSize="small" />,
+    'Dating': <FavoriteRounded fontSize="small" />,
+    'Networking': <HandshakeRounded fontSize="small" />,
+    'Activity Partners': <SportsSoccerRounded fontSize="small" />,
+    'Travel Buddies': <FlightRounded fontSize="small" />,
+    'Study Partners': <SchoolRounded fontSize="small" />,
+    'Business Connections': <BusinessCenterRounded fontSize="small" />
+  };
+
   return (
     <Layout username={tokenUsername} darkMode={darkMode} toggleDarkMode={toggleDarkMode} unreadCount={unreadCount} shouldAnimate={shouldAnimate}>
       <Box sx={{
@@ -3977,7 +3987,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
                             Active filters:
                           </Typography>
-                          {(activeFriendFilters.gender || activeFriendFilters.ageRange || activeFriendFilters.lookingFor) && (
+                          {/* {(activeFriendFilters.gender || activeFriendFilters.ageRange || activeFriendFilters.lookingFor) && ( */}
+                          {((localFilters?.friendsGender !== DEFAULT_FILTERS?.friendsGender) || 
+                            (localFilters?.friendsAgeRange?.[0] !== DEFAULT_FILTERS?.friendsAgeRange?.[0]) || 
+                            (localFilters?.friendsAgeRange?.[1] !== DEFAULT_FILTERS?.friendsAgeRange?.[1]) || 
+                            (localFilters?.friendsLookingFor?.length > 0)) && (
                             <Button
                               size="small"
                               onClick={resetFriendFilters}
@@ -3988,7 +4002,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           )}
                         </Box>
                         
-                        {activeFriendFilters.gender && (
+                        {/* {activeFriendFilters.gender && ( */}
                           <Chip
                             size="small"
                             label={`Gender: ${localFilters.friendsGender}`}
@@ -3996,9 +4010,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             color="primary"
                             variant="outlined"
                           />
-                        )}
+                        {/* )} */}
                         
-                        {activeFriendFilters?.ageRange && (
+                        {/* {activeFriendFilters?.ageRange && ( */}
                           <Chip
                             size="small"
                             label={`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`}
@@ -4006,9 +4020,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             color="primary"
                             variant="outlined"
                           />
-                        )}
+                        {/* )} */}
                         
-                        {activeFriendFilters?.lookingFor && localFilters?.friendsLookingFor?.length > 0 && (
+                        {/* {activeFriendFilters?.lookingFor && localFilters?.friendsLookingFor?.length > 0 && ( */}
                           <Chip
                             size="small"
                             label={`Looking for: ${localFilters?.friendsLookingFor?.length}`}
@@ -4016,7 +4030,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             color="primary"
                             variant="outlined"
                           />
-                        )}
+                        {/* )} */}
                         
                         
                       </Box>
@@ -4029,7 +4043,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             justifyContent: 'space-between', 
                             alignItems: 'center',
                             cursor: 'pointer',
-                            mb: activeFriendFilters.gender ? 2 : 0
+                            mb: activeFriendFilters.gender ? 2 : 0,
+                            WebkitTapHighlightColor: 'transparent',
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none',
+                            userSelect: 'none',
                           }}
                           onClick={() => toggleFilterSection('gender')}
                         >
@@ -4095,7 +4113,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             justifyContent: 'space-between', 
                             alignItems: 'center',
                             cursor: 'pointer',
-                            mb: activeFriendFilters.ageRange ? 2 : 0
+                            mb: activeFriendFilters.ageRange ? 2 : 0,
+                            WebkitTapHighlightColor: 'transparent',
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none',
+                            userSelect: 'none',
                           }}
                           onClick={() => toggleFilterSection('ageRange')}
                         >
@@ -4116,7 +4138,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         {activeFriendFilters?.ageRange && (
                           <>
                             {/* Age Slider */}
-                            <Box sx={{ mt: 2, px: 1 }}>
+                            <Box sx={{ mt: 1, px: 1 }}>
                               <Slider
                                 value={localFilters.friendsAgeRange}
                                 onChange={(event, newValue) => {
@@ -4146,7 +4168,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             </Box>
                             
                             {/* Age Inputs */}
-                            <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                            {/* <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
                               <TextField
                                 fullWidth
                                 label="Min Age"
@@ -4171,10 +4193,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 }}
                                 sx={{ borderRadius: '12px' }}
                               />
-                            </Box>
+                            </Box> */}
                             
                             {/* Quick Age Presets */}
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 3, mb: 1, display: 'block' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, mb: 1, display: 'block' }}>
                               Quick presets:
                             </Typography>
                             <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -4213,7 +4235,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             justifyContent: 'space-between', 
                             alignItems: 'center',
                             cursor: 'pointer',
-                            mb: activeFriendFilters.lookingFor ? 2 : 0
+                            mb: activeFriendFilters.lookingFor ? 2 : 0,
+                            WebkitTapHighlightColor: 'transparent',
+                            WebkitTouchCallout: 'none',
+                            WebkitUserSelect: 'none',
+                            userSelect: 'none',
                           }}
                           onClick={() => toggleFilterSection('lookingFor')}
                         >
@@ -4234,7 +4260,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         {activeFriendFilters.lookingFor && (
                           <Box>
                             {/* Multi-select dropdown */}
-                            <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                            {/* <FormControl fullWidth size="small" sx={{ mt: 2 }}>
                               <InputLabel>What are they looking for?</InputLabel>
                               <Select
                                 multiple
@@ -4288,10 +4314,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   </Box>
                                 </MenuItem>
                               </Select>
-                            </FormControl>
+                            </FormControl> */}
                             
                             {/* Quick toggle chips */}
-                            <Typography variant="caption" color="text.secondary" sx={{ mt: 3, mb: 1, display: 'block' }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, mb: 1, display: 'block' }}>
                               Select quickly:
                             </Typography>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -4299,17 +4325,20 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 <Chip
                                   key={item}
                                   label={item}
+                                  icon={lookingForIcons[item] || <SearchRounded fontSize="small" />}
                                   size="small"
                                   onClick={() => toggleLookingForItem(item)}
                                   variant={localFilters?.friendsLookingFor?.includes(item) ? "filled" : "outlined"}
                                   color="success"
-                                  sx={{ borderRadius: '8px' }}
+                                  sx={{ borderRadius: '8px', gap: 0.2, padding: '4px 6px',
+                                    '& .MuiChip-icon': { fontSize: '0.8rem' }
+                                  }}
                                 />
                               ))}
                             </Box>
                             
                             {localFilters?.friendsLookingFor?.length > 0 && (
-                              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
                                 <Button
                                   size="small"
                                   onClick={clearLookingFor}
@@ -4428,11 +4457,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                   {/* <Box gap={2} mt={3} sx={{display:'flex'}}> */}
                     <Button
                       variant="outlined"
-                      onClick={handleResetFilters}
-                      disabled={isDefaultFilters}
+                      // onClick={handleResetFilters}
+                      onClick={() => setIsExtraFiltersOpen(false)}
+                      // disabled={isDefaultFilters}
                       fullWidth sx={{ borderRadius:'8px', textTransform: 'none' }}
                     >
-                      Reset
+                      Close
                     </Button>
                     <Button
                       variant="contained" 
