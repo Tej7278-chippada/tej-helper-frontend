@@ -1,6 +1,7 @@
 // /components/AboutHelper.js
 import React from 'react';
-import { Box, Grid, Card, Typography } from '@mui/material';
+import { Box, Grid, Card, Typography, Button } from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
 
 const AboutHelper = ({ isMobile, darkMode }) => {
 
@@ -12,6 +13,19 @@ const AboutHelper = ({ isMobile, darkMode }) => {
     boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
     borderRadius: '14px',
   });
+
+  const handleDownload = () => {
+    // Replace with your actual APK file URL
+    const apkUrl = 'https://helper.net.in/apk/helper-app.apk'; // 'https://yourdomain.com/path/to/helper-app.apk';
+    
+    // Create a temporary anchor element to trigger download
+    const link = document.createElement('a');
+    link.href = apkUrl;
+    link.download = 'Helper-App.apk';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const sections = [
     {
@@ -230,6 +244,42 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           >
             Post a task, find work, or help someone nearby.
             Helper makes helping and earning simple.
+          </Typography>
+
+          {/* Download App Button */}
+          <Button
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            onClick={handleDownload}
+            startIcon={<DownloadIcon />}
+            sx={{
+              backgroundColor: darkMode ? '#1976d2' : '#1565c0',
+              color: 'white',
+              fontWeight: 600,
+              borderRadius: '10px',
+              px: 4,
+              py: 1.2,
+              '&:hover': {
+                backgroundColor: darkMode ? '#1565c0' : '#0d47a1',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 20px rgba(21, 101, 192, 0.3)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Download App
+          </Button>
+
+          <Typography
+            variant="caption"
+            sx={{ 
+              display: 'block', 
+              mt: 2, 
+              opacity: 0.7, 
+              color: darkMode ? '#aaa' : '#666' 
+            }}
+          >
+            APK file • Android only • Free to download
           </Typography>
 
           {/* <Typography

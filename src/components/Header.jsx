@@ -198,6 +198,47 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
     };
   }, []);
 
+  // this function inside the Header component (after toggleDarkMode is available)
+  useEffect(() => {
+    // Update PWA/TWA status bar color when dark mode changes
+    const updateStatusBarColor = () => {
+      const themeColor = darkMode ? '#121212' : '#ffffff';
+      
+      // Update theme-color meta tag
+      const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+      const msThemeColor = document.querySelector('meta[name="msapplication-navbutton-color"]');
+      const appleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+      
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', themeColor);
+      }
+      if (msThemeColor) {
+        msThemeColor.setAttribute('content', themeColor);
+      }
+      if (appleStatusBar) {
+        // For iOS, we can adjust the status bar style
+        appleStatusBar.setAttribute('content', darkMode ? 'black-translucent' : 'default');
+      }
+      
+      // For TWA (Trusted Web Activity) - Android
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        // If running as TWA/PWA, we can't change status bar dynamically on Android
+        // But the meta tag should work on next launch
+        console.log('Running as PWA/TWA, status bar color updated to:', themeColor);
+      }
+    };
+
+    // Update status bar color when darkMode changes
+    updateStatusBarColor();
+  }, [darkMode]);
+
+  // Also update the dark mode toggle handler in your menu
+  const handleDarkModeToggle = () => {
+    toggleDarkMode();
+    // The useEffect above will automatically update the status bar
+    handleClose();
+  };
+
   // Handle PWA installation
   const handleInstallClick = async () => {
     // Check for globally stored prompt first
@@ -704,7 +745,7 @@ const Header = ({ username , toggleDarkMode, darkMode, unreadCount, shouldAnimat
         </MenuItem> */}
 
         {/* Dark Mode Toggle */}
-        <MenuItem onClick={() => { toggleDarkMode(); handleClose(); }}>
+        <MenuItem onClick={handleDarkModeToggle}>
           <ListItemIcon>
             {darkMode ? 
               <LightModeRoundedIcon fontSize="small" sx={{ color: '#FFA726' }} /> :

@@ -6,12 +6,29 @@
     <meta name="fast2sms" content="6Y0LXMe02x1dqhjERyZd0Tjt2jsN2jfW">
     <link rel="icon" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
     <!-- <meta name="theme-color" content="#000000" /> -->
-    <meta name="theme-color" content="#1976d2" />
+    <!-- <meta name="theme-color" content="#1976d2" /> -->
+    <!-- ✅ Dynamic theme-color meta tag (will be updated via JavaScript) -->
+    <meta name="theme-color" id="theme-color-meta" content="#ffffff" />
+
+    <!-- For iOS Safari -->
     <!-- <meta name="apple-mobile-web-app-status-bar-style" content="default" /> black-translucent -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-capable" content="yes" />
+
+    <!-- For Android Chrome -->
     <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- For Chrome/Edge PWA -->
+    <meta name="msapplication-navbutton-color" id="ms-theme-color" content="#ffffff">
+    
+    <!-- ✅ Add viewport-fit=cover for better fullscreen experience -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    
+    <!-- ✅ Add meta tags for PWA status bar -->
+    <meta name="apple-mobile-web-app-status-bar-style" id="apple-status-bar-style" content="black-translucent">
+
     <!-- <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups" /> -->
     <meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none" />
     
@@ -103,7 +120,7 @@
     </script> -->
 
     <!-- ✅ Dark mode preload -->
-    <script>
+    <!-- <script>
       // Check for dark mode preference before React loads
       const savedMode = localStorage.getItem('darkMode');
       const prefersDark = window.matchMedia('(prefers-color-scheme: light)').matches; // by default on webpage loads takes as light mode (for dark mode use dark instead of light)
@@ -111,6 +128,53 @@
         document.documentElement.classList.add('dark-mode');
         document.querySelector('meta[name="theme-color"]').setAttribute('content', '#121212');
       }
+    </script> -->
+    <!-- ✅ Enhanced dark mode detection with status bar color update -->
+    <script>
+      // Function to update theme-color meta tag
+      function updateThemeColor(isDarkMode) {
+        const themeColor = isDarkMode ? '#121212' : '#ffffff';
+        const metaThemeColor = document.getElementById('theme-color-meta');
+        const msThemeColor = document.getElementById('ms-theme-color');
+        
+        if (metaThemeColor) {
+          metaThemeColor.setAttribute('content', themeColor);
+        }
+        if (msThemeColor) {
+          msThemeColor.setAttribute('content', themeColor);
+        }
+        
+        // Update iOS status bar style
+        const appleStatusBar = document.getElementById('apple-status-bar-style');
+        if (appleStatusBar) {
+          // Use 'black-translucent' for dark mode to blend with header
+          // Use 'default' for light mode for better contrast
+          appleStatusBar.setAttribute('content', isDarkMode ? 'black-translucent' : 'default');
+        }
+        
+        console.log('Status bar color updated to:', themeColor, isDarkMode ? 'Dark Mode' : 'Light Mode');
+      }
+
+      // Check for dark mode preference before React loads
+      const savedMode = localStorage.getItem('darkMode');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: light)').matches; // by default on webpage loads takes as light mode
+      
+      const isDarkMode = savedMode === 'true' || (savedMode === null && prefersDark);
+      
+      if (isDarkMode) {
+        document.documentElement.classList.add('dark-mode');
+      }
+      
+      // Update theme color immediately
+      updateThemeColor(isDarkMode);
+      
+      // Listen for dark mode changes (for dynamic updates)
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'darkMode') {
+          const newDarkMode = e.newValue === 'true';
+          updateThemeColor(newDarkMode);
+        }
+      });
     </script>
   </head>
   <body>
