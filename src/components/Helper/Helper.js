@@ -123,7 +123,7 @@ const DEFAULT_FILTERS = {
   serviceType: '',
   gender: '',
   postStatus: '',
-  priceRange: [0, 10000000],
+  priceRange: [0, 20000],
   postType: 'HelpRequest', // added this line for only shows the Helper posts on ALL section
   bloodGroup: 'All',
   // Friends-specific filters
@@ -356,6 +356,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     const savedFilters = localStorage.getItem('helperFilters');
     return savedFilters ? JSON.parse(savedFilters) : DEFAULT_FILTERS;
   });
+  const [appliedFilter, setAppliedFilter] = useState({
+    filtersCount: 0,
+    filterType: '',
+  })
 
   // State for temporary filters before applying
   const [localFilters, setLocalFilters] = useState(filters);
@@ -385,27 +389,27 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   
 
   // Handle filter changes
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setLocalFilters(prev => ({ ...prev, [name]: value }));
-  };
+  // const handleFilterChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setLocalFilters(prev => ({ ...prev, [name]: value }));
+  // };
 
   // Handle price range changes
-  const handlePriceChange = (e, type) => {
-    const value = Number(e.target.value);
-    setLocalFilters(prev => ({
-      ...prev,
-      priceRange: type === 'min' 
-        ? [value, prev.priceRange[1]] 
-        : [prev.priceRange[0], value]
-    }));
-  };
+  // const handlePriceChange = (e, type) => {
+  //   const value = Number(e.target.value);
+  //   setLocalFilters(prev => ({
+  //     ...prev,
+  //     priceRange: type === 'min' 
+  //       ? [value, prev.priceRange[1]] 
+  //       : [prev.priceRange[0], value]
+  //   }));
+  // };
 
   // Add friends-specific filter handlers
-  const handleFriendsFilterChange = (e) => {
-    const { name, value } = e.target;
-    setLocalFilters(prev => ({ ...prev, [name]: value }));
-  };
+  // const handleFriendsFilterChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setLocalFilters(prev => ({ ...prev, [name]: value }));
+  // };
 
   // Handle friends age range changes
   // const handleFriendsAgeRangeChange = (e, type) => {
@@ -433,6 +437,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     setLocalFilters(prev => ({
       ...prev,
       friendsAgeRange: range
+    }));
+  };
+
+  const handleFriendsGenderPreset = (gender) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      friendsGender: gender
     }));
   };
 
@@ -549,14 +560,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setActivePostFilters({
         gender: !!filters?.gender && filters?.gender !== '',
         status: !!filters?.postStatus && filters?.postStatus !== '',
-        price: !(filters?.priceRange?.[0] === 0 && filters?.priceRange?.[1] === 10000000)
+        price: !(filters?.priceRange?.[0] === 0 && filters?.priceRange?.[1] === 20000)
       });
     } else {
       // Services
       setActiveServiceFilters({
         gender: !!filters?.gender && filters?.gender !== '',
         status: !!filters?.postStatus && filters?.postStatus !== '',
-        price: !(filters?.priceRange?.[0] === 0 && filters?.priceRange?.[1] === 10000000)
+        price: !(filters?.priceRange?.[0] === 0 && filters?.priceRange?.[1] === 20000)
       });
     }
   }, [filters, selectedCategory]);
@@ -608,7 +619,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         if (localFilters?.postStatus && localFilters?.postStatus !== '') {
           appliedFilters.push(`Status: ${localFilters?.postStatus}`);
         }
-        if (!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000)) {
+        if (!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 20000)) {
           appliedFilters.push(`Price: ₹${localFilters?.priceRange?.[0]} - ₹${localFilters?.priceRange?.[1]}`);
         }
         categoryName = 'post';
@@ -621,7 +632,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         if (localFilters?.postStatus && localFilters?.postStatus !== '') {
           appliedFilters.push(`Status: ${localFilters?.postStatus}`);
         }
-        if (!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000)) {
+        if (!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 20000)) {
           appliedFilters.push(`Price: ₹${localFilters?.priceRange?.[0]} - ₹${localFilters?.priceRange?.[1]}`);
         }
         categoryName = 'service';
@@ -645,6 +656,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         severity: 'success' 
       });
     }
+    setAppliedFilter({
+      filtersCount: appliedFilters.length,
+      filterType: categoryName
+    });
     // Show success message
     // if (selectedCategory === 'Friends') {
     //   const appliedFilters = [];
@@ -749,7 +764,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       ...prev,
       gender: '',
       postStatus: '',
-      priceRange: [0, 10000000]
+      priceRange: [0, 20000]
     }));
   };
 
@@ -4238,7 +4253,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               </Box>
                               
                               {/* Blood Group Dropdown for precise selection */}
-                              <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                              {/* <FormControl fullWidth size="small" sx={{ mt: 2 }}>
                                 <InputLabel>Select Blood Group</InputLabel>
                                 <Select
                                   name="bloodGroup"
@@ -4257,7 +4272,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   <MenuItem value="O+">O+</MenuItem>
                                   <MenuItem value="O-">O-</MenuItem>
                                 </Select>
-                              </FormControl>
+                              </FormControl> */}
                             </Box>
                           )}
                         </Box>
@@ -4307,17 +4322,18 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           )}
                         </Box>
                         
-                        {/* {activeFriendFilters.gender && ( */}
+                        {(localFilters?.friendsGender !== '') && (
                           <Chip
                             size="small"
-                            label={`Gender: ${localFilters.friendsGender}`}
+                            label={`Gender: ${localFilters.friendsGender || 'All'}`}
                             onDelete={() => setLocalFilters(prev => ({ ...prev, friendsGender: '' }))}
                             color="primary"
                             variant="outlined"
                           />
-                        {/* )} */}
+                        )}
                         
-                        {/* {activeFriendFilters?.ageRange && ( */}
+                        {((localFilters?.friendsAgeRange?.[0] !== DEFAULT_FILTERS?.friendsAgeRange?.[0]) || 
+                            (localFilters?.friendsAgeRange?.[1] !== DEFAULT_FILTERS?.friendsAgeRange?.[1])) && (
                           <Chip
                             size="small"
                             label={`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`}
@@ -4325,17 +4341,17 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             color="primary"
                             variant="outlined"
                           />
-                        {/* )} */}
+                        )}
                         
-                        {/* {activeFriendFilters?.lookingFor && localFilters?.friendsLookingFor?.length > 0 && ( */}
+                        {(localFilters?.friendsLookingFor?.length > 0) && (
                           <Chip
                             size="small"
-                            label={`Looking for: ${localFilters?.friendsLookingFor?.length}`}
+                            label={`Looking for: ${localFilters?.friendsLookingFor?.length || 'All'}`}
                             onDelete={clearLookingFor}
                             color="primary"
                             variant="outlined"
                           />
-                        {/* )} */}
+                        )}
                         
                         
                       </Box>
@@ -4367,7 +4383,37 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         
                         {activeFriendFilters.gender && (
                           <Box sx={{ mt: 2 }}>
-                            <FormControl fullWidth size="small">
+                            {/* Gender Quick Presets */}
+                            <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                              Select quickly:
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                              {[
+                                { value: '', label: 'All Genders', icon: <PeopleRounded fontSize="small" /> },
+                                { value: 'Male', label: 'Male', icon: <ManRounded fontSize="small" /> },
+                                { value: 'Female', label: 'Female', icon: <WomanRounded fontSize="small" /> },
+                                { value: 'Non-binary', label: 'Non-binary', icon: <TransgenderRounded fontSize="small" /> },
+                                { value: 'Other', label: 'Other / Prefer not to say', icon: <PersonRounded fontSize="small" /> }
+                              ].map((option) => (
+                                <Chip
+                                  key={option.value}
+                                  label={option.label}
+                                  icon={option.icon}
+                                  onClick={() => handleFriendsGenderPreset(option.value)}
+                                  variant={localFilters?.friendsGender === option.value ? "filled" : "outlined"}
+                                  color="primary"
+                                  size="small"
+                                  sx={{ 
+                                    borderRadius: '8px',
+                                    gap: 0.2,
+                                    padding: '4px 6px',
+                                    fontWeight: localFilters?.friendsGender === option.value ? 600 : 400,
+                                    '& .MuiChip-icon': { fontSize: '0.8rem' }
+                                  }}
+                                />
+                              ))}
+                            </Box>
+                            {/* <FormControl fullWidth size="small">
                               <InputLabel>Select Gender</InputLabel>
                               <Select
                                 name="friendsGender"
@@ -4377,7 +4423,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 sx={{ borderRadius: '12px' }}
                               >
                                 <MenuItem value="">
-                                  {/* <em>All Genders</em> */}
+                                  <em>All Genders</em>
                                   All Genders
                                 </MenuItem>
                                 <MenuItem value="Male">
@@ -4405,7 +4451,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   </Box>
                                 </MenuItem>
                               </Select>
-                            </FormControl>
+                            </FormControl> */}
                           </Box>
                         )}
                       </Box>
@@ -4689,9 +4735,21 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           flexWrap: 'wrap',
                           alignItems: 'center'
                         }}>
-                          <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
-                            Active filters:
-                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                            <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                              Active filters:
+                            </Typography>
+                            {(localFilters?.gender || localFilters?.postStatus || 
+                              !(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 20000)) && (
+                              <Button
+                                size="small"
+                                onClick={resetPostFilters}
+                                sx={{ ml: 'auto', fontSize: '0.75rem', minWidth: 'auto' }}
+                              >
+                                Clear All
+                              </Button>
+                            )}
+                          </Box>
                           
                           {localFilters?.gender && localFilters?.gender !== '' && (
                             <Chip
@@ -4703,7 +4761,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             />
                           )}
                           
-                          {localFilters?.postStatus && localFilters?.postStatus !== '' && (
+                          {(localFilters?.postStatus && localFilters?.postStatus !== '') && (
                             <Chip
                               size="small"
                               label={`Status: ${localFilters?.postStatus}`}
@@ -4713,28 +4771,17 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             />
                           )}
                           
-                          {!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000) && (
+                          {!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 20000) && (
                             <Chip
                               size="small"
                               label={`Price: ₹${localFilters?.priceRange?.[0]} - ₹${localFilters?.priceRange?.[1]}`}
                               onDelete={() => setLocalFilters(prev => ({ 
                                 ...prev, 
-                                priceRange: [0, 10000000] 
+                                priceRange: [DEFAULT_FILTERS?.priceRange?.[0], DEFAULT_FILTERS?.priceRange?.[1]]
                               }))}
                               color="primary"
                               variant="outlined"
                             />
-                          )}
-                          
-                          {(localFilters?.gender || localFilters?.postStatus || 
-                            !(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000)) && (
-                            <Button
-                              size="small"
-                              onClick={resetPostFilters}
-                              sx={{ ml: 'auto', fontSize: '0.75rem', minWidth: 'auto' }}
-                            >
-                              Clear All
-                            </Button>
                           )}
                         </Box>
 
@@ -4808,7 +4855,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               </Box>
                               
                               {/* Gender Dropdown for precise selection */}
-                              <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                              {/* <FormControl fullWidth size="small" sx={{ mt: 2 }}>
                                 <InputLabel>Select Gender</InputLabel>
                                 <Select
                                   name="gender"
@@ -4825,7 +4872,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   <MenuItem value="Kids">Kids</MenuItem>
                                   <MenuItem value="Everyone">Everyone</MenuItem>
                                 </Select>
-                              </FormControl>
+                              </FormControl> */}
                             </Box>
                           )}
                         </Box>
@@ -4877,7 +4924,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   { value: '', label: 'All Status' },
                                   { value: 'Active', label: 'Active Only' },
                                   { value: 'InActive', label: 'InActive Only' },
-                                  { value: 'Closed', label: 'Closed' }
+                                  // { value: 'Closed', label: 'Closed' }
                                 ].map((option) => (
                                   <Chip
                                     key={option.value}
@@ -4895,7 +4942,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                               </Box>
                               
                               {/* Status Dropdown for precise selection */}
-                              <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                              {/* <FormControl fullWidth size="small" sx={{ mt: 2 }}>
                                 <InputLabel>Select Status</InputLabel>
                                 <Select
                                   name="postStatus"
@@ -4909,7 +4956,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   <MenuItem value="InActive">InActive</MenuItem>
                                   <MenuItem value="Closed">Closed</MenuItem>
                                 </Select>
-                              </FormControl>
+                              </FormControl> */}
                             </Box>
                           )}
                         </Box>
@@ -4941,7 +4988,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                             <Typography variant="subtitle2" fontWeight={600} color="success.main">
                               <CurrencyRupeeRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
                               Price Range
-                              {!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000) && (
+                              {!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 20000) && (
                                 <Typography component="span" variant="caption" sx={{ ml: 1, color: 'success.main' }}>
                                   (₹{localFilters?.priceRange?.[0]} - ₹{localFilters?.priceRange?.[1]})
                                 </Typography>
@@ -4970,7 +5017,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   valueLabelDisplay="auto"
                                   valueLabelFormat={(value) => `₹${value}`}
                                   min={0}
-                                  max={10000000}
+                                  max={20000}
                                   step={1000}
                                   sx={{
                                     '& .MuiSlider-valueLabel': {
@@ -4982,12 +5029,12 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 />
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
                                   <Typography variant="caption" color="text.secondary">₹0</Typography>
-                                  <Typography variant="caption" color="text.secondary">₹1 Cr</Typography>
+                                  <Typography variant="caption" color="text.secondary">₹20 k</Typography>
                                 </Box>
                               </Box>
                               
                               {/* Price Inputs */}
-                              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                              {/* <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
                                 <TextField
                                   fullWidth
                                   label="Min Price (₹)"
@@ -5008,14 +5055,14 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   value={localFilters.priceRange[1]}
                                   onChange={(e) => handlePriceChange(e, 'max')}
                                   InputProps={{
-                                    inputProps: { min: localFilters.priceRange[0], max: 10000000 }
+                                    inputProps: { min: localFilters.priceRange[0], max: 20000 }
                                   }}
                                   sx={{ borderRadius: '12px' }}
                                 />
-                              </Box>
+                              </Box> */}
                               
                               {/* Quick Price Presets */}
-                              <Typography variant="caption" color="text.secondary" sx={{ mt: 3, mb: 1, display: 'block' }}>
+                              <Typography variant="caption" color="text.secondary" sx={{ mt: 1, mb: 1, display: 'block' }}>
                                 Quick presets:
                               </Typography>
                               <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -5024,8 +5071,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   { label: 'Under ₹500', range: [0, 500] },
                                   { label: 'Under ₹2000', range: [0, 2000] },
                                   { label: '₹1k-5k', range: [1000, 5000] },
-                                  { label: '₹5k-20k', range: [5000, 20000] },
-                                  { label: '₹20k+', range: [20000, 10000000] }
+                                  { label: '₹5k-10k', range: [5000, 10000] },
+                                  { label: '₹10k-20k', range: [10000, 20000] },
+                                  { label: '₹20k-1Lakh', range: [20000, 100000] },
+                                  { label: '₹1Lakh+', range: [100000, 2000000] },
                                 ].map((preset) => (
                                   <Chip
                                     key={preset.label}
@@ -6682,6 +6731,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 {searchQuery && <Typography variant="body2" color="text.secondary">
                   and search of "{searchQuery}"
                 </Typography>}
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  {appliedFilter.filtersCount > 0 && `Applied ${appliedFilter.filtersCount} ${appliedFilter.filterType} filter(s)`}
+                </Typography>
               </Box>
             )}
             <Box
