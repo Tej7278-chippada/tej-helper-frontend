@@ -32,7 +32,7 @@ import ShareLocationRoundedIcon from '@mui/icons-material/ShareLocationRounded';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 // import CategoryBar from './CategoryBar';
-import Friends from '../Friends/Friends';
+// import Friends from '../Friends/Friends';
 // import PersonIcon from '@mui/icons-material/Person';
 // import CategoryIcon from '@mui/icons-material/Category';
 // import PriceChangeIcon from '@mui/icons-material/PriceChange';
@@ -76,6 +76,11 @@ import { VerifiedRounded,
   ClearRounded,
   FilterListRounded,
   Diversity1Rounded,
+  CheckCircleRounded,
+  AttachMoneyRounded,
+  BloodtypeRounded,
+  ChildCareRounded,
+  CurrencyRupeeRounded,
  } from '@mui/icons-material';
 import UserProfileDetails from './UserProfileDetails';
 import { Slider } from '@mui/material';
@@ -204,6 +209,9 @@ const getButtonStyle = (darkMode, button) => ({
     transform: 'translateY(-1px)',
   }
 });
+
+const gradientHover = 'linear-gradient(135deg, #3a56d4 0%, #2d0a8c 50%, #5c0b9b 100%)';
+
 
 const mapButtonStyle = (mapMode, isMobile) => ({
   color: mapMode === 'satellite' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
@@ -345,20 +353,33 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
   const [isExtraFiltersOpen, setIsExtraFiltersOpen] = useState(false);
   const [filters, setFilters] = useState(() => {
-  const savedFilters = localStorage.getItem('helperFilters');
-  return savedFilters ? JSON.parse(savedFilters) : DEFAULT_FILTERS;
+    const savedFilters = localStorage.getItem('helperFilters');
+    return savedFilters ? JSON.parse(savedFilters) : DEFAULT_FILTERS;
   });
 
   // State for temporary filters before applying
   const [localFilters, setLocalFilters] = useState(filters);
+  const [activePostFilters, setActivePostFilters] = useState({
+    gender: false,
+    status: false,
+    price: false,
+  });
+  const [activeServiceFilters, setActiveServiceFilters] = useState({
+    gender: false,
+    status: false,
+    price: false,
+  });
+  const [activeBloodDonorFilters, setActiveBloodDonorFilters] = useState({
+    bloodGroup: false,
+  });
   const [activeFriendFilters, setActiveFriendFilters] = useState({
     gender: false,
     ageRange: false,
     lookingFor: false
   });
-  const isDefaultFilters = useMemo(() => {
-    return JSON.stringify(localFilters) === JSON.stringify(DEFAULT_FILTERS);
-  }, [localFilters]);
+  // const isDefaultFilters = useMemo(() => {
+  //   return JSON.stringify(localFilters) === JSON.stringify(DEFAULT_FILTERS);
+  // }, [localFilters]);
   // Add a ref to track if we've restored scroll position
   const hasRestoredScroll = useRef(false);
   
@@ -387,25 +408,25 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   };
 
   // Handle friends age range changes
-  const handleFriendsAgeRangeChange = (e, type) => {
-    const value = Number(e.target.value);
-    setLocalFilters(prev => {
-      const newAgeRange = type === 'min' 
-        ? [value, prev.friendsAgeRange[1]] 
-        : [prev.friendsAgeRange[0], value];
+  // const handleFriendsAgeRangeChange = (e, type) => {
+  //   const value = Number(e.target.value);
+  //   setLocalFilters(prev => {
+  //     const newAgeRange = type === 'min' 
+  //       ? [value, prev.friendsAgeRange[1]] 
+  //       : [prev.friendsAgeRange[0], value];
       
-      // Validate min <= max
-      if (newAgeRange[0] > newAgeRange[1]) {
-        if (type === 'min') {
-          return { ...prev, friendsAgeRange: [value, value] };
-        } else {
-          return { ...prev, friendsAgeRange: [newAgeRange[0], newAgeRange[0]] };
-        }
-      }
+  //     // Validate min <= max
+  //     if (newAgeRange[0] > newAgeRange[1]) {
+  //       if (type === 'min') {
+  //         return { ...prev, friendsAgeRange: [value, value] };
+  //       } else {
+  //         return { ...prev, friendsAgeRange: [newAgeRange[0], newAgeRange[0]] };
+  //       }
+  //     }
       
-      return { ...prev, friendsAgeRange: newAgeRange };
-    });
-  };
+  //     return { ...prev, friendsAgeRange: newAgeRange };
+  //   });
+  // };
 
   // Quick age range presets
   const handleQuickAgeRange = (range) => {
@@ -424,15 +445,15 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   // };
 
   // Handle looking for filter (multi-select) with toggle functionality
-  const handleLookingForChange = (event) => {
-    const {
-      target: { value },
-    } = event;
-    setLocalFilters(prev => ({
-      ...prev,
-      friendsLookingFor: typeof value === 'string' ? value.split(',') : value,
-    }));
-  };
+  // const handleLookingForChange = (event) => {
+  //   const {
+  //     target: { value },
+  //   } = event;
+  //   setLocalFilters(prev => ({
+  //     ...prev,
+  //     friendsLookingFor: typeof value === 'string' ? value.split(',') : value,
+  //   }));
+  // };
 
   // Toggle individual lookingFor items
   const toggleLookingForItem = (item) => {
@@ -520,6 +541,23 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         ageRange: !(filters?.friendsAgeRange?.[0] === 18 && filters?.friendsAgeRange?.[1] === 65),
         lookingFor: filters?.friendsLookingFor && filters?.friendsLookingFor?.length > 0
       });
+    } else if (selectedCategory === 'BloodDonors') {
+      setActiveBloodDonorFilters({
+        bloodGroup: !!filters?.bloodGroup && filters?.bloodGroup !== 'All'
+      });
+    } else if (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') {
+      setActivePostFilters({
+        gender: !!filters?.gender && filters?.gender !== '',
+        status: !!filters?.postStatus && filters?.postStatus !== '',
+        price: !(filters?.priceRange?.[0] === 0 && filters?.priceRange?.[1] === 10000000)
+      });
+    } else {
+      // Services
+      setActiveServiceFilters({
+        gender: !!filters?.gender && filters?.gender !== '',
+        status: !!filters?.postStatus && filters?.postStatus !== '',
+        price: !(filters?.priceRange?.[0] === 0 && filters?.priceRange?.[1] === 10000000)
+      });
     }
   }, [filters, selectedCategory]);
 
@@ -535,6 +573,60 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setSnackbar({ open: true, message: 'Min age cannot be greater than max age', severity: 'warning' });
       return;
     }
+
+    // Show success message based on category
+    let appliedFilters = [];
+    let categoryName = '';
+    
+    switch(selectedCategory) {
+      case 'Friends':
+        if (localFilters?.friendsGender && localFilters?.friendsGender !== '') {
+          appliedFilters.push(`Gender: ${localFilters?.friendsGender}`);
+        }
+        if (!(localFilters?.friendsAgeRange?.[0] === 18 && localFilters?.friendsAgeRange?.[1] === 65)) {
+          appliedFilters.push(`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`);
+        }
+        if (localFilters?.friendsLookingFor && localFilters?.friendsLookingFor?.length > 0) {
+          appliedFilters.push(`Looking for: ${localFilters?.friendsLookingFor?.length} item(s)`);
+        }
+        categoryName = 'friends';
+        break;
+        
+      case 'BloodDonors':
+        if (localFilters?.bloodGroup && localFilters?.bloodGroup !== 'All') {
+          appliedFilters.push(`Blood Group: ${localFilters?.bloodGroup}`);
+        }
+        categoryName = 'blood donor';
+        break;
+        
+      case 'Paid':
+      case 'UnPaid':
+      case 'Emergency':
+        if (localFilters?.gender && localFilters?.gender !== '') {
+          appliedFilters.push(`Gender: ${localFilters?.gender}`);
+        }
+        if (localFilters?.postStatus && localFilters?.postStatus !== '') {
+          appliedFilters.push(`Status: ${localFilters?.postStatus}`);
+        }
+        if (!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000)) {
+          appliedFilters.push(`Price: ₹${localFilters?.priceRange?.[0]} - ₹${localFilters?.priceRange?.[1]}`);
+        }
+        categoryName = 'post';
+        break;
+        
+      default: // Services
+        if (localFilters?.gender && localFilters?.gender !== '') {
+          appliedFilters.push(`Gender: ${localFilters?.gender}`);
+        }
+        if (localFilters?.postStatus && localFilters?.postStatus !== '') {
+          appliedFilters.push(`Status: ${localFilters?.postStatus}`);
+        }
+        if (!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000)) {
+          appliedFilters.push(`Price: ₹${localFilters?.priceRange?.[0]} - ₹${localFilters?.priceRange?.[1]}`);
+        }
+        categoryName = 'service';
+    }
+
     // Only update if filters actually changed
     if (JSON.stringify(localFilters) !== JSON.stringify(filters)) {
       setFilters(localFilters);
@@ -546,40 +638,119 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
     setShowDistanceRanges(false);
     setIsExtraFiltersOpen(false);
     // Show success message
-    if (selectedCategory === 'Friends') {
-      const appliedFilters = [];
-      if (localFilters?.friendsGender && localFilters?.friendsGender !== '') {
-        appliedFilters.push(`Gender: ${localFilters?.friendsGender}`);
-      }
-      if (!(localFilters?.friendsAgeRange?.[0] === 18 && localFilters?.friendsAgeRange?.[1] === 65)) {
-        appliedFilters.push(`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`);
-      }
-      if (localFilters?.friendsLookingFor && localFilters?.friendsLookingFor?.length > 0) {
-        appliedFilters.push(`Looking for: ${localFilters?.friendsLookingFor?.length} item(s)`);
-      }
-      
-      if (appliedFilters.length > 0) {
-        setSnackbar({ 
-          open: true, 
-          message: `Applied ${appliedFilters.length} friend filter(s)`, 
-          severity: 'success' 
-        });
-      }
+    if (appliedFilters.length > 0) {
+      setSnackbar({ 
+        open: true, 
+        message: `Applied ${appliedFilters.length} ${categoryName} filter(s)`, 
+        severity: 'success' 
+      });
     }
+    // Show success message
+    // if (selectedCategory === 'Friends') {
+    //   const appliedFilters = [];
+    //   if (localFilters?.friendsGender && localFilters?.friendsGender !== '') {
+    //     appliedFilters.push(`Gender: ${localFilters?.friendsGender}`);
+    //   }
+    //   if (!(localFilters?.friendsAgeRange?.[0] === 18 && localFilters?.friendsAgeRange?.[1] === 65)) {
+    //     appliedFilters.push(`Age: ${localFilters?.friendsAgeRange?.[0]}-${localFilters?.friendsAgeRange?.[1]}`);
+    //   }
+    //   if (localFilters?.friendsLookingFor && localFilters?.friendsLookingFor?.length > 0) {
+    //     appliedFilters.push(`Looking for: ${localFilters?.friendsLookingFor?.length} item(s)`);
+    //   }
+      
+      // if (appliedFilters.length > 0) {
+      //   setSnackbar({ 
+      //     open: true, 
+      //     message: `Applied ${appliedFilters.length} friend filter(s)`, 
+      //     severity: 'success' 
+      //   });
+      // }
+    // }
   };
 
   // Reset filters
-  const handleResetFilters = () => {
-    setLocalFilters(DEFAULT_FILTERS);
-    setFilters(DEFAULT_FILTERS);
-    setSelectedCategory('Paid'); // for category bar 'ALL' selection 
-    setSortBy('nearest');
-    setSkip(0);
-    setPosts([]);
-    // Clear cache for the old filter combination
-    globalCache.lastCacheKey = null;
-    localStorage.removeItem('helperFilters');
-    setShowDistanceRanges(false);
+  // const handleResetFilters = () => {
+  //   setLocalFilters(DEFAULT_FILTERS);
+  //   setFilters(DEFAULT_FILTERS);
+  //   setSelectedCategory('Paid'); // for category bar 'ALL' selection 
+  //   setSortBy('nearest');
+  //   setSkip(0);
+  //   setPosts([]);
+  //   // Clear cache for the old filter combination
+  //   globalCache.lastCacheKey = null;
+  //   localStorage.removeItem('helperFilters');
+  //   setShowDistanceRanges(false);
+  // };
+
+  // Add price presets handler
+  const handlePricePreset = (preset) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      priceRange: preset
+    }));
+  };
+
+  // Add blood group presets handler
+  const handleBloodGroupPreset = (group) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      bloodGroup: group
+    }));
+  };
+
+  // Add quick gender presets handler
+  const handleGenderPreset = (gender) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      gender: gender
+    }));
+  };
+
+  // Add quick status presets handler
+  const handleStatusPreset = (status) => {
+    setLocalFilters(prev => ({
+      ...prev,
+      postStatus: status
+    }));
+  };
+
+  // Toggle filter sections for different categories
+  const toggleBloodDonorFilterSection = (section) => {
+    setActiveBloodDonorFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const togglePostFilterSection = (section) => {
+    setActivePostFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const toggleServiceFilterSection = (section) => {
+    setActiveServiceFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  // Reset specific filters for each category
+  const resetBloodDonorFilters = () => {
+    setLocalFilters(prev => ({
+      ...prev,
+      bloodGroup: 'All'
+    }));
+  };
+
+  const resetPostFilters = () => {
+    setLocalFilters(prev => ({
+      ...prev,
+      gender: '',
+      postStatus: '',
+      priceRange: [0, 10000000]
+    }));
   };
 
   // Reset specific friend filters
@@ -3369,6 +3540,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               textAlign: 'center',
               cursor: 'pointer',
               transition: 'opacity 0.5s ease-in-out',
+              WebkitTapHighlightColor: 'transparent',
+              WebkitTouchCallout: 'none',
+              WebkitUserSelect: 'none',
+              userSelect: 'none',
               '&::before': {
                 content: '""',
                 position: 'absolute',
@@ -3920,60 +4095,190 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                 sx={{
                   position: 'absolute',
                   top: isMobile ? '45px' : '45px',
-                  right: '1px', ml: '4px', 
-                  // width: '90%',
-                  // maxWidth: '400px',
-                  minWidth: isMobile ? '100%' : 'auto',
+                  right: '1px', 
+                  // ml: '4px', 
+                  width: isMobile ? 'calc(100% - 4px)' : '400px',
                   maxWidth: isMobile ? '100%' : '400px',
                   zIndex: 1001,
                   borderRadius: '12px',
                   backdropFilter: 'blur(10px)',
-                  minWidth: '200px',
+                  background: darkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+                  boxShadow: darkMode ? '0 8px 32px rgba(0, 0, 0, 0.3)' : '0 8px 32px rgba(0, 0, 0, 0.1)',
                   maxHeight: '60vh',
                   overflowY: 'auto',
                 }}
               >
-                <CardContent >
-                  <Typography variant="h6" gutterBottom >
-                    { selectedCategory === 'BloodDonors' ? 'Blood Donor filters' : selectedCategory === 'Friends' ? 'Friends filters' : 'Filters'}
-                  </Typography>
-                  <IconButton
-                    onClick={() => setIsExtraFiltersOpen(false)}
-                    sx={{
-                      position: 'absolute',
-                      top: '6px',
-                      right: '6px'
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6">
+                      {selectedCategory === 'BloodDonors' ? 'Blood Donor Filters' : 
+                      selectedCategory === 'Friends' ? 'Friends Filters' : 
+                      'Filters'}
+                    </Typography>
+                    <IconButton
+                      onClick={() => setIsExtraFiltersOpen(false)}
+                      size="small"
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Box>
                   
-                  <Box sx={{ mt: 2}}>
+                  {/* Filter Content based on selectedCategory */}
+                  <Box sx={{ mt: 2 }}>
+                    {selectedCategory === 'BloodDonors' ? (
+                      <>
+                        {/* Blood Donor Filter Summary */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          gap: 1, 
+                          mb: 2, 
+                          flexWrap: 'wrap',
+                          alignItems: 'center'
+                        }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                            Active filters:
+                          </Typography>
+                          
+                          {localFilters?.bloodGroup !== 'All' && (
+                            <Chip
+                              size="small"
+                              label={`Blood Group: ${localFilters?.bloodGroup}`}
+                              onDelete={resetBloodDonorFilters}
+                              color="error"
+                              variant="outlined"
+                              sx={{ 
+                                fontWeight: 500,
+                                '& .MuiChip-deleteIcon': { fontSize: '0.8rem' }
+                              }}
+                            />
+                          )}
+                          
+                          {localFilters?.bloodGroup !== 'All' && (
+                            <Button
+                              size="small"
+                              onClick={resetBloodDonorFilters}
+                              sx={{ ml: 'auto', fontSize: '0.75rem', minWidth: 'auto' }}
+                            >
+                              Clear
+                            </Button>
+                          )}
+                        </Box>
 
-                    {selectedCategory === 'BloodDonors' ? 
-                    <>
-                    {/* Blood Group Filter */}
-                    <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',}, minWidth: '240px' }}>
-                      <InputLabel>Blood Group</InputLabel>
-                      <Select
-                      name="bloodGroup"
-                        value={localFilters.bloodGroup}
-                        onChange={handleFilterChange}
-                        label="Blood Group"
-                      >
-                        <MenuItem value="All">All Groups</MenuItem>
-                        <MenuItem value="A+">A+</MenuItem>
-                        <MenuItem value="A-">A-</MenuItem>
-                        <MenuItem value="B+">B+</MenuItem>
-                        <MenuItem value="B-">B-</MenuItem>
-                        <MenuItem value="AB+">AB+</MenuItem>
-                        <MenuItem value="AB-">AB-</MenuItem>
-                        <MenuItem value="O+">O+</MenuItem>
-                        <MenuItem value="O-">O-</MenuItem>
-                      </Select>
-                    </FormControl>
-                    </> : 
-                    selectedCategory === 'Friends' ? (
+                        {/* Blood Group Filter - Enhanced */}
+                        <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(220, 53, 69, 0.05)' }}>
+                          <Box 
+                            sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              mb: activeBloodDonorFilters.bloodGroup ? 2 : 0,
+                              WebkitTapHighlightColor: 'transparent',
+                              WebkitTouchCallout: 'none',
+                              WebkitUserSelect: 'none',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => toggleBloodDonorFilterSection('bloodGroup')}
+                          >
+                            <Typography variant="subtitle2" fontWeight={600} color="error.main">
+                              <BloodtypeRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                              Blood Group
+                            </Typography>
+                            <IconButton size="small">
+                              {activeBloodDonorFilters.bloodGroup ? <ExpandLess /> : <ExpandMore />}
+                            </IconButton>
+                          </Box>
+                          
+                          {activeBloodDonorFilters.bloodGroup && (
+                            <Box sx={{ mt: 2 }}>
+                              {/* Blood Group Quick Presets */}
+                              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                                Select blood group:
+                              </Typography>
+                              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1 }}>
+                                {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map((group) => (
+                                  <Button
+                                    key={group}
+                                    variant={localFilters?.bloodGroup === group ? "contained" : "outlined"}
+                                    color="error"
+                                    size="small"
+                                    onClick={() => handleBloodGroupPreset(group)}
+                                    sx={{
+                                      borderRadius: '8px',
+                                      textTransform: 'none',
+                                      fontWeight: localFilters?.bloodGroup === group ? 600 : 400,
+                                      backgroundColor: localFilters?.bloodGroup === group ? '#dc3545' : 'transparent',
+                                      '&:hover': {
+                                        backgroundColor: localFilters?.bloodGroup === group ? '#c82333' : 'rgba(220, 53, 69, 0.08)'
+                                      }
+                                    }}
+                                  >
+                                    {group}
+                                  </Button>
+                                ))}
+                                <Button
+                                  variant={localFilters?.bloodGroup === 'All' ? "contained" : "outlined"}
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => handleBloodGroupPreset('All')}
+                                  sx={{
+                                    gridColumn: 'span 2',
+                                    borderRadius: '8px',
+                                    textTransform: 'none',
+                                    fontWeight: localFilters?.bloodGroup === 'All' ? 600 : 400,
+                                    backgroundColor: localFilters?.bloodGroup === 'All' ? '#1976d2' : 'transparent',
+                                    '&:hover': {
+                                      backgroundColor: localFilters?.bloodGroup === 'All' ? '#1565c0' : 'rgba(25, 118, 210, 0.08)'
+                                    }
+                                  }}
+                                >
+                                  All Blood Groups
+                                </Button>
+                              </Box>
+                              
+                              {/* Blood Group Dropdown for precise selection */}
+                              <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                                <InputLabel>Select Blood Group</InputLabel>
+                                <Select
+                                  name="bloodGroup"
+                                  value={localFilters?.bloodGroup || 'All'}
+                                  onChange={handleFilterChange}
+                                  label="Select Blood Group"
+                                  sx={{ borderRadius: '12px' }}
+                                >
+                                  <MenuItem value="All">All Blood Groups</MenuItem>
+                                  <MenuItem value="A+">A+</MenuItem>
+                                  <MenuItem value="A-">A-</MenuItem>
+                                  <MenuItem value="B+">B+</MenuItem>
+                                  <MenuItem value="B-">B-</MenuItem>
+                                  <MenuItem value="AB+">AB+</MenuItem>
+                                  <MenuItem value="AB-">AB-</MenuItem>
+                                  <MenuItem value="O+">O+</MenuItem>
+                                  <MenuItem value="O-">O-</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          )}
+                        </Box>
+
+                        {/* Blood Donor Info */}
+                        <Box sx={{ 
+                          p: 2, 
+                          borderRadius: 2, 
+                          bgcolor: 'rgba(255, 193, 7, 0.05)',
+                          border: '1px solid rgba(255, 193, 7, 0.1)'
+                        }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <InfoRounded fontSize="small" />
+                            <Box>
+                              <strong>Note:</strong> Blood donors are lifesavers! 
+                              Filter by specific blood groups to find compatible donors in emergencies.
+                            </Box>
+                          </Typography>
+                        </Box>
+                      </>
+                    ) : selectedCategory === 'Friends' ? (
                     <>
                       {/* Filter Summary Bar */}
                       <Box sx={{ 
@@ -4373,106 +4678,441 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         </Typography>
                       </Box>
                     </>
-                    ) : 
-                    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, flexWrap: 'wrap' }}>
-                    {/* Gender Filter */}
-                    <FormControl size='small' sx={{ flex: '1 1 140px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
-                      <InputLabel>Gender</InputLabel>
-                      <Select
-                        name="gender"
-                        value={localFilters.gender}
-                        onChange={handleFilterChange}
-                        label="Gender"
-                      >
-                        <MenuItem value="">All</MenuItem>
-                        <MenuItem value="Male">Male</MenuItem>
-                        <MenuItem value="Female">Female</MenuItem>
-                        <MenuItem value="Kids">Kids</MenuItem>
-                        <MenuItem value="Everyone">Everyone</MenuItem>
-                      </Select>
-                    </FormControl>
+                    ) : (
+                      // Posts and Services filters
+                      <>
+                        {/* Filter Summary for Posts/Services */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          gap: 1, 
+                          mb: 2, 
+                          flexWrap: 'wrap',
+                          alignItems: 'center'
+                        }}>
+                          <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                            Active filters:
+                          </Typography>
+                          
+                          {localFilters?.gender && localFilters?.gender !== '' && (
+                            <Chip
+                              size="small"
+                              label={`Gender: ${localFilters?.gender}`}
+                              onDelete={() => setLocalFilters(prev => ({ ...prev, gender: '' }))}
+                              color="primary"
+                              variant="outlined"
+                            />
+                          )}
+                          
+                          {localFilters?.postStatus && localFilters?.postStatus !== '' && (
+                            <Chip
+                              size="small"
+                              label={`Status: ${localFilters?.postStatus}`}
+                              onDelete={() => setLocalFilters(prev => ({ ...prev, postStatus: '' }))}
+                              color="primary"
+                              variant="outlined"
+                            />
+                          )}
+                          
+                          {!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000) && (
+                            <Chip
+                              size="small"
+                              label={`Price: ₹${localFilters?.priceRange?.[0]} - ₹${localFilters?.priceRange?.[1]}`}
+                              onDelete={() => setLocalFilters(prev => ({ 
+                                ...prev, 
+                                priceRange: [0, 10000000] 
+                              }))}
+                              color="primary"
+                              variant="outlined"
+                            />
+                          )}
+                          
+                          {(localFilters?.gender || localFilters?.postStatus || 
+                            !(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000)) && (
+                            <Button
+                              size="small"
+                              onClick={resetPostFilters}
+                              sx={{ ml: 'auto', fontSize: '0.75rem', minWidth: 'auto' }}
+                            >
+                              Clear All
+                            </Button>
+                          )}
+                        </Box>
 
-                    {/* Status Filter */}
-                    <FormControl size='small' sx={{ flex: '1 1 180px', '& .MuiOutlinedInput-root': { borderRadius: '12px',} }}>
-                      <InputLabel>Status</InputLabel>
-                      <Select
-                        name="postStatus"
-                        value={localFilters.postStatus}
-                        onChange={handleFilterChange}
-                        label="Status"
-                      >
-                        <MenuItem value="">All</MenuItem>
-                        <MenuItem value="Active">Active</MenuItem>
-                        <MenuItem value="InActive">InActive</MenuItem>
-                        <MenuItem value="Closed">Closed</MenuItem>
-                      </Select>
-                    </FormControl>
+                        {/* Gender Filter - Enhanced */}
+                        <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(25, 118, 210, 0.05)' }}>
+                          <Box 
+                            sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              mb: (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                                ? activePostFilters.gender ? 2 : 0
+                                : activeServiceFilters.gender ? 2 : 0,
+                              WebkitTapHighlightColor: 'transparent',
+                              WebkitTouchCallout: 'none',
+                              WebkitUserSelect: 'none',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => {
+                              if (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') {
+                                togglePostFilterSection('gender');
+                              } else {
+                                toggleServiceFilterSection('gender');
+                              }
+                            }}
+                          >
+                            <Typography variant="subtitle2" fontWeight={600} color="primary">
+                              <TransgenderRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                              Gender Preference
+                            </Typography>
+                            <IconButton size="small">
+                              {(selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                                ? (activePostFilters.gender ? <ExpandLess /> : <ExpandMore />)
+                                : (activeServiceFilters.gender ? <ExpandLess /> : <ExpandMore />)}
+                            </IconButton>
+                          </Box>
+                          
+                          {((selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                            ? activePostFilters.gender : activeServiceFilters.gender) && (
+                            <Box sx={{ mt: 2 }}>
+                              {/* Gender Quick Presets */}
+                              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                                Select quickly:
+                              </Typography>
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {[
+                                  { value: '', label: 'All Genders', icon: <PeopleRounded fontSize="small" /> },
+                                  { value: 'Male', label: 'Male', icon: <ManRounded fontSize="small" /> },
+                                  { value: 'Female', label: 'Female', icon: <WomanRounded fontSize="small" /> },
+                                  { value: 'Kids', label: 'Kids', icon: <ChildCareRounded fontSize="small" /> },
+                                  { value: 'Everyone', label: 'Everyone', icon: <PersonRounded fontSize="small" /> }
+                                ].map((option) => (
+                                  <Chip
+                                    key={option.value}
+                                    label={option.label}
+                                    icon={option.icon}
+                                    onClick={() => handleGenderPreset(option.value)}
+                                    variant={localFilters?.gender === option.value ? "filled" : "outlined"}
+                                    color="primary"
+                                    size="small"
+                                    sx={{ 
+                                      borderRadius: '8px',
+                                      gap: 0.2,
+                                      padding: '4px 6px',
+                                      fontWeight: localFilters?.gender === option.value ? 600 : 400,
+                                      '& .MuiChip-icon': { fontSize: '0.8rem' }
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                              
+                              {/* Gender Dropdown for precise selection */}
+                              <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                                <InputLabel>Select Gender</InputLabel>
+                                <Select
+                                  name="gender"
+                                  value={localFilters?.gender || ''}
+                                  onChange={handleFilterChange}
+                                  label="Select Gender"
+                                  sx={{ borderRadius: '12px' }}
+                                >
+                                  <MenuItem value="">
+                                    <em>All Genders</em>
+                                  </MenuItem>
+                                  <MenuItem value="Male">Male</MenuItem>
+                                  <MenuItem value="Female">Female</MenuItem>
+                                  <MenuItem value="Kids">Kids</MenuItem>
+                                  <MenuItem value="Everyone">Everyone</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          )}
+                        </Box>
 
-                    {/* Price Range */}
-                    <Box display="flex" gap={2} flex="1 1 auto">
-                      <TextField
-                        label="Min Price"
-                        type="number" size='small'
-                        value={localFilters.priceRange[0]}
-                        onChange={(e) => handlePriceChange(e, 'min')}
-                        fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
-                      />
-                      <TextField
-                        label="Max Price"
-                        type="number" size='small'
-                        value={localFilters.priceRange[1]}
-                        onChange={(e) => handlePriceChange(e, 'max')}
-                        fullWidth sx={{'& .MuiOutlinedInput-root': { borderRadius: '12px',}}}
-                      />
-                    </Box>
-                    </Box>}
+                        {/* Status Filter - Enhanced */}
+                        <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(156, 39, 176, 0.05)' }}>
+                          <Box 
+                            sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              mb: (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                                ? activePostFilters.status ? 2 : 0
+                                : activeServiceFilters.status ? 2 : 0,
+                              WebkitTapHighlightColor: 'transparent',
+                              WebkitTouchCallout: 'none',
+                              WebkitUserSelect: 'none',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => {
+                              if (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') {
+                                togglePostFilterSection('status');
+                              } else {
+                                toggleServiceFilterSection('status');
+                              }
+                            }}
+                          >
+                            <Typography variant="subtitle2" fontWeight={600} color="secondary">
+                              <CheckCircleRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                              Post Status
+                            </Typography>
+                            <IconButton size="small">
+                              {(selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                                ? (activePostFilters.status ? <ExpandLess /> : <ExpandMore />)
+                                : (activeServiceFilters.status ? <ExpandLess /> : <ExpandMore />)}
+                            </IconButton>
+                          </Box>
+                          
+                          {((selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                            ? activePostFilters.status : activeServiceFilters.status) && (
+                            <Box sx={{ mt: 2 }}>
+                              {/* Status Quick Presets */}
+                              <Typography variant="caption" color="text.secondary" sx={{ mb: 1.5, display: 'block' }}>
+                                Select status:
+                              </Typography>
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                {[
+                                  { value: '', label: 'All Status' },
+                                  { value: 'Active', label: 'Active Only' },
+                                  { value: 'InActive', label: 'InActive Only' },
+                                  { value: 'Closed', label: 'Closed' }
+                                ].map((option) => (
+                                  <Chip
+                                    key={option.value}
+                                    label={option.label}
+                                    onClick={() => handleStatusPreset(option.value)}
+                                    variant={localFilters?.postStatus === option.value ? "filled" : "outlined"}
+                                    color="secondary"
+                                    size="small"
+                                    sx={{ 
+                                      borderRadius: '8px',
+                                      fontWeight: localFilters?.postStatus === option.value ? 600 : 400,
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                              
+                              {/* Status Dropdown for precise selection */}
+                              <FormControl fullWidth size="small" sx={{ mt: 2 }}>
+                                <InputLabel>Select Status</InputLabel>
+                                <Select
+                                  name="postStatus"
+                                  value={localFilters?.postStatus || ''}
+                                  onChange={handleFilterChange}
+                                  label="Select Status"
+                                  sx={{ borderRadius: '12px' }}
+                                >
+                                  <MenuItem value="">All Status</MenuItem>
+                                  <MenuItem value="Active">Active</MenuItem>
+                                  <MenuItem value="InActive">InActive</MenuItem>
+                                  <MenuItem value="Closed">Closed</MenuItem>
+                                </Select>
+                              </FormControl>
+                            </Box>
+                          )}
+                        </Box>
+
+                        {/* Price Range Filter - Enhanced */}
+                        <Box sx={{ mb: 3, p: 2, borderRadius: 2, bgcolor: 'rgba(76, 175, 80, 0.05)' }}>
+                          <Box 
+                            sx={{ 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              alignItems: 'center',
+                              cursor: 'pointer',
+                              mb: (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                                ? activePostFilters.price ? 2 : 0
+                                : activeServiceFilters.price ? 2 : 0,
+                              WebkitTapHighlightColor: 'transparent',
+                              WebkitTouchCallout: 'none',
+                              WebkitUserSelect: 'none',
+                              userSelect: 'none',
+                            }}
+                            onClick={() => {
+                              if (selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') {
+                                togglePostFilterSection('price');
+                              } else {
+                                toggleServiceFilterSection('price');
+                              }
+                            }}
+                          >
+                            <Typography variant="subtitle2" fontWeight={600} color="success.main">
+                              <CurrencyRupeeRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
+                              Price Range
+                              {!(localFilters?.priceRange?.[0] === 0 && localFilters?.priceRange?.[1] === 10000000) && (
+                                <Typography component="span" variant="caption" sx={{ ml: 1, color: 'success.main' }}>
+                                  (₹{localFilters?.priceRange?.[0]} - ₹{localFilters?.priceRange?.[1]})
+                                </Typography>
+                              )}
+                            </Typography>
+                            <IconButton size="small">
+                              {(selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                                ? (activePostFilters.price ? <ExpandLess /> : <ExpandMore />)
+                                : (activeServiceFilters.price ? <ExpandLess /> : <ExpandMore />)}
+                            </IconButton>
+                          </Box>
+                          
+                          {((selectedCategory === 'Paid' || selectedCategory === 'UnPaid' || selectedCategory === 'Emergency') 
+                            ? activePostFilters.price : activeServiceFilters.price) && (
+                            <>
+                              {/* Price Slider */}
+                              <Box sx={{ mt: 1, px: 1 }}>
+                                <Slider
+                                  value={localFilters.priceRange}
+                                  onChange={(event, newValue) => {
+                                    setLocalFilters(prev => ({ 
+                                      ...prev, 
+                                      priceRange: newValue 
+                                    }));
+                                  }}
+                                  valueLabelDisplay="auto"
+                                  valueLabelFormat={(value) => `₹${value}`}
+                                  min={0}
+                                  max={10000000}
+                                  step={1000}
+                                  sx={{
+                                    '& .MuiSlider-valueLabel': {
+                                      backgroundColor: '#4CAF50',
+                                      borderRadius: '8px',
+                                      padding: '4px 8px'
+                                    }
+                                  }}
+                                />
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
+                                  <Typography variant="caption" color="text.secondary">₹0</Typography>
+                                  <Typography variant="caption" color="text.secondary">₹1 Cr</Typography>
+                                </Box>
+                              </Box>
+                              
+                              {/* Price Inputs */}
+                              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                                <TextField
+                                  fullWidth
+                                  label="Min Price (₹)"
+                                  type="number"
+                                  size="small"
+                                  value={localFilters.priceRange[0]}
+                                  onChange={(e) => handlePriceChange(e, 'min')}
+                                  InputProps={{
+                                    inputProps: { min: 0, max: localFilters.priceRange[1] }
+                                  }}
+                                  sx={{ borderRadius: '12px' }}
+                                />
+                                <TextField
+                                  fullWidth
+                                  label="Max Price (₹)"
+                                  type="number"
+                                  size="small"
+                                  value={localFilters.priceRange[1]}
+                                  onChange={(e) => handlePriceChange(e, 'max')}
+                                  InputProps={{
+                                    inputProps: { min: localFilters.priceRange[0], max: 10000000 }
+                                  }}
+                                  sx={{ borderRadius: '12px' }}
+                                />
+                              </Box>
+                              
+                              {/* Quick Price Presets */}
+                              <Typography variant="caption" color="text.secondary" sx={{ mt: 3, mb: 1, display: 'block' }}>
+                                Quick presets:
+                              </Typography>
+                              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                                {[
+                                  { label: 'Free', range: [0, 0] },
+                                  { label: 'Under ₹500', range: [0, 500] },
+                                  { label: 'Under ₹2000', range: [0, 2000] },
+                                  { label: '₹1k-5k', range: [1000, 5000] },
+                                  { label: '₹5k-20k', range: [5000, 20000] },
+                                  { label: '₹20k+', range: [20000, 10000000] }
+                                ].map((preset) => (
+                                  <Chip
+                                    key={preset.label}
+                                    label={preset.label}
+                                    size="small"
+                                    onClick={() => handlePricePreset(preset.range)}
+                                    variant={
+                                      localFilters.priceRange[0] === preset.range[0] && 
+                                      localFilters.priceRange[1] === preset.range[1] 
+                                        ? "filled" 
+                                        : "outlined"
+                                    }
+                                    color="success"
+                                    sx={{ borderRadius: '8px' }}
+                                  />
+                                ))}
+                              </Box>
+                            </>
+                          )}
+                        </Box>
+
+                        {/* Filter Info */}
+                        <Box sx={{ 
+                          p: 2, 
+                          borderRadius: 2, 
+                          bgcolor: 'rgba(255, 193, 7, 0.05)',
+                          border: '1px solid rgba(255, 193, 7, 0.1)'
+                        }}>
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <InfoRounded fontSize="small" />
+                            <Box>
+                              <strong>Tips:</strong> 
+                              <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
+                                <li>Use price range to find services within your budget</li>
+                                <li>Filter by status to see only active posts</li>
+                                <li>Gender filters help find services suitable for specific needs</li>
+                              </ul>
+                            </Box>
+                          </Typography>
+                        </Box>
+                      </>
+                    )}
                   </Box>
-
-                  {/* Action Buttons */}
-                  {/* <Box gap={2} mt={3} sx={{display:'flex'}}>
-                    <Button
-                      variant="outlined"
-                      onClick={handleResetFilters}
-                      disabled={isDefaultFilters}
-                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none' }}
-                    >
-                      Reset
-                    </Button>
-                    <Button
-                      variant="contained" 
-                      onClick={handleApplyFilters}
-                      disabled={isDefaultFilters}
-                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none'}}
-                    >
-                      Apply
-                    </Button>
-                  </Box> */}
                 </CardContent>
-                <CardActions sx={{ position: 'sticky', bottom: 0, justifyContent: 'center', p: 2, 
-                  background: darkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.8)',
-                   backdropFilter: 'blur(10px)',
-                   borderTop: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(0, 0, 0, 0.1)',
-                 }}>
-                  {/* Action Buttons */}
-                  {/* <Box gap={2} mt={3} sx={{display:'flex'}}> */}
-                    <Button
-                      variant="outlined"
-                      // onClick={handleResetFilters}
-                      onClick={() => setIsExtraFiltersOpen(false)}
-                      // disabled={isDefaultFilters}
-                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none' }}
-                    >
-                      Close
-                    </Button>
-                    <Button
-                      variant="contained" 
-                      onClick={handleApplyFilters}
-                      disabled={isDefaultFilters}
-                      fullWidth sx={{ borderRadius:'8px', textTransform: 'none'}}
-                    >
-                      Apply
-                    </Button>
-                  {/* </Box> */}
+                {/* Action Buttons */}
+                <CardActions sx={{ 
+                  position: 'sticky', 
+                  bottom: 0, 
+                  justifyContent: 'center', 
+                  p: 2, 
+                  background: darkMode ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(10px)',
+                  borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+                }}>
+                  <Button
+                    variant="outlined"
+                    // onClick={handleResetFilters}
+                    onClick={() => setIsExtraFiltersOpen(false)}
+                    // disabled={isDefaultFilters}
+                    fullWidth 
+                    sx={{ 
+                      borderRadius:'8px', 
+                      textTransform: 'none',
+                      borderWidth: '2px',
+                      '&:hover': { borderWidth: '2px' }
+                    }}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    variant="contained" 
+                    onClick={handleApplyFilters}
+                    disabled={JSON.stringify(localFilters) === JSON.stringify(filters)}
+                    fullWidth 
+                    sx={{ 
+                      borderRadius:'8px', 
+                      textTransform: 'none',
+                      background: gradientHover,
+                      '&:hover': { background: gradientHover },
+                      '&.Mui-disabled': {
+                        background: darkMode ? 'rgba(255, 255, 255, 0.12)'  : 'rgba(0, 0, 0, 0.12)',
+                        color: darkMode ? 'rgba(255, 255, 255, 0.26)' : 'rgba(0, 0, 0, 0.26)',
+                      },
+                    }}
+                  >
+                    Apply Filters
+                  </Button>
                 </CardActions>
               </Card>
             )}
