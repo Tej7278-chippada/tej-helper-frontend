@@ -1,5 +1,16 @@
+// Enhanced BloodDonorCard.jsx
 import React from 'react';
-import { Card, CardContent, Typography, Box, Chip, Avatar, Rating } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Chip,
+  Avatar,
+  Rating,
+  Tooltip,
+  Badge
+} from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import {
@@ -15,6 +26,20 @@ import {
   Link as LinkIcon,
   ChatRounded,
   QuestionAnswerRounded,
+  FavoriteRounded,
+  // FiberManualRecord,
+  // AccessTimeRounded,
+  PeopleRounded,
+  BloodtypeRounded,
+  HistoryRounded,
+  ScheduleRounded,
+  PhoneRounded,
+  // EmailRounded,
+  // CakeRounded,
+  // TransgenderRounded,
+  // ManRounded,
+  // WomanRounded,
+  // PersonRounded,
 } from '@mui/icons-material';
 
 const BloodDonorCard = ({ donor, onClick, darkMode }) => {
@@ -29,6 +54,41 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
     return `${distance.toFixed(1)} km away`;
   };
 
+  const formatLastSeen = (date) => {
+    if (!date) return 'Never active';
+
+    const now = new Date();
+    const lastSeen = new Date(date);
+    const diffInMinutes = Math.floor((now - lastSeen) / (1000 * 60));
+
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+    return `${Math.floor(diffInMinutes / 1440)}d ago`;
+  };
+
+  // const getActivityStatus = (lastLoginAt) => {
+  //   if (!lastLoginAt) return { color: '#9e9e9e', label: 'Offline', icon: <FiberManualRecord fontSize="small" /> };
+
+  //   const lastSeen = new Date(lastLoginAt);
+  //   const now = new Date();
+  //   const diffInMinutes = Math.floor((now - lastSeen) / (1000 * 60));
+
+  //   if (diffInMinutes < 5) return { color: '#4caf50', label: 'Online', icon: <FiberManualRecord fontSize="small" /> };
+  //   if (diffInMinutes < 60) return { color: '#ff9800', label: 'Recently active', icon: <AccessTimeRounded fontSize="small" /> };
+  //   return { color: '#9e9e9e', label: 'Offline', icon: <FiberManualRecord fontSize="small" /> };
+  // };
+
+  // const getGenderIcon = (gender) => {
+  //   switch (gender) {
+  //     case 'Male': return <span style={{ color: '#2196f3' }}><ManRounded fontSize="small" /></span>;
+  //     case 'Female': return <span style={{ color: '#e91e63' }}><WomanRounded fontSize="small" /></span>;
+  //     case 'Non-binary': return <span style={{ color: '#9c27b0' }}><TransgenderRounded fontSize="small" /></span>;
+  //     case 'Other': return <span style={{ color: '#ff9800' }}><PersonRounded fontSize="small" /></span>;
+  //     default: return <TransgenderRounded fontSize="small" />;
+  //   }
+  // };
+
   const donationCount = (donor?.bloodDonor?.donationCount)
     ? donor.bloodDonor.donationCount
     : 0;
@@ -36,20 +96,13 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
   const formatDonateDate = (date) =>
     date ? new Date(date).toLocaleDateString('en-IN', {
       dateStyle: 'medium',
-      // timeStyle: 'short',
     }) : '—';
-
-  // const formatDate = (date) =>
-  //   date ? new Date(date).toLocaleString('en-IN', {
-  //     dateStyle: 'medium',
-  //     timeStyle: 'short',
-  //   }) : '—';
 
   const LAST_DONATION_GAP_DAYS = 56; // 8 weeks
 
   const lastDonationDate =
     donationCount > 0
-      ? donor.bloodDonor.lastDonated // latest donation
+      ? donor.bloodDonor.lastDonated
       : null;
 
   const getEligibilityInfo = () => {
@@ -73,22 +126,21 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
 
   const eligibility = getEligibilityInfo();
 
-  
   // Helper function to detect social platform from URL
   const detectSocialPlatform = (url) => {
     if (!url) return 'other';
-    
+
     const lowerUrl = url.toLowerCase();
-    
+
     for (const [platform, data] of Object.entries(SOCIAL_MEDIA_PLATFORMS)) {
       if (platform !== 'other' && data.pattern.test(lowerUrl.replace('https://', '').replace('http://', ''))) {
         return platform;
       }
     }
-    
+
     return 'other';
   };
-  
+
   // Helper function to get social media icon component
   const getSocialIcon = (platform, fontSize = 'small', color = 'inherit') => {
     const icons = {
@@ -105,7 +157,7 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
     };
     return icons[platform] || <LinkIcon fontSize={fontSize} sx={{ color }} />;
   };
-  
+
   // Social media platform options with icons, colors, and domain patterns
   const SOCIAL_MEDIA_PLATFORMS = {
     whatsapp: {
@@ -200,49 +252,75 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
     }
   };
 
+  // const activityStatus = getActivityStatus(donor.lastLoginAt);
+  const bloodGroupColor = donor.bloodDonor?.bloodGroup === 'O+' ? '#dc3545' :
+    donor.bloodDonor?.bloodGroup?.startsWith('O') ? '#c62828' :
+      donor.bloodDonor?.bloodGroup?.startsWith('A') ? '#1976d2' :
+        donor.bloodDonor?.bloodGroup?.startsWith('B') ? '#2e7d32' :
+          donor.bloodDonor?.bloodGroup?.startsWith('AB') ? '#9c27b0' : '#757575';
+
   return (
-    <Card 
-      sx={{ 
-        cursor: 'pointer', 
-        // mb: 2,
+    <Card
+      sx={{
+        cursor: 'pointer',
         borderRadius: 3,
-        backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
+        backgroundColor: darkMode ? 'rgba(30, 30, 30, 0.8)' : 'rgba(255, 255, 255, 0.95)',
         transition: 'all 0.3s ease',
-        WebkitTapHighlightColor: 'transparent', // Remove tap highlight
-        WebkitTouchCallout: 'none', // Disable iOS callout
-        WebkitUserSelect: 'none', // Disable text selection
-        userSelect: 'none', // Disable text selection
+        WebkitTapHighlightColor: 'transparent',
+        WebkitTouchCallout: 'none',
+        WebkitUserSelect: 'none',
+        userSelect: 'none',
+        border: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}`,
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: darkMode 
-            ? '0 8px 25px rgba(220, 53, 69, 0.3)' 
-            : '0 8px 25px rgba(220, 53, 69, 0.2)',
+          boxShadow: darkMode
+            ? '0 12px 30px rgba(220, 53, 69, 0.25)'
+            : '0 12px 30px rgba(220, 53, 69, 0.15)',
+          borderColor: '#dc3545',
         }
       }}
       onClick={onClick}
     >
       <CardContent sx={{ p: 2 }}>
-        <Box display="flex" alignItems="flex-start" gap={2} mb={1}>
-          {/* Profile Picture */}
-          <Avatar 
-            src={donor.profilePic ? `data:image/jpeg;base64,${donor.profilePic}` : null}
-            sx={{ 
-              width: 60, 
-              height: 60,
-              // border: `2px solid ${donor.bloodDonor?.bloodGroup === 'O+' ? '#dc3545' : '#1976d2'}`
-            }}
-          >
-            {!donor.profilePic && donor.username?.charAt(0).toUpperCase()}
-          </Avatar>
-          
-          <Box flex={1}>
+        {/* Header Section */}
+        <Box display="flex" alignItems="flex-start" gap={1.5} mb={1}>
+          {/* Profile Picture with Activity Badge */}
+          {/* <Badge
+            overlap="circular"
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            badgeContent={
+              <Tooltip title={activityStatus.label}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    backgroundColor: activityStatus.color,
+                    border: `2px solid ${darkMode ? '#1e1e1e' : '#fff'}`,
+                  }}
+                />
+              </Tooltip>
+            }
+          > */}
+            <Avatar
+              src={donor.profilePic ? `data:image/jpeg;base64,${donor.profilePic}` : null}
+              sx={{
+                width: 70,
+                height: 70,
+                // border: `2px solid ${bloodGroupColor}`
+              }}
+            >
+              {!donor.profilePic && donor.username?.charAt(0).toUpperCase()}
+            </Avatar>
+          {/* </Badge> */}
+
+          <Box flex={1} minWidth={0}>
             {/* Username and Verification */}
-            <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap', gap:1, mb: 1 }} >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0, flex: 1 }}>
-                <Typography variant="h6"
-                sx={{ fontWeight: 'bold',
-                  // flex: 1,
-                  // minWidth: 0, //critical for ellipsis
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -250,135 +328,291 @@ const BloodDonorCard = ({ donor, onClick, darkMode }) => {
                   {donor.username}
                 </Typography>
                 {donor.idVerification?.status === 'approved' && (
-                  <VerifiedIcon color="success" fontSize="small" />
+                  <Tooltip title="Verified Profile">
+                    <VerifiedIcon color="success" fontSize="small" />
+                  </Tooltip>
                 )}
               </Box>
-              {donationCount > 0 && (
+              {/* <Chip
+                label={activityStatus.label}
+                size="small"
+                icon={activityStatus.icon}
+                sx={{
+                  backgroundColor: `${activityStatus.color}15`,
+                  color: activityStatus.color,
+                  fontSize: '0.7rem',
+                  height: 22,
+                  '& .MuiChip-icon': { fontSize: '0.8rem', color: activityStatus.color }
+                }}
+              /> */}
+            </Box>
+
+            {/* Basic Info */}
+            <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+              {/* Blood Group */}
+              <Chip
+                icon={<BloodtypeRounded sx={{ fontSize: 16 }} />}
+                label={donor.bloodDonor?.bloodGroup || 'Unknown'}
+                size="small"
+                sx={{
+                  backgroundColor: `${bloodGroupColor}15`,
+                  color: bloodGroupColor,
+                  fontWeight: 'bold',
+                  border: `1px solid ${bloodGroupColor}40`
+                }}
+              />
+
+              {/* Distance */}
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <LocationOnIcon sx={{ fontSize: 16, color: '#ff5722' }} />
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>
+                  {formatDistance(donor.distance) || 'Unknown'}
+                </Typography>
+              </Box>
+
+              {/* Gender (if available from friendsProfile) */}
+              {/* {donor.friendsProfile?.gender && donor.friendsProfile.gender !== 'Unknown' && (
+                <Box display="flex" alignItems="center" gap={0.2}>
+                  {getGenderIcon(donor.friendsProfile.gender)}
+                  <Typography variant="caption" color="text.secondary">
+                    {donor.friendsProfile.gender}
+                  </Typography>
+                </Box>
+              )} */}
+
+              {/* Age (if available from friendsProfile) */}
+              {/* {donor.friendsProfile?.age && (
+                <Box display="flex" alignItems="center" gap={0.5}>
+                  <CakeRounded sx={{ fontSize: 16, color: '#9c27b0' }} />
+                  <Typography variant="caption" color="text.secondary">
+                    {donor.friendsProfile.age} yrs
+                  </Typography>
+                </Box>
+              )} */}
+            </Box>
+
+            {/* Donation Count */}
+            {donationCount >= 0 && (
+              <Box display="flex" alignItems="center" gap={0.5}>
+                <FavoriteRounded sx={{ fontSize: 14, color: '#dc3545' }} />
+                <Typography variant="caption" color="text.secondary">
+                  Donated {donationCount} time{donationCount > 1 ? 's' : ''}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Profile Description */}
+        {donor.profileDescription ? (
+          <Typography variant="body2" color="text.secondary" paragraph sx={{
+            mb: 2,
+            lineHeight: 1.5,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden'
+          }}>
+            {donor.profileDescription}
+          </Typography>
+        ) : (
+          <Typography variant="body2" color="text.secondary" paragraph sx={{
+            mb: 2,
+            opacity: 0.7
+          }}>
+            No bio yet
+          </Typography>
+        )}
+
+        {/* Eligibility Status */}
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            <ScheduleRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+            Donation Status
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Chip
+              icon={<HistoryRounded fontSize="small" />}
+              label={lastDonationDate ? `Last: ${formatDonateDate(lastDonationDate)}` : 'No history'}
+              size="small"
+              variant="outlined"
+              sx={{
+                borderRadius: '12px',
+                fontSize: '0.7rem',
+                height: 24,
+                // borderColor: eligibility.eligible ? '#4caf50' : '#ff9800',
+                // color: eligibility.eligible ? '#4caf50' : '#ff9800'
+              }}
+            />
+            <Chip
+              label={eligibility.eligible ? 'Ready to donate' : `Ready in ${eligibility.daysLeft}d`}
+              size="small"
+              sx={{
+                borderRadius: '12px',
+                backgroundColor: eligibility.eligible ? '#4caf5015' : '#ff980015',
+                color: eligibility.eligible ? '#4caf50' : '#ff9800',
+                fontSize: '0.7rem',
+                height: 24
+              }}
+            />
+          </Box>
+        </Box>
+
+        {/* Interests (if available) */}
+        {/* {donor.interests && donor.interests.length > 0 && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              Interests
+            </Typography>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {donor.interests.slice(0, 3).map((interest, index) => (
                 <Chip
-                  label={`Donated ${donationCount} time${donationCount > 1 ? 's' : ''}`}
-                  variant="outlined"
+                  key={index}
+                  label={interest}
                   size="small"
-                  // color="success" 
-                  sx={{ ml: 'auto', color: '#F57C00', borderColor: '#F57C00' }}
+                  variant="outlined"
+                  sx={{
+                    borderRadius: '12px',
+                    fontSize: '0.7rem',
+                    height: 20,
+                    borderColor: darkMode ? '#555555' : '#9e9e9e',
+                    color: darkMode ? '#757575' : '#616161'
+                  }}
+                />
+              ))}
+              {donor.interests.length > 3 && (
+                <Chip
+                  label={`+${donor.interests.length - 3}`}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: '8px',
+                    borderColor: darkMode ? '#555555' : '#9e9e9e',
+                    color: darkMode ? '#757575' : '#616161',
+                    fontSize: '0.7rem',
+                    height: 20
+                  }}
                 />
               )}
             </Box>
-            
-            {/* Blood Group and Distance */}
-            <Box display="flex" gap={1} alignItems="center" mb={1}>
-              <Chip 
-                label={`🩸 ${donor.bloodDonor?.bloodGroup || 'Unknown'}`}
-                // color="error"
-                size="small" variant="outlined"
-                sx={{ fontWeight: 'bold' }}
-              />
-              <Box display="flex" alignItems="center">
-                <LocationOnIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {/* {donor.distance?.toFixed(1)} km away */}
-                  {formatDistance(donor.distance) ? `${formatDistance(donor.distance)}` : ''}
+          </Box>
+        )} */}
+
+        {/* Stats and Contact Section */}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          pt: 1, mt: 1.5,
+          borderTop: `1px solid ${darkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)'}`
+        }}>
+          {/* Left: Stats */}
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
+            {/* Trust Level */}
+            <Tooltip title="Trust Rating">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Rating
+                  value={donor.trustLevel || 0}
+                  size="small"
+                  readOnly
+                  precision={0.5}
+                  sx={{ fontSize: '1rem' }}
+                />
+                <Typography variant="caption" color="text.secondary">
+                  {donor.trustLevel > 0 ? donor.trustLevel.toFixed(1) : 'N/A'}
                 </Typography>
               </Box>
-            </Box>
-            
-            
+            </Tooltip>
+
+            {/* Followers */}
+            <Tooltip title="Followers">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <PeopleRounded sx={{ fontSize: 16, color: '#757575' }} />
+                <Typography variant="caption" color="text.secondary">
+                  {donor.followerCount || 0}
+                </Typography>
+              </Box>
+            </Tooltip>
+          </Box>
+
+          {/* Right: Contact Icons */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            {/* Contact Methods */}
+            {(donor.bloodDonor?.contactWay?.phone || donor.bloodDonor?.contactWay?.email) && (
+              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                {donor.bloodDonor.contactWay.phone && (
+                  <Tooltip title="Phone available">
+                    <Avatar sx={{
+                      bgcolor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                      color: '#2196F3',
+                      width: 24,
+                      height: 24
+                    }}>
+                      <PhoneRounded sx={{ fontSize: 18 }} />
+                    </Avatar>
+                  </Tooltip>
+                )}
+                {/* {donor.bloodDonor.contactWay.email && (
+                  <Tooltip title="Email available">
+                    <Avatar sx={{
+                      bgcolor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                      color: '#E4405F',
+                      width: 24,
+                      height: 24
+                    }}>
+                      <EmailRounded sx={{ fontSize: 18 }} />
+                    </Avatar>
+                  </Tooltip>
+                )} */}
+              </Box>
+            )}
+
+            {/* Social Media */}
+            {donor.bloodDonor?.contactWay?.socialMedia?.slice(0, 2).map((social, index) => {
+              const platform = detectSocialPlatform(social.url || social.platform);
+              const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+
+              return (
+                <Tooltip key={index} title={platformData.label}>
+                  <Avatar sx={{
+                    bgcolor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                    color: platformData.color,
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%'
+                  }}>
+                    {getSocialIcon(platform, '18', platformData.color)}
+                  </Avatar>
+                </Tooltip>
+              );
+            })}
+
+            {donor.bloodDonor?.contactWay?.socialMedia?.length > 2 && (
+              <Tooltip title={`+${donor.bloodDonor.contactWay.socialMedia.length - 2} more social profiles`}>
+                <Chip
+                  label={`+${donor.bloodDonor.contactWay.socialMedia.length - 2}`}
+                  size="small"
+                  sx={{
+                    height: 20,
+                    fontSize: '0.7rem',
+                    backgroundColor: darkMode ? 'rgba(97, 97, 97, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+                    color: darkMode ? '#757575' : '#616161'
+                  }}
+                />
+              </Tooltip>
+            )}
           </Box>
         </Box>
-        {/* Profile Description */}
-        {donor.profileDescription ? (
-          <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 1 }}>
-            {donor.profileDescription.length > 100 
-              ? `${donor.profileDescription.substring(0, 100)}...`
-              : donor.profileDescription
-            }
-          </Typography>
-        ) : (
-          <Typography variant="body2" color="text.secondary" paragraph sx={{ mb: 1, fontStyle: 'italic' }}>
-            No profile description provided.
-          </Typography>
-        )}
-        
-        {/* Additional Info */}
-        <Box display="flex" gap={1} flexWrap="wrap">
-          {/* Trust Level */}
-          <Chip 
-            label={
-              <Box display="flex" alignItems="center">
-                <Rating value={donor.trustLevel || 0} size="small" readOnly />
-                <Typography variant="caption" sx={{ ml: 0.5 }}>
-                  ({donor.trustLevel > 0 ? `${donor.trustLevel}/5` : 'N/A'})
-                </Typography>
-              </Box>
-            }
-            variant="outlined"
-            size="small"
-          />
-          
-          {/* Last Donated */}
-          {/* {donor.bloodDonor?.lastDonated?.[0] && (
-            <Chip 
-              label={`Last donated: ${new Date(donor.bloodDonor.lastDonated[0]).toLocaleDateString()}`}
-              variant="outlined"
-              size="small"
-              color="info"
-            />
-          )} */}
-          
-          {/* Follower Count */}
-          <Chip 
-            label={`${donor.followerCount || 0} followers`}
-            variant="outlined"
-            size="small"
-          />
-        </Box>
-        <Box sx={{ my: 1 }}>
-          <Typography variant="body2" mb={0.5} >
-            Contact Medium:
-          </Typography>
-          {(donor?.bloodDonor?.contactWay?.phone || donor?.bloodDonor?.contactWay?.email ||  donor?.bloodDonor?.contactWay?.socialMedia?.length > 0) ? (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {donor.bloodDonor.contactWay.phone && <PhoneIcon fontSize="small" sx={{ color: '#0088cc' }} />}
-              {donor.bloodDonor.contactWay.email && <EmailIcon fontSize="small" sx={{ color: '#E4405F' }} />}
 
-              {donor.bloodDonor.contactWay.socialMedia.map((social, index) => {
-                const platform = detectSocialPlatform(social.url || social.platform);
-                const platformData =
-                  SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
-
-                return (
-                  <Box key={index} sx={{ color: platformData.color }}> {/* platformData.color */}
-                    {getSocialIcon(platform, 'small')}
-                  </Box>
-                );
-              })}
-            </Box>
-          ) : (
-            <Typography variant="body2" color="text.secondary" mb={1.5} >
-              N/A
-            </Typography>
-          )}
-        </Box>
-        <Typography variant="body2" sx={{ mt: 1, color: 'inherit'  }}>
-          Last donated: {donor.bloodDonor?.lastDonated?.[0] ? formatDonateDate(lastDonationDate) : 'No donation history yet'} {' '}
-          {lastDonationDate && (`(${eligibility.eligible
-            ? 'Eligible to donate now'
-            : `Eligible in ${eligibility.daysLeft} day${eligibility.daysLeft > 1 ? 's' : ''}`})`)}
+        {/* Last Active */}
+        <Typography variant="caption" color="text.secondary" sx={{
+          display: 'block',
+          mt: 1,
+          textAlign: 'center',
+          opacity: 0.7
+        }}>
+          Last active: {formatLastSeen(donor.lastLoginAt)}
         </Typography>
-        {/* {lastDonationDate && (
-          <Chip
-            label={
-              eligibility.eligible
-                ? 'Eligible to donate now'
-                : `Eligible in ${eligibility.daysLeft} day${eligibility.daysLeft > 1 ? 's' : ''}`
-            }
-            color={eligibility.eligible ? 'success' : 'warning'}
-            variant="outlined"
-            size="small"
-          />
-        )} */}
-        {/* <Typography variant="body2" sx={{ mt: 1, color: 'inherit'  }}>
-          Last seen : {formatDate(donor?.lastLoginAt) || 'Not found'}
-        </Typography> */}
       </CardContent>
     </Card>
   );
