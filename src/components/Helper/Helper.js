@@ -4372,7 +4372,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           }}
                           onClick={() => toggleFilterSection('gender')}
                         >
-                          <Typography variant="subtitle2" fontWeight={600}>
+                          <Typography variant="subtitle2" fontWeight={600} color="primary.main" >
                             <TransgenderRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
                             Gender Preference
                           </Typography>
@@ -4472,11 +4472,11 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           }}
                           onClick={() => toggleFilterSection('ageRange')}
                         >
-                          <Typography variant="subtitle2" fontWeight={600}>
+                          <Typography variant="subtitle2" fontWeight={600} color="secondary.main" >
                             <CakeRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
                             Age Range
                             {activeFriendFilters.ageRange && (
-                              <Typography component="span" variant="caption" sx={{ ml: 1, color: 'primary.main' }}>
+                              <Typography component="span" variant="caption" sx={{ ml: 1, color: 'secondary.main' }}>
                                 ({localFilters?.friendsAgeRange?.[0]}-{localFilters?.friendsAgeRange?.[1]})
                               </Typography>
                             )}
@@ -4505,8 +4505,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                 min={18}
                                 max={65}
                                 sx={{
+                                  color: 'secondary.main',
                                   '& .MuiSlider-valueLabel': {
-                                    backgroundColor: 'primary.main',
+                                    backgroundColor: 'secondary.main',
                                     borderRadius: '8px',
                                     padding: '4px 8px'
                                   }
@@ -4569,7 +4570,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                       ? "filled" 
                                       : "outlined"
                                   }
-                                  color="primary"
+                                  color="secondary"
                                   sx={{ borderRadius: '8px' }}
                                 />
                               ))}
@@ -4594,7 +4595,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                           }}
                           onClick={() => toggleFilterSection('lookingFor')}
                         >
-                          <Typography variant="subtitle2" fontWeight={600}>
+                          <Typography variant="subtitle2" fontWeight={600} color="success.main" >
                             <SearchRounded fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
                             Looking For
                             {activeFriendFilters?.lookingFor && localFilters?.friendsLookingFor?.length > 0 && (
@@ -5020,6 +5021,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                                   max={20000}
                                   step={1000}
                                   sx={{
+                                    color: 'success.main',
                                     '& .MuiSlider-valueLabel': {
                                       backgroundColor: '#4CAF50',
                                       borderRadius: '8px',
@@ -5753,21 +5755,95 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '50vh',
+                      // height: '50vh',
                       textAlign: 'center',
+                      p: 2
                     }}>
-                      <img 
+                      {/* <img 
                         src="https://cdn-icons-png.flaticon.com/512/4076/4076478.png" 
                         alt="No blood donors found" 
                         style={{ width: '100px', opacity: 0.7, marginBottom: '16px' }}
-                      />
-                      <Typography variant="body1" color="text.secondary">
+                      /> */}
+                      <Box sx={{ 
+                        width: 120, 
+                        height: 120, 
+                        borderRadius: '50%', 
+                        backgroundColor: darkMode ? 'rgba(220, 53, 69, 0.1)' : 'rgba(220, 53, 69, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 3
+                      }}>
+                        <BloodtypeRounded sx={{ fontSize: 60, color: '#dc3545', opacity: 0.7 }} />
+                      </Box>
+                      <Typography variant="h6" color="text.primary" gutterBottom>
                         {searchQuery 
-                          ? `No blood donors found for "${searchQuery}" within ${distanceRange} km`
-                          : `No blood donors found within ${distanceRange} km of your location...`
+                          ? `No blood donors found for "${searchQuery}"`
+                          : `No blood donors nearby yet`
                         }
                       </Typography>
-                      {searchQuery && (
+                      <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 400, mb: 3 }}>
+                        {searchQuery 
+                          ? `Try adjusting your search or expanding the search radius to find more blood donors.`
+                          : `Blood donors within ${distanceRange} km will appear here. Try increasing your search radius or adjusting your filters.`
+                        }
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
+                        {searchQuery ? (
+                          <Button 
+                            variant="outlined" 
+                            startIcon={<ClearRounded />}
+                            onClick={handleClearSearch}
+                            sx={{ 
+                              borderRadius: '20px',
+                              textTransform: 'none',
+                              px: 3,
+                              borderWidth: 2,
+                              '&:hover': {
+                                borderWidth: 2
+                              }
+                            }}
+                          >
+                            Clear Search
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outlined"
+                            startIcon={<LocationOnIcon />}
+                            disabled={distanceRange >= 1000}
+                            onClick={() => setDistanceRange(prev => Math.min(prev + 10, 1000))}
+                            sx={{ 
+                              borderRadius: '20px',
+                              textTransform: 'none',
+                              px: 3,
+                              borderWidth: 2,
+                              '&:hover': {
+                                borderWidth: 2
+                              }
+                            }}
+                          >
+                            Increase Radius (+10 km)
+                          </Button>
+                        )}
+                        
+                        <Button 
+                          variant="contained"
+                          startIcon={<FilterListRounded/>}
+                          onClick={() => setIsExtraFiltersOpen(true)}
+                          sx={{ 
+                            borderRadius: '20px',
+                            textTransform: 'none',
+                            px: 3,
+                            backgroundColor: '#2196f3',
+                            '&:hover': {
+                              backgroundColor: '#1976d2',
+                            }
+                          }}
+                        >
+                          Adjust Filters
+                        </Button>
+                      </Box>
+                      {/* {searchQuery && (
                         <Button 
                           variant="outlined" size="small"
                           sx={{ mt: 2, borderRadius: '12px', textTransform: 'none',
@@ -5813,6 +5889,31 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
                         >
                           Increase Search Radius
                         </Button>
+                      )} */}
+                      {/* Tips Section */}
+                      {!searchQuery && (
+                        <Box sx={{ 
+                          mt: 4, 
+                          p: 2, 
+                          borderRadius: 2, 
+                          backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                          maxWidth: 500,
+                          textAlign: 'left'
+                        }}>
+                          <Typography variant="subtitle2" color="primary" gutterBottom>
+                            💡 Tips to find more blood donors:
+                          </Typography>
+                          <Box component="ul" sx={{ 
+                            pl: 2, 
+                            mb: 0,
+                            '& li': { mb: 1, fontSize: '0.875rem', color: 'text.secondary' }
+                          }}>
+                            <li>Increase search radius to find donors in nearby areas</li>
+                            <li>Adjust filters (blood group) to broaden your search</li>
+                            {/* <li>Add your own friends profile to appear in others' searches</li> */}
+                            <li>Check back later as more people join the platform</li>
+                          </Box>
+                        </Box>
                       )}
                     </Box>
                   )
@@ -5820,7 +5921,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
               posts.length > 0 ? (
                 <Grid container spacing={isMobile ? 1.5 : 1.5}>
                   {posts.map((user, index) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={`${user._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${user._id}`}>
+                    <Grid item xs={12} sm={6} md={4} lg={4} key={`${user._id}-${index}`} ref={index === posts.length - 3 ? lastPostRef : null} id={`post-${user._id}`}>
                       <FriendsCard
                         user={user} 
                         onClick={() => handleOpenUserProfileDialog(user._id)}
