@@ -7,9 +7,37 @@ import TranslateIcon from '@mui/icons-material/Translate';
 
 const AboutHelper = ({ isMobile, darkMode }) => {
 
-  const [userLanguage, setUserLanguage] = useState('en');
+  const [userLanguage, setUserLanguage] = useState(() => {
+    // Initialize from cache immediately
+    const cached = localStorage.getItem('helper_user_location');
+    if (cached) {
+      try {
+        const { language, location, timestamp } = JSON.parse(cached);
+        // Cache valid for 7 days
+        if (Date.now() - timestamp < 7 * 24 * 60 * 60 * 1000) {
+          setDetectedLocation(location);
+          return language;
+        }
+      } catch (e) {
+        console.error('Cache parse error:', e);
+      }
+    }
+    return 'en';
+  });
   const [anchorEl, setAnchorEl] = useState(null);
   const [detectedLocation, setDetectedLocation] = useState('');
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState(false);
+
+  // Cache keys
+  const CACHE_KEYS = {
+    LOCATION: 'helper_user_location',
+    LANGUAGE: 'helper_user_language',
+    TIMESTAMP: 'helper_location_timestamp'
+  };
+
+  // Cache duration: 7 days (in milliseconds)
+  const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
   // Indian languages mapping
   const indianLanguages = {
@@ -111,6 +139,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'Find Friends Nearby',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'Connect with real people around you who share similar interests and goals.',
+            'Find friends, activity partners, study buddies, or travel companions near your location.',
+            'Chat safely with verified users using in-app messaging and shared hobbies.',
+          ],
+        },
+        {
           title: 'Search alerts for Lost Child or Pet',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -202,6 +239,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
             'आपातकालीन स्थिति में तत्काल स्थानीय मदद प्राप्त करें जब हर मिनट कीमती हो।',
             'रक्तदाताओं से लेकर तत्काल मरम्मत तक, अपने पास वास्तविक लोगों को खोजें।',
             'कम्युनिटी-पावर्ड सपोर्ट जो समय और जान दोनों बचाता है।',
+          ],
+        },
+        {
+          title: 'आस-पास मित्र खोजें',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'अपने आस-पास के उन वास्तविक लोगों से जुड़ें जिनकी रुचियां और लक्ष्य आपके समान हैं।',
+            'अपने स्थान के पास मित्र, एक्टिविटी पार्टनर, पढ़ाई के साथी या यात्रा साथी खोजें।',
+            'इन-ऐप मैसेजिंग और साझा शौक के माध्यम से वेरिफाइड यूजर्स के साथ सुरक्षित रूप से चैट करें।',
           ],
         },
         {
@@ -300,6 +346,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'దగ్గరలోని స్నేహితులను కనుగొనండి',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'మీ ఆలోచనలు మరియు అభిరుచులు కలిసే మీ చుట్టుపక్కల వ్యక్తులతో కనెక్ట్ అవ్వండి.',
+            'మీ ప్రాంతంలో స్నేహితులు, యాక్టివిటీ పార్ట్‌నర్‌లు, స్టడీ బడ్డీలు లేదా ట్రావెల్ కంపానియన్లను కనుగొనండి.',
+            'ఇన్-యాప్ మెసేజింగ్ ద్వారా వెరిఫైడ్ యూజర్లతో సురక్షితంగా చాట్ చేయండి.',
+          ],
+        },
+        {
           title: 'తప్పిపోయిన పిల్లలు లేదా పెంపుడు జంతువుల అలర్ట్స్',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -391,6 +446,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
             'প্রতিটি মুহূর্ত যখন মূল্যবান, তখন জরুরি পরিস্থিতিতে তাৎক্ষণিক স্থানীয় সাহায্য পান।',
             'রক্তদাতা থেকে শুরু করে জরুরি মেরামত, আপনার কাছেই আসল মানুষদের খুঁজে নিন।',
             'কমিউনিটি-চালিত সহায়তা যা সময় এবং জীবন উভয়ই বাঁচায়।',
+          ],
+        },
+        {
+          title: 'আশেপাশে বন্ধু খুঁজুন',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'আপনার চারপাশে থাকা এমন মানুষদের সাথে যুক্ত হন যাদের আগ্রহ এবং লক্ষ্য আপনার মতোই।',
+            'আপনার এলাকার কাছাকাছি বন্ধু, অ্যাক্টিভিটি পার্টনার, পড়ার সঙ্গী বা ভ্রমণের সঙ্গী খুঁজে নিন।',
+            'ইন-অ্যাপ মেসেজিং ব্যবহার করে ভেরিফাইড ব্যবহারকারীদের সাথে নিরাপদভাবে চ্যাট করুন।',
           ],
         },
         {
@@ -488,6 +552,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'அருகிலுள்ள நண்பர்களைக் கண்டறியுங்கள்',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'உங்களைப் போன்ற அதே ஆர்வம் மற்றும் இலக்குகளைக் கொண்ட நிஜ மனிதர்களுடன் இணையுங்கள்।',
+            'உங்கள் பகுதிக்கு அருகிலுள்ள நண்பர்கள், விளையாட்டுத் தோழர்கள், படிப்புத் தோழர்கள் அல்லது பயணத் துணைகளைக் கண்டறியுங்கள்।',
+            'இன்-ஆப் மெசேஜிங் மூலம் சரிபார்க்கப்பட்ட பயனர்களுடன் பாதுகாப்பாக அரட்டையடிக்கவும்।',
+          ],
+        },
+        {
           title: 'காணாமல் போன குழந்தை அல்லது செல்லப் பிராணிகளுக்கான தேடல் அறிவிப்பு',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -579,6 +652,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
             'आणीबाणीच्या प्रसंगी, जेव्हा प्रत्येक मिनिट महत्त्वाचा असतो, तेव्हा त्वरित स्थानिक मदत मिळवा.',
             'रक्तदात्यांपासून ते तातडीच्या दुरुस्तीपर्यंत, तुमच्या जवळचे खरे लोक शोधा.',
             'कम्युनिटी-पावर्ड सपोर्ट जो वेळ आणि जीव दोन्ही वाचवतो.',
+          ],
+        },
+        {
+          title: 'जवळपासचे मित्र शोधा',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'तुमच्या आजूबाजूच्या अशा खऱ्या लोकांशी जोडा ज्यांचे विचार आणि आवडी तुमच्यासारख्याच आहेत।',
+            'तुमच्या परिसरात मित्र, ॲक्टिव्हिटी पार्टनर, अभ्यासाचे सोबती किंवा प्रवासाचे सोबती शोधा।',
+            'इन-ॲप मेसेजिंगद्वारे व्हेरिफाईड युजर्ससोबत सुरक्षितपणे चॅट करा।',
           ],
         },
         {
@@ -676,6 +758,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'નજીકના મિત્રો શોધો',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'તમારી આસપાસના એવા વાસ્તવિક લોકો સાથે જોડાઓ જેમના રસ અને લક્ષ્યો તમારા જેવા જ હોય।',
+            'તમારા લોકેશનની નજીક મિત્રો, એક્ટિવિટી પાર્ટનર્સ, અભ્યાસના મિત્રો અથવા પ્રવાસના સાથીઓ શોધો।',
+            'ઇન-એપ મેસેજિંગ દ્વારા વેરિફાઇડ યુઝર્સ સાથે સુરક્ષિત રીતે ચેટ કરો।',
+          ],
+        },
+        {
           title: 'ખોવાયેલા બાળકો અથવા પાલતુ પ્રાણીઓ માટે સર્ચ એલર્ટ',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -767,6 +858,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
             'ಪ್ರತಿ ನಿಮಿಷವೂ ಮುಖ್ಯವಾಗಿರುವ ತುರ್ತು ಸಂದರ್ಭಗಳಲ್ಲಿ ತಕ್ಷಣದ ಸ್ಥಳೀಯ ಸಹಾಯ ಪಡೆಯಿರಿ.',
             'ರಕ್ತದಾನಿಗಳಿಂದ ಹಿಡಿದು ತುರ್ತು ರಿಪೇರಿ ಕೆಲಸಗಳವರೆಗೆ, ನಿಮ್ಮ ಹತ್ತಿರವಿರುವ ನೈಜ ಜನರನ್ನು ಹುಡುಕಿ.',
             'ಸಮಯ ಮತ್ತು ಜೀವ ಎರಡನ್ನೂ ಉಳಿಸುವ ಸಮುದಾಯ ಆಧಾರಿತ ಬೆಂಬಲ.',
+          ],
+        },
+        {
+          title: 'ಹತ್ತಿರದ ಸ್ನೇಹಿತರನ್ನು ಹುಡುಕಿ',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'ನಿಮ್ಮಂತೆಯೇ ಆಸಕ್ತಿ ಮತ್ತು ಗುರಿಗಳನ್ನು ಹೊಂದಿರುವ ನಿಮ್ಮ ಸುತ್ತಮುತ್ತಲಿನ ನೈಜ ಜನರೊಂದಿಗೆ ಸಂಪರ್ಕ ಸಾಧಿಸಿ।',
+            'ನಿಮ್ಮ ಸ್ಥಳದ ಹತ್ತಿರ ಸ್ನೇಹಿತರು, ಆಕ್ಟಿವಿಟಿ ಪಾರ್ಟ್‌ನರ್‌ಗಳು, ಓದಿನ ಗೆಳೆಯರು ಅಥವಾ ಪ್ರಯಾಣದ ಸಂಗಾತಿಗಳನ್ನು ಹುಡುಕಿ।',
+            'ಇನ್-ಆಪ್ ಮೆಸೇಜಿಂಗ್ ಮೂಲಕ ವೆರಿಫೈಡ್ ಬಳಕೆದಾರರೊಂದಿಗೆ ಸುರಕ್ಷಿತವಾಗಿ ಚಾಟ್ ಮಾಡಿ।',
           ],
         },
         {
@@ -864,6 +964,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'അടുത്തുള്ള സുഹൃത്തുക്കളെ കണ്ടെത്താം',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'സമാന താൽപ്പര്യങ്ങളും ലക്ഷ്യങ്ങളുമുള്ള നിങ്ങളുടെ ചുറ്റുമുള്ള യഥാർത്ഥ ആളുകളുമായി ബന്ധപ്പെടുക।',
+            'നിങ്ങളുടെ സ്ഥലത്തിനടുത്തുള്ള സുഹൃത്തുക്കൾ, ആക്റ്റിവിറ്റി പാർട്ണർമാർ, പഠന കൂട്ടുകാർ അല്ലെങ്കിൽ യാത്രാ പങ്കാളികൾ എന്നിവരെ കണ്ടെത്തുക।',
+            'ഇൻ-ആപ്പ് മെസേജിംഗിലൂടെ വെരിഫൈഡ് ഉപയോക്താക്കളുമായി സുരക്ഷിതമായി ചാറ്റ് ചെയ്യുക।',
+          ],
+        },
+        {
           title: 'കാണായ കുട്ടികൾക്കും വളർത്തുമൃഗങ്ങൾക്കും വേണ്ടിയുള്ള തിരച്ചിൽ അലേർട്ട്',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -955,6 +1064,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
             'ਐਮਰਜੈਂਸੀ ਦੇ ਸਮੇਂ ਤੁਰੰਤ ਸਥਾਨਕ ਮਦਦ ਪ੍ਰਾਪਤ ਕਰੋ ਜਦੋਂ ਹਰ ਮਿੰਟ ਕੀਮਤੀ ਹੋਵੇ।',
             'ਖੂਨਦਾਨੀਆਂ ਤੋਂ ਲੈ ਕੇ ਤੁਰੰਤ ਮੁਰੰਮਤ ਤੱਕ, ਆਪਣੇ ਨੇੜੇ ਅਸਲ ਲੋਕਾਂ ਨੂੰ ਲੱਭੋ।',
             'ਕਮਿਊਨਿਟੀ-ਪਾਵਰਡ ਸਪੋਰਟ ਜੋ ਸਮਾਂ ਅਤੇ ਜਾਨ ਦੋਵੇਂ ਬਚਾਉਂਦੀ ਹੈ।',
+          ],
+        },
+        {
+          title: 'ਨੇੜਲੇ ਦੋਸਤ ਲੱਭੋ',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'ਆਪਣੇ ਆਲੇ-ਦੁਆਲੇ ਦੇ ਅਸਲ ਲੋਕਾਂ ਨਾਲ ਜੁੜੋ ਜਿਨ੍ਹਾਂ ਦੀਆਂ ਰੁਚੀਆਂ ਅਤੇ ਟੀਚੇ ਤੁਹਾਡੇ ਵਰਗੇ ਹਨ।',
+            'ਆਪਣੀ ਲੋਕੇਸ਼ਨ ਦੇ ਨੇੜੇ ਦੋਸਤ, ਐਕਟੀਵਿਟੀ ਪਾਰਟਨਰ, ਪੜ੍ਹਾਈ ਦੇ ਸਾਥੀ ਜਾਂ ਸਫ਼ਰ ਦੇ ਸਾਥੀ ਲੱਭੋ।',
+            'ਇਨ-ਐਪ ਮੈਸੇਜਿੰਗ ਰਾਹੀਂ ਵੈਰੀਫਾਈਡ ਯੂਜ਼ਰਸ ਨਾਲ ਸੁਰੱਖਿਅਤ ਢੰਗ ਨਾਲ ਚੈਟ ਕਰੋ।',
           ],
         },
         {
@@ -1052,6 +1170,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'ନିକଟସ୍ଥ ବନ୍ଧୁ ଖୋଜନ୍ତୁ',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'ଆପଣଙ୍କ ଚାରିପାଖରେ ଥିବା ପ୍ରକୃତ ଲୋକଙ୍କ ସହିତ ଯୋଡି ହୁଅନ୍ତୁ ଯେଉଁମାନଙ୍କର ରୁଚି ଆପଣଙ୍କ ସହିତ ସମାନ।',
+            'ଆପଣଙ୍କ ଅଞ୍ଚଳ ପାଖରେ ବନ୍ଧୁ, ଆକ୍ଟିଭିଟି ପାର୍ଟନର, ପାଠ ପଢା ସାଥୀ କିମ୍ବା ଭ୍ରମଣ ସାଥୀ ଖୋଜନ୍ତୁ।',
+            'ଇନ୍-ଆପ୍ ମେସେଜିଂ ମାଧ୍ୟମରେ ଭେରିଫାଇଡ୍ ବ୍ୟବହାରକାରୀଙ୍କ ସହ ସୁରକ୍ଷିତ ଭାବରେ ଚାଟ୍ କରନ୍ତୁ।',
+          ],
+        },
+        {
           title: 'ହଜିଯାଇଥିବା ଶିଶୁ କିମ୍ବା ପୋଷା ପ୍ରାଣୀ ପାଇଁ ସର୍ଚ୍ଚ ଆଲର୍ଟ',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -1146,6 +1273,15 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           ],
         },
         {
+          title: 'ওচৰৰে বন্ধু বিচাৰক',
+          image: '/aboutHelper/find_friends.jpg',
+          points: [
+            'আপোনাৰ চাৰিওপাশে থকা প্ৰকৃত লোকসকলৰ সৈতে সংযোগ স্থাপন কৰক যাৰ আগ্ৰহ আৰু লক্ষ্য আপোনাৰ সৈতে একে।',
+            'আপোনাৰ স্থানৰ ওচৰত বন্ধু, খেলৰ সংগী, পঢ়াৰ সংগী বা ভ্ৰমণৰ সংগী বিচাৰি পাওক।',
+            'ইন-এপ মেচেজিং ব্যৱহাৰ কৰি ভেরিফাইড ইউজাৰৰ সৈতে সুৰক্ষিতভাৱೆ কথা পাতক।',
+          ],
+        },
+        {
           title: 'নিৰুদ্দেশ হোৱা শিশু বা পোহনীয়া জন্তুৰ বাবে এলাৰ্ট',
           image: '/aboutHelper/lost_child.jpg',
           points: [
@@ -1197,36 +1333,147 @@ const AboutHelper = ({ isMobile, darkMode }) => {
   // Detect user location and set language
   useEffect(() => {
     const detectUserLocation = async () => {
+      // Check cache first
+      const cachedLocation = localStorage.getItem(CACHE_KEYS.LOCATION);
+      const cachedLang = localStorage.getItem(CACHE_KEYS.LANGUAGE);
+      const cachedTime = localStorage.getItem(CACHE_KEYS.TIMESTAMP);
+      
+      if (cachedLocation && cachedLang && cachedTime) {
+        const age = Date.now() - parseInt(cachedTime);
+        if (age < CACHE_DURATION) {
+          try {
+            const locationData = JSON.parse(cachedLocation);
+            setDetectedLocation(locationData.display);
+            setUserLanguage(cachedLang);
+            return; // Exit early, using cached data
+          } catch (e) {
+            console.error('Cache parse error:', e);
+            // Continue to fetch fresh data
+          }
+        }
+      }
+
+      // No valid cache, fetch fresh data
+      setLocationLoading(true);
+      setLocationError(false);
+      
+      // Timeout promise for fetch
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Location detection timeout')), 5000)
+      );
+
       try {
-        // Using IP geolocation API
-        const response = await fetch('https://ipapi.co/json/');
+        // Race between fetch and timeout
+        const response = await Promise.race([
+          fetch('https://ipapi.co/json/', {
+            headers: {
+              'Accept': 'application/json',
+              'Cache-Control': 'no-cache'
+            }
+          }),
+          timeoutPromise
+        ]);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const data = await response.json();
         
-        if (data.country_code === 'IN') {
+        let detectedLang = 'en';
+        let locationDisplay = '';
+        
+        if (data.country_code === 'IN' && data.region_code) {
           // User is in India
           const stateCode = `IN-${data.region_code}`;
-          const detectedLang = regionalMapping[stateCode] || regionalMapping['IN'];
-          setUserLanguage(detectedLang);
-          setDetectedLocation(`${data.city}, ${data.region}`);
+          detectedLang = regionalMapping[stateCode] || regionalMapping['IN'] || 'hi';
+          locationDisplay = data.city 
+            ? `${data.city}, ${data.region}`
+            : `${data.region}, India`;
         } else {
-          // User outside India - show English
-          setUserLanguage('en');
-          setDetectedLocation(`${data.country_name || 'International'}`);
+          // User outside India
+          detectedLang = 'en';
+          locationDisplay = data.country_name || 'International';
         }
+
+        // Update state
+        setUserLanguage(detectedLang);
+        setDetectedLocation(locationDisplay);
+        setLocationError(false);
+
+        // Save to cache
+        const cacheData = {
+          language: detectedLang,
+          location: {
+            display: locationDisplay,
+            raw: data,
+            countryCode: data.country_code,
+            regionCode: data.region_code,
+            city: data.city
+          },
+          timestamp: Date.now()
+        };
+
+        localStorage.setItem(CACHE_KEYS.LOCATION, JSON.stringify(cacheData.location));
+        localStorage.setItem(CACHE_KEYS.LANGUAGE, detectedLang);
+        localStorage.setItem(CACHE_KEYS.TIMESTAMP, Date.now().toString());
+
       } catch (error) {
         console.error('Location detection failed:', error);
-        // Fallback to browser language
-        const browserLang = navigator.language.split('-')[0];
-        if (indianLanguages[browserLang]) {
-          setUserLanguage(browserLang);
-        } else {
-          setUserLanguage('en');
+        setLocationError(true);
+        
+        // Enhanced fallback strategy
+        let fallbackLang = 'en';
+        let fallbackLocation = 'Location not detected';
+        
+        // Try browser language as first fallback
+        try {
+          const browserLang = navigator.language.split('-')[0];
+          if (indianLanguages[browserLang]) {
+            fallbackLang = browserLang;
+            fallbackLocation = `Detected from browser (${browserLang})`;
+          }
+        } catch (e) {
+          // Ignore browser language errors
         }
-        setDetectedLocation('Location not detected');
+
+        // Try previous cache as second fallback (even if expired)
+        if (!fallbackLang || fallbackLang === 'en') {
+          const oldCache = localStorage.getItem(CACHE_KEYS.LOCATION);
+          const oldLang = localStorage.getItem(CACHE_KEYS.LANGUAGE);
+          if (oldCache && oldLang) {
+            try {
+              const oldLocation = JSON.parse(oldCache);
+              fallbackLang = oldLang;
+              fallbackLocation = `${oldLocation.display || 'Previously detected'} (cached)`;
+            } catch (e) {
+              // Ignore old cache errors
+            }
+          }
+        }
+
+        setUserLanguage(fallbackLang);
+        setDetectedLocation(fallbackLocation);
+        
+      } finally {
+        setLocationLoading(false);
       }
     };
 
     detectUserLocation();
+  }, []); // Empty deps - run once on mount
+
+  // Optional: Preload detection for faster subsequent visits
+  useEffect(() => {
+    // Preconnect to geolocation API
+    const preconnectLink = document.createElement('link');
+    preconnectLink.rel = 'preconnect';
+    preconnectLink.href = 'https://ipapi.co';
+    document.head.appendChild(preconnectLink);
+
+    return () => {
+      document.head.removeChild(preconnectLink);
+    };
   }, []);
 
   const getGlassmorphismStyle = (opacity = 0.16, blur = 18) => ({
@@ -1378,11 +1625,11 @@ const AboutHelper = ({ isMobile, darkMode }) => {
                   color: darkMode ? '#fff' : '#2c3e50',
                 }}
               >{currentLanguage.nativeName}</Typography>
-              {detectedLocation && (
+              {/* {detectedLocation && (
                 <Typography variant="caption" sx={{ ml: 0.5, opacity: 0.7, color: darkMode ? '#e0e0e0' : '#424242', }}>
                   ({detectedLocation})
                 </Typography>
-              )}
+              )} */}
             </Box>
           }
           onClick={handleLanguageClick}
@@ -1419,7 +1666,7 @@ const AboutHelper = ({ isMobile, darkMode }) => {
               border: `1px solid ${darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
               borderRadius: '16px',
               mt: 1,
-              overflow: 'hidden',
+              overflow: 'auto',
             }
           }}
           MenuListProps={{
@@ -1428,9 +1675,16 @@ const AboutHelper = ({ isMobile, darkMode }) => {
             }
           }}
         >
-          <Typography sx={{ p: 2, fontWeight: 'bold', borderBottom: '1px solid rgba(0,0,0,0.1)', color: darkMode ? '#fff' : '#222' }}>
-            {currentContent.changeLanguage || 'Change language'}:
-          </Typography>
+          <Box sx={{ p: 2, borderBottom: '1px solid rgba(0,0,0,0.1)',}} >
+            <Typography sx={{ fontWeight: 'bold', color: darkMode ? '#fff' : '#222' }}>
+              {currentContent.changeLanguage || 'Change language'}:
+            </Typography>
+            {detectedLocation && (
+              <Typography variant="caption" sx={{ opacity: 0.7, color: darkMode ? '#e0e0e0' : '#424242', }}>
+                ({detectedLocation})
+              </Typography>
+            )}
+          </Box>
           {Object.entries(indianLanguages).map(([code, lang]) => (
             <MenuItem 
               key={code} 
@@ -1530,7 +1784,16 @@ const AboutHelper = ({ isMobile, darkMode }) => {
                   variant={isMobile ? 'subtitle1' : 'h6'}
                   fontWeight={600}
                   gutterBottom
-                  sx={{ color: darkMode ? '#fff' : '#333', }}
+                  sx={{ 
+                    color: darkMode ? '#fff' : '#333',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    wordBreak: 'break-word', // Break long words
+                    hyphens: 'auto', // Enable hyphenation
+                    maxWidth: '100%',
+                    lineHeight: 1.4,
+                    // pr: 1, // Padding right for breathing room
+                  }}
                 >
                   {section.title}
                 </Typography>
