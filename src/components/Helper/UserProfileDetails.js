@@ -12,7 +12,7 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import InterestsRoundedIcon from '@mui/icons-material/InterestsRounded';
 import FollowDialog from './FollowDialog';
 import UserProfileDetailsSkeleton from '../Skeletons/UserProfileDetailsSkeleton';
-import { CheckCircleRounded, ReportGmailerrorredRounded } from '@mui/icons-material';
+import { BusinessCenterRounded, CakeRounded, CheckCircleRounded, ConnectWithoutContactRounded, Diversity1Rounded, FavoriteRounded, FlightRounded, ForumRounded, HandshakeRounded, HistoryRounded, InterestsRounded, ManRounded, PeopleRounded, PersonRounded, ReportGmailerrorredRounded, ScheduleRounded, SchoolRounded, SearchRounded, SportsSoccerRounded, TransgenderRounded, WomanRounded } from '@mui/icons-material';
 import {
   WhatsApp as WhatsAppIcon,
   Telegram as TelegramIcon,
@@ -75,6 +75,8 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
   const [userReportSuccess, setUserReportSuccess] = useState(false);
   const [bloodRequestStatus, setBloodRequestStatus] = useState('request'); // 'request', 'requested', 'accepted', 'rejected'
   const [loadingBloodRequest, setLoadingBloodRequest] = useState(false);
+  const [friendsProfileEnabled, setFriendsProfileEnabled] = useState(false);
+  const [friendsProfileData, setFriendsProfileData] = useState(null);
 
   // Fetch user's rating when dialog opens
   useEffect(() => {
@@ -117,6 +119,12 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
       setTotalReviews(response.data.totalReviews);
       // setRatings(response.data.ratings);
       setServiceHistory(response.data.serviceHistory || []);
+
+      // Set friends profile data
+      if (response.data.friendsProfile) {
+        setFriendsProfileEnabled(response.data.friendsProfile.friend || false);
+        setFriendsProfileData(response.data.friendsProfile);
+      }
 
       // Set blood request status if available
       if (response.data.bloodRequestStatus) {
@@ -557,6 +565,59 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
     }
   };
 
+  const lookingForIcons = {
+    'Friendship': <PeopleRounded fontSize="small" />,
+    'Dating': <FavoriteRounded fontSize="small" />,
+    'Networking': <HandshakeRounded fontSize="small" />,
+    'Activity Partners': <SportsSoccerRounded fontSize="small" />,
+    'Travel Buddies': <FlightRounded fontSize="small" />,
+    'Study Partners': <SchoolRounded fontSize="small" />,
+    'Business Connections': <BusinessCenterRounded fontSize="small" />
+  };
+
+  // Add this function to get gender icon
+  const getGenderIcon = (gender) => {
+    switch(gender) {
+      case 'Male': return <span style={{ color: '#2196f3' }}><ManRounded fontSize="small" /></span>; // ♂
+      case 'Female': return <span style={{ color: '#e91e63' }}><WomanRounded fontSize="small" /></span>; //♀
+      case 'Non-binary': return <span style={{ color: '#9c27b0' }}><TransgenderRounded fontSize="small" /></span>; // ⚧
+      case 'Other': return <span style={{ color: '#ff9800' }}><PersonRounded fontSize="small" /></span>; // ⚥
+      default: return <TransgenderRounded fontSize="small" />;
+    }
+  };
+
+  const donationCount = (profile?.bloodDonor?.donationCount )
+    ? profile?.bloodDonor?.donationCount
+    : 0;
+
+  const LAST_DONATION_GAP_DAYS = 56; // 8 weeks
+
+  const lastDonationDate =
+    donationCount > 0
+      ? profile?.bloodDonor?.lastDonated
+      : null;
+
+  const getEligibilityInfo = () => {
+    if (!lastDonationDate) {
+      return { eligible: true, daysLeft: 0 };
+    }
+
+    const lastDate = new Date(lastDonationDate);
+    const today = new Date();
+
+    const diffTime = today.getTime() - lastDate.getTime();
+    const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    const daysLeft = LAST_DONATION_GAP_DAYS - daysPassed;
+
+    return {
+      eligible: daysLeft <= 0,
+      daysLeft: daysLeft > 0 ? daysLeft : 0
+    };
+  };
+
+  const eligibility = getEligibilityInfo();
+
   // tab navigation component
   const renderTabNavigation = () => (
     <Box sx={{ 
@@ -802,6 +863,277 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
           )} */}
         </Box>
       </Box>
+    </Box>
+  );
+
+  const renderFriendsProfile = () => (
+    <Box sx={{ 
+      gap: '20px', 
+      alignItems: 'center', 
+      my: '10px', 
+      p: 2,
+      ...getGlassmorphismStyle(theme, darkMode), 
+      borderRadius: '12px',
+      // border: '1px solid',
+      // borderColor: darkMode ? 'rgba(156, 39, 176, 0.3)' : 'rgba(156, 39, 176, 0.2)',
+      // background: darkMode 
+      //   ? 'linear-gradient(145deg, rgba(156, 39, 176, 0.1) 0%, rgba(33, 33, 33, 0.85) 100%)' 
+      //   : 'linear-gradient(145deg, rgba(156, 39, 176, 0.05) 0%, rgba(255, 255, 255, 0.15) 100%)',
+    }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Diversity1Rounded fontSize="small" color="primary"  />
+          <Typography variant="body1" fontWeight={500} >
+            Friends Profile
+          </Typography>
+          {/* {friendsProfileData?.friend && (
+            <Chip
+              label="Enabled"
+              size="small"
+              sx={{
+                backgroundColor: '#9c27b0',
+                color: 'white',
+                height: '20px',
+                fontSize: '0.7rem',
+                '& .MuiChip-label': { px: 1 }
+              }}
+            />
+          )} */}
+        </Box>
+        {/* {friendsProfileData?.inAppMessaging && (
+          <Tooltip title="In-app messaging enabled">
+            <ChatRounded sx={{ color: '#9c27b0', fontSize: '1.2rem' }} />
+          </Tooltip>
+        )} */}
+      </Box>
+
+      {friendsProfileData?.friend ? (
+        <>
+          {/* Basic Info Grid */}
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2 }}>
+                {getGenderIcon(friendsProfileData.gender)}
+                <Typography variant="body2" fontWeight={500}>
+                  {friendsProfileData.gender || 'Not specified'}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CakeRounded sx={{ fontSize: 16, color: '#9c27b0', mb: 0.5 }} />
+                <Typography variant="body2" fontWeight={500}>
+                  {friendsProfileData.age ? `${friendsProfileData.age} yrs` : 'Not specified'}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+
+          {/* Looking For Section */}
+          {friendsProfileData?.lookingFor?.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                <SearchRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                Looking for
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {friendsProfileData.lookingFor.map((item, index) => (
+                  <Chip
+                    key={index}
+                    label={item}
+                    size="small"
+                    icon={lookingForIcons[item] || <SearchRounded fontSize="small" />}
+                    sx={{
+                      borderRadius: '12px',
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: '#1565c0',
+                      fontSize: '0.7rem',
+                      height: 20,
+                      backdropFilter: 'blur(4px)',
+                      '& .MuiChip-icon': { fontSize: '0.8rem', color: '#1565c0' }
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* Hobbies Section */}
+          {friendsProfileData?.hobbies?.length > 0 && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="body2" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
+                <InterestsRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                Hobbies
+              </Typography>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                {friendsProfileData.hobbies.map((hobby, index) => (
+                  <Chip
+                    key={index}
+                    label={hobby}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      borderRadius: '12px',
+                      fontSize: '0.7rem',
+                      height: 20,
+                      borderColor: darkMode ? '#555555' : '#9e9e9e',
+                      color: darkMode ? '#757575' : '#616161'
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* Contact Information (Only if in-app messaging is disabled) */}
+          {/* {!friendsProfileData?.inAppMessaging && ( */}
+            <>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2, mb: 1 }}>
+                <ConnectWithoutContactRounded fontSize="small" sx={{ color: darkMode ? '#9e9e9e' : '#616161' }} />
+                <Typography variant="body2" color="textSecondary" >
+                  Contact via
+                </Typography>
+                {userId !== localStorage.getItem('userId') && (
+                <Box sx={{ ml: 'auto'}} >
+                  <Button
+                    variant="contained"
+                    // color="primary"
+                    // onClick={() => openRouteMapDialog(post)}
+                    // disabled={stockCountId === 0}
+                    sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', color: '#fff' }}
+                    startIcon={<ForumRounded />}
+                    onClick={() => {setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });}}
+                  >
+                    Chat
+                  </Button>
+                </Box>
+                )}
+              </Box>
+              {(friendsProfileData?.contactWay?.phone || 
+                friendsProfileData?.contactWay?.email || 
+                friendsProfileData?.contactWay?.socialMedia?.length > 0) && (
+                <>
+                  
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    {friendsProfileData.contactWay.phone && (
+                      <Chip
+                        icon={<PhoneIcon fontSize="small" />}
+                        label={friendsProfileData.contactWay.phone}
+                        variant="outlined"
+                        size="small"
+                        onClick={() => window.open(`tel:${friendsProfileData.contactWay.phone}`)}
+                        sx={{ 
+                          px: 0.5,
+                        //   borderColor: '#4CAF50',
+                        //   color: '#4CAF50',
+                        //   '&:hover': {
+                        //     backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        //     borderColor: '#388E3C',
+                        //     cursor: 'pointer',
+                        //   }
+                        }}
+                      />
+                    )}
+                    {friendsProfileData.contactWay.email && (
+                      <Chip
+                        icon={<EmailIcon fontSize="small" />}
+                        label={friendsProfileData.contactWay.email}
+                        variant="outlined"
+                        size="small"
+                        onClick={() => window.open(`mailto:${friendsProfileData.contactWay.email}`)}
+                        sx={{ 
+                          px: 0.5,
+                        //   borderColor: '#2196F3',
+                        //   color: '#2196F3',
+                        //   '&:hover': {
+                        //     backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        //     borderColor: '#1976D2',
+                        //     cursor: 'pointer',
+                        //   }
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  {/* Social Media Links */}
+                  {friendsProfileData.contactWay.socialMedia?.length > 0 && (
+                    <Box sx={{ mt: 1 }}>
+                      <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
+                        Social Media
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                        {friendsProfileData.contactWay.socialMedia.map((social, index) => {
+                          const platform = detectSocialPlatform(social.url || social.platform);
+                          const platformData = SOCIAL_MEDIA_PLATFORMS[platform] || SOCIAL_MEDIA_PLATFORMS.other;
+                          
+                          return (
+                            <Chip
+                              key={index}
+                              icon={getSocialIcon(platform, 'small', platformData.color)}
+                              label={social.platform || platformData.label}
+                              variant="outlined"
+                              size="small"
+                              onClick={() => handleSocialChipClick(social.url, platform)}
+                              sx={{ 
+                                px: 0.5,
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                  // backgroundColor: platformData.color,
+                                  transform: 'translateY(-2px)',
+                                  // boxShadow: `0 4px 12px ${platformData.color}80`,
+                                  cursor: 'pointer',
+                                  // color: 'white',
+                                },
+                              }}
+                            />
+                          );
+                        })}
+                      </Box>
+                    </Box>
+                  )}
+                </>
+              )}
+            </>
+          {/* )} */}
+
+          {/* In-app Messaging Badge */}
+          {/* {friendsProfileData?.inAppMessaging && (
+            <Box sx={{ 
+              mt: 2, 
+              p: 1.5, 
+              borderRadius: '8px', 
+              backgroundColor: 'rgba(156, 39, 176, 0.1)',
+              border: '1px dashed #9c27b0',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}>
+              <ChatRounded sx={{ color: '#9c27b0', fontSize: '1.2rem' }} />
+              <Typography variant="body2" sx={{ color: '#9c27b0' }}>
+                This user prefers in-app messaging for friend connections
+              </Typography>
+            </Box>
+          )} */}
+        </>
+      ) : (
+        <Box sx={{ 
+          py: 3, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center', 
+          gap: 1,
+          opacity: 0.7
+        }}>
+          <Diversity2RoundedIcon sx={{ fontSize: '2.5rem', color: 'text.secondary' }} />
+          <Typography variant="body2" color="textSecondary" textAlign="center">
+            Friends profile is not enabled for this user
+          </Typography>
+          <Typography variant="caption" color="textSecondary" textAlign="center">
+            When enabled, they can share their interests, hobbies, and connection preferences
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 
@@ -1055,6 +1387,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
               </Grid> */}
             </Grid>
           </Box>
+          {profile?.bloodDonor?.donate === true && (
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -1201,11 +1534,11 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 />
               )} */}
             </Box>)}
-            <Typography variant="body2" color="textSecondary">
+            {/* <Typography variant="body2" color="textSecondary">
               📅 Last donated: {profile?.bloodDonor?.lastDonated 
                 ? formatDonateDate(profile.bloodDonor.lastDonated) 
                 : 'No donation history yet'}
-            </Typography>
+            </Typography> */}
             {/* <Typography variant="body2" color="textSecondary">
               Last donated: {profile?.bloodDonor?.lastDonated 
                 ? formatDonateDate(profile.bloodDonor.lastDonated) 
@@ -1214,60 +1547,99 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                   <> (Total Donated: {profile.bloodDonor.donationCount})</>
                 )}
             </Typography> */}
-            <Typography variant="body2" color="textSecondary">
+            {/* <Typography variant="body2" color="textSecondary">
               Next eligibility date: {profile?.bloodDonor?.eligibilityDate 
                 ? formatDonateDate(profile.bloodDonor.eligibilityDate) 
                 : 'No donation history yet'}
-            </Typography>
-            {profile?.bloodDonor?.donate === true && (profile?.bloodDonor?.contactWay?.phone || profile?.bloodDonor?.contactWay?.email || (profile?.bloodDonor?.contactWay?.socialMedia && profile?.bloodDonor?.contactWay?.socialMedia?.length > 0)) && (
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="subtitle1" color="textSecondary" style={{ fontWeight: 500 }}>
-                Contact Medium:
+            </Typography> */}
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                <ScheduleRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
+                Donation Status
               </Typography>
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Chip
+                  icon={<HistoryRounded fontSize="small" />}
+                  label={profile?.bloodDonor?.lastDonated ? `Last: ${formatDonateDate(profile?.bloodDonor?.lastDonated )}` : 'No history'}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    borderRadius: '12px',
+                    fontSize: '0.7rem',
+                    height: 24,
+                    // borderColor: eligibility.eligible ? '#4caf50' : '#ff9800',
+                    // color: eligibility.eligible ? '#4caf50' : '#ff9800'
+                  }}
+                />
+                <Chip
+                  label={eligibility.eligible ? 'Ready to donate' : `Ready in ${eligibility.daysLeft}d`}
+                  size="small"
+                  sx={{
+                    borderRadius: '12px',
+                    backgroundColor: eligibility.eligible ? '#4caf5015' : '#ff980015',
+                    color: eligibility.eligible ? '#4caf50' : '#ff9800',
+                    fontSize: '0.7rem',
+                    height: 24
+                  }}
+                />
+              </Box>
+            </Box>
+            {profile?.bloodDonor?.donate === true && (profile?.bloodDonor?.contactWay?.phone || profile?.bloodDonor?.contactWay?.email || (profile?.bloodDonor?.contactWay?.socialMedia && profile?.bloodDonor?.contactWay?.socialMedia?.length > 0)) && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', mt: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.2, mb: 1 }}>
+                <ConnectWithoutContactRounded fontSize="small" sx={{ color: darkMode ? '#9e9e9e' : '#616161' }} />
+                <Typography variant="body2" color="textSecondary" >
+                  Contact via
+                </Typography>
+              </Box>
               {(profile?.bloodDonor?.contactWay?.phone || profile.bloodDonor.contactWay.email) && (
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                   {profile.bloodDonor.contactWay.phone && (
                     <Chip
                       key="phone"
-                      label={`📱 ${profile.bloodDonor.contactWay.phone}`}
+                      icon={<PhoneIcon fontSize="small" />}
+                      label={profile.bloodDonor.contactWay.phone}
                       variant="outlined"
                       size="small"
                       onClick={() => window.open(`tel:${profile.bloodDonor.contactWay.phone}`)}
                       sx={{ 
+                        px: 0.5,
                         // borderColor: '#4CAF50',
                         // color: '#4CAF50',
-                        '&:hover': {
-                          backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                          borderColor: '#388E3C',
-                          cursor: 'pointer',
-                        }
+                        // '&:hover': {
+                        //   backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        //   borderColor: '#388E3C',
+                        //   cursor: 'pointer',
+                        // }
                       }}
                     />
                   )}
                   {profile.bloodDonor.contactWay.email && (
                     <Chip
                       key="email"
-                      label={`✉️ ${profile.bloodDonor.contactWay.email}`}
+                      icon={<EmailIcon fontSize="small" />}
+                      label={profile.bloodDonor.contactWay.email}
                       variant="outlined"
                       size="small"
                       onClick={() => window.open(`mailto:${profile.bloodDonor.contactWay.email}`)}
                       sx={{ 
+                        px: 0.5,
                         // borderColor: '#2196F3',
                         // color: '#2196F3',
-                        '&:hover': {
-                          backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                          borderColor: '#1976D2',
-                          cursor: 'pointer',
-                        }
+                        // '&:hover': {
+                        //   backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        //   borderColor: '#1976D2',
+                        //   cursor: 'pointer',
+                        // }
                       }}
                     />
                   )}
                 </Box>
               )}
               {profile?.bloodDonor?.contactWay?.socialMedia && profile.bloodDonor.contactWay.socialMedia.length > 0 && (
-                <Box>
-                  <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
-                    Connect via social media:
+                <Box sx={{ mt: 1 }}>
+                  <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
+                    Social media
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     {profile.bloodDonor.contactWay.socialMedia.map((social, index) => {
@@ -1285,12 +1657,13 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                           sx={{ 
                             // backgroundColor: platformData.color,
                             // color: 'white',
-                            fontWeight: 500, px: 0.5,
+                            // fontWeight: 500,
+                             px: 0.5,
                             transition: 'all 0.2s ease',
                             '&:hover': {
-                              backgroundColor: platformData.color,
+                              // backgroundColor: platformData.color,
                               transform: 'translateY(-2px)',
-                              boxShadow: `0 4px 12px ${platformData.color}80`,
+                              // boxShadow: `0 4px 12px ${platformData.color}80`,
                               cursor: 'pointer',
                             },
                             '&:active': {
@@ -1306,6 +1679,10 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
             </Box>
             )}
           </Box>
+          )}
+          {/* Friends Profile Section */}
+          {friendsProfileEnabled && renderFriendsProfile()}
+          
           <Box sx={{ gap: '20px', alignItems:'center', my: '10px', p: 2,
             ...getGlassmorphismStyle(theme, darkMode), borderRadius: '12px' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
