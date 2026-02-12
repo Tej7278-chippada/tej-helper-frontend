@@ -1304,6 +1304,14 @@ const AboutHelper = ({ isMobile, darkMode }) => {
 
   // Detect user location and set language
   useEffect(() => {
+    const languageFromStorage = localStorage.getItem('userLang');
+    if (languageFromStorage) {
+      const { language, region, city } = JSON.parse(languageFromStorage);
+      setUserLanguage(language);
+      setDetectedLocation(`${city}, ${region}`);
+      // console.log('Language loaded from storage:', languageFromStorage);
+      return;
+    }
     const detectUserLocation = async () => {
       try {
         // Using IP geolocation API
@@ -1316,6 +1324,16 @@ const AboutHelper = ({ isMobile, darkMode }) => {
           const detectedLang = regionalMapping[stateCode] || regionalMapping['IN'];
           setUserLanguage(detectedLang);
           setDetectedLocation(`${data.city}, ${data.region}`);
+          // Save to cache
+          const userLang = {
+            language: detectedLang,
+            raw: data,
+            countryCode: data.country_code,
+            region: data.region,
+            city: data.city
+          };
+          localStorage.setItem('userLang', JSON.stringify(userLang));
+          // console.log('Detected location:', data.city, data.region, 'Setting language to:', detectedLang);
         } else {
           // User outside India - show English
           setUserLanguage('en');
