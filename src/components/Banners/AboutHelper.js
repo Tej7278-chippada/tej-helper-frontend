@@ -7,37 +7,9 @@ import TranslateIcon from '@mui/icons-material/Translate';
 
 const AboutHelper = ({ isMobile, darkMode }) => {
 
-  const [userLanguage, setUserLanguage] = useState(() => {
-    // Initialize from cache immediately
-    const cached = localStorage.getItem('helper_user_location');
-    if (cached) {
-      try {
-        const { language, location, timestamp } = JSON.parse(cached);
-        // Cache valid for 7 days
-        if (Date.now() - timestamp < 7 * 24 * 60 * 60 * 1000) {
-          setDetectedLocation(location);
-          return language;
-        }
-      } catch (e) {
-        console.error('Cache parse error:', e);
-      }
-    }
-    return 'en';
-  });
+  const [userLanguage, setUserLanguage] = useState('en');
   const [anchorEl, setAnchorEl] = useState(null);
   const [detectedLocation, setDetectedLocation] = useState('');
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [locationError, setLocationError] = useState(false);
-
-  // Cache keys
-  const CACHE_KEYS = {
-    LOCATION: 'helper_user_location',
-    LANGUAGE: 'helper_user_language',
-    TIMESTAMP: 'helper_location_timestamp'
-  };
-
-  // Cache duration: 7 days (in milliseconds)
-  const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000;
 
   // Indian languages mapping
   const indianLanguages = {
@@ -1333,147 +1305,36 @@ const AboutHelper = ({ isMobile, darkMode }) => {
   // Detect user location and set language
   useEffect(() => {
     const detectUserLocation = async () => {
-      // Check cache first
-      const cachedLocation = localStorage.getItem(CACHE_KEYS.LOCATION);
-      const cachedLang = localStorage.getItem(CACHE_KEYS.LANGUAGE);
-      const cachedTime = localStorage.getItem(CACHE_KEYS.TIMESTAMP);
-      
-      if (cachedLocation && cachedLang && cachedTime) {
-        const age = Date.now() - parseInt(cachedTime);
-        if (age < CACHE_DURATION) {
-          try {
-            const locationData = JSON.parse(cachedLocation);
-            setDetectedLocation(locationData.display);
-            setUserLanguage(cachedLang);
-            return; // Exit early, using cached data
-          } catch (e) {
-            console.error('Cache parse error:', e);
-            // Continue to fetch fresh data
-          }
-        }
-      }
-
-      // No valid cache, fetch fresh data
-      setLocationLoading(true);
-      setLocationError(false);
-      
-      // Timeout promise for fetch
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Location detection timeout')), 5000)
-      );
-
       try {
-        // Race between fetch and timeout
-        const response = await Promise.race([
-          fetch('https://ipapi.co/json/', {
-            headers: {
-              'Accept': 'application/json',
-              'Cache-Control': 'no-cache'
-            }
-          }),
-          timeoutPromise
-        ]);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        // Using IP geolocation API
+        const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
         
-        let detectedLang = 'en';
-        let locationDisplay = '';
-        
-        if (data.country_code === 'IN' && data.region_code) {
+        if (data.country_code === 'IN') {
           // User is in India
           const stateCode = `IN-${data.region_code}`;
-          detectedLang = regionalMapping[stateCode] || regionalMapping['IN'] || 'hi';
-          locationDisplay = data.city 
-            ? `${data.city}, ${data.region}`
-            : `${data.region}, India`;
+          const detectedLang = regionalMapping[stateCode] || regionalMapping['IN'];
+          setUserLanguage(detectedLang);
+          setDetectedLocation(`${data.city}, ${data.region}`);
         } else {
-          // User outside India
-          detectedLang = 'en';
-          locationDisplay = data.country_name || 'International';
+          // User outside India - show English
+          setUserLanguage('en');
+          setDetectedLocation(`${data.country_name || 'International'}`);
         }
-
-        // Update state
-        setUserLanguage(detectedLang);
-        setDetectedLocation(locationDisplay);
-        setLocationError(false);
-
-        // Save to cache
-        const cacheData = {
-          language: detectedLang,
-          location: {
-            display: locationDisplay,
-            raw: data,
-            countryCode: data.country_code,
-            regionCode: data.region_code,
-            city: data.city
-          },
-          timestamp: Date.now()
-        };
-
-        localStorage.setItem(CACHE_KEYS.LOCATION, JSON.stringify(cacheData.location));
-        localStorage.setItem(CACHE_KEYS.LANGUAGE, detectedLang);
-        localStorage.setItem(CACHE_KEYS.TIMESTAMP, Date.now().toString());
-
       } catch (error) {
         console.error('Location detection failed:', error);
-        setLocationError(true);
-        
-        // Enhanced fallback strategy
-        let fallbackLang = 'en';
-        let fallbackLocation = 'Location not detected';
-        
-        // Try browser language as first fallback
-        try {
-          const browserLang = navigator.language.split('-')[0];
-          if (indianLanguages[browserLang]) {
-            fallbackLang = browserLang;
-            fallbackLocation = `Detected from browser (${browserLang})`;
-          }
-        } catch (e) {
-          // Ignore browser language errors
+        // Fallback to browser language
+        const browserLang = navigator.language.split('-')[0];
+        if (indianLanguages[browserLang]) {
+          setUserLanguage(browserLang);
+        } else {
+          setUserLanguage('en');
         }
-
-        // Try previous cache as second fallback (even if expired)
-        if (!fallbackLang || fallbackLang === 'en') {
-          const oldCache = localStorage.getItem(CACHE_KEYS.LOCATION);
-          const oldLang = localStorage.getItem(CACHE_KEYS.LANGUAGE);
-          if (oldCache && oldLang) {
-            try {
-              const oldLocation = JSON.parse(oldCache);
-              fallbackLang = oldLang;
-              fallbackLocation = `${oldLocation.display || 'Previously detected'} (cached)`;
-            } catch (e) {
-              // Ignore old cache errors
-            }
-          }
-        }
-
-        setUserLanguage(fallbackLang);
-        setDetectedLocation(fallbackLocation);
-        
-      } finally {
-        setLocationLoading(false);
+        setDetectedLocation('Location not detected');
       }
     };
 
     detectUserLocation();
-  }, []); // Empty deps - run once on mount
-
-  // Optional: Preload detection for faster subsequent visits
-  useEffect(() => {
-    // Preconnect to geolocation API
-    const preconnectLink = document.createElement('link');
-    preconnectLink.rel = 'preconnect';
-    preconnectLink.href = 'https://ipapi.co';
-    document.head.appendChild(preconnectLink);
-
-    return () => {
-      document.head.removeChild(preconnectLink);
-    };
   }, []);
 
   const getGlassmorphismStyle = (opacity = 0.16, blur = 18) => ({
