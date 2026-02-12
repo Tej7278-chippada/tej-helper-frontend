@@ -986,6 +986,13 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
   //   }
   // }, [distanceRange, userLocation]);
 
+  const fallbackLocation = (userRegion) => {
+    const { region, city, raw } = JSON.parse(userRegion);
+    setCurrentAddress(`${city}, ${region}`);
+    setUserLocation({latitude: raw.latitude, longitude: raw.longitude});
+    localStorage.setItem('userLocation', JSON.stringify({latitude: raw.latitude, longitude: raw.longitude, address: `${city}, ${region}`})); // Store in localStorage
+  };
+
 
   // Fetch user's location and address
   const fetchUserLocation = useCallback(() => {
@@ -994,6 +1001,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
     if (!navigator.geolocation) {
       console.error('Geolocation not supported');
+      const userRegion = localStorage.getItem('userLang');
+      if (userRegion) {
+        fallbackLocation(userRegion);
+      }
       setLoadingLocation(false);
       return;
     }
@@ -1033,6 +1044,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
         } else if (locationStatus === 'denied' && locationPermissionRequested) {
           // Location was denied, store this
           localStorage.setItem('locationPermissionRequested', 'denied');
+          const userRegion = localStorage.getItem('userLang');
+          if (userRegion) {
+            fallbackLocation(userRegion);
+          }
           // Check for notifications after location handling
           checkNotificationsAfterLocation();
           setLoadingLocation(false);
@@ -1083,6 +1098,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       },
       (error) => {
         // console.error('Error fetching location:', error);
+        const userRegion = localStorage.getItem('userLang');
+        if (userRegion) {
+          fallbackLocation(userRegion);
+        }
         setSnackbar({
           open: true,
           message: 'Failed to fetch your current location. Please enable the location permission or try again. Your location is never shared publicly.',
@@ -1129,6 +1148,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       
     } else if (status === 'denied') {
       localStorage.setItem('locationPermissionRequested', 'denied');
+      const userRegion = localStorage.getItem('userLang');
+      if (userRegion) {
+        fallbackLocation(userRegion);
+      }
       // Still show notification dialog even if location was denied
       setTimeout(() => {
         checkNotificationsAfterLocation();
@@ -1136,6 +1159,10 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       setLoadingLocation(false);
     } else if (status === 'later') {
       localStorage.setItem('locationPermissionRequested', 'later');
+      const userRegion = localStorage.getItem('userLang');
+      if (userRegion) {
+        fallbackLocation(userRegion);
+      }
       // Still show notification dialog even if location was denied
       setTimeout(() => {
         checkNotificationsAfterLocation();
