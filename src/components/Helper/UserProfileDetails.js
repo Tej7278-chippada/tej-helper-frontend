@@ -997,13 +997,28 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                 {userId !== localStorage.getItem('userId') && (
                 <Box sx={{ ml: 'auto'}} >
                   <Button
-                    variant="contained"
-                    // color="primary"
-                    // onClick={() => openRouteMapDialog(post)}
-                    // disabled={stockCountId === 0}
-                    sx={{ margin: "0rem", borderRadius: '8px', background: 'linear-gradient(135deg, #4361ee 0%, #3f37c9 100%)', color: '#fff' }}
-                    startIcon={<ForumRounded />}
+                    variant="text" size="small" startIcon={<ForumRounded />}
                     onClick={() => {setSnackbar({ open: true, message: 'We’re working on this feature. It will be available soon!', severity: 'warning' });}}
+                    sx={{ borderRadius: 99, textTransform: 'none', px: 1.5,
+                      color: '#4361ee',
+                      background: 'none',
+                      border: '1px solid #4361ee',
+                      transition: 'all 0.3s ease',
+                      // boxShadow: '0 4px 20px rgba(67, 97, 238, 0.3)',
+                      '&:hover': {
+                        background: 'none',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 25px rgba(67, 97, 238, 0.4)',
+                      },
+                      '&:active': {
+                        transform: 'translateY(0)',
+                      },
+                      '&.Mui-disabled': {
+                        background: 'rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.26)',
+                      },
+                    }}
+                    disabled={!isAuthenticated || isFetching} // Disable if not logged in  || loadingFollow
                   >
                     Chat
                   </Button>
