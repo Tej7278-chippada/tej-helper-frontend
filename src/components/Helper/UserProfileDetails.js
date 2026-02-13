@@ -929,10 +929,10 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
               </Box>
             </Grid>
           </Grid>
-
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 1, mb: 1 }}>
           {/* Looking For Section */}
           {friendsProfileData?.lookingFor?.length > 0 && (
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 0 }}>
               <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
                 <SearchRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
                 Looking for
@@ -961,7 +961,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
 
           {/* Hobbies Section */}
           {friendsProfileData?.hobbies?.length > 0 && (
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 0 }}>
               <Typography variant="body2" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
                 <InterestsRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
                 Hobbies
@@ -985,6 +985,7 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
               </Box>
             </Box>
           )}
+          </Box>
 
           {/* Contact Information (Only if in-app messaging is disabled) */}
           {/* {!friendsProfileData?.inAppMessaging && ( */}

@@ -311,7 +311,7 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   </Tooltip>
                 )}
               </Box>
-              <Chip
+              {/* <Chip
                 label={activityStatus.label}
                 size="small"
                 icon={activityStatus.icon}
@@ -322,7 +322,15 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   height: 22,
                   '& .MuiChip-icon': { fontSize: '0.8rem', color: activityStatus.color }
                 }}
-              />
+              /> */}
+              {user.friendsProfile?.gender && user.friendsProfile.gender !== 'Unknown' && (
+                <Box display="flex" alignItems="center" gap={0.2}>
+                  {getGenderIcon(user.friendsProfile.gender)}
+                  <Typography variant="caption" color="text.secondary">
+                    {user.friendsProfile.gender}
+                  </Typography>
+                </Box>
+              )}
             </Box>
             
             {/* Basic Info */}
@@ -334,17 +342,17 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                 </Typography>
               </Box>
               
-              {user.friendsProfile?.gender && user.friendsProfile.gender !== 'Unknown' && (
+              {/* {user.friendsProfile?.gender && user.friendsProfile.gender !== 'Unknown' && (
                 <Box display="flex" alignItems="center" gap={0.2}>
                   {getGenderIcon(user.friendsProfile.gender)}
                   <Typography variant="caption" color="text.secondary">
                     {user.friendsProfile.gender}
                   </Typography>
                 </Box>
-              )}
+              )} */}
               
               {user.friendsProfile?.age && (
-                <Box display="flex" alignItems="center" gap={0.5}>
+                <Box display="flex" alignItems="center" gap={0.5} sx={{ ml: 'auto' }}>
                   <CakeRounded sx={{ fontSize: 16, color: '#9c27b0', mb: 0.5 }} />
                   <Typography variant="caption" color="text.secondary" >
                     {user.friendsProfile.age} yrs
@@ -374,7 +382,7 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
           </Typography>
         ) : (
           <Typography variant="body2" color="text.secondary" paragraph sx={{ 
-            mb: 2, 
+            mb: 1, 
             // fontStyle: 'italic',
             opacity: 0.7
           }}>
@@ -382,15 +390,16 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
           </Typography>
         )}
         
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '1fr 1fr' }, gap: 1 }}>
         {/* Looking For Section */}
         {user.friendsProfile?.lookingFor && user.friendsProfile.lookingFor.length > 0 && (
-          <Box sx={{ mb: 1 }}>
+          <Box sx={{ mb: 0 }}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
               <SearchRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
               Looking for
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {user.friendsProfile.lookingFor.slice(0, 3).map((item, index) => (
+              {user.friendsProfile.lookingFor.slice(0, 2).map((item, index) => (
                 <Chip
                   key={index}
                   label={item}
@@ -407,9 +416,9 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   }}
                 />
               ))}
-              {user.friendsProfile.lookingFor.length > 3 && (
+              {user.friendsProfile.lookingFor.length > 2 && (
                 <Chip
-                  label={`+${user.friendsProfile.lookingFor.length - 3}`}
+                  label={`+${user.friendsProfile.lookingFor.length - 2}`}
                   size="small"
                   sx={{
                     borderRadius: '6px',
@@ -426,13 +435,13 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
         
         {/* Hobbies Section */}
         {user.friendsProfile?.hobbies && user.friendsProfile.hobbies.length > 0 && (
-          <Box sx={{ mb: 1 }}>
+          <Box sx={{ mb: 0 }}>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
               <InterestsRounded sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle' }} />
               Interests
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {user.friendsProfile.hobbies.slice(0, 4).map((hobby, index) => (
+              {user.friendsProfile.hobbies.slice(0, 2).map((hobby, index) => (
                 <Chip
                   key={index}
                   label={hobby}
@@ -447,9 +456,9 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
                   }}
                 />
               ))}
-              {user.friendsProfile.hobbies.length > 4 && (
+              {user.friendsProfile.hobbies.length > 2 && (
                 <Chip
-                  label={`+${user.friendsProfile.hobbies.length - 4}`}
+                  label={`+${user.friendsProfile.hobbies.length - 2}`}
                   size="small"
                   variant="outlined"
                   sx={{
@@ -464,7 +473,8 @@ const FriendsCard = ({ user, onClick, darkMode }) => {
             </Box>
           </Box>
         )}
-        
+        </Box>
+
         {/* Stats and Contact Section */}
         <Box sx={{ 
           display: 'flex', 
