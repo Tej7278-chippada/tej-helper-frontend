@@ -1036,18 +1036,20 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       <Chip
                         icon={<PhoneIcon fontSize="small" />}
                         label={friendsProfileData.contactWay.phone}
-                        variant="outlined"
+                        variant="contained"
                         size="small"
                         onClick={() => window.open(`tel:${friendsProfileData.contactWay.phone}`)}
                         sx={{ 
                           px: 0.5,
+                          backgroundColor: 'transparent',
+                          color: darkMode ? '#9e9e9e' : '#616161',
                         //   borderColor: '#4CAF50',
                         //   color: '#4CAF50',
-                        //   '&:hover': {
-                        //     backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
                         //     borderColor: '#388E3C',
                         //     cursor: 'pointer',
-                        //   }
+                          }
                         }}
                       />
                     )}
@@ -1055,18 +1057,21 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       <Chip
                         icon={<EmailIcon fontSize="small" />}
                         label={friendsProfileData.contactWay.email}
-                        variant="outlined"
+                        variant="contained"
                         size="small"
                         onClick={() => window.open(`mailto:${friendsProfileData.contactWay.email}`)}
                         sx={{ 
                           px: 0.5,
+                          backgroundColor: 'transparent',
+                          color: darkMode ? '#9e9e9e' : '#616161',
+                          '&.MuiChip-icon': { color: darkMode ? '#9e9e9e' : '#616161' },
                         //   borderColor: '#2196F3',
                         //   color: '#2196F3',
-                        //   '&:hover': {
-                        //     backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
                         //     borderColor: '#1976D2',
                         //     cursor: 'pointer',
-                        //   }
+                          }
                         }}
                       />
                     )}
@@ -1088,18 +1093,20 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                               key={index}
                               icon={getSocialIcon(platform, 'small', platformData.color)}
                               label={social.platform || platformData.label}
-                              variant="outlined"
+                              variant="contained"
                               size="small"
                               onClick={() => handleSocialChipClick(social.url, platform)}
                               sx={{ 
                                 px: 0.5,
                                 transition: 'all 0.2s ease',
+                                backgroundColor: 'transparent',
+                                color: darkMode ? '#9e9e9e' : '#616161',
                                 '&:hover': {
-                                  // backgroundColor: platformData.color,
+                                  backgroundColor: platformData.color,
                                   transform: 'translateY(-2px)',
                                   // boxShadow: `0 4px 12px ${platformData.color}80`,
                                   cursor: 'pointer',
-                                  // color: 'white',
+                                  color: 'white',
                                 },
                               }}
                             />
@@ -1265,11 +1272,11 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                         key={index}
                         label={interest}
                         variant="outlined" size="small" color="text.secondary"
-                        sx={{ borderRadius: '8px', 
-                          fontSize: '0.8rem',
+                        sx={{ borderRadius: '12px', 
+                          fontSize: '0.7rem',
                           height: '20px',
                           borderColor: darkMode ? '#555555' : '#9e9e9e',
-                          // color: darkMode ? '#757575' : '#616161'
+                          color: darkMode ? '#757575' : '#616161',
                          }}
                       />
                     ))}
@@ -1615,18 +1622,20 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       key="phone"
                       icon={<PhoneIcon fontSize="small" />}
                       label={profile.bloodDonor.contactWay.phone}
-                      variant="outlined"
+                      variant="contained"
                       size="small"
                       onClick={() => window.open(`tel:${profile.bloodDonor.contactWay.phone}`)}
                       sx={{ 
                         px: 0.5,
+                        backgroundColor: 'transparent',
+                        color: darkMode ? '#9e9e9e' : '#616161',
                         // borderColor: '#4CAF50',
                         // color: '#4CAF50',
-                        // '&:hover': {
-                        //   backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(76, 175, 80, 0.1)',
                         //   borderColor: '#388E3C',
                         //   cursor: 'pointer',
-                        // }
+                        }
                       }}
                     />
                   )}
@@ -1635,18 +1644,20 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                       key="email"
                       icon={<EmailIcon fontSize="small" />}
                       label={profile.bloodDonor.contactWay.email}
-                      variant="outlined"
+                      variant="contained"
                       size="small"
                       onClick={() => window.open(`mailto:${profile.bloodDonor.contactWay.email}`)}
                       sx={{ 
                         px: 0.5,
+                        backgroundColor: 'transparent',
+                        color: darkMode ? '#9e9e9e' : '#616161',
                         // borderColor: '#2196F3',
                         // color: '#2196F3',
-                        // '&:hover': {
-                        //   backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        '&:hover': {
+                          backgroundColor: 'rgba(33, 150, 243, 0.1)',
                         //   borderColor: '#1976D2',
                         //   cursor: 'pointer',
-                        // }
+                        }
                       }}
                     />
                   )}
@@ -1667,20 +1678,24 @@ const UserProfileDetails = ({ userId, open, onClose, isMobile, isAuthenticated, 
                           key={index}
                           icon={getSocialIcon(platform, 'small', platformData.color)}
                           label={social.platform || platformData.label}
-                          variant="outlined"
+                          variant="contained"
                           size="small"
                           onClick={() => handleSocialChipClick(social.url, platform)}
                           sx={{ 
                             // backgroundColor: platformData.color,
                             // color: 'white',
                             // fontWeight: 500,
-                             px: 0.5,
+                            px: 0.5,
+                            backgroundColor: 'transparent',
+                            color: darkMode ? '#9e9e9e' : '#616161',
                             transition: 'all 0.2s ease',
                             '&:hover': {
-                              // backgroundColor: platformData.color,
+                              backgroundColor: platformData.color,
                               transform: 'translateY(-2px)',
                               // boxShadow: `0 4px 12px ${platformData.color}80`,
                               cursor: 'pointer',
+                              color: '#fff',
+                              '&.MuiChip-icon': { color: '#fff' },
                             },
                             '&:active': {
                               transform: 'translateY(0)',

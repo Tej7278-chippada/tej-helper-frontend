@@ -1070,7 +1070,7 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       async (position) => {
         try {
           const { latitude, longitude, accuracy } = position.coords;
-          const locationData = { latitude, longitude };
+          const locationData = { latitude, longitude, accuracy };
           setUserLocation(locationData);
           setLocationDetails({ accuracy });  // GPS accuracy in meters
           const address = await fetchAddress(latitude, longitude); // Fetch address first
@@ -1359,8 +1359,9 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
 
     if (storedLocation && savedAddress) {
       // Use the stored location
-      const { latitude, longitude } = JSON.parse(storedLocation);
+      const { latitude, longitude, accuracy } = JSON.parse(storedLocation);
       setUserLocation({ latitude, longitude });
+      setLocationDetails({ accuracy });
       // fetchAddress(latitude, longitude);
       setCurrentAddress(savedAddress);
       if (savedDistance) {
@@ -1862,7 +1863,16 @@ const Helper = ({ darkMode, toggleDarkMode, unreadCount, shouldAnimate})=> {
       // setBloodDonors([]);
       setBloodDonorMarkers([]);
     }
-  }, [userLocation, distanceRange, searchQuery, filters, generateCacheKey]);
+    // Scroll to top of posts
+    setTimeout(() => {
+      if (postsContainerRef.current) {
+        postsContainerRef.current.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100); // Small delay to ensure state updates complete
+  }, [userLocation, distanceRange, searchQuery, filters, generateCacheKey, selectedCategory]);
 
   
   const handleOpenUserProfileDialog = (id) => {

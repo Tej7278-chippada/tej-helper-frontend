@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { fetchUserFollowers, fetchUserFollowing } from '../api/api';
 import VerifiedRoundedIcon from '@mui/icons-material/VerifiedRounded';
+import SkeletonChats from '../Chat/SkeletonChats';
 
 const FollowDialog = ({ 
   open, 
@@ -100,12 +101,14 @@ const FollowDialog = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="xs"
       fullWidth
+      fullScreen={isMobile}
       PaperProps={{
         sx: {
           borderRadius: '12px',
-          maxHeight: '70vh'
+          maxHeight: '80vh',
+          mx: 1.5
         }
       }}
     >
@@ -133,8 +136,8 @@ const FollowDialog = ({
       >
         <Box sx={{ mt: 1 }}>
           {loading && initialLoad ? (
-            <Box display="flex" justifyContent="center" alignItems="center" height={100}>
-              <CircularProgress />
+            <Box >
+              <SkeletonChats />
             </Box>
           ) : error ? (
             <Typography variant="body2" color="error" textAlign="center">
@@ -154,9 +157,17 @@ const FollowDialog = ({
                     alignItems: 'center',
                     gap: 2,
                     p: 1,
-                    mb: 1,
+                    // mb: 1,
                     borderRadius: '8px',
                     cursor: 'pointer',
+                    WebkitTapHighlightColor: 'transparent', // Remove tap highlight
+                    WebkitTouchCallout: 'none', // Disable iOS callout
+                    WebkitUserSelect: 'none', // Disable text selection
+                    userSelect: 'none',
+                    '&:active': {
+                      transform: 'scale(0.98)', // Add press feedback instead
+                      transition: 'transform 0.1s ease',
+                    },
                     '&:hover': {
                       backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
                     }
@@ -167,9 +178,13 @@ const FollowDialog = ({
                     src={user.profilePic ? `data:image/jpeg;base64,${user.profilePic}` : null}
                     sx={{ width: 50, height: 50 }}
                   />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="body1" fontWeight="medium">
-                      {user.username}
+                  <Box sx={{ display: 'flex', flex: 1, flexDirection: 'column', minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minWidth: 0 }}>
+                      <Typography variant="body1" fontWeight="medium" sx={{
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }} >
+                        {user.username}
+                      </Typography>
                       {user.idVerification?.status === 'approved' && (
                         <VerifiedRoundedIcon 
                           sx={{ 
@@ -180,7 +195,7 @@ const FollowDialog = ({
                           }} 
                         />
                       )}
-                    </Typography>
+                    </Box>
                     <Typography 
                       variant="body2" 
                       color="text.secondary" 
@@ -188,7 +203,7 @@ const FollowDialog = ({
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: '-webkit-box',
-                        WebkitLineClamp: 2,
+                        WebkitLineClamp: 1,
                         WebkitBoxOrient: 'vertical',
                       }}
                     >

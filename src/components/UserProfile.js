@@ -159,7 +159,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     email: '',
     phone: '',
     profileDescription: '',
-    withYou: false,
+    // withYou: false,
     // donate: false,
     // bloodGroup: '',
   });
@@ -450,7 +450,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
       username: userData.username,
       email: userData.email,
       phone: userData.phone || '',
-      withYou: userData.withYou || false,
+      // withYou: userData.withYou || false,
       donate: userData.bloodDonor?.donate || false,
       bloodGroup: userData.bloodDonor?.bloodGroup || '',
       profileDescription: userData.profileDescription || '',
@@ -515,7 +515,7 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
         username: updated.username,
         email: updated.email,
         phone: phoneNumber,
-        withYou: updated.withYou,
+        // withYou: updated.withYou,
         // bloodDonor: {
         //   donate: updated.bloodDonor?.donate ?? false,
         //   bloodGroup: updated.bloodDonor?.bloodGroup ?? ''
@@ -679,13 +679,13 @@ const UserProfile = ({darkMode, toggleDarkMode, unreadCount, shouldAnimate}) => 
     }
   };
 
-  const toggleWithYou = (e) => {
-    const isChecked = e.target.checked;
-    setProfileForm((prev) => ({
-      ...prev,
-      withYou: isChecked
-    }));
-  };
+  // const toggleWithYou = (e) => {
+  //   const isChecked = e.target.checked;
+  //   setProfileForm((prev) => ({
+  //     ...prev,
+  //     withYou: isChecked
+  //   }));
+  // };
 
   const toggleBloodDonate = (e) => {
     const isChecked = e.target.checked;
@@ -3106,7 +3106,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                   *If you choose to donate, your blood group will be visible to nearby people who may need emergency blood support.
                 </Typography>
               </Box> */}
-              <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
+              {/* <Box sx={{ mt: 2, p: 2, bgcolor: 'rgba(25, 118, 210, 0.05)', borderRadius: 2 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between">
                   <Typography variant="body2" fontWeight={500}>
                     {profileForm.withYou
@@ -3122,7 +3122,7 @@ const SOCIAL_MEDIA_PLATFORMS = {
                 <Typography variant="caption" color="text.secondary" marginTop={4}>
                   *Your profile will be visible to women nearby who may need help in unsafe situations.
                 </Typography>
-              </Box>
+              </Box> */}
             </Box>
           </Box>
         </DialogContent>
